@@ -19,6 +19,7 @@ function loadVideos(categoryId) {
                     <a href="/video/${video.id}">
                         <img src="${video.thumbnail}" alt="${video.name}">
                         <div class="thumbnail-title">${video.name}</div>
+                        <div class="thumbnail-duration">${video.duration}</div>
                     </a>
                 </div>
             `).join('');

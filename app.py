@@ -76,6 +76,10 @@ def get_videos_by_category(category_id):
             category_id=category_id
         )
 
+    for video in videos:
+        # Convert duration from seconds to HH:MM:SS format
+        video['duration'] = seconds_to_hhmmss(video['duration'])
+
     return jsonify(videos)
 
 

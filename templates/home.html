@@ -18,10 +18,14 @@ Home
         Scripts
         --------------------------------------------------------------------------
         loadVideos.js:
-            - Loads videos for a specific category
+            - Loads videos for each category
+
+        scroll.js:
+            - Handles horizontal scrolling of thumbnails within each category
         ==========================================================================
     -->
     <script src="{{ url_for('static', filename='js/loadVideos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
 
     <!--
         ==========================================================================
@@ -38,9 +42,12 @@ Home
                 {{ category.name }}
             </div>
 
-            <!-- Thumbnails container -->
-            <div class="thumbnails"></div>
+            <!-- Thumbnails wrapper with scroll arrows -->
+            <div class="thumbnails-wrapper" id="wrapper-{{ category.id }}">
+                <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ category.id }}', -1)"></button>
+                <div class="thumbnails"></div>
+                <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ category.id }}', 1)"></button>
+            </div>
         </div>
-
     {% endfor %}
 {% endblock %}

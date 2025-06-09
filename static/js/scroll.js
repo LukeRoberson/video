@@ -28,8 +28,12 @@ function scrollThumbnails(wrapperId, direction) {
 function updateArrows(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
     const thumbnails = wrapper.querySelector('.thumbnails');
+
+    console.log(`ScrollLeft: ${thumbnails.scrollLeft}, ClientWidth: ${thumbnails.clientWidth}, ScrollWidth: ${thumbnails.scrollWidth}`);
+
     const leftArrow = wrapper.querySelector('.scroll-arrow.left');
     const rightArrow = wrapper.querySelector('.scroll-arrow.right');
+    
     // Show/hide arrows based on scroll position
     leftArrow.style.display = thumbnails.scrollLeft > 0 ? 'flex' : 'none';
     rightArrow.style.display = (thumbnails.scrollLeft + thumbnails.clientWidth) < thumbnails.scrollWidth ? 'flex' : 'none';
@@ -43,11 +47,33 @@ function updateArrows(wrapperId) {
 function setupScrollArrows() {
     document.querySelectorAll('.thumbnails-wrapper').forEach(wrapper => {
         const thumbnails = wrapper.querySelector('.thumbnails');
+
+        // Add event listeners for scroll and resize
         thumbnails.addEventListener('scroll', () => updateArrows(wrapper.id));
         window.addEventListener('resize', () => updateArrows(wrapper.id));
-        updateArrows(wrapper.id);
+
+        // Delay by 100ms to allow layout calculation
+        setTimeout(() => updateArrows(wrapper.id), 100);
     });
 }
+
+
+// Add event listeners for mouse scrolling
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.thumbnails').forEach(thumbnails => {
+        thumbnails.addEventListener('wheel', (event) => {
+            // Prevent vertical scrolling
+            event.preventDefault();
+
+            // Scroll horizontally
+            const speedFactor = 2; // Adjust this value to control scroll speed
+            thumbnails.scrollBy({
+                left: event.deltaY * speedFactor, // Use vertical scroll delta for horizontal scrolling
+                behavior: 'smooth'
+            });
+        });
+    });
+});
 
 
 // Initialize scroll arrows when the DOM is ready

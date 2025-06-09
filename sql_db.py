@@ -895,7 +895,10 @@ class DatabaseManager:
 
             # Insert into the videos_tags join table
             self.c.execute(
-                "INSERT OR IGNORE INTO videos_tags (video_id, tag_id) VALUES (?, ?)",
+                """
+                INSERT OR IGNORE INTO videos_tags (video_id, tag_id)
+                VALUES (?, ?)
+                """,
                 (video_id, tag_id)
             )
             self.conn.commit()
@@ -910,7 +913,7 @@ class DatabaseManager:
 
         return (
             "success",
-            f"Added tag '{tag}' and linked it to video ID {video_id} successfully."
+            f"Added tag '{tag}' and linked it to video ID {video_id}."
         )
 
     def get_tags_by_video_id(
@@ -950,7 +953,8 @@ class DatabaseManager:
 
         Args:
             speaker (str): A speaker name to be added.
-            video_id (int): The ID of the video to which the speaker will be added.
+            video_id (int): The ID of the video to which the speaker
+                will be added.
 
         Returns:
             tuple: A tuple containing the status ("success" or "error")
@@ -973,7 +977,10 @@ class DatabaseManager:
 
             # Insert into the videos_tags join table
             self.c.execute(
-                "INSERT OR IGNORE INTO videos_speakers (video_id, speaker_id) VALUES (?, ?)",
+                """
+                INSERT OR IGNORE INTO videos_speakers (video_id, speaker_id)
+                VALUES (?, ?)
+                """,
                 (video_id, tag_id)
             )
             self.conn.commit()
@@ -988,7 +995,7 @@ class DatabaseManager:
 
         return (
             "success",
-            f"Added speaker '{speaker}' and linked them to video ID {video_id} successfully."
+            f"Added speaker '{speaker}' and linked them to video {video_id}."
         )
 
     def get_speakers_by_video_id(
@@ -1002,7 +1009,8 @@ class DatabaseManager:
             video_id (int): The ID of the video for which to retrieve speakers.
 
         Returns:
-            list: A list of dicts, each containing the ID and name of a speaker.
+            list: A list of dicts, each containing the ID and
+                name of a speaker.
         """
 
         self.c.execute("""
@@ -1024,11 +1032,13 @@ class DatabaseManager:
         """
         Adds a character:
             Add definition in the characters table.
-            Links the character to a video in the videos_bible_characters table.
+            Links the character to a video in the
+                videos_bible_characters table.
 
         Args:
             character (str): A character name to be added.
-            video_id (int): The ID of the video to which the character will be added.
+            video_id (int): The ID of the video to which the character
+                will be added.
 
         Returns:
             tuple: A tuple containing the status ("success" or "error")
@@ -1051,7 +1061,13 @@ class DatabaseManager:
 
             # Insert into the videos_bible_characters join table
             self.c.execute(
-                "INSERT OR IGNORE INTO videos_bible_characters (video_id, character_id) VALUES (?, ?)",
+                """
+                INSERT OR IGNORE INTO videos_bible_characters (
+                    video_id,
+                    character_id
+                )
+                VALUES (?, ?)
+                """,
                 (video_id, character_id)
             )
             self.conn.commit()
@@ -1066,7 +1082,8 @@ class DatabaseManager:
 
         return (
             "success",
-            f"Added character '{character}' and linked them to video ID {video_id} successfully."
+            f"Added character '{character}' and linked them "
+            f"to video ID {video_id}."
         )
 
     def get_characters_by_video_id(
@@ -1077,10 +1094,12 @@ class DatabaseManager:
         Retrieve characters from the characters table for a video
 
         Args:
-            video_id (int): The ID of the video for which to retrieve characters.
+            video_id (int): The ID of the video for which to
+                retrieve characters.
 
         Returns:
-            list: A list of dicts, each containing the ID and name of a character.
+            list: A list of dicts, each containing the ID and
+                name of a character.
         """
 
         self.c.execute("""
@@ -1110,7 +1129,8 @@ class DatabaseManager:
             book (str): The bible book name.
             chapter (int): The chapter number.
             verse (int): The verse number.
-            video_id (int): The ID of the video to which the scripture will be added.
+            video_id (int): The ID of the video to which the scripture
+                will be added.
 
         Returns:
             tuple: A tuple containing the status ("success" or "error")
@@ -1119,21 +1139,34 @@ class DatabaseManager:
 
         try:
             self.c.execute(
-                "INSERT OR IGNORE INTO scriptures (book, chapter, verse) VALUES (?, ?, ?)",
+                """
+                INSERT OR IGNORE INTO scriptures (book, chapter, verse)
+                VALUES (?, ?, ?)
+                """,
                 (book, chapter, verse)
             )
             self.conn.commit()
 
             # Retrieve the scripture ID
             self.c.execute(
-                "SELECT id FROM scriptures WHERE book = ? AND chapter = ? AND verse = ?",
+                """
+                SELECT id
+                FROM scriptures
+                WHERE book = ? AND chapter = ? AND verse = ?
+                """,
                 (book, chapter, verse)
             )
             scripture_id = self.c.fetchone()[0]
 
             # Insert into the videos_scriptures join table
             self.c.execute(
-                "INSERT OR IGNORE INTO videos_scriptures (video_id, scripture_id) VALUES (?, ?)",
+                """
+                INSERT OR IGNORE INTO videos_scriptures (
+                    video_id,
+                    scripture_id
+                )
+                VALUES (?, ?)
+                """,
                 (video_id, scripture_id)
             )
             self.conn.commit()
@@ -1148,7 +1181,8 @@ class DatabaseManager:
 
         return (
             "success",
-            f"Added scripture '{book} {chapter}:{verse}' and linked them to video ID {video_id} successfully."
+            f"Added scripture '{book} {chapter}:{verse}' and linked "
+            f"them to video {video_id}."
         )
 
     def get_scriptures_by_video_id(
@@ -1159,10 +1193,12 @@ class DatabaseManager:
         Retrieve scriptures from the scriptures table for a video.
 
         Args:
-            video_id (int): The ID of the video for which to retrieve scriptures.
+            video_id (int): The ID of the video for which to
+                retrieve scriptures.
 
         Returns:
-            list: A list of dicts, each containing the ID and details of a scripture.
+            list: A list of dicts, each containing the ID and
+                details of a scripture.
         """
 
         self.c.execute("""
