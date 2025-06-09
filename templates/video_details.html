@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ video.name }}{% endblock %}
+
+{% block content %}
+<div class="video-details">
+    <h1>{{ video.name }}</h1>
+    <p><strong>Category:</strong> {{ video.category_name }}</p>
+    <p><strong>Description:</strong> {{ video.description }}</p>
+    <p><strong>Tags:</strong> {{ video.tags | join(", ") }}</p>
+    <p><strong>Duration:</strong> {{ video.duration | seconds_to_hhmmss }}</p>
+    {% set resolutions = [
+        ('1080p', video.url_1080),
+        ('720p', video.url_720),
+        ('480p', video.url_480),
+        ('360p', video.url_360),
+        ('240p', video.url_240)
+    ] %}
+    {% set available = resolutions | selectattr(1) | list %}
+    {% if available %}
+        <p><strong>Available in:</strong>
+            {% for res, url in resolutions if url %}
+            {{ res }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+    {% endif %}
+
+    <!-- Video player -->
+    <div class="video-player">
+        <video controls width="640">
+            {% for res, url in resolutions %}
+                {% if url %}
+                    <source src="{{ url }}" type="video/mp4" label="{{ res }}">
+                    {% set selected_res = res %}
+                {% endif %}
+            {% endfor %}
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Similar videos section -->
+    <div class="similar-videos">
+        <h2>Similar Videos</h2>
+        <div class="thumbnails">
+            {% for similar in similar_videos %}
+                <div class="thumbnail">
+                    <img src="{{ similar.thumb }}" alt="{{ similar.title }}">
+                    <div class="thumbnail-title">{{ similar.title }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,250 @@
+/* 
+    styles.css
+    Main stylesheet for Flask video template.
+    Styles layout, navigation bar, category rows, and video thumbnails.
+*/
+
+
+/* ===========================
+   General Page Styles
+   =========================== */
+body {
+    background-color: #181818;
+    color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.body-content {
+    padding: 2em;
+}
+
+
+/* ===========================
+   Navigation Bar
+   =========================== */
+.navbar {
+    background: #232323;
+    padding: 1em;
+    display: flex;
+    gap: 1em;
+}
+
+.navbar a {
+    color: #f0f0f0;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+
+/* ===========================
+   Category Rows
+   =========================== */
+.category-row {
+    margin-bottom: 2em;
+}
+
+.category-title {
+    font-size: 1.2em;
+    margin-bottom: 0.5em;
+}
+
+
+/* ===========================
+   Scroll Arrows for Carousels
+   =========================== */
+.scroll-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    background: rgba(40,40,40,0.8);
+    border: none;
+    color: #fff;
+    width: 40px;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    border-radius: 0;
+    font-size: 0; /* Hide any text inside */
+}
+
+.scroll-arrow.left::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 24px solid transparent;
+    border-bottom: 24px solid transparent;
+    border-right: 24px solid #fff;
+}
+
+.scroll-arrow.right::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 24px solid transparent;
+    border-bottom: 24px solid transparent;
+    border-left: 24px solid #fff;
+}
+
+.scroll-arrow:hover {
+    opacity: 1;
+}
+
+.scroll-arrow.left {
+    left: 0;
+    border-radius: 8px 0 0 8px;
+}
+
+.scroll-arrow.right {
+    right: 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.thumbnails-wrapper {
+    position: relative;
+}
+
+
+/* ===========================
+   Thumbnails (Video Items)
+   =========================== */
+.thumbnails {
+    display: flex;
+    overflow-x: auto;
+    gap: 1em;
+    padding-bottom: 1em;
+    scrollbar-color: #444 #232323;  /* For Firefox */
+    scrollbar-width: thin;              /* For Firefox */
+}
+
+/* Individual thumbnail card - Add 50px to height for name */
+.thumbnail {
+    width: 240px;
+    height: 185px;
+    background: #333;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    color: #aaa;
+    font-size: 1em;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.2s;
+    overflow: hidden;
+}
+
+/* Thumbnail image (240x135) */
+.thumbnail img {
+    width: 100%;
+    height: 135px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+    display: block;
+}
+
+.thumbnail-title {
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-size: 1.0em;
+    text-align: center;
+    color: #f0f0f0;
+    word-break: break-word;
+}
+
+.thumbnail:hover {
+    transform: scale(1.05);
+    background: #444;
+}
+
+.thumbnail a {
+    text-decoration: none; /* Remove underline from links */
+    color: inherit; /* Ensure the text color matches the surrounding styles */
+}
+
+
+/* Responsive: Medium screens (tablets) */
+/* Thumbnail is 160x90, with title height 40px */
+@media (max-width: 900px) {
+    .body-content {
+        padding: 1em;
+    }
+    .thumbnail {
+        width: 160px;
+        height: 130px;
+    }
+    .thumbnail img {
+        height: 90px;
+    }
+    .thumbnail-title {
+        min-height: 32px;
+        font-size: 0.85em;
+    }
+    .thumbnails {
+        gap: 0.7em;
+    }
+}
+
+/* Responsive: Small screens (phones) */
+/* Thumbnail is 80x45, with title height 60px */
+@media (max-width: 600px) {
+    .body-content {
+        padding: 0.5em;
+    }
+    .category-title {
+        font-size: 1em;
+        margin-bottom: 0.3em;
+    }
+    .thumbnail {
+        width: 80px;
+        height: 105px;
+        font-size: 0.9em;
+    }
+    .thumbnail img {
+        height: 45px;
+    }
+    .thumbnail-title {
+        min-height: 20px;
+        font-size: 0.85em;
+        margin-top: 0.2em;
+    }
+    .thumbnails {
+        gap: 0.4em;
+    }
+    .scroll-arrow {
+        width: 28px;
+    }
+}
+
+
+/* ===========================
+   Custom Scrollbar Styling
+   =========================== */
+.thumbnails::-webkit-scrollbar {
+    height: 10px;
+    background: #232323;
+    border-radius: 8px;
+}
+
+.thumbnails::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 8px;
+    border: 2px solid #232323;
+}
+
+.thumbnails::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
