@@ -136,6 +136,10 @@ def video_details(video_id):
     return render_template(
         "video_details.html",
         video=video,
+        tags=tags,
+        speakers=speakers,
+        characters=characters,
+        scriptures=scriptures,
         similar_videos=similar_videos
     )
 
