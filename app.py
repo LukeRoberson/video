@@ -3,13 +3,6 @@ from flask import Flask, render_template, jsonify
 from sql_db import DatabaseManager
 
 
-with DatabaseManager() as db:
-    result = db.create_category_table()
-    print(f"Category table created: {result}")
-    result = db.create_video_table()
-    print(f"Video table created: {result}")
-
-
 def seconds_to_hhmmss(seconds):
     """
     Convert seconds to HH:MM:SS format.

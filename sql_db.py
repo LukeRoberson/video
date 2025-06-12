@@ -24,12 +24,10 @@ Videos Schema:
     - url_480 (TEXT): URL for the video in 480p.
     - url_360 (TEXT): URL for the video in 360p.
     - url_240 (TEXT): URL for the video in 240p.
-    - category_id (INTEGER): Foreign key referencing categories(id).
     - description (TEXT): Description of the video.
-    - tags (TEXT): Comma-separated tags associated with the video.
     - thumbnail (TEXT): URL or path to the video's thumbnail.
     - duration (INTEGER): Duration of the video in seconds.
-    - watched (BOOLEAN): Whether the video has been watched (default is 0).
+    - url (TEXT): Main URL for the video.
 
 A video may have more than one URL for different resolutions.
     They may not all be available
@@ -105,340 +103,6 @@ class DatabaseManager:
         # Commit any changes and close the connection
         self.conn.commit()
         self.conn.close()
-
-    def create_category_table(
-        self
-    ) -> tuple[str, str]:
-        """
-        Create the categories table: Stores video categories.
-
-        Schema:
-            - id (INTEGER): Primary key, auto-incremented.
-            - name (TEXT): Unique name of the category.
-            - main_area (TEXT): Field for additional categorization.
-
-        Args:
-            None
-
-        Returns:
-            tuple: A tuple containing the status ("success" or "error")
-                and a message.
-        """
-
-        # Create categories table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS categories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE,
-                    main_area TEXT NOT NULL
-                );
-            """)
-            self.conn.commit()
-
-        except sqlite3.OperationalError as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An error occurred while creating the categories: {e}"
-            )
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the categories "
-                f"table: {e}"
-            )
-
-        return (
-            "success",
-            "Created categories table successfully."
-        )
-
-    def create_video_table(
-        self
-    ) -> tuple[str, str]:
-        """
-        Create tables for storing video details.
-            This is the main table for storing video information.
-
-        Videos table:
-            id, name, url_1080, url_720, url_480, url_360, url_240,
-            category_id, description, thumbnail, duration, date_added
-
-        Args:
-            None
-
-        Returns:
-            tuple: A tuple containing the status ("success" or "error")
-                and a message.
-        """
-
-        # Create videos table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS videos (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE,
-                    url_1080 TEXT,
-                    url_720 TEXT,
-                    url_480 TEXT,
-                    url_360 TEXT,
-                    url_240 TEXT,
-                    category_id INTEGER NOT NULL,
-                    description TEXT,
-                    thumbnail TEXT,
-                    duration INTEGER,
-                    date_added TIMESTAMP,
-                    FOREIGN KEY (category_id) REFERENCES categories(id)
-                );
-            """)
-            self.conn.commit()
-
-        except sqlite3.OperationalError as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An error occurred while creating the videos table."
-                f"\n{e}"
-            )
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        return (
-            "success",
-            "Created tables successfully."
-        )
-
-    def create_meta_tables(
-        self
-    ) -> tuple[str, str]:
-        """
-        Create several tables for storing metadata related to videos.
-            - Tags table: Stores tags for videos.
-            - Speakers table: Stores speaker names.
-            - Scriptures table: Stores scripture references.
-            - Bible characters table: Stores names of Bible characters.
-
-        Speakers table:
-            id, name
-
-        Scriptures table:
-            id, reference
-
-        Bible characters table:
-            id, name
-
-        Args:
-            None
-
-        Returns:
-            tuple: A tuple containing the status ("success" or "error")
-                and a message.
-        """
-
-        # Create tags table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS tags (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the tags "
-                f"table: {e}"
-            )
-
-        # Create speakers table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS speakers (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        # Create scriptures table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS scriptures (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    book TEXT NOT NULL,
-                    chapter INTEGER NOT NULL,
-                    verse INTEGER NOT NULL,
-                    UNIQUE(book, chapter, verse)
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        # Create bible characters table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS bible_characters (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        return (
-            "success",
-            "Created tables successfully."
-        )
-
-    def create_join_tables(
-        self
-    ) -> tuple[str, str]:
-        """
-        Create tables for joining videos with metadata
-            Links videos to tags, speakers, scriptures, and Bible characters.
-
-        Videos_Speakers table:
-            video_id, speaker_id
-
-        Videos_Scriptures table:
-            video_id, scripture_id
-
-        Videos_Bible_Characters table:
-            video_id, character_id
-
-        Videos_Tags table:
-            video_id, tag_id
-
-        Args:
-            None
-
-        Returns:
-            tuple: A tuple containing the status ("success" or "error")
-                and a message.
-        """
-
-        # Create Video-Tags table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS videos_tags (
-                    video_id INTEGER NOT NULL,
-                    tag_id INTEGER NOT NULL,
-                    FOREIGN KEY (video_id) REFERENCES videos(id),
-                    FOREIGN KEY (tag_id) REFERENCES tags(id),
-                    PRIMARY KEY (video_id, tag_id)
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        # Create Video-Speakers table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS videos_speakers (
-                    video_id INTEGER NOT NULL,
-                    speaker_id INTEGER NOT NULL,
-                    FOREIGN KEY (video_id) REFERENCES videos(id),
-                    FOREIGN KEY (speaker_id) REFERENCES speakers(id),
-                    PRIMARY KEY (video_id, speaker_id)
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        # Create Video-Scriptures table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS videos_scriptures (
-                    video_id INTEGER NOT NULL,
-                    scripture_id INTEGER NOT NULL,
-                    FOREIGN KEY (video_id) REFERENCES videos(id),
-                    FOREIGN KEY (scripture_id) REFERENCES scriptures(id),
-                    PRIMARY KEY (video_id, scripture_id)
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        # Create Video-Bible_Characters table
-        try:
-            self.c.execute("""
-                CREATE TABLE IF NOT EXISTS videos_bible_characters (
-                    video_id INTEGER NOT NULL,
-                    character_id INTEGER NOT NULL,
-                    FOREIGN KEY (video_id) REFERENCES videos(id),
-                    FOREIGN KEY (character_id) REFERENCES bible_characters(id),
-                    PRIMARY KEY (video_id, character_id)
-                );
-            """)
-            self.conn.commit()
-
-        except Exception as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An unexpected error occurred while creating the videos "
-                f"table: {e}"
-            )
-
-        return (
-            "success",
-            "Created tables successfully."
-        )
 
     def _get_category_id_by_name(
         self,
@@ -577,7 +241,7 @@ class DatabaseManager:
             return (
                 "error",
                 f"Cannot delete category with ID {category_id} because it is "
-                "referenced by one or more videos."
+                "referenced by one or more linked videos."
             )
 
         except Exception as e:
@@ -616,6 +280,7 @@ class DatabaseManager:
     def add_video(
         self,
         name: str,
+        url: str = "",
         url_1080: str = "",
         url_720: str = "",
         url_480: str = "",
@@ -632,6 +297,7 @@ class DatabaseManager:
 
         Args:
             name (str): The name of the video.
+            url (str): The main URL for the video.
             url_1080 (str, optional): URL for the video in 1080p.
             url_720 (str, optional): URL for the video in 720p.
             url_480 (str, optional): URL for the video in 480p.
@@ -651,40 +317,49 @@ class DatabaseManager:
                 and a message.
         """
 
-        # Get the category ID by name
-        category_id = self._get_category_id_by_name(category_name)
-        if category_id is None:
-            return ("error", f"Category '{category_name}' does not exist.")
-
         # Insert the video into the videos table
         try:
             self.c.execute(
                 """
                 INSERT INTO videos (
-                    name, url_1080, url_720, url_480, url_360, url_240,
-                    category_id, description, thumbnail,
-                    duration, date_added
+                    name, url, url_1080, url_720, url_480, url_360, url_240,
+                    description, thumbnail, duration, date_added
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     name,
+                    url,
                     url_1080, url_720, url_480, url_360, url_240,
-                    category_id,
                     description,
                     thumbnail,
                     duration,
                     date_added,
                 )
             )
-            self.conn.commit()
+            video_id = self.c.lastrowid
 
-        except sqlite3.IntegrityError as e:
-            self.conn.rollback()
-            return (
-                "error",
-                f"An error occurred while adding the video: {e}"
-            )
+            # Link to category if provided
+            if category_name:
+                category_id = self._get_category_id_by_name(category_name)
+                if category_id is None:
+                    self.conn.rollback()
+                    return (
+                        "error",
+                        f"Category '{category_name}' does not exist."
+                    )
+
+                self.c.execute(
+                    """
+                    INSERT OR IGNOREINTO video_categories (
+                        video_id,
+                        category_id
+                    ) VALUES (?, ?)
+                    """,
+                    (video_id, category_id)
+                )
+
+            self.conn.commit()
 
         except Exception as e:
             self.conn.rollback()
@@ -794,35 +469,27 @@ class DatabaseManager:
 
         # Convert category_name to category_id if ID is not provided
         if category_id is None and category_name is not None:
-            if category_name is not None:
-                category_id = self._get_category_id_by_name(category_name)
+            category_id = self._get_category_id_by_name(category_name)
 
         # Get videos based on category_id
-        if category_id is not None:
-            try:
+        try:
+            if category_id is not None:
                 query = self.c.execute(
-                    "SELECT * FROM videos WHERE category_id = ?",
+                    """
+                    SELECT v.*
+                    FROM videos v
+                    JOIN video_categories vc ON v.id = vc.video_id
+                    WHERE vc.category_id = ?
+                    """,
                     (category_id,)
                 )
-
-            except Exception as e:
-                return (
-                    "error",
-                    f"An unexpected error occurred while retrieving videos "
-                    f"for category '{category_name}': {e}"
-                )
-
-        # If no category_name is provided, get all videos
-        else:
-            try:
+            else:
                 query = self.c.execute("SELECT * FROM videos")
-
-            except Exception as e:
-                return (
-                    "error",
-                    f"An unexpected error occurred while retrieving "
-                    f"all videos: {e}"
-                )
+        except Exception as e:
+            return (
+                "error",
+                f"An unexpected error occurred while retrieving videos: {e}"
+            )
 
         # Fetch all videos, converting each row to a dict
         try:
@@ -1211,6 +878,100 @@ class DatabaseManager:
 
         # Convert each row to a dictionary for easier access
         return [dict(row) for row in rows]
+
+    def add_category_to_video(
+        self,
+        video_id: int,
+        category_id: int
+    ) -> tuple[str, str]:
+        """
+        Link a category to a video in the video_categories table.
+
+        Args:
+            video_id (int): The ID of the video to which the category
+                will be linked.
+            category_id (int): The
+
+        Returns:
+            tuple: A tuple containing the status ("success" or "error")
+                and a message.
+        """
+
+        try:
+            self.c.execute(
+                """
+                INSERT OR IGNORE INTO video_categories (
+                    video_id,
+                    category_id
+                ) VALUES (?, ?)
+                """,
+                (video_id, category_id)
+            )
+            self.conn.commit()
+            return ("success", "Category linked to video.")
+
+        except Exception as e:
+            self.conn.rollback()
+            return ("error", f"Failed to link category: {e}")
+
+    def remove_category_from_video(
+        self,
+        video_id: int,
+        category_id: int
+    ) -> tuple[str, str]:
+        """
+        Unlink a category from a video in the video_categories table.
+
+        Args:
+            video_id (int): The ID of the video from which the category
+                will be unlinked.
+            category_id (int): The
+
+        Returns:
+            tuple: A tuple containing the status ("success" or "error")
+                and a message.
+        """
+
+        try:
+            self.c.execute(
+                """
+                DELETE FROM video_categories
+                WHERE video_id = ?
+                AND category_id = ?
+                """,
+                (video_id, category_id)
+            )
+            self.conn.commit()
+            return ("success", "Category unlinked from video.")
+
+        except Exception as e:
+            self.conn.rollback()
+            return ("error", f"Failed to unlink category: {e}")
+
+    def get_categories_by_video_id(
+        self,
+        video_id: int
+    ) -> list[dict]:
+        """
+        Retrieve categories linked to a video by its ID.
+
+        Args:
+            video_id (int): The ID of the video for which to
+                retrieve categories.
+
+        Returns:
+            list: A list of dicts, each containing the ID and name
+                of a category.
+        """
+
+        self.c.execute("""
+            SELECT c.id, c.name
+            FROM categories c
+            JOIN video_categories vc ON c.id = vc.category_id
+            WHERE vc.video_id = ?
+        """, (video_id,))
+
+        return [dict(row) for row in self.c.fetchall()]
 
 
 if __name__ == "__main__":

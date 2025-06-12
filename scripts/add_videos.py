@@ -10,7 +10,7 @@ sys.path.append(parent_folder)
 from sql_db import DatabaseManager
 
 
-VIDEO_CSV = 'scripts/video_list.csv'
+VIDEO_CSV = 'video_details.csv'
 
 
 def duration_to_seconds(duration: str) -> int:
@@ -35,19 +35,19 @@ def duration_to_seconds(duration: str) -> int:
 
 
 # Create Video table
-with DatabaseManager() as db:
-    print("Creating video table")
-    result = db.create_video_table()
-    print(f"Result: {result}")
+# with DatabaseManager() as db:
+#     print("Creating video table")
+#     result = db.create_video_table()
+#     print(f"Result: {result}")
 
 # Create metadata tables
-with DatabaseManager() as db:
-    # Create a database
-    print("Creating metadata tables")
-    result = db.create_meta_tables()
-    print(f"Result: {result}")
-    result = db.create_join_tables()
-    print(f"Result: {result}")
+# with DatabaseManager() as db:
+#     # Create a database
+#     print("Creating metadata tables")
+#     result = db.create_meta_tables()
+#     print(f"Result: {result}")
+#     result = db.create_join_tables()
+#     print(f"Result: {result}")
 
 # Generate video data from CSV
 video_list = []
@@ -72,16 +72,18 @@ for video in video_list:
         )
 
         # Print the result, unless it was a duplicate
-        if 'UNIQUE' not in result[1]:
-            print(f"Adding video: {video['name']}")
+        print(f"Adding video: {video['name']}")
+        if 'UNIQUE' in result[1]:
+            print(f"Video {video['name']} already exists in the database.")
+        else:
             print(f"Result: {result}")
 
 # Fetch and print all videos
-with DatabaseManager() as db:
-    videos = db.get_videos()
-    print("Videos:")
-    for video in videos:
-        print(
-            f"- {video['name']} (ID: {video['id']}, Category:"
-            f"{video['category_id']})"
-        )
+# with DatabaseManager() as db:
+#     videos = db.get_videos()
+#     print("Videos:")
+#     for video in videos:
+#         print(
+#             f"- {video['name']} (ID: {video['id']}, Category:"
+#             f"{video['category_id']})"
+#         )

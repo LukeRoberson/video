@@ -24,12 +24,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import pandas as pd
+import os
+from tqdm import tqdm
 
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201503_1_VIDEO",
-    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201504_1_VIDEO"
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivjtg_x_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-502015533_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivwrd_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivnwf_x_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_5_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_4_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_2_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_1_VIDEO",
 ]
 
 
@@ -61,14 +69,7 @@ class JwScraper:
         self.driver_path = driver_path
 
         # A dictionary to hold the details
-        self.details = {
-            "final_url": "",
-            "1080p": "",
-            "720p": "",
-            "480p": "",
-            "360p": "",
-            "240p": ""
-        }
+        self.details = {}
 
     def __enter__(
         self
@@ -96,7 +97,7 @@ class JwScraper:
         if hasattr(self, 'driver'):
             self.driver.quit()
 
-    def scrape_videos(
+    def scrape_vids(
         self,
     ) -> list:
         # Open the URL
@@ -143,15 +144,15 @@ class JwScraper:
         # Add to dictionary
         for url in urls:
             if "1080P" in url:
-                self.details["url_1080p"] = url
+                self.details["url_1080"] = url
             elif "720P" in url:
-                self.details["url_720p"] = url
+                self.details["url_720"] = url
             elif "480P" in url:
-                self.details["url_480p"] = url
+                self.details["url_480"] = url
             elif "360P" in url:
-                self.details["url_360p"] = url
+                self.details["url_360"] = url
             elif "240P" in url:
-                self.details["url_240p"] = url
+                self.details["url_240"] = url
 
         # Scrape the video thumbnail (background-image URL)
         try:
@@ -217,6 +218,7 @@ class CreateCsv:
 
         self.filename = filename
         self.detail_list = []
+        self.error_list = []
 
     def add_details(
         self,
@@ -230,15 +232,18 @@ class CreateCsv:
 
         Dictionary keys should include:
             - final_url
-            - At least one video URL: 1080p, 720p, 480p, 360p, or 240p
+            - At least one video URL: 1080, 720, 480, 360, or 240
             - thumbnail
             - duration
             - title
         """
 
+        error_flag = False
+
         # Check that we have a dictionary
         if not isinstance(details, dict):
-            raise ValueError("Details must be a dictionary.")
+            print("Details must be a dictionary.")
+            return
 
         # Check that we have the required keys
         required_keys = ['url', 'thumbnail', 'duration', 'name']
@@ -248,23 +253,27 @@ class CreateCsv:
                 not isinstance(details[key], str) or
                 not details[key].strip()
             ):
-                raise ValueError(
-                    f"Missing or invalid value for '{key}' in details."
+                print(
+                    f"Missing or invalid value for '{key}' in: "
+                    f"{details['url']}"
                 )
+                error_flag = True
 
         # Check that at least one video URL is present
         video_keys = [
-            'url_1080p', 'url_720p', 'url_480p', 'url_360p', 'url_240p'
+            'url_1080', 'url_720', 'url_480', 'url_360', 'url_240'
         ]
         if not any(
             key in details and isinstance(details[key], str) and
             details[key].strip() for key in video_keys
         ):
-            raise ValueError(
-                "At least one video URL must be provided."
-            )
+            print("No valid video URL found in details:", details['url'])
+            error_flag = True
 
-        self.detail_list.append(details)
+        if error_flag:
+            self.error_list.append(details)
+        else:
+            self.detail_list.append(details)
 
     def write_to_csv(
         self,
@@ -274,37 +283,92 @@ class CreateCsv:
         """
 
         if not self.detail_list:
-            raise ValueError("No details to write to CSV.")
+            print("No details to write to 'successful' CSV.")
+            print("Looking for errors to write to 'difficult' CSV.")
 
         # Create a DataFrame from the list of details
         df = pd.DataFrame(self.detail_list)
+
+        # Create a DataFrame for errors if there are any
+        if self.error_list:
+            print(f"Errors found in {len(self.error_list)} videos. ")
+            error_df = pd.DataFrame(self.error_list)
+        else:
+            error_df = None
 
         # Add extra columns if they don't exist
         extra_columns = ["category_name", "description", "date_added"]
         for col in extra_columns:
             if col not in df.columns:
                 df[col] = ""
+            if error_df is not None and col not in error_df.columns:
+                error_df[col] = ""
 
         # Update the column order
         column_order = [
             "name", "duration", "category_name", "description", "date_added",
-            "url", "thumbnail", "url_1080p", "url_720p", "url_480p",
-            "url_360p", "url_240p"
+            "url", "thumbnail", "url_1080", "url_720", "url_480",
+            "url_360", "url_240"
         ]
-        column_order = [col for col in column_order if col in df.columns]
+
+        # Ensure all columns exist in the DataFrame,
+        #   filling missing ones with empty strings
+        for col in column_order:
+            if col not in df.columns:
+                df[col] = ""
+            if error_df is not None and col not in error_df.columns:
+                error_df[col] = ""
+
         df = df[column_order]
+        if error_df is not None:
+            error_df = error_df[column_order]
+
+        # Check if the file is writable before writing
+        counter = 0
+        if os.path.exists(self.filename):
+            if not os.access(self.filename, os.W_OK):
+                print(f"File '{self.filename}' is not writable.")
+
+                # Add a counter to the filename before the extension
+                base, ext = os.path.splitext(self.filename)
+                self.filename = f"{base}_{counter}{ext}"
+                while os.path.exists(self.filename) and not os.access(
+                    self.filename, os.W_OK
+                ):
+                    counter += 1
+                    self.filename = f"{base}_{counter}{ext}"
+                    if counter > 100:
+                        raise IOError(
+                            "Unable to find a filename after 100 attempts."
+                        )
 
         # Write the DataFrame to a CSV file
-        df.to_csv(self.filename, index=False)
+        if not df.empty:
+            try:
+                df.to_csv(self.filename, index=False)
+
+            except Exception as e:
+                print(f"Error writing to CSV: {e}")
+
+        # If there are errors, write them to a separate CSV file
+        if error_df is not None and not error_df.empty:
+            error_file = "difficult_vids.csv"
+            if os.path.exists(error_file):
+                error_df.to_csv(error_file, mode='a', header=False, index=False)
+            else:
+                error_df.to_csv(error_file, index=False)
 
 
 full_details = CreateCsv()
-for url in urls:
+for url in tqdm(urls, desc="Scraping videos", colour="green"):
     with JwScraper(url=url) as scraper:
-        print(f"Scraping {url}...")
-        scraper.scrape_videos()
-
+        scraper.scrape_vids()
         full_details.add_details(scraper.details)
 
 print("Writing details to CSV...")
 full_details.write_to_csv()
+
+if full_details.error_list:
+    print("\nSome videos had errors during scraping:")
+    for error in full_details.error_list:
+        print(error['url'])
