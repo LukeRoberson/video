@@ -265,75 +265,139 @@ CREATE TABLE videos_tags (
 
 # Database Manager
 
-This is several classes to manage the database.
+## Classes
+
+There are several classes used in managing the database.
+</br></br>
 
 
-Parent class:
-* context manager
-* commit and close DB
+### Class: DatabaseContext
+
+A context manager that connects to the database and sets up a cursor. It handles a clean disconnection at the end.
+
+An instance of this class is used by other classes.
+
+Example usage:
+```
+with DatabaseContext() as db:
+    video_mgr = VideoManager(db)
+    videos = video_mgr.get()
+
+print(videos)
+```
+</br></br>
 
 
-Videos:
-* Add a new video                                   [DONE]
-* Update a video (by it's ID)                       [DONE]
-* Delete a video (by it's ID)                       [DONE]
-* Resolve a video name to an ID                     [DONE]
-* Get all videos                                    [DONE]
-* Get a video by it's ID                            [DONE]
-* Get a filtered list of videos (category, etc)
+### Management Classes
+
+There are classes for managing each of the main databases:
+* VideoManager
+* CategoryManager
+* TagManager
+* SpeakerManager
+* CharacterManager
+* ScriptureManager
+</br></br>
+
+Each of these manage CRUD operations for the databases. They typically all have these methods (the VideoManager class is an exception):
+
+| Method            | Purpose                          | Returns (on success) |
+| ----------------- | -------------------------------- | -------------------- |
+| add               | Add a new item                   | The item's ID        |
+| update            | Update an existing item          | The item's ID        |
+| get               | Get one or more items            | The item's ID        |
+| get_from_video    | Get the item from a video        | A list of the item   |
+| add_to_video      | Add an item to a video           | True                 |
+| remove_from_video | Remove an item from a video      | True                 |
+| name_to_id        | Convert an item's name to its ID | The item's ID        |
+
+Here an _item_ refers to a category, tag, speaker, character, or scripture.
+
+Classes use the ID of an object when making changes.
+
+Most classes will take a name (string) as input. The exception is ScriptureManager, which takes a book (string), chapter (integer), and verse (int).
+
+When adding an item, if the item already exists, there will be no error. The _add_ method will return the ID of that item, whether newly added, or it already existed.
+</br></br>
 
 
-Categories:
-* Add a new category                                [DONE]
-* Update a category (by ID)                         [DONE]
-* Delete a category (by ID)                         [DONE]
-* Add a category to a video
-* Get categories (all/id)                           [DONE]
-* Update the category on a video
-* Remove a category from a video
-* Resolve a category to an ID                       [DONE]
+### Class: VideoManager
+
+The VideoManager class is slightly different, as:
+1. It has a lot more fields to work with
+2. It is not applied to other tables, in the same sense as a category is applied to a video.
+
+The _add_ and _update_ methods take inputs for:
+* id - On _update_ only. Mandatory
+* name - Mandatory when adding a video
+* description
+* url - URL of the video' web page on jw.org
+* url_1080 - URL of the video in 1080p
+* url_720 - URL of the video in 720p
+* url_480 - URL of the video in 480p
+* url_360 - URL of the video in 360p
+* url_240 - URL of the video in 240p
+* thumbnail - URL of the video's thumbnail
+* duration - Duration of the video (in seconds)
+* date_added - The date the video was added to jw.org (in epoch format)
+
+Not all fields need to be present. They can be ignored if the information is not available.
+
+The _delete_ method only needs an ID of the video to delete.
+
+The _get_ method will return all videos in the database, or one specific video if the optional ID is provided.
+
+The _name_to_id_ method resolves a videos name (if found) to it's ID. The ID is needed to perform any video related operation.
+</br></br>
 
 
-Tags:
-* Add a new tag                                     [DONE]
-* Update a tag                                      [DONE]
-* Delete a tag                                      [DONE]
-* Add a tag to a video
-* Get tags (all/id)                                 [DONE]
-* Update a tag on a video
-* Remove a tag from a video
-* Resolve a tag name to an ID                       [DONE]
+**Filtering Results**
+
+To filter results, use the _get_filter_ method. This allows us to pass:
+* Category ID
+* Tag ID
+* Speaker ID
+* Character ID
+* Scripture ID
+
+At this time, only one of each of these IDs can be passed.
+
+These are all optional. If none are passed, this is functionally the same as the _get_ method with no video ID. That is, it will return all videos.
 
 
-Speaker:
-* Add a new speaker                                 [DONE]
-* Update a speaker                                  [DONE]
-* Delete a speaker                                  [DONE]
-* Add a speaker to a video
-* Get speakers (all/id)                             [DONE]
-* Update a speaker on a video
-* Remove a speaker from a video
-* Resolve a speaker name to an ID                   [DONE]
+
+### To Do
+
+* Filter by date added
+* Filter by duration
+* Allow filtering by a list (eg, multiple categories, tags, etc)
+    * Handle OR / AND for a list
 
 
-Character:
-* Add a new character                               [DONE]
-* Update a character                                [DONE]
-* Delete a character                                [DONE]
-* Add a character to a video
-* Get characters (all/id)                           [DONE]
-* Update a character on a video
-* Remove a character from a video
-* Resolve a character name to an ID                 [DONE]
+### Workflows
 
+This is how to add an item to a video (eg, add a category to a video). The same process applies for other metadata; Category is used below as an example.
 
-Scripture:
-* Add a new scripture                               [DONE]
-* Update a scripture                                [DONE]
-* Delete a scripture                                [DONE]
-* Add a scripture to a video
-* Get categories (all/id)                           [DONE]
-* Update a scripture on a video
-* Remove a scripture from a video
-* Resolve a scripture name to an ID                 [DONE]
+1. Instantiate ContextManager, VideoManager, CategoryManager
+2. Convert a video name to it's ID (if needed)
+3. Add the category to the category database (it's ok if it already exists); Returns category ID
+4. Add category to video, passing video ID and category ID
+
+```
+video_name = "Test video"
+category_name = "Test category"
+
+with DatabaseContext() as db:
+    video_mgr = VideoManager(db)
+    cat_mgr = CategoryManager(db)
+
+    video_id = video_mgr.name_to_id(video_name)
+    category_id = cat_mgr.add(category_name)
+
+    if video_id is not None and category_id is not None:
+        cat_mgr.add_to_video(
+            video_id = video_id,
+            category_id = category_id
+        )
+```
 

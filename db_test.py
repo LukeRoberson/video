@@ -79,3 +79,9 @@ with DatabaseContext() as db:
     spk_mgr = SpeakerManager(db)
     ch_mgr = CharacterManager(db)
     scrip_mgr = ScriptureManager(db)
+
+    video = video_mgr.get(1)
+    print("Video:", video)
+
+    tag = tag_mgr.get_from_video(1)
+    print("tag:", tag)

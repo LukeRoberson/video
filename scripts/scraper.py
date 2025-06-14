@@ -30,14 +30,15 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivjtg_x_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-502015533_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivwrd_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-ivnwf_x_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_5_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_4_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_2_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbcov_201405_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201707_3_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201710_12_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201710_7_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-cpw_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbrd_201603_2_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbkm_201504_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-whcov_x_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-whkh_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbvod24_1_VIDEO",
 ]
 
 
