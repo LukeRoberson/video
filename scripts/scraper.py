@@ -30,15 +30,12 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201707_3_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201710_12_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwb_201710_7_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-cpw_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbrd_201603_2_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbkm_201504_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-whcov_x_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-whkh_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=pub-jwbvod24_1_VIDEO",
+]
+
+# Cause a traceback
+bad_urls = [
+    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-501100047_1_VIDEO",
+	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-501000009_1_VIDEO",
 ]
 
 
