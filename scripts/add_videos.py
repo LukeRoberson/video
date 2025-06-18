@@ -14,7 +14,7 @@ from sql_db import (  # noqa: E402
 )
 
 
-VIDEO_CSV = 'video_details.csv'
+VIDEO_CSV = 'Good.csv'
 
 
 def duration_to_seconds(
@@ -43,7 +43,7 @@ def duration_to_seconds(
 
 # Generate video data from CSV
 video_list = []
-with open(VIDEO_CSV, newline='', encoding='utf-8') as csvfile:
+with open(VIDEO_CSV, newline='', encoding='cp1252') as csvfile:
     reader = csv.DictReader(csvfile)
     video_list = [row for row in reader]
 

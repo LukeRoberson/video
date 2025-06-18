@@ -30,12 +30,7 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-]
-
-# Cause a traceback
-bad_urls = [
-    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-501100047_1_VIDEO",
-	"https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-501000009_1_VIDEO",
+    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-502100025_1_VIDEO"
 ]
 
 
