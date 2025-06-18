@@ -30,7 +30,18 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-    "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&lank=docid-502100025_1_VIDEO"
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesAVProduction/pub-jwbrd_201410_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/StudioTalks/pub-jwban_201410_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201410_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/pub-jwbmw_201411_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODBiblePrinciples/pub-jwbai_201412_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201412_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/StudioTalks/pub-jwban_201502_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201502_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODBiblePrinciples/pub-jwbai_201502_2_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwbrd_201504_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/pub-jwbmw_201504_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesReliefWork/pub-jwbrd_201505_3_VIDEO",
 ]
 
 

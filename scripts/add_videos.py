@@ -14,7 +14,7 @@ from sql_db import (  # noqa: E402
 )
 
 
-VIDEO_CSV = 'Good.csv'
+VIDEO_CSV = 'video_details.csv'
 
 
 def duration_to_seconds(

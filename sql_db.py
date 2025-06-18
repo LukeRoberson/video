@@ -1160,7 +1160,7 @@ class TagManager:
 
         # Verify tag exists
         self.db.cursor.execute(
-            "SELECT 1 FROM categories WHERE id = ?", (tag_id,)
+            "SELECT 1 FROM tags WHERE id = ?", (tag_id,)
         )
         if not self.db.cursor.fetchone():
             print(f"Tag with ID {tag_id} does not exist.")
