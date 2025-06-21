@@ -20,3 +20,9 @@ instance/
 chromedriver.exe
 LICENSE.chromedriver
 THIRD_PARTY_LICENSES.chromedriver
+
+# Folders
+DB Backup/
+
+# CSV files
+*.csv

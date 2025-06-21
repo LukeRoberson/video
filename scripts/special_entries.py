@@ -8,7 +8,7 @@ from tqdm import tqdm
 from colorama import Fore, Style
 
 
-CSV_FILE = "Difficult.csv"
+CSV_FILE = "difficult_vids.csv"
 
 df = pd.read_csv(CSV_FILE)
 

@@ -1532,7 +1532,7 @@ class SpeakerManager:
 
         # Verify speaker exists
         self.db.cursor.execute(
-            "SELECT 1 FROM categories WHERE id = ?", (speaker_id,)
+            "SELECT 1 FROM speakers WHERE id = ?", (speaker_id,)
         )
         if not self.db.cursor.fetchone():
             print(f"Speaker with ID {speaker_id} does not exist.")
@@ -1912,7 +1912,7 @@ class CharacterManager:
 
         # Verify character exists
         self.db.cursor.execute(
-            "SELECT 1 FROM categories WHERE id = ?", (character_id,)
+            "SELECT 1 FROM bible_characters WHERE id = ?", (character_id,)
         )
         if not self.db.cursor.fetchone():
             print(f"character with ID {character_id} does not exist.")
@@ -2324,7 +2324,7 @@ class ScriptureManager:
 
         # Verify scripture exists
         self.db.cursor.execute(
-            "SELECT 1 FROM categories WHERE id = ?", (scripture_id,)
+            "SELECT 1 FROM scriptures WHERE id = ?", (scripture_id,)
         )
         if not self.db.cursor.fetchone():
             print(f"Scripture with ID {scripture_id} does not exist.")

@@ -19,17 +19,18 @@ from sql_db import (  # noqa: E402
 )
 
 
-VIDEO_CSV = 'metadata.csv'
+VIDEO_CSV = 'metadata2.csv'
 
 # Generate data from CSV
 meta_list = []
-with open(VIDEO_CSV, newline='', encoding='cp1252') as csvfile:
+with open(VIDEO_CSV, newline='', encoding='utf-8-sig') as csvfile:
     reader = csv.DictReader(csvfile)
     meta_list = [row for row in reader]
 
 for item in meta_list:
     with DatabaseContext() as db:
         video_mgr = VideoManager(db)
+        print(Fore.GREEN, f"Processing video: {item['name']}", Style.RESET_ALL)
         video_id = video_mgr.name_to_id(item['name'])
         if video_id is None:
             print(

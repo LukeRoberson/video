@@ -30,18 +30,20 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesAVProduction/pub-jwbrd_201410_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/StudioTalks/pub-jwban_201410_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201410_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/pub-jwbmw_201411_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODBiblePrinciples/pub-jwbai_201412_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201412_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/StudioTalks/pub-jwban_201502_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbmw_201502_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODBiblePrinciples/pub-jwbai_201502_2_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwbrd_201504_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/pub-jwbmw_201504_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesReliefWork/pub-jwbrd_201505_3_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenMovies/pub-ivtru_2_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502015255_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/SeriesWhatPeersSay/docid-502013268_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502014176_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/SeriesWhatPeersSay/docid-502013228_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502014231_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODIntExpTransformations/pub-jwb_201910_4_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODIntExpTransformations/pub-jwb_202003_7_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbvod25_22_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwb_201808_12_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwb_202003_11_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/docid-502014259_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/AccomplishMinistry/docid-502012372_1_VIDEO",
+    "https://www.jw.org/en/library/videos/#en/mediaitems/VODMinistryTools/pub-imv_3_VIDEO"
 ]
 
 
@@ -183,6 +185,7 @@ class JwScraper:
                 By.CSS_SELECTOR,
                 ".mediaItemTitleContainer .mediaItemDuration"
             )
+            print(f"Duration element found: {duration_element}")
             self.details["duration"] = (
                 duration_element.text.strip().replace("Duration: ", "")
             )
@@ -191,17 +194,40 @@ class JwScraper:
             print(f"Error scraping duration: {e}")
 
         # Scrape the video title
-        try:
-            title_element = self.driver.find_element(
-                By.CSS_SELECTOR,
-                ".mediaItemTitleContainer .mediaItemTitle"
-            )
-            self.details["name"] = (
-                title_element.text.strip().replace("—", " - ")
-            )
+        # try:
+        #     title_element = self.driver.find_element(
+        #         By.CSS_SELECTOR,
+        #         ".mediaItemTitleContainer .mediaItemTitle"
+        #     )
+        #     print(f"Title element found: {title_element}")
+        #     self.details["name"] = (
+        #         title_element.text.strip().replace("—", " - ")
+        #     )
 
+        # except Exception as e:
+        #     print(f"Error scraping title: {e}")
+
+        # Scrape the div with id="regionMain"
+        try:
+            region_main = self.driver.find_element(By.ID, "regionMain")
         except Exception as e:
-            print(f"Error scraping title: {e}")
+            print(f"Error scraping regionMain: {e}")
+
+        # Search region_main for an <article> tag with id="article"
+        try:
+            article_element = region_main.find_element(By.CSS_SELECTOR, "article#article")
+        except Exception as e:
+            print(f"Error finding article tag: {e}")
+
+        # Search article_element for an <h1> tag
+        try:
+            h1_element = article_element.find_element(By.TAG_NAME, "h1")
+            if h1_element:
+                print(f"Found <h1> tag: {h1_element.text}")
+                self.details["name"] = h1_element.text
+        except Exception as e:
+            print(f"Error finding <h1> tag in article: {e}")
+
 
 
 class CreateCsv:
@@ -349,7 +375,7 @@ class CreateCsv:
         # Write the DataFrame to a CSV file
         if not df.empty:
             try:
-                df.to_csv(self.filename, index=False)
+                df.to_csv(self.filename, index=False, encoding="utf-8-sig")
 
             except Exception as e:
                 print(f"Error writing to CSV: {e}")

@@ -46,6 +46,28 @@
             {% endfor %}
         </p>
     {% endif %}
+    
+    <p><strong>Speakers:</strong></p>
+    <ul>
+        {% for speaker in speakers %}
+            <li>{{ speaker.name }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>Scriptures:</strong></p>
+    <ul>
+        {% for scripture in scriptures %}
+            <li>{{ scripture.book }} {{ scripture.chapter }}:{{ scripture.verse }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>Bible Characters:</strong></p>
+    <ul>
+        {% for character in characters %}
+            <li>{{ character.name }}</li>
+        {% endfor %}
+    </ul>
+
 
 
     <!-- Similar videos section -->
