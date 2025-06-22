@@ -1,0 +1,53 @@
+<!--
+    ==========================================================================
+    Home Page
+    --------------------------------------------------------------------------
+    - Displays a list of video categories.
+    - Each category has a button to load videos dynamically.
+    ==========================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+    <!--
+        ==========================================================================
+        Scripts
+        --------------------------------------------------------------------------
+        loadVideos.js:
+            - Loads videos for each category
+
+        scroll.js:
+            - Handles horizontal scrolling of thumbnails within each category
+        ==========================================================================
+    -->
+    <script src="{{ url_for('static', filename='js/loadVideos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
+
+    <!--
+        ==========================================================================
+        Main Content Area
+        --------------------------------------------------------------------------
+        - Creates a row for each video category, which comes from Flask.
+        - Adds a button to load videos for that category.
+        ==========================================================================
+    -->
+    {% for category in categories %}
+        <div class="category-row" id="category-{{ category.id }}" data-category-id="{{ category.id }}">
+            <!-- Category title -->
+            <div class="category-title">
+                {{ category.name }}
+            </div>
+
+            <!-- Thumbnails wrapper with scroll arrows -->
+            <div class="thumbnails-wrapper" id="wrapper-{{ category.id }}">
+                <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ category.id }}', -1)"></button>
+                <div class="thumbnails"></div>
+                <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ category.id }}', 1)"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

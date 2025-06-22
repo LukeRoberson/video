@@ -72,6 +72,10 @@ from sql_db import (
 
 
 # Connect to the database
+
+MAIN_CATEGORY = "JW Broadcasting"
+SUBCATEGORY = "Monthly Programs"
+
 with DatabaseContext() as db:
     video_mgr = VideoManager(db)
     cat_mgr = CategoryManager(db)
@@ -80,8 +84,17 @@ with DatabaseContext() as db:
     ch_mgr = CharacterManager(db)
     scrip_mgr = ScriptureManager(db)
 
-    video = video_mgr.get(1)
-    print("Video:", video)
+    # Get IDs of main and subcategories
+    main_cat_id = cat_mgr.name_to_id(MAIN_CATEGORY)
+    sub_cat_id = cat_mgr.name_to_id(SUBCATEGORY)
+    print(f"Main Category ID: {main_cat_id}")
+    print(f"Subcategory ID: {sub_cat_id}")
 
-    tag = tag_mgr.get_from_video(1)
-    print("tag:", tag)
+    # Get videos with both categories
+    cat_list = [1340, 1]
+    videos = video_mgr.get_filter(
+        category_id=cat_list,
+    )
+    if videos:
+        for video in videos:
+            print(f"Video ID: {video['id']}, Name: {video['name']}")

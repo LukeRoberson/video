@@ -397,7 +397,7 @@ class VideoManager:
 
     def get_filter(
         self,
-        category_id: int | None = None,
+        category_id: list[int] | None = None,
         tag_id: int | None = None,
         speaker_id: int | None = None,
         character_id: int | None = None,
@@ -409,8 +409,22 @@ class VideoManager:
             - Category ID
 
         Args:
-            category_id (int | None): The ID of the category to filter by.
+            category_id (list[int] | None):
+                A list of category ID's to filter by.
+                Returns videos the have ALL of the categories.
                 If None, retrieves all videos. Defaults to None.
+            tag_id (int | None):
+                The ID of the tag to filter by.
+                If None, does not filter by tag. Defaults to None.
+            speaker_id (int | None):
+                The ID of the speaker to filter by.
+                If None, does not filter by speaker. Defaults to None.
+            character_id (int | None):
+                The ID of the character to filter by.
+                If None, does not filter by character. Defaults to None.
+            scripture_id (int | None):
+                The ID of the scripture to filter by.
+                If None, does not filter by scripture. Defaults to None.
 
         Returns:
             list[dict] | None:
@@ -432,11 +446,17 @@ class VideoManager:
         params = []
 
         # Dymanically build the query fields based on provided filters
-        #   This createsa list of JOIN and WHERE statements
-        if category_id is not None:
+        #   This creates a list of JOIN and WHERE statements
+        if (
+            category_id is not None and
+            isinstance(category_id, list) and
+            category_id
+        ):
             joins.append("JOIN video_categories vc ON v.id = vc.video_id")
-            wheres.append("vc.category_id = ?")
-            params.append(category_id)
+            wheres.append(
+                f"vc.category_id IN ({','.join(['?'] * len(category_id))})"
+            )
+            params.extend(category_id)
 
         if tag_id is not None:
             joins.append("JOIN videos_tags vt ON v.id = vt.video_id")
@@ -463,6 +483,15 @@ class VideoManager:
             query += " " + " ".join(joins)
         if wheres:
             query += " WHERE " + " AND ".join(wheres)
+
+        # Add a GROUP BY clause if filtering by categories
+        if (
+            category_id is not None and
+            isinstance(category_id, list) and
+            category_id
+        ):
+            query += " GROUP BY v.id HAVING COUNT(DISTINCT vc.category_id) = ?"
+            params.append(len(category_id))
 
         # Execute the query with the parameters
         cursor = self.db.cursor.execute(query, tuple(params))

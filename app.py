@@ -69,19 +69,31 @@ def home():
 
 
 @app.route(
-    "/about",
+    "/broadcasting",
     methods=["GET"],
 )
-def about():
+def broadcasting():
     """
-    A simple about page.
+    Render the home page with categories and their items.
 
     Returns:
-        Response: A rendered HTML page with information about the application.
-        This page is static and does not require any database interaction.
+        Response: A rendered HTML page with categories and their items.
+        This page is dynamic and fetches data from the database.
     """
 
-    return render_template("about.html")
+    # Fetch categories from the database
+    CATEGORY = "JW Broadcasting"
+    SUB_CATEGORY_LIST = [
+        "Monthy Programs",
+        "Talks",
+        "News and Announcements",
+    ]
+
+    return render_template(
+        "category.html",
+        category=CATEGORY,
+        sub_categories=SUB_CATEGORY_LIST,
+    )
 
 
 @app.route(
@@ -105,10 +117,11 @@ def get_videos_by_category(
     """
 
     # Select all videos with the given category ID
+    cat_list = [category_id]
     with DatabaseContext() as db:
         video_mgr = VideoManager(db)
         videos = video_mgr.get_filter(
-            category_id=category_id,
+            category_id=cat_list,
         )
 
     # If no videos are found, return a 404 error
