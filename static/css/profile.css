@@ -1,0 +1,74 @@
+/* 
+    profile.css
+    ----------------------------------------------------
+    Styles used when creating or editing a user profile.
+*/
+
+/* Center the viewport vertically and horizontally */
+.center-viewport {
+    min-height: calc(100vh - 150px); /* Adjust if your navbar is taller */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Wrapper for the profile image carousel, centers content and adds spacing */
+.carousel-profile-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* Set a fixed width for the carousel itself */
+.carousel-profile-wrapper .carousel {
+    width: 180px;
+}
+
+/* Style for carousel images: size, border, shape, and hover effect */
+.carousel-item img {
+    max-height: 140px;
+    object-fit: contain;
+    border: 3px solid transparent;
+    border-radius: 50%; /* Makes image circular */
+    transition: border-color 0.2s;
+    cursor: pointer;
+    background: #f8f9fa;
+    padding: 8px;
+}
+
+/* Style carousel navigation arrows: size and remove default background */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Custom SVG for previous arrow, filled black for visibility */
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='black' viewBox='0 0 16 16'><path d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/></svg>");
+}
+
+/* Custom SVG for next arrow, filled black for visibility */
+.carousel-control-next-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='black' viewBox='0 0 16 16'><path d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/></svg>");
+}
+
+/* Style for the carousel arrow button containers: size, alignment, and always visible */
+.carousel-control-prev, .carousel-control-next {
+    position: static;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+}
+
+/* Focus style for carousel arrow buttons for accessibility */
+.carousel-control-prev:focus, .carousel-control-next:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #0d6efd33;
+}

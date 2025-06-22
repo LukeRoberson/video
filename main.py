@@ -26,6 +26,8 @@ Custom Dependencies:
 
 # Standard library imports
 import logging
+import os
+import random
 from flask import (
     Flask,
     Response,
@@ -58,7 +60,11 @@ logging.basicConfig(
 
 
 # Register the filter with Flask
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder='static',
+    template_folder='templates'
+)
 app.register_blueprint(category_bp)
 app.register_blueprint(api_bp)
 app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
@@ -78,6 +84,38 @@ def home():
 
     return render_template(
         "home.html",
+    )
+
+
+@app.route(
+    "/create_profile",
+    methods=["GET"]
+)
+def create_profile() -> Response:
+    """
+    Render the profile creation page.
+
+    Returns:
+        Response: A rendered HTML page for creating a new profile.
+    """
+
+    profile_dir = os.path.join(
+        app.static_folder,
+        'img',
+        'profiles'
+    )
+
+    profile_pics = [
+        f for f in os.listdir(profile_dir)
+        if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+    ]
+    random.shuffle(profile_pics)
+
+    return make_response(
+        render_template(
+            'create_profile.html',
+            profile_pics=profile_pics
+        )
     )
 
 

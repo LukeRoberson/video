@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css')}}" />
+{% endblock %}
+
+{% block title %}
+Create Profile
+{% endblock %}
+
+
+{% block content %}
+
+<div class="center-viewport">
+    <!-- A card in the middle of the screen -->
+    <div class="card shadow" style="width: 400px;">
+        <div class="card-body">
+            <h2 class="mb-4 text-center">Create New Profile</h2>
+
+            <!-- Form to create a new profile -->
+            <form>
+                <!-- Name field -->
+                <div class="mb-4">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="Enter name" required>
+                </div>
+
+                <!-- Profile picture field -->
+                <div class="mb-4 text-center">
+                    <!-- Carousel for potential profile pics -->
+                    <div class="carousel-profile-wrapper">
+                        <!-- Left button to go back one pic -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#profilePicCarousel" data-bs-slide="prev" tabindex="-1">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+
+                        <!-- Profile picture -->
+                        <div id="profilePicCarousel" class="carousel slide" data-bs-interval="false">
+                            <div class="carousel-inner">
+                                {% for pic in profile_pics %}
+                                <div class="carousel-item {% if loop.first %}active selected{% endif %}" data-pic="{{ pic }}">
+                                    <img src="/static/img/profiles/{{ pic }}" alt="{{ pic }}" class="d-block w-100 profile-pic-option">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Right button to go to the next pic -->
+                        <button class="carousel-control-next" type="button" data-bs-target="#profilePicCarousel" data-bs-slide="next" tabindex="-1">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="profile_pic" name="profile_pic" value="{{ profile_pics[0] if profile_pics else '' }}" required>
+                </div>
+                
+                <!-- Button to create the profile -->
+                <button type="submit" class="btn btn-primary w-100 btn-lg">Create Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/profileCarousel.js') }}"></script>        
+{% endblock %}

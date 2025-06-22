@@ -127,23 +127,39 @@ class DateTimeAttribute:
         """
 
         # Get the remote file as a stream
-        with requests.get(self.url, stream=True) as r:
-            r.raise_for_status()
-            total = int(r.headers.get('content-length', 0))
+        tried_360p = False
+        while True:
+            with requests.get(self.url, stream=True) as r:
+                r.raise_for_status()
+                total = int(r.headers.get('content-length', 0))
 
-            # Open the local file for writing in binary mode
-            with open(self.temp_path, 'wb') as f, tqdm(
-                desc="Downloading",
-                total=total,
-                unit='B',
-                unit_scale=True,
-                unit_divisor=1024,
-            ) as bar:
-                # Download the file in chunks
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        bar.update(len(chunk))
+                # Open the local file for writing in binary mode
+                try:
+                    with open(self.temp_path, 'wb') as f, tqdm(
+                        desc="Downloading",
+                        total=total,
+                        unit='B',
+                        unit_scale=True,
+                        unit_divisor=1024,
+                    ) as bar:
+                        # Download the file in chunks
+                        for chunk in r.iter_content(chunk_size=8192):
+                            if chunk:
+                                f.write(chunk)
+                                bar.update(len(chunk))
+
+                    # Exit the loop if download is successful
+                    break
+
+                # If the video is not available, try 360P
+                except requests.exceptions.RequestException:
+                    if not tried_360p and "240P" in self.url:
+                        self.url = self.url.replace("240P", "360P")
+                        tried_360p = True
+                        print("240P not available, trying 360P...")
+                    else:
+                        print(f"Failed to download: {self.url}")
+                        break
 
 
 if __name__ == "__main__":
