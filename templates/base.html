@@ -10,25 +10,24 @@
     <body>
         <div class="navbar">
             <a href="{{ url_for('home') }}" class="navbar-brand">Browse</a>
-            <a href="{{ url_for('broadcasting') }}" class="navbar-item">Broadcasting</a>
-            <a href="{{ url_for('children') }}" class="navbar-item">Children</a>
-            <a href="{{ url_for('teens') }}" class="navbar-item">Teenagers</a>
-            <a href="{{ url_for('family') }}" class="navbar-item">Family</a>
-            <a href="{{ url_for('programs_events') }}" class="navbar-item">Programs and Events</a>
-            <a href="{{ url_for('our_activities') }}" class="navbar-item">Our Activities</a>
-            <a href="{{ url_for('meetings_ministry') }}" class="navbar-item">Our Meetings and Ministry</a>
-            <a href="{{ url_for('organization') }}" class="navbar-item">Our Organization</a>
-            <a href="{{ url_for('bible') }}" class="navbar-item">The Bible</a>
-            <a href="{{ url_for('dramas') }}" class="navbar-item">Dramas</a>
-            <a href="{{ url_for('series') }}" class="navbar-item">Series</a>
-            <a href="{{ url_for('music') }}" class="navbar-item">Music</a>
-            <a href="{{ url_for('interviews') }}" class="navbar-item">Interviews and Experiences</a>
+            <a href="{{ url_for('category_pages.broadcasting') }}" class="navbar-item">Broadcasting</a>
+            <a href="{{ url_for('category_pages.children') }}" class="navbar-item">Children</a>
+            <a href="{{ url_for('category_pages.teens') }}" class="navbar-item">Teenagers</a>
+            <a href="{{ url_for('category_pages.family') }}" class="navbar-item">Family</a>
+            <a href="{{ url_for('category_pages.programs_events') }}" class="navbar-item">Programs and Events</a>
+            <a href="{{ url_for('category_pages.our_activities') }}" class="navbar-item">Our Activities</a>
+            <a href="{{ url_for('category_pages.meetings_ministry') }}" class="navbar-item">Our Meetings and Ministry</a>
+            <a href="{{ url_for('category_pages.organization') }}" class="navbar-item">Our Organization</a>
+            <a href="{{ url_for('category_pages.bible') }}" class="navbar-item">The Bible</a>
+            <a href="{{ url_for('category_pages.dramas') }}" class="navbar-item">Dramas</a>
+            <a href="{{ url_for('category_pages.series') }}" class="navbar-item">Series</a>
+            <a href="{{ url_for('category_pages.music') }}" class="navbar-item">Music</a>
+            <a href="{{ url_for('category_pages.interviews') }}" class="navbar-item">Interviews and Experiences</a>
         </div>
 
         <div class="body-content">
             {% block content %}
             {% endblock %}
-            <hr/>
         </div>
     </body>
 </html>
