@@ -17,33 +17,35 @@ Home
         ==========================================================================
         Scripts
         --------------------------------------------------------------------------
-        loadVideos.js:
-            - Loads videos for each category
+        populateCategories.js:
+            - Loads videos into each carousel based on the category ID's.
 
         scroll.js:
             - Handles horizontal scrolling of thumbnails within each category
         ==========================================================================
     -->
-    <script src="{{ url_for('static', filename='js/loadVideos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/populateCategories.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
 
     <!--
         ==========================================================================
         Main Content Area
         --------------------------------------------------------------------------
-        - Creates a row for each video category, which comes from Flask.
-        - Adds a button to load videos for that category.
+        - The page itself is a main category
+        - Create a row (carousel) for each sub-category, which comes from Flask.
+        - The 'observer' in populateCategories.js will handle loading videos
+          into each carousel as it is shown on the page.
         ==========================================================================
     -->
-    {% for category in categories %}
-        <div class="category-row" id="category-{{ category.id }}" data-category-id="{{ category.id }}">
+    {% for sub_cat in sub_categories %}
+        <div class="category-row" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
             <!-- Category title -->
             <div class="category-title">
-                {{ category.name }}
+                {{ sub_cat.name }}
             </div>
 
             <!-- Thumbnails wrapper with scroll arrows -->
-            <div class="thumbnails-wrapper" id="wrapper-{{ category.id }}">
+            <div class="thumbnails-wrapper" id="wrapper-{{ sub_cat.id }}">
                 <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ category.id }}', -1)"></button>
                 <div class="thumbnails"></div>
                 <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ category.id }}', 1)"></button>

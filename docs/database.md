@@ -360,18 +360,12 @@ To filter results, use the _get_filter_ method. This allows us to pass:
 * Character ID
 * Scripture ID
 
-At this time, only one of each of these IDs can be passed.
+The Category ID is expected to be a list with one or more items, or 'None' if we don't want to filter based on category at all.
+
+Other parameters accept only one item.
 
 These are all optional. If none are passed, this is functionally the same as the _get_ method with no video ID. That is, it will return all videos.
 
-
-
-### To Do
-
-* Filter by date added
-* Filter by duration
-* Allow filtering by a list (eg, multiple categories, tags, etc)
-    * Handle OR / AND for a list
 
 
 ### Workflows
@@ -383,7 +377,7 @@ This is how to add an item to a video (eg, add a category to a video). The same 
 3. Add the category to the category database (it's ok if it already exists); Returns category ID
 4. Add category to video, passing video ID and category ID
 
-```
+```python
 video_name = "Test video"
 category_name = "Test category"
 

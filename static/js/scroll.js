@@ -29,8 +29,6 @@ function updateArrows(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
     const thumbnails = wrapper.querySelector('.thumbnails');
 
-    console.log(`ScrollLeft: ${thumbnails.scrollLeft}, ClientWidth: ${thumbnails.clientWidth}, ScrollWidth: ${thumbnails.scrollWidth}`);
-
     const leftArrow = wrapper.querySelector('.scroll-arrow.left');
     const rightArrow = wrapper.querySelector('.scroll-arrow.right');
     

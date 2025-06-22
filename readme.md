@@ -1,5 +1,10 @@
 # Video Streaming
 
+A video steaming service for videos found on jw.org, and in JW Library.
+
+All videos in this app are publically available on jw.org. This app does not distribute these videos. It is just an interface to access them in a way similar to a streaming service, with more search functions, etc.
+</br></br>
+
 
 # To Do
 
@@ -27,4 +32,10 @@ Search:
 
 TV (waaaay in the future):
 * QR code for the url
+
+Database:
+* Filter by date added
+* Filter by duration
+* Allow filtering by a list (eg, multiple categories, tags, etc)
+    * Handle OR / AND for a list
 

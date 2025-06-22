@@ -1,21 +1,25 @@
 /**
- * loadvideos.js
+ * populateCategories.js
  * 
  * Handles loading videos and thumbnails dynamically for each category in the video manager web app.
+ *  Pages are organized by main category, and will display a carousel for subcategories.
+ * 
  * For lazy loading, it uses the IntersectionObserver API to load videos only when the category row is in view.
- * This improves performance by reducing the initial load time and only fetching data as needed.
+ *  This improves performance by reducing the initial load time and only fetching data as needed.
  */
 
 
 /**
- * Loads videos for a given category and populates the thumbnails section.
+ * Calls a Flask route, passing a major category ID and subcategory ID, to get a list of videos.
+ * Loads videos into the carousel for the specified category.
+ * 
  * @param {*} categoryId - The ID of the category to load videos for.
  */
-function populateCategory(categoryId) {
-    fetch(`/videos/${categoryId}`)
+function populateCategory(categoryId, subcategoryId) {
+    fetch(`/api/categories/${categoryId}/${subcategoryId}`)
         .then(response => response.json())
         .then(videos => {
-            const thumbnailsDiv = document.querySelector(`#category-${categoryId} .thumbnails`);
+            const thumbnailsDiv = document.querySelector(`#category-${subcategoryId} .thumbnails`);
             thumbnailsDiv.innerHTML = videos.map(video => `
                 <div class="thumbnail">
                     <a href="/video/${video.id}">
@@ -41,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const categoryId = entry.target.dataset.categoryId;
-                populateCategory(categoryId);
+                const subcategoryId = entry.target.dataset.subcategoryId;
+                populateCategory(categoryId, subcategoryId);
                 observer.unobserve(entry.target); // Stop observing once loaded
             }
         });
