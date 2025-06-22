@@ -13,7 +13,12 @@ CSV_FILE = "difficult_vids.csv"
 df = pd.read_csv(CSV_FILE)
 
 errors = []
-for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing videos", colour="green"):
+for idx, row in tqdm(
+    df.iterrows(),
+    total=len(df),
+    desc="Processing videos",
+    colour="green"
+):
     video_url = row['url']
 
     # Set up Selenium
@@ -23,7 +28,9 @@ for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing videos", col
 
     # Wait for the video player to load
     wait = WebDriverWait(driver, 10)
-    video_div = wait.until(EC.presence_of_element_located((By.ID, "vjs_video_3")))
+    video_div = wait.until(
+        EC.presence_of_element_located((By.ID, "vjs_video_3"))
+    )
 
     # Find the play button inside the video player and click it
     play_button = video_div.find_element(By.CLASS_NAME, "vjs-big-play-button")
@@ -41,11 +48,19 @@ for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing videos", col
     time.sleep(2)
 
     # Now find the vjs-progress-holder inside the video player
-    progress_holder = video_div.find_element(By.CLASS_NAME, "vjs-progress-holder")
+    progress_holder = video_div.find_element(
+        By.CLASS_NAME,
+        "vjs-progress-holder"
+    )
 
     # Wait for aria-valuetext to appear (max 10 seconds)
     try:
-        wait.until(lambda d: progress_holder.get_attribute("aria-valuetext") is not None)
+        wait.until(
+            lambda d: (
+                progress_holder.get_attribute("aria-valuetext")
+                is not None
+            )
+        )
     except Exception:
         errors.append(video_url)
         print(
@@ -57,7 +72,11 @@ for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing videos", col
         continue
 
     # Get the updated outerHTML and aria-valuetext
-    duration = progress_holder.get_attribute("aria-valuetext").split(" ")[-1]
+    duration = None
+    if progress_holder:
+        aria_valuetext = progress_holder.get_attribute("aria-valuetext")
+        if aria_valuetext is not None:
+            duration = aria_valuetext.split(" ")[-1]
 
     # Get the poster (thumbnail) URL from the video tag
     video_tag = driver.find_element(By.TAG_NAME, "video")

@@ -29,7 +29,8 @@ for video_name in video_list:
 
         print(
             Fore.YELLOW,
-            f"Video: {video_name}:{video_id}. Category: {category_name}:{category_id}",
+            f"Video: {video_name}:{video_id}. "
+            f"Category: {category_name}:{category_id}",
             Style.RESET_ALL
         )
         if video_id is not None and category_id is not None:
@@ -39,7 +40,10 @@ for video_name in video_list:
             )
 
             if result:
-                print(f"Video '{video_name}' added to category '{category_name}'.")
+                print(
+                    f"Video '{video_name}' "
+                    f"added to category '{category_name}'."
+                )
             else:
                 print(
                     f"Failed to add video '{video_name}' "

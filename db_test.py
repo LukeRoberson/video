@@ -84,17 +84,8 @@ with DatabaseContext() as db:
     ch_mgr = CharacterManager(db)
     scrip_mgr = ScriptureManager(db)
 
-    # Get IDs of main and subcategories
-    main_cat_id = cat_mgr.name_to_id(MAIN_CATEGORY)
-    sub_cat_id = cat_mgr.name_to_id(SUBCATEGORY)
-    print(f"Main Category ID: {main_cat_id}")
-    print(f"Subcategory ID: {sub_cat_id}")
-
-    # Get videos with both categories
-    cat_list = [1340, 1]
+    # Get videos with no date_added
     videos = video_mgr.get_filter(
-        category_id=cat_list,
+        missing_date=True,
     )
-    if videos:
-        for video in videos:
-            print(f"Video ID: {video['id']}, Name: {video['name']}")
+    print(f"Found {len(videos)} videos with no date_added.")

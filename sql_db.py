@@ -402,6 +402,7 @@ class VideoManager:
         speaker_id: int | None = None,
         character_id: int | None = None,
         scripture_id: int | None = None,
+        missing_date: bool = False
     ) -> list[dict] | None:
         """
         Retrieves a filtered list of videos from the database.
@@ -425,6 +426,9 @@ class VideoManager:
             scripture_id (int | None):
                 The ID of the scripture to filter by.
                 If None, does not filter by scripture. Defaults to None.
+            missing_date (bool):
+                Filters for videos that are missing a 'date_added' value.
+                If False, does not filter by date. Defaults to False.
 
         Returns:
             list[dict] | None:
@@ -477,6 +481,9 @@ class VideoManager:
             joins.append("JOIN videos_scriptures vscr ON v.id = vscr.video_id")
             wheres.append("vscr.scripture_id = ?")
             params.append(scripture_id)
+
+        if missing_date:
+            wheres.append("(v.date_added IS NULL OR v.date_added = '')")
 
         # Convert the list of JOIN and WHERE statements to strings
         if joins:
