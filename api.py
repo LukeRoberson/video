@@ -11,6 +11,8 @@ Functions:
 Routes:
     - /api/categories/<int>/<int>
         - category_filter: Fetches videos by category and subcategory IDs.
+    - /api/profile/create
+        - create_profile: Creates a new user profile.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -27,6 +29,7 @@ from flask import (
     Blueprint,
     Response,
     request,
+    session,
     jsonify,
     make_response,
 )
@@ -211,41 +214,105 @@ def create_profile() -> Response:
 
 
 @api_bp.route(
-    '/api/profile/read',
-    methods=['GET'],
+    "/api/profile/set_active",
+    methods=["POST"]
 )
-def read_profile() -> Response:
+def set_active_profile() -> Response:
     """
-    Endpoint to read user profiles.
+    Set the active profile for the session.
+
+    Expects JSON:
+        {
+            "profile_id": <int or "guest">
+        }
 
     Returns:
-        Response: A JSON response indicating that the profile reading
-            endpoint is not yet implemented.
+        Response: A redirect to the home page after setting the active profile.
     """
 
-    # Read a list of all profiles from the local database
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        profile_list = profile_mgr.read()
-
-    # Handle errors
-    if profile_list is None:
-        logging.error("Failed to read profiles from the local database.")
+    # Get the JSON data from the request
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for setting active profile.")
         return make_response(
             jsonify(
                 {
-                    'error': 'Failed to read profiles'
+                    "error": "No data provided"
                 }
             ),
-            500
+            400
         )
 
-    # Return the list of profiles
+    if "profile_id" not in data:
+        logging.error("Missing 'profile_id' in request data.")
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'profile_id' in request data"
+                }
+            ),
+            400
+        )
+
+    # Set the active profile in the session
+    profile_id = data.get("profile_id")
+    session["active_profile"] = profile_id
+    logging.info(f"Active profile set to: {profile_id}")
+
+    # Return a JSON response indicating success
     return make_response(
         jsonify(
             {
-                'message': f'Found {len(profile_list)} profiles',
-                'profiles': profile_list,
+                "success": True,
+                "active_profile": profile_id
+            }
+        ),
+        200
+    )
+
+
+@api_bp.route(
+    "/api/profile/get_active",
+    methods=["GET"]
+)
+def get_active_profile() -> Response:
+    """
+    Get the active profile for the session.
+
+    Returns:
+        Response: A JSON response with the active profile ID.
+    """
+
+    # Retrieve the active profile from the session
+    active_profile = session.get("active_profile", None)
+
+    # If no active profile is set, return a default value
+    if active_profile is None or active_profile == "guest":
+        profile = {
+            "id": None,
+            "name": "Guest",
+            "image": "guest.png"
+        }
+    else:
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+            profile = profile_mgr.read(
+                profile_id=active_profile
+            )
+            profile = profile[0] if profile else {
+                "id": None,
+                "name": "Guest",
+                "image": "guest.png"
+            }
+
+    logging.info(f"Active profile retrieved: {active_profile}")
+    logging.info(f"Profile details: {profile}")
+
+    # Return a JSON response with the active profile ID
+    return make_response(
+        jsonify(
+            {
+                "active_profile": profile
             }
         ),
         200

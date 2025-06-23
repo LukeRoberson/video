@@ -17,30 +17,55 @@ Select Profile
 {% endblock %}
 
 {% block content %}
+<!-- A card in the middle of the screen with profile options-->
 <div class="center-viewport">
     <div class="card shadow" style="width: 400px;">
         <div class="card-body">
             <h2 class="mb-4 text-center">Select Profile</h2>
             <div class="list-group mb-4">
+                
                 <!-- Guest profile -->
-                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
-                    <img src="/static/img/profiles/esther_1.png" alt="Guest" class="rounded-circle me-3" style="width:48px; height:48px;">
+                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-profile-id="guest">
+                    <img src="/static/img/profiles/guest.png" alt="Guest" class="rounded-circle me-3" style="width:48px; height:48px;">
                     <span>Guest</span>
                 </a>
+                
                 <!-- Existing profiles -->
                 {% for profile in profiles %}
-                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
+                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-profile-id="{{ profile.id }}">
                     <img src="/static/img/profiles/{{ profile.image }}" alt="{{ profile.name }}" class="rounded-circle me-3" style="width:48px; height:48px;">
                     <span>{{ profile.name }}</span>
                 </a>
                 {% endfor %}
+                
                 <!-- Add new profile -->
                 <a href="{{ url_for('create_profile') }}" class="list-group-item list-group-item-action d-flex align-items-center justify-content-center text-primary">
                     <i class="bi bi-plus-circle me-2" style="font-size: 1.5rem;"></i>
                     <span>Add New Profile</span>
                 </a>
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const profileId = this.getAttribute('data-profile-id');
+            fetch('/api/profile/set_active', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profile_id: profileId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

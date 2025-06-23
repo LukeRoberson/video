@@ -60,9 +60,9 @@
                 
                 <!-- Profile icon: Aligned right -->
                 <div class="d-flex align-items-center">
-                    <span class="me-2 text-white">Guest</span>
+                    <span id="profile-name" class="me-2 text-white">Guest</span>
                     <a href="{{ url_for('select_profile') }}" class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-decoration-none" style="width:32px; height:32px;">
-                        <i class="bi bi-person-fill text-white"></i>
+                        <img id="profile-img" src="/static/img/profiles/guest.png" alt="Profile" class="rounded-circle" style="width:28px; height:28px; object-fit:cover;">
                     </a>
                 </div>
             </div>
@@ -73,6 +73,16 @@
         </div>
 
         <!-- Bootstrap JS (with Popper) -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            fetch('/api/profile/get_active')
+            .then(res => res.json())
+            .then(profile => {
+                console.log('Active profile:', profile.active_profile.name);
+                document.getElementById('profile-name').textContent = profile.active_profile.name || 'Guest';
+                document.getElementById('profile-img').src = '/static/img/profiles/' + (profile.active_profile.image || 'guest.png');
+                document.getElementById('profile-img').alt = profile.active_profile.name || 'Guest';
+            });
+        </script>
     </body>
 </html>

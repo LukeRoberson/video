@@ -31,6 +31,9 @@ import random
 from flask import (
     Flask,
     Response,
+    session,
+    request,
+    jsonify,
     render_template,
     make_response
 )
@@ -63,12 +66,17 @@ logging.basicConfig(
 )
 
 
+# Create a secret key for the Flask application
+SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
+
+
 # Register the filter with Flask
 app = Flask(
     __name__,
     static_folder='static',
     template_folder='templates'
 )
+app.secret_key = SECRET_KEY
 app.register_blueprint(category_bp)
 app.register_blueprint(api_bp)
 app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
@@ -138,7 +146,10 @@ def create_profile() -> Response:
 
     profile_pics = [
         f for f in os.listdir(profile_dir)
-        if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+        if (
+            f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) and
+            f.lower() != 'guest.png'
+        )
     ]
     random.shuffle(profile_pics)
 
