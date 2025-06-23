@@ -50,6 +50,10 @@ from sql_db import (
     CharacterManager,
     ScriptureManager,
 )
+from local_db import (
+    LocalDbContext,
+    ProfileManager,
+)
 
 
 # Configure logging
@@ -70,6 +74,14 @@ app.register_blueprint(api_bp)
 app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
 
 
+# Define the static directory for profile images
+profile_dir = os.path.join(
+    app.static_folder,
+    'img',
+    'profiles'
+)
+
+
 @app.route(
     "/",
     methods=["GET"],
@@ -88,6 +100,31 @@ def home():
 
 
 @app.route(
+    "/select_profile",
+    methods=["GET"]
+)
+def select_profile() -> Response:
+    """
+    Render the profile selection page.
+
+    Returns:
+        Response: A rendered HTML page for selecting a profile.
+    """
+
+    # Get all profiles from the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile_list = profile_mgr.read()
+
+    return make_response(
+        render_template(
+            'select_profile.html',
+            profiles=profile_list,
+        )
+    )
+
+
+@app.route(
     "/create_profile",
     methods=["GET"]
 )
@@ -98,12 +135,6 @@ def create_profile() -> Response:
     Returns:
         Response: A rendered HTML page for creating a new profile.
     """
-
-    profile_dir = os.path.join(
-        app.static_folder,
-        'img',
-        'profiles'
-    )
 
     profile_pics = [
         f for f in os.listdir(profile_dir)

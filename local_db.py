@@ -91,8 +91,8 @@ class LocalDbContext:
                 CREATE TABLE IF NOT EXISTS profiles (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
+                    image TEXT NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
                 """
             )
@@ -137,12 +137,14 @@ class ProfileManager:
     def create(
         self,
         name: str,
+        image: str,
     ) -> int | None:
         """
         Adds a new profile to the database.
 
         Args:
             name (str): The name of the profile.
+            image (str): The image associated with the profile.
 
         Returns:
             int: The ID of the newly created profile.
@@ -152,8 +154,8 @@ class ProfileManager:
             with self.db.conn:
                 cursor = self.db.cursor
                 cursor.execute(
-                    "INSERT INTO profiles (name) VALUES (?)",
-                    (name,)
+                    "INSERT INTO profiles (name, image) VALUES (?, ?)",
+                    (name, image)
                 )
             profile_id = self.db.cursor.lastrowid
             self.db.conn.commit()

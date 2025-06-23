@@ -98,8 +98,7 @@ class DateTimeAttribute:
             if track.track_type == "General":
                 self.dateattribute = (
                     track.tagged_date or
-                    track.encoded_date or
-                    track.file_last_modification_date
+                    track.encoded_date
                 )
 
         if self.dateattribute:
@@ -175,11 +174,10 @@ if __name__ == "__main__":
             print("No videos found with missing date_added.")
             sys.exit(0)
 
-        random.shuffle(videos)
         print(f"Found {len(videos)} videos with no date_added.")
 
         # Grab a selection of 100 videos to process
-        for video in videos[:500]:
+        for video in videos:
             with DateTimeAttribute(video['url_240'], LOCAL_PATH) as dt:
                 dt.download_file()
                 dt.get_attribute()
@@ -193,6 +191,10 @@ if __name__ == "__main__":
 
             else:
                 print("No creation date found.")
+                id = video_mgr.update(
+                    video['id'],
+                    date_added="Unknown",
+                )
 
             if id:
                 print(f"Updated video ID {id} with date_added {dt.datestring}")

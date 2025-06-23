@@ -26,7 +26,9 @@ Custom Dependencies:
 from flask import (
     Blueprint,
     Response,
+    request,
     jsonify,
+    make_response,
 )
 import logging
 
@@ -34,6 +36,10 @@ import logging
 from sql_db import (
     DatabaseContext,
     VideoManager,
+)
+from local_db import (
+    LocalDbContext,
+    ProfileManager,
 )
 
 
@@ -123,3 +129,124 @@ def category_filter(
         video['duration'] = seconds_to_hhmmss(video['duration'])
 
     return jsonify(videos)
+
+
+@api_bp.route(
+    '/api/profile/create',
+    methods=['POST'],
+)
+def create_profile() -> Response:
+    """
+    Endpoint to create a new user profile.
+    This is a placeholder for future implementation.
+
+    Expected JSON Body:
+        {
+            "name": "<Profile Name>",
+            "image": "<image file name>",
+        }
+
+    Returns:
+        Response: A JSON response indicating that the profile creation
+            endpoint is not yet implemented.
+    """
+
+    # Get the JSON data and validate it
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for profile creation.")
+        return make_response(
+            jsonify(
+                {
+                    'error': 'No data provided'
+                }
+            ),
+            400
+        )
+
+    if 'name' not in data or 'image' not in data:
+        logging.error("Missing required fields for profile creation.")
+        return make_response(
+            jsonify(
+                {
+                    'error': 'Missing required fields: name and image'
+                }
+            ),
+            400
+        )
+
+    # Extract profile name and image from the data
+    profile_name = data['name']
+    profile_image = data['image']
+
+    # Create a new profile in the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        id = profile_mgr.create(
+            name=profile_name,
+            image=profile_image,
+        )
+
+    # Handle errors
+    if id is None:
+        logging.error("Failed to create profile in the local database.")
+        return make_response(
+            jsonify(
+                {
+                    'error': 'Failed to create profile'
+                }
+            ),
+            500
+        )
+
+    # Return the response with the created profile ID
+    return make_response(
+        jsonify(
+            {
+                'message': f'Created profile with ID: {id}',
+            }
+        ),
+        200
+    )
+
+
+@api_bp.route(
+    '/api/profile/read',
+    methods=['GET'],
+)
+def read_profile() -> Response:
+    """
+    Endpoint to read user profiles.
+
+    Returns:
+        Response: A JSON response indicating that the profile reading
+            endpoint is not yet implemented.
+    """
+
+    # Read a list of all profiles from the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile_list = profile_mgr.read()
+
+    # Handle errors
+    if profile_list is None:
+        logging.error("Failed to read profiles from the local database.")
+        return make_response(
+            jsonify(
+                {
+                    'error': 'Failed to read profiles'
+                }
+            ),
+            500
+        )
+
+    # Return the list of profiles
+    return make_response(
+        jsonify(
+            {
+                'message': f'Found {len(profile_list)} profiles',
+                'profiles': profile_list,
+            }
+        ),
+        200
+    )

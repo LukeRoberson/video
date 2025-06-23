@@ -21,7 +21,6 @@ Create Profile
             <form>
                 <!-- Name field -->
                 <div class="mb-4">
-                    <label for="name" class="form-label">Name</label>
                     <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="Enter name" required>
                 </div>
 
@@ -56,11 +55,16 @@ Create Profile
                 </div>
                 
                 <!-- Button to create the profile -->
-                <button type="submit" class="btn btn-primary w-100 btn-lg">Create Profile</button>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Create Profile</button>
+                    <button type="button" class="btn btn-danger w-100 btn-lg" onclick="window.location.href='/select_profile'">Cancel</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/profileCarousel.js') }}"></script>        
+<script src="{{ url_for('static', filename='js/profileCarousel.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profileMgmt.js') }}"></script>
+
 {% endblock %}
