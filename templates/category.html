@@ -1,9 +1,9 @@
 <!--
     ==========================================================================
-    Home Page
+    Categories Page Template
     --------------------------------------------------------------------------
     - Displays a list of video categories.
-    - Each category has a button to load videos dynamically.
+    - Each category loads videos dynamically.
     ==========================================================================
 -->
 
@@ -37,21 +37,26 @@ Home
           into each carousel as it is shown on the page.
         ==========================================================================
     -->
-    <div class="px-5 py-4">
-    {% for sub_cat in sub_categories %}
-        <div class="category-row" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
-            <!-- Category title -->
-            <div class="category-title">
-                {{ sub_cat.name }}
-            </div>
+    <div class="container justify-content-center my-5">
+        <div class="card shadow-lg bg-dark text-white" style="width: 100%; border-radius: 18px;">
+            <div class="px-5 py-5">
+            {% for sub_cat in sub_categories %}
+                <div class="category-row" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
+                    <!-- Category title -->
+                    <div class="category-title">
+                        <h3>{{ sub_cat.name }}</h3>
+                    </div>
 
-            <!-- Thumbnails wrapper with scroll arrows -->
-            <div class="thumbnails-wrapper" id="wrapper-{{ sub_cat.id }}">
-                <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ category.id }}', -1)"></button>
-                <div class="thumbnails"></div>
-                <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ category.id }}', 1)"></button>
+                    <!-- Thumbnails wrapper with scroll arrows -->
+                    <div class="thumbnails-wrapper" id="wrapper-{{ sub_cat.id }}">
+                        <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ category.id }}', -1)"></button>
+                        <div class="thumbnails"></div>
+                        <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ category.id }}', 1)"></button>
+                    </div>
+                </div>
+            </br></br>
+            {% endfor %}
             </div>
         </div>
-    {% endfor %}
     </div>
 {% endblock %}

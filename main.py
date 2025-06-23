@@ -87,18 +87,17 @@ app.jinja_env.filters['nl2br'] = nl2br
 
 # Define the static directory for profile images
 profile_dir = os.path.join(
-    app.static_folder,
+    'static',
     'img',
     'profiles'
 )
 
 # Define the static directory for banner images
 banner_dir = os.path.join(
-    app.static_folder,
+    'static',
     'img',
     'banner'
 )
-
 
 
 @app.route(

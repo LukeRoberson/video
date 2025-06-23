@@ -134,7 +134,7 @@ body {
 /* Individual thumbnail card - Add 50px to height for name */
 .thumbnail {
     width: 240px;
-    height: 185px;
+    height: 220px;
     background: #333;
     border-radius: 8px;
     display: flex;
@@ -142,7 +142,7 @@ body {
     align-items: center;
     justify-content: flex-start;
     color: #aaa;
-    font-size: 1em;
+    font-size: 0.95em;
     flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     cursor: pointer;
@@ -154,7 +154,7 @@ body {
 /* Thumbnail image (240x135) */
 .thumbnail img {
     width: 100%;
-    height: 135px;
+    height: 140px;
     object-fit: cover;
     border-radius: 8px 8px 0 0;
     display: block;
@@ -162,13 +162,16 @@ body {
 
 /* The video title, below the thumbnail image */
 .thumbnail-title {
-    margin-top: 0.5em;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
-    font-size: 1.0em;
+    margin: 0.5em;
+    font-size: 0.95em;
     text-align: center;
     color: #f0f0f0;
     word-break: break-word;
+    max-height: 4.0em;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* The video duration, shown on the thumbnail */
