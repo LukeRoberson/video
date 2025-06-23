@@ -31,9 +31,6 @@ import random
 from flask import (
     Flask,
     Response,
-    session,
-    request,
-    jsonify,
     render_template,
     make_response
 )
@@ -59,6 +56,11 @@ from local_db import (
 )
 
 
+# Define the custom filter
+def nl2br(value):
+    return value.replace('\n', '<br>')
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -80,6 +82,7 @@ app.secret_key = SECRET_KEY
 app.register_blueprint(category_bp)
 app.register_blueprint(api_bp)
 app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
+app.jinja_env.filters['nl2br'] = nl2br
 
 
 # Define the static directory for profile images
@@ -213,6 +216,7 @@ def video_details(
                 404
             )
         video = video_list[0]
+        print("Video Details:", video)
 
         # Fetch the category name for the video
         cat_list = cat_mgr.get_from_video(

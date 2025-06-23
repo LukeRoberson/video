@@ -1,86 +1,178 @@
 {% extends "base.html" %}
-{% block title %}{{ video.name }}{% endblock %}
+
+{% block head %}
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/videojs-resolution-switcher@0.4.2/lib/videojs-resolution-switcher.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>    
+    
+    <script src="https://cdn.jsdelivr.net/npm/videojs-resolution-switcher@0.4.2/lib/videojs-resolution-switcher.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />
+{% endblock %}
+
+{% block title %}
+    {{ video.name }}
+{% endblock %}
 
 {% block content %}
-<div class="video-details">
-    <h1>{{ video.name }}</h1>
-    <p><strong>Categories:</strong>
-    <ul></ul>
-        {% for category in categories %}
-            <li>{{ category.name }}</li>
-        {% endfor %}
-    </ul>
-         {{ video.category_name }}</p>
-    <p><strong>Description:</strong> {{ video.description }}</p>
-    <p><strong>Duration:</strong> {{ video.duration | seconds_to_hhmmss }}</p>
+<!-- Generate the video URLs based on resolution -->
+{% set resolutions = [
+    ('1080', video.url_1080),
+    ('720', video.url_720),
+    ('480', video.url_480),
+    ('360', video.url_360),
+    ('240', video.url_240)
+] %}
 
-    <!-- Get available resolutions -->
-    {% set resolutions = [
-        ('1080p', video.url_1080),
-        ('720p', video.url_720),
-        ('480p', video.url_480),
-        ('360p', video.url_360),
-        ('240p', video.url_240)
-    ] %}
-    {% set available = resolutions | selectattr(1) | list %}
+<!-- The card with the main content-->
+<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 1000px; border-radius: 18px;">
+        <div class="card-body">
 
-    <!-- Video player -->
-    <div class="video-player">
-        <video controls width="640">
-            {% for res, url in resolutions %}
-                {% if url %}
-                    <source src="{{ url }}" type="video/mp4" label="{{ res }}">
-                    {% set selected_res = res %}
-                {% endif %}
-            {% endfor %}
-            Your browser does not support the video tag.
-        </video>
-    </div>
+            <!-- Video player -->
+            <div class="video-player mb-4">
+                <video
+                    id="player"
+                    class="video-js vjs-theme-city vjs-big-play-centered vjs-16-9 vjs-fluid"
+                    controls
+                    preload="auto"
+                    poster="{{ video.thumbnail or '' }}"
+                    data-setup='{}'
+                    style="border-radius: 12px; background: #181a1b;"
+                >
+                    <!-- Set up the available resolutions -->
+                    {% for res, url in resolutions %}
+                        {% if url %}
+                            <source src="{{ url }}" type="video/mp4" label="{{ res }}p" res="{{ res|replace('p', '') }}">
+                        {% endif %}
+                    {% endfor %}
+                </video>
+            </div>
 
-    <!-- Extra video information -->
-    <p><strong>Tags:</strong> {{ tags | map(attribute='name') | join(", ") }}</p>
-    {% if available %}
-        <p><strong>Available in:</strong>
-            {% for res, url in resolutions if url %}
-            {{ res }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        </p>
-    {% endif %}
-    
-    <p><strong>Speakers:</strong></p>
-    <ul>
-        {% for speaker in speakers %}
-            <li>{{ speaker.name }}</li>
-        {% endfor %}
-    </ul>
+            <!-- Video details -->
+            <div class="px-4 pb-2 pt-2">
+                <h1>{{ video.name }}</h1>
+                <p>{{ video.duration | seconds_to_hhmmss }}</p>
+            </div>
 
-    <p><strong>Scriptures:</strong></p>
-    <ul>
-        {% for scripture in scriptures %}
-            <li>{{ scripture.book }} {{ scripture.chapter }}:{{ scripture.verse }}</li>
-        {% endfor %}
-    </ul>
+            <div class="px-4 pb-2 pt-2">
+                <p>
+                    {% for tag in tags %}
+                        <span class="badge badge-dark-grey me-1 my-1">{{ tag.name }}</span>
+                    {% endfor %}
+                </p>
+            </div>
 
-    <p><strong>Bible Characters:</strong></p>
-    <ul>
-        {% for character in characters %}
-            <li>{{ character.name }}</li>
-        {% endfor %}
-    </ul>
-
-
-
-    <!-- Similar videos section -->
-    <div class="similar-videos">
-        <h2>Similar Videos</h2>
-        <div class="thumbnails">
-            {% for similar in similar_videos %}
-                <div class="thumbnail">
-                    <img src="{{ similar.thumb }}" alt="{{ similar.title }}">
-                    <div class="thumbnail-title">{{ similar.title }}</div>
-                </div>
-            {% endfor %}
+            <div class="px-4 pb-2 pt-2">
+                <p>{{ video.description | nl2br | safe }}</p>
+            </div>
         </div>
     </div>
 </div>
+
+
+<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 1000px; border-radius: 18px;">
+        <div class="card-body">
+
+            <div class="container d-flex justify-content-center my-5">
+                <div class="row g-4 align-items-stretch">
+                    <!-- Categories -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark text-white border-light h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Categories</h5>
+                                <ul class="list-group list-group-flush">
+                                    {% for category in categories %}
+                                        <li class="list-group-item bg-dark text-white border-secondary">{{ category.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Speakers -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark text-white border-light h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Speakers</h5>
+                                <ul class="list-group list-group-flush">
+                                    {% for speaker in speakers %}
+                                        <li class="list-group-item bg-dark text-white border-secondary">{{ speaker.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Scriptures -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark text-white border-light h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Scriptures</h5>
+                                <ul class="list-group list-group-flush">
+                                    {% for scripture in scriptures %}
+                                        <li class="list-group-item bg-dark text-white border-secondary">{{ scripture.book }} {{ scripture.chapter }}:{{ scripture.verse }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Bible Characters -->
+                    <div class="col-md-6">
+                        <div class="card bg-dark text-white border-light h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Bible Characters</h5>
+                                <ul class="list-group list-group-flush">
+                                    {% for character in characters %}
+                                        <li class="list-group-item bg-dark text-white border-secondary">{{ character.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Similar videos section -->
+<div class="container d-flex justify-content-center my-5">
+    <div class="card shadow-lg bg-dark text-white" style="width: 1000px; border-radius: 18px;">
+        <div class="card-body">
+            <div class="similar-videos p-3">
+                <h2>Similar Videos</h2>
+                <div class="thumbnails d-flex justify-content-center flex-wrap">
+                    {% for similar in similar_videos %}
+                        <div class="thumbnail m-2">
+                            <img src="{{ similar.thumb }}" alt="{{ similar.title }}">
+                            <div class="thumbnail-title text-center">{{ similar.title }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var player = videojs('player');
+
+    // Initialize the resolution switcher
+    player.videoJsResolutionSwitcher({
+      default: 'high',
+    //   dynamicLabel: true,
+      ui: true,
+      callback: function (resolution) {
+        console.log("Resolution changed to:", resolution);
+      }
+    });
+
+    // Ensure the control bar is visible
+    player.controlBar.show();
+  });
+</script>
 {% endblock %}

@@ -323,3 +323,31 @@ body {
     background: #222;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+
+/* ===========================
+   VideoJS Custom Styles
+   ---------------------
+   Required to get the gear icon to appear correctly
+   =========================== */
+.vjs-resolution-button .vjs-menu-button .vjs-icon-placeholder::before {
+  font-family: VideoJS;
+  content: '\f110';
+  font-size: 1.8em;
+  line-height: 1.67;
+}
+
+.vjs-resolution-button-staticlabel {
+    display: none; /* Hides the incorrect icon */
+}
+
+
+/* ===========================
+   Badges (tags
+   =========================== */
+.badge-dark-grey {
+    background-color: #343a40; /* Dark grey */
+    color: #fff; /* White text */
+    border-radius: 0.25rem; /* Optional: Adjust border radius */
+    padding: 0.5em 0.75em; /* Optional: Adjust padding */
+}
