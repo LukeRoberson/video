@@ -8,19 +8,24 @@ All videos in this app are publically available on jw.org. This app does not dis
 
 # To Do
 
-Data:
-* How to get the added date?
-* Remove 'main area' from database
+Main Page:
+* Search bar
+* Continue watching
 
-UI:
+Video Page:
 * Select the desired resolution
-* Fun stats (number of videos, total duration, percentage you've seen)
-* Profiles (different watched status, resume time, etc)
+
+Profiles:
+* Mark videos as watched (manually)
+* Auto mark as watched if a video finishes
+* Mark as unwatched
+* Track resume time on video
+
+Data
+* Add fields for 'chapters' based on timestamp
 
 Backend:
 * Look at tags, etc, and select similar videos
-* Local DB to set watched/unwatched/resume status for a video
-* Create DB from master databases
 * Settings page: Reset local DB (watch status, etc)
 
 Search:
@@ -30,12 +35,11 @@ Search:
 * Show by bible character
 * Show by scripture
 
-TV (waaaay in the future):
-* QR code for the url
-
 Database:
 * Filter by date added
 * Filter by duration
 * Allow filtering by a list (eg, multiple categories, tags, etc)
     * Handle OR / AND for a list
 
+Other things:
+* Stats page (fun stats globally and for the user)

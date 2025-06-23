@@ -17,7 +17,7 @@ body {
 }
 
 .body-content {
-    padding: 2em;
+    padding: 0;
 }
 
 
@@ -271,3 +271,55 @@ body {
     background: #666;
 }
 
+
+/* Modern carousel controls: rounded rectangle, blue tint, subtle shadow, transparent */
+#bannerCarousel .carousel-control-prev,
+#bannerCarousel .carousel-control-next {
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+
+#bannerCarousel:hover .carousel-control-prev,
+#bannerCarousel:hover .carousel-control-next {
+    opacity: 1;
+}
+
+#bannerCarousel .carousel-control-prev-icon,
+#bannerCarousel .carousel-control-next-icon {
+    background-color: rgba(9, 3, 34, 0.35); /* DodgerBlue, semi-transparent */
+    border-radius: 8px;
+    padding: 36px 18px;
+    box-shadow: 0 2px 8px rgba(3, 26, 48, 0.15);
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+#bannerCarousel:hover .carousel-control-prev-icon,
+#bannerCarousel:hover .carousel-control-next-icon {
+    background-color: rgba(16, 54, 90, 0.7);
+    box-shadow: 0 4px 16px rgba(6, 30, 54, 0.25);
+}
+
+.carousel-caption {
+    background: rgba(0, 0, 0, 0.55); /* semi-transparent black */
+    border-radius: 0px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.carousel-caption h1, 
+.carousel-caption h5, 
+.carousel-caption p {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+.continue-thumb {
+    width: 330px;
+    height: 186px; /* 16:9 ratio, adjust as needed */
+    object-fit: cover;
+    border-radius: 12px;
+    background: #222;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}

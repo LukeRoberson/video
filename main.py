@@ -89,6 +89,14 @@ profile_dir = os.path.join(
     'profiles'
 )
 
+# Define the static directory for banner images
+banner_dir = os.path.join(
+    app.static_folder,
+    'img',
+    'banner'
+)
+
+
 
 @app.route(
     "/",
@@ -102,8 +110,17 @@ def home():
         Response: A rendered HTML 'welcome' page
     """
 
+    banner_pics = [
+        f for f in os.listdir(banner_dir)
+        if (
+            f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+        )
+    ]
+    print("Banner Pictures:", banner_pics)
+
     return render_template(
         "home.html",
+        banner_pics=banner_pics,
     )
 
 

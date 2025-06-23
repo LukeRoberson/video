@@ -37,6 +37,7 @@ Home
           into each carousel as it is shown on the page.
         ==========================================================================
     -->
+    <div class="px-5 py-4">
     {% for sub_cat in sub_categories %}
         <div class="category-row" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
             <!-- Category title -->
@@ -52,4 +53,5 @@ Home
             </div>
         </div>
     {% endfor %}
+    </div>
 {% endblock %}

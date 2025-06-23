@@ -1,23 +1,99 @@
-<!--
-    ==========================================================================
-    Home Page
-    --------------------------------------------------------------------------
-    - Displays a list of video categories.
-    - Each category has a button to load videos dynamically.
-    ==========================================================================
--->
-
 {% extends "base.html" %}
 {% block title %}
 Home
 {% endblock %}
 
 {% block content %}
-<div class="welcome-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
-    <h1 style="font-size: 3rem; margin-bottom: 1rem; color: #2c3e50;">Welcome to VideoHub</h1>
-    <p style="font-size: 1.25rem; color: #555; max-width: 500px; text-align: center;">
-        Discover, watch, and enjoy a world of amazing videos. Explore our collection and find your favorites!
-    </p>
+<div id="bannerCarousel" class="carousel slide"
+    data-bs-ride="carousel"
+    data-bs-interval="7000"
+    style="width: 100%; margin: 0 auto; margin-top: 0;">
+    <!-- Carousel indicators (shows the number of images and the active one) -->
+    <div class="carousel-indicators">
+        {% for pic in banner_pics %}
+        <button type="button"
+                data-bs-target="#bannerCarousel"
+                data-bs-slide-to="{{ loop.index0 }}"
+                {% if loop.first %}class="active"{% endif %}
+                aria-current="{% if loop.first %}true{% else %}false{% endif %}"
+                aria-label="Slide {{ loop.index }}">
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- The carousel itself -->
+    <div class="carousel-inner">
+        {% for pic in banner_pics %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <div style="position: relative; width: 100%; padding-top: 33.33%;">
+                <!-- The image -->
+                <img src="/static/img/banner/{{ pic }}" 
+                    class="d-block w-100"
+                    alt="Banner {{ loop.index }}"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                
+                <! -- Overlay title on the image -->
+                <div class="carousel-caption d-none d-md-block">
+                    <h1>Overlay Title {{ loop.index }}</h1>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Left button on the carousel -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <!-- Right button on the carousel -->
+    <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
 </div>
 
+
+<!-- The card with the main content-->
+<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 1400px; border-radius: 18px;">
+        <div class="card-body">
+
+            <!-- Search Bar -->
+            <form class="mb-4">
+                <input type="text" class="form-control form-control-lg" placeholder="Search videos...">
+            </form>
+
+            <!-- Continue Watching Carousel -->
+            <h4 class="mb-3">Continue Watching</h4>
+            <div id="continueWatchingCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <!-- Example carousel items (replace with dynamic content later) -->
+                    <div class="carousel-item active">
+                        <div class="d-flex gap-3 justify-content-center">
+                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/502015535/univ/art/502015535_univ_lss_lg.jpg" class="rounded continue-thumb" alt="Video 1">
+                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201801/art/jwb_univ_201801_lss_02_lg.jpg" class="rounded continue-thumb" alt="Video 2">
+                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/mwbv/univ/202203/art/mwbv_univ_202203_lss_03_lg.jpg" class="rounded continue-thumb" alt="Video 3">
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="d-flex gap-3 justify-content-center">
+                            <img src="https://cms-imgp.jw-cdn.org/img/p/1001071829/univ/art/1001071829_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 4">
+                            <img src="https://cms-imgp.jw-cdn.org/img/p/702012013/univ/art/702012013_univ_lsr_xl.jpg" class="rounded continue-thumb" alt="Video 5">
+                            <img src="https://cms-imgp.jw-cdn.org/img/p/1102016357/univ/art/1102016357_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 6">
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+
+            <!-- Add more carousel sections for other categories here -->
+
+        </div>
+    </div>
+</div>
 {% endblock %}
