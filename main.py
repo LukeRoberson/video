@@ -513,5 +513,24 @@ def scripture_details(
     )
 
 
+@app.route(
+    "/admin",
+    methods=["GET"],
+)
+def admin_dashboard() -> Response:
+    """
+    Render the admin dashboard.
+
+    Returns:
+        Response: A rendered HTML page with the admin dashboard.
+    """
+
+    return make_response(
+        render_template(
+            "admin.html"
+        )
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
