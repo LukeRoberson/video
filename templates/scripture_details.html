@@ -12,8 +12,43 @@
 <!-- The card with the main content-->
 <div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
     <div class="card shadow-lg bg-dark text-white" style="width: 80%; border-radius: 18px;">
+
+        <!-- Scripture details section -->
         <div class="card-body p-4">
-            <h1>Scripture: {{ scripture.name }}</h1>
+            <div class="row align-items-center mb-4">
+
+                <!-- Use a real profile pic if available, otherwise an empty pic -->
+                <div class="col-md-3 text-center">
+                    {% if scripture.profile_pic %}
+                        <img src="{{ scripture.profile_pic }}" alt="{{ scripture.name }} profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/scriptures/default-icon.png') }}" alt="Default profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                    {% endif %}
+                </div>
+
+                <!-- Scripture name and stats -->
+                <div class="col-md-9">
+                    <h1 class="mb-2">{{ scripture.name }}</h1>
+                    <br />
+
+                    <!-- Scripture text, if available -->
+                    {% if scripture.text %}
+                        <blockquote class="blockquote text-center">
+                            <p class="text-info">{{ scripture.text }}</p>
+                        </blockquote>
+                    {% else %}
+                        <blockquote class="blockquote text-center">
+                            <p class="text-info">Not available</p>
+                        </blockquote>
+                    {% endif %}
+                    <br />
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        <!-- Video Grid -->
+        <div class="card-body p-4">
             <p class="mb-3">{{ videos|length }} videos found.</p>
             <br />
 

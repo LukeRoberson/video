@@ -49,38 +49,9 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 
 ## Special Pages:
 
-**Characters**
-
-_Page is working, but just a grid of videos_
-
-* A page for each character
-* Access by clicking a character on a video page
-* Need a global way to access it as well
-* Include a profile style page, with some basic stats (a little like a linked in profile)
-    * Name
-    * Picture
-    * Timeframe
-* Will need to track these details in the database
-</br></br>
-
-**Speakers**
-
-_Page is working, but is just a grid of videos_
-
-* Dynamic pictures for speakers
-* Picture and name
-* No other details, don't want to focus on the speaker too much
-* A grid of their videos
-</br></br>
-
-**Scriptures**
-
-_Page is working, but is just a grid of videos_
-
-* Dynamic page, like the rest
-* Quote the scripture at the top
-* Grid of videos below
-* Will need to update DB with scripture
+**Dynamic Pages**
+* Pages for characters, tags, speakers, scriptures
+* To browse through these items
 </br></br>
 
 
@@ -140,6 +111,7 @@ _Page has been created, but there's no functionality there yet_
 **Bible Character table**
 * Add a profile pic
 * Add a date range
+* Description field
 </br></br>
 
 **Scripture table**
@@ -149,6 +121,10 @@ _Page has been created, but there's no functionality there yet_
 
 **Speaker Table**
 * Add a field for a picture
+</br></br>
+
+**Data**
+* Add URLs for videos
 </br></br>
 
 
