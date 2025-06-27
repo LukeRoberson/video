@@ -471,13 +471,43 @@ def scripture_details(
         If the scripture is not found, a 404 error is returned.
     """
 
-    videos = []
-    scripture_name = []
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+        video_mgr = VideoManager(db)
+
+        # Get scripture details
+        scripture = scripture_mgr.get(id=scripture_id)
+        if scripture:
+            scripture = scripture[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Scripture not found"
+                ),
+                404
+            )
+
+        # Fetch videos associated with the scripture
+        videos = video_mgr.get_filter(
+            scripture_id=scripture_id
+        )
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this scripture"
+                ),
+                404
+            )
+
+        # Build a name for the scripture
+        scripture['name'] = f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
 
     return make_response(
         render_template(
             "scripture_details.html",
-            scripture=scripture_name,
+            scripture=scripture,
             videos=videos,
         )
     )

@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Scripture Details</title>
-</head>
-<body>
-    <h1>Scripture: {{ scripture }}</h1>
-    <h2>Videos</h2>
-    <ul>
-        {% for video in videos %}
-            <li>{{ video.name }}</li>
-        {% endfor %}
-    </ul>
-</body>
+    <head>
+        <title>Scripture Details</title>
+    </head>
+    <body>
+        <h1>Scripture: {{ scripture.name }}</h1>
+        <p>ID: {{ scripture.id }}</p>
+        <p>Book: {{ scripture.book }}</p>
+        <p>Chapter: {{ scripture.chapter }}</p>
+        <p>Verse: {{ scripture.verse }}</p>
+        <h2>Videos</h2>
+        <ul>
+            {% for video in videos %}
+                <li>{{ video.name }}</li>
+            {% endfor %}
+        </ul>
+    </body>
 </html>

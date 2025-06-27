@@ -57,7 +57,7 @@
             <div class="px-4 pb-2 pt-2">
                 <p>
                     {% for tag in tags %}
-                        <span class="badge badge-dark-grey me-1 my-1">{{ tag.name }}</span>
+                        <a href="/tag/{{ tag.id }}" class="badge badge-dark-grey me-1 my-1">{{ tag.name }}</a>
                     {% endfor %}
                 </p>
             </div>
@@ -97,7 +97,11 @@
                                 <h5 class="card-title">Speakers</h5>
                                 <ul class="list-group list-group-flush">
                                     {% for speaker in speakers %}
-                                        <li class="list-group-item bg-dark text-white border-secondary">{{ speaker.name }}</li>
+                                        <li class="list-group-item bg-dark text-white border-secondary">
+                                            <a href="/speaker/{{ speaker.id }}" class="text-white text-decoration-none hover-underline" style="transition: color 0.2s;">
+                                                {{ speaker.name }}
+                                            </a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -111,7 +115,11 @@
                                 <h5 class="card-title">Scriptures</h5>
                                 <ul class="list-group list-group-flush">
                                     {% for scripture in scriptures %}
-                                        <li class="list-group-item bg-dark text-white border-secondary">{{ scripture.book }} {{ scripture.chapter }}:{{ scripture.verse }}</li>
+                                        <li class="list-group-item bg-dark text-white border-secondary">
+                                            <a href="/scripture/{{ scripture.id }}" class="text-white text-decoration-none hover-underline" style="transition: color 0.2s;">
+                                                {{ scripture.book }} {{ scripture.chapter }}:{{ scripture.verse }}
+                                            </a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -125,7 +133,11 @@
                                 <h5 class="card-title">Bible Characters</h5>
                                 <ul class="list-group list-group-flush">
                                     {% for character in characters %}
-                                        <li class="list-group-item bg-dark text-white border-secondary">{{ character.name }}</li>
+                                        <li class="list-group-item bg-dark text-white border-secondary">
+                                            <a href="/character/{{ character.id }}" class="text-white text-decoration-none hover-underline" style="transition: color 0.2s;">
+                                                {{ character.name }}
+                                            </a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
