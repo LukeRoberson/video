@@ -473,7 +473,7 @@ class VideoManager:
             params.append(speaker_id)
 
         if character_id is not None:
-            joins.append("JOIN videos_characters vch ON v.id = vch.video_id")
+            joins.append("JOIN videos_bible_characters vch ON v.id = vch.video_id")
             wheres.append("vch.character_id = ?")
             params.append(character_id)
 

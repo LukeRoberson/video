@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tag Details</title>
+</head>
+<body>
+    <h1>Tag: {{ tag.name }}</h1>
+    <p>ID: {{ tag.id }}</p>
+    <h2>Videos</h2>
+    <ul>
+        {% for video in videos %}
+            <li>{{ video.name }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scripture Details</title>
+</head>
+<body>
+    <h1>Scripture: {{ scripture }}</h1>
+    <h2>Videos</h2>
+    <ul>
+        {% for video in videos %}
+            <li>{{ video.name }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

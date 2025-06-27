@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speaker Details</title>
+</head>
+<body>
+    <h1>Speaker: {{ speaker.name }}</h1>
+    <p>ID: {{ speaker.id }}</p>
+    <h2>Videos</h2>
+    <ul>
+        {% for video in videos %}
+            <li>{{ video.name }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

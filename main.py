@@ -280,5 +280,208 @@ def video_details(
     )
 
 
+@app.route(
+    "/tag/<int:tag_id>",
+    methods=["GET"],
+)
+def tag_details(
+    tag_id: int,
+) -> Response:
+    """
+    Render the details of a specific tag and the videos associated with it.
+
+    Args:
+        tag_id (int): The ID of the tag to fetch details for.
+
+    Returns:
+        Response: A rendered HTML page with tag details and associated videos.
+        If the tag is not found, a 404 error is returned.
+    """
+
+    with DatabaseContext() as db:
+        tag_mgr = TagManager(db)
+        video_mgr = VideoManager(db)
+
+        # Get the tag name from the tag ID
+        tag = tag_mgr.get(id=tag_id)
+        if tag:
+            tag = tag[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Tag not found"
+                ),
+                404
+            )
+
+        # Fetch videos associated with the tag
+        videos = video_mgr.get_filter(
+            tag_id=tag_id
+        )
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this tag"
+                ),
+                404
+            )
+
+    return make_response(
+        render_template(
+            "tag_details.html",
+            tag=tag,
+            videos=videos,
+        )
+    )
+
+
+@app.route(
+    "/speaker/<int:speaker_id>",
+    methods=["GET"],
+)
+def speaker_details(
+    speaker_id: int,
+) -> Response:
+    """
+    Render the details of a specific speaker and the videos associated with them.
+
+    Args:
+        speaker_id (int): The ID of the speaker to fetch details for.
+
+    Returns:
+        Response: A rendered HTML page with speaker details and associated videos.
+        If the speaker is not found, a 404 error is returned.
+    """
+
+    with DatabaseContext() as db:
+        speaker_mgr = SpeakerManager(db)
+        video_mgr = VideoManager(db)
+
+        # Get speaker details
+        speaker = speaker_mgr.get(id=speaker_id)
+        if speaker:
+            speaker = speaker[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Speaker not found"
+                ),
+                404
+            )
+
+        # Fetch videos associated with the speaker
+        videos = video_mgr.get_filter(
+            speaker_id=speaker_id
+        )
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this speaker"
+                ),
+                404
+            )
+
+    return make_response(
+        render_template(
+            "speaker_details.html",
+            speaker=speaker,
+            videos=videos,
+        )
+    )
+
+
+@app.route(
+    "/character/<int:character_id>",
+    methods=["GET"],
+)
+def character_details(
+    character_id: int,
+) -> Response:
+    """
+    Render the details of a specific character and the videos associated with them.
+
+    Args:
+        character_id (int): The ID of the character to fetch details for.
+
+    Returns:
+        Response: A rendered HTML page with character details and associated videos.
+        If the character is not found, a 404 error is returned.
+    """
+
+    videos = []
+
+    with DatabaseContext() as db:
+        character_mgr = CharacterManager(db)
+        video_mgr = VideoManager(db)
+
+        # Get character details
+        character = character_mgr.get(id=character_id)
+        if character:
+            character = character[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Character not found"
+                ),
+                404
+            )
+        
+        # Fetch videos associated with the character
+        videos = video_mgr.get_filter(
+            character_id=character_id
+        )
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this character"
+                ),
+                404
+            )
+
+    return make_response(
+        render_template(
+            "character_details.html",
+            character=character,
+            videos=videos,
+        )
+    )
+
+
+@app.route(
+    "/scripture/<int:scripture_id>",
+    methods=["GET"],
+)
+def scripture_details(
+    scripture_id: int,
+) -> Response:
+    """
+    Render the details of a specific scripture and the videos associated with them.
+
+    Args:
+        scripture_id (int): The ID of the scriptire to fetch details for.
+
+    Returns:
+        Response: A rendered HTML page with scripture details and associated videos.
+        If the scripture is not found, a 404 error is returned.
+    """
+
+    videos = []
+    scripture_name = []
+
+    return make_response(
+        render_template(
+            "scripture_details.html",
+            scripture=scripture_name,
+            videos=videos,
+        )
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
