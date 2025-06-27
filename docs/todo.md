@@ -49,12 +49,10 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 
 ## Special Pages:
 
-**Tags**
-* Clicking a tag on a video page loads a page with videos with that tag
-* Just a big grid, sorted by date, should be fine
-</br></br>
-
 **Characters**
+
+_Page is working, but just a grid of videos_
+
 * A page for each character
 * Access by clicking a character on a video page
 * Need a global way to access it as well
@@ -66,6 +64,9 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 </br></br>
 
 **Speakers**
+
+_Page is working, but is just a grid of videos_
+
 * Dynamic pictures for speakers
 * Picture and name
 * No other details, don't want to focus on the speaker too much
@@ -73,6 +74,9 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 </br></br>
 
 **Scriptures**
+
+_Page is working, but is just a grid of videos_
+
 * Dynamic page, like the rest
 * Quote the scripture at the top
 * Grid of videos below
@@ -95,6 +99,9 @@ A settings page
 </br></br>
 
 Admin Tools
+
+_Page has been created, but there's no functionality there yet_
+
 * Meant for me only, so find a way to hide it from regular users; Special profile name maybe?
 * Form to add metadata to existing videos
 * Form to add a new video
