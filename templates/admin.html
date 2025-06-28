@@ -35,7 +35,7 @@ Admin
             <h3>Resolve names to IDs</h3>
 
             <!-- Videos -->
-            <form class="d-flex p-4 align-items-end" style="gap: 16px;">
+            <form class="d-flex p-4 align-items-end" style="gap: 16px;" id="resolveVideoForm">
                 <div class="form-group mb-0 col">
                     <label for="videoName" class="sr-only">Video Name</label>
                     <input type="text" class="form-control" id="videoName" placeholder="Enter video name">
@@ -45,14 +45,14 @@ Admin
                     <input type="text" class="form-control" id="videoId" placeholder="ID will appear here" readonly>
                 </div>
                 <div class="mb-0 align-self-end col-auto">
-                    <button type="button" class="btn btn-success" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-success" style="border-radius: 8px;" id="resolveVideoBtn">
                         Resolve
                     </button>
                 </div>
             </form>
 
             <!-- Tags -->
-            <form class="d-flex p-4 align-items-end" style="gap: 16px;">
+            <form class="d-flex p-4 align-items-end" style="gap: 16px;" id="resolveTagForm">
                 <div class="form-group mb-0 col">
                     <label for="tagName" class="sr-only">Tag Name</label>
                     <input type="text" class="form-control" id="tagName" placeholder="Enter tag name">
@@ -62,14 +62,14 @@ Admin
                     <input type="text" class="form-control" id="tagId" placeholder="ID will appear here" readonly>
                 </div>
                 <div class="mb-0 align-self-end">
-                    <button type="button" class="btn btn-success" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-success" style="border-radius: 8px;" id="resolveTagBtn">
                         Resolve
                     </button>
                 </div>
             </form>
 
             <!-- Speakers -->
-            <form class="d-flex p-4 align-items-end" style="gap: 16px;">
+            <form class="d-flex p-4 align-items-end" style="gap: 16px;" id="resolveSpeakerForm">
                 <div class="form-group mb-0 col">
                     <label for="speakerName" class="sr-only">Speaker Name</label>
                     <input type="text" class="form-control" id="speakerName" placeholder="Enter speaker name">
@@ -79,14 +79,14 @@ Admin
                     <input type="text" class="form-control" id="speakerId" placeholder="ID will appear here" readonly>
                 </div>
                 <div class="mb-0 align-self-end">
-                    <button type="button" class="btn btn-success" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-success" style="border-radius: 8px;" id="resolveSpeakerBtn">
                         Resolve
                     </button>
                 </div>
             </form>
 
             <!-- Characters -->
-            <form class="d-flex p-4 align-items-end" style="gap: 16px;">
+            <form class="d-flex p-4 align-items-end" style="gap: 16px;" id="resolveCharacterForm">
                 <div class="form-group mb-0 col">
                     <label for="characterName" class="sr-only">Character Name</label>
                     <input type="text" class="form-control" id="characterName" placeholder="Enter character name">
@@ -96,7 +96,7 @@ Admin
                     <input type="text" class="form-control" id="characterId" placeholder="ID will appear here" readonly>
                 </div>
                 <div class="mb-0 align-self-end">
-                    <button type="button" class="btn btn-success" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-success" style="border-radius: 8px;" id="resolveCharacterBtn">
                         Resolve
                     </button>
                 </div>
@@ -110,11 +110,17 @@ Admin
     <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
         <div class="card-body p-4">
             <h3>Add Metadata to Videos</h3>
-            <form class="p-4" style="margin: auto;">
+            <form class="p-4" style="margin: auto;" id="addMetadataForm">
                 <!-- Video ID -->
                 <div class="form-group mb-3">
                     <label for="videoId" class="form-label">Video ID</label>
                     <input type="text" class="form-control" id="videoId" placeholder="Enter video ID">
+                </div>
+
+                <!-- URL -->
+                <div class="form-group mb-3">
+                    <label for="url" class="form-label">URL</label>
+                    <input type="text" class="form-control" id="url" placeholder="Enter video URL">
                 </div>
 
                 <!-- Tags -->
@@ -153,4 +159,85 @@ Admin
     </div>
 </div>
 
+<script>
+document.getElementById('addMetadataForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const video_id = document.getElementById('videoId').value;
+    const url = document.getElementById('url').value;
+    const tag_id = document.getElementById('tagId').value;
+    const speaker_id = document.getElementById('speakerId').value;
+    const character_id = document.getElementById('characterId').value;
+    const scripture_id = document.getElementById('scriptureId').value;
+
+    const payload = {
+        video_id: video_id,
+        url: url,
+        tag_id: tag_id,
+        speaker_id: speaker_id,
+        character_id: character_id,
+        scripture_id: scripture_id
+    };
+
+    try {
+        const response = await fetch('/api/video/metadata', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            alert('Metadata added successfully!');
+        } else {
+            alert('Failed to add metadata: ' + (result.error || 'Unknown error'));
+        }
+    } catch (err) {
+        alert('Error: ' + err);
+    }
+});
+
+async function resolveNameToId(type, name, idInputId) {
+    if (!name) {
+        document.getElementById(idInputId).value = '';
+        return;
+    }
+    let param = '';
+    if (type === 'video') param = 'video_name';
+    if (type === 'tag') param = 'tag_name';
+    if (type === 'speaker') param = 'speaker_name';
+    if (type === 'character') param = 'character_name';
+    const url = `/api/video/metadata?${param}=${encodeURIComponent(name)}`;
+    try {
+        const response = await fetch(url);
+        const result = await response.json();
+        let idValue = '';
+        if (type === 'video') idValue = result.video_id ?? '';
+        if (type === 'tag') idValue = result.tag_id ?? '';
+        if (type === 'speaker') idValue = result.speaker_id ?? '';
+        if (type === 'character') idValue = result.character_id ?? '';
+        document.getElementById(idInputId).value = idValue;
+    } catch (err) {
+        document.getElementById(idInputId).value = '';
+        alert('Error resolving ID: ' + err);
+    }
+}
+
+document.getElementById('resolveVideoBtn').addEventListener('click', function() {
+    const name = document.getElementById('videoName').value;
+    resolveNameToId('video', name, 'videoId');
+});
+document.getElementById('resolveTagBtn').addEventListener('click', function() {
+    const name = document.getElementById('tagName').value;
+    resolveNameToId('tag', name, 'tagId');
+});
+document.getElementById('resolveSpeakerBtn').addEventListener('click', function() {
+    const name = document.getElementById('speakerName').value;
+    resolveNameToId('speaker', name, 'speakerId');
+});
+document.getElementById('resolveCharacterBtn').addEventListener('click', function() {
+    const name = document.getElementById('characterName').value;
+    resolveNameToId('character', name, 'characterId');
+});
+</script>
 {% endblock %}

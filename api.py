@@ -39,6 +39,9 @@ import logging
 from sql_db import (
     DatabaseContext,
     VideoManager,
+    TagManager,
+    SpeakerManager,
+    CharacterManager,
 )
 from local_db import (
     LocalDbContext,
@@ -317,3 +320,195 @@ def get_active_profile() -> Response:
         ),
         200
     )
+
+
+@api_bp.route(
+    "/api/video/metadata",
+    methods=["GET", "POST"]
+)
+def add_video_metadata() -> Response:
+    """
+    Add metadata to a video, or resolves existing metadata.
+
+    GET:
+        Map video names to IDs
+        Map Tags to IDs
+        Map Speakers to IDs
+        Map Characters to IDs
+        Map Scriptures to IDs
+
+    POST:
+        Add metadata to a video.
+        Expects JSON:
+            {
+                "video_id": <int>,
+                "url": <string>,
+                "tag_id": <int>,
+                "speaker_id": <int>,
+                "character_id": <int>,
+                "scripture_id": <int>
+            }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+        Includes metadata for a GET
+    """
+
+    if request.method == "GET":
+        video_id = None
+        tag_id = None
+        speaker_id = None
+        character_id = None
+
+        # Get the query parameters
+        video_name = request.args.get("video_name", None)
+        tag_name = request.args.get("tag_name", None)
+        speaker_name = request.args.get("speaker_name", None)
+        character_name = request.args.get("character_name", None)
+
+        with DatabaseContext() as db:
+            if video_name:
+                video_mgr = VideoManager(db)
+                video_id = video_mgr.name_to_id(
+                    name=video_name,
+                )
+
+            if tag_name:
+                tag_mgr = TagManager(db)
+                tag_id = tag_mgr.name_to_id(
+                    name=tag_name,
+                )
+
+            if speaker_name:
+                speaker_mgr = SpeakerManager(db)
+                speaker_id = speaker_mgr.name_to_id(
+                    name=speaker_name,
+                )
+
+            if character_name:
+                character_mgr = CharacterManager(db)
+                character_id = character_mgr.name_to_id(
+                    name=character_name,
+                )
+
+        return make_response(
+            jsonify(
+                {
+                    "video_id": video_id,
+                    "tag_id": tag_id,
+                    "speaker_id": speaker_id,
+                    "character_id": character_id
+                }
+            ),
+            200
+        )
+
+    elif request.method == "POST":
+        # Get the JSON data from the request
+        data = request.get_json()
+        if not data:
+            logging.error("No data provided for adding video metadata.")
+            return make_response(
+                jsonify(
+                    {
+                        "error": "No data provided"
+                    }
+                ),
+                400
+            )
+
+        # Validate and extract the data
+        video_id = data.get("video_id", None)
+        url = data.get("url", None)
+        tag_id = data.get("tag_id", None)
+        speaker_id = data.get("speaker_id", None)
+        character_id = data.get("character_id", None)
+        scripture_id = data.get("scripture_id", None)
+
+        if video_id is None:
+            logging.error("Missing 'video_id' in request data.")
+            return make_response(
+                jsonify(
+                    {
+                        "error": "Missing 'video_id' in request data"
+                    }
+                ),
+                400
+            )
+
+        # Ensure at least one metadata field is provided
+        if all(
+            field is None
+            for field in [url, tag_id, speaker_id, character_id, scripture_id]
+        ):
+            logging.error("No metadata fields provided for video.")
+            return make_response(
+                jsonify(
+                    {
+                        "error": "At least one metadata field must be provided"
+                    }
+                ),
+                400
+            )
+
+        # Convert tag_id to a list, splitting by commas if necessary
+        if tag_id is not None:
+            if isinstance(tag_id, str):
+                tag_id = (
+                    [t.strip() for t in tag_id.split(",")]
+                    if "," in tag_id
+                    else [tag_id.strip()]
+                )
+            else:
+                tag_id = [tag_id]
+
+        # Convert character_id to a list, splitting by commas if necessary
+        if character_id is not None:
+            if isinstance(character_id, str):
+                character_id = (
+                    [c.strip() for c in character_id.split(",")]
+                    if "," in character_id
+                    else [character_id.strip()]
+                )
+            else:
+                character_id = [character_id]
+
+        # Convert speaker_id to a list, splitting by commas if necessary
+        if speaker_id is not None:
+            if isinstance(speaker_id, str):
+                speaker_id = (
+                    [s.strip() for s in speaker_id.split(",")]
+                    if "," in speaker_id
+                    else [speaker_id.strip()]
+                )
+            else:
+                speaker_id = [speaker_id]
+
+        logging.info(
+            f"Adding metadata for video ID: {video_id}, "
+            f"URL: {url}, "
+            f"Tag IDs: {tag_id}, "
+            f"Speaker IDs: {speaker_id}, "
+            f"Character IDs: {character_id}, "
+        )
+
+        # Return a success response
+        return make_response(
+            jsonify(
+                {
+                    "success": True
+                }
+            ),
+            200
+        )
+
+    else:
+        logging.error("Unsupported request method.")
+        return make_response(
+            jsonify(
+                {
+                    "error": "Unsupported request method"
+                }
+            ),
+            405
+        )

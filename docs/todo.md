@@ -71,7 +71,10 @@ A settings page
 
 Admin Tools
 
-_Page has been created, but there's no functionality there yet_
+_Page has been created_
+_No scraping functionality_
+_name to ID is done_
+_Add metadata is partly done, need to finish backend_
 
 * Meant for me only, so find a way to hide it from regular users; Special profile name maybe?
 * Form to add metadata to existing videos
