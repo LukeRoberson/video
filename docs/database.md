@@ -7,17 +7,23 @@
 **Purpose:**
 _Stores Bible characters_
 
-| Field Name | Datatype | Constraints               | Description                    |
-| ---------- | -------- | ------------------------- | ------------------------------ |
-| id         | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
-| name       | TEXT     | NOT NULL, UNIQUE          | Name of the character          |
+| Field Name  | Datatype | Constraints               | Description                    |
+| ----------- | -------- | ------------------------- | ------------------------------ |
+| id          | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
+| name        | TEXT     | NOT NULL, UNIQUE          | Name of the character          |
+| profile_pic | TEXT     |                           | Pic of the character           |
+| date_range  | TEXT     |                           | Date range of theie life       |
+| description | TEXT     |                           | A brief description of them    |
 
 
 **Schema:**
 ```sql
 CREATE TABLE bible_characters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    profile_pic TEXT,
+    date_range TEXT,
+    description TEXT
 );
 ```
 
@@ -52,7 +58,8 @@ _Stores scriptures (book, chapter, verse) that appear in videos. The combination
 | id         | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
 | book       | TEXT     | NOT NULL                  | Name of the book               | 
 | chapter    | INTEGER  | NOT NULL                  | Chapter number                 | 
-| verse      | INTEGER  | NOT NULL                  | Verse number                   | 
+| verse      | INTEGER  | NOT NULL                  | Verse number                   |
+| verse_text | TEXT     |                           | The verse text                 |
 
 
 **Schema:**
@@ -62,6 +69,7 @@ CREATE TABLE scriptures (
     book TEXT NOT NULL,
     chapter INTEGER NOT NULL,
     verse INTEGER NOT NULL,
+    verse_text TEXT,
     UNIQUE(book, chapter, verse)
 );
 ```
@@ -72,17 +80,19 @@ CREATE TABLE scriptures (
 **Purpose:**
 _Stores the names of people who have appeared in videos_
 
-| Field Name | Datatype | Constraints               | Description                    |
-| ---------- | -------- | ------------------------- | ------------------------------ |
-| id         | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
-| name       | TEXT     | NOT NULL, UNIQUE          | Person's name                  | 
+| Field Name  | Datatype | Constraints               | Description                    |
+| ----------- | -------- | ------------------------- | ------------------------------ |
+| id          | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
+| name        | TEXT     | NOT NULL, UNIQUE          | Person's name                  |
+| profile_pic | TEXT     |                           | Picture of the speaker         |
 
 
 **Schema:**
 ```sql
 CREATE TABLE speakers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    profile_pic TEXT
 );
 ```
 

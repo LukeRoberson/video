@@ -104,24 +104,11 @@ _Page has been created, but there's no functionality there yet_
 * List of tags (AND/OR)
 </br></br>
 
-**Bible Character table**
-* Add a profile pic
-* Add a date range
-* Description field
-</br></br>
-
-**Scripture table**
-* Add a field to include the text
-* Unless this can be retrieved straight from the website?
-</br></br>
-
-**Speaker Table**
-* Add a field for a picture
-</br></br>
-
 **Data**
 * Add URLs for videos
 * Get date stamps for remaining videos
+* Get profile pics for speakers
+* Get profile pics for characters
 </br></br>
 
 
