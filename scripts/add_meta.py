@@ -11,7 +11,6 @@ sys.path.append(parent_folder)
 from sql_db import (  # noqa: E402
     DatabaseContext,
     VideoManager,
-    CategoryManager,
     TagManager,
     SpeakerManager,
     CharacterManager,
@@ -130,11 +129,14 @@ for item in meta_list:
             scripture_mgr = ScriptureManager(db)
 
             scripture = item['scripture'].strip()
-            match = re.match(r'(?P<book>(?:\d\s*)?\w[\w\s]*?)\s+(?P<chapter>\d+):(?P<verse>\d+)', scripture)
+            match = re.match(
+                r'(?P<book>(?:\d\s*)?\w[\w\s]*?)\s+(?P<chapter>\d+):(?P<verse>\d+)',
+                scripture
+            )
             if match:
                 book = match.group('book').strip()
-                chapter = match.group('chapter')
-                verse = match.group('verse')
+                chapter = int(match.group('chapter'))
+                verse = int(match.group('verse'))
             else:
                 book = chapter = verse = None
 
@@ -154,7 +156,8 @@ for item in meta_list:
                 if scripture_id is None:
                     print(
                         Fore.RED,
-                        f"Scripture reference '{scripture}' could not be added",
+                        f"Scripture reference '{scripture}' "
+                        f"could not be added",
                         Style.RESET_ALL
                     )
                 else:

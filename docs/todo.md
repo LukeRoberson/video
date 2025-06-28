@@ -1,9 +1,14 @@
 # UI
 
-## Main Page:
+## Errors
 
-Create a favicon
+* profileMgmt.js is throwing an error in Chrome console
+* Selecting a profile does nothing
+* Trying to create a new profile throws a 'method not supported' error
 </br></br>
+
+
+## Main Page:
 
 Current month's broadcasting video
 * Before 'continue watching'
@@ -51,7 +56,8 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 
 **Dynamic Pages**
 * Base pages for characters, tags, speakers, scriptures
-* To browse through these items
+    * To browse through these items
+* Video details: Make categories clickable
 </br></br>
 
 
@@ -71,15 +77,8 @@ A settings page
 
 Admin Tools
 
-_Page has been created_
-_No scraping functionality_
-_name to ID is done_
-_Add metadata is partly done, need to finish backend_
-
-* Meant for me only, so find a way to hide it from regular users; Special profile name maybe?
-* Form to add metadata to existing videos
-* Form to add a new video
 * Button to run a scrape, to check for new videos and categories from the website
+* Need a spinning wheel to show it's still working when adding lots of metadata
 </br></br>
 
 

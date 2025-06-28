@@ -17,6 +17,7 @@ Routes:
 Dependencies:
     - Flask: For creating the API endpoints.
     - logging: For logging API requests and responses.
+    - re: For regular expression operations.
 
 Custom Dependencies:
     - DatabaseContext: Context manager for database connections.
@@ -34,6 +35,8 @@ from flask import (
     make_response,
 )
 import logging
+import re
+from datetime import datetime
 
 # Custom imports
 from sql_db import (
@@ -42,6 +45,7 @@ from sql_db import (
     TagManager,
     SpeakerManager,
     CharacterManager,
+    ScriptureManager,
 )
 from local_db import (
     LocalDbContext,
@@ -346,7 +350,8 @@ def add_video_metadata() -> Response:
                 "tag_id": <int>,
                 "speaker_id": <int>,
                 "character_id": <int>,
-                "scripture_id": <int>
+                "scripture_id": <int>,
+                "date_added": <string>,
             }
 
     Returns:
@@ -420,20 +425,30 @@ def add_video_metadata() -> Response:
         print(f"Received data: {data}")
 
         # Validate and extract the data
-        video_id = data.get("video_id", None)
+        video_name = data.get("video_name", None)
         description = data.get("description", None)
         url = data.get("url", None)
-        tag_id = data.get("tag_id", None)
-        speaker_id = data.get("speaker_id", None)
-        character_id = data.get("character_id", None)
-        scripture_id = data.get("scripture_id", None)
+        tag_name = data.get("tag_name", None)
+        speaker_name = data.get("speaker_name", None)
+        character_name = data.get("character_name", None)
+        scripture_name = data.get("scripture_name", None)
+        date_added = data.get("date_added", None)
 
-        if video_id is None:
-            logging.error("Missing 'video_id' in request data.")
+        # If they're empty strings, convert to None
+        description = None if description == '' else description
+        url = None if url == '' else url
+        tag_name = None if tag_name == '' else tag_name
+        speaker_name = None if speaker_name == '' else speaker_name
+        character_name = None if character_name == '' else character_name
+        scripture_name = None if scripture_name == '' else scripture_name
+
+        # Ensure video_name is provided
+        if video_name is None:
+            logging.error("Missing 'video_name' in request data.")
             return make_response(
                 jsonify(
                     {
-                        "error": "Missing 'video_id' in request data"
+                        "error": "Missing 'video_name' in request data"
                     }
                 ),
                 400
@@ -442,7 +457,10 @@ def add_video_metadata() -> Response:
         # Ensure at least one metadata field is provided
         if all(
             field is None
-            for field in [url, tag_id, speaker_id, character_id, scripture_id]
+            for field in [
+                description, url, tag_name, speaker_name,
+                character_name, scripture_name, date_added
+            ]
         ):
             logging.error("No metadata fields provided for video.")
             return make_response(
@@ -454,47 +472,424 @@ def add_video_metadata() -> Response:
                 400
             )
 
-        # Convert tag_id to a list, splitting by commas if necessary
-        if tag_id is not None:
-            if isinstance(tag_id, str):
-                tag_id = (
-                    [t.strip() for t in tag_id.split(",")]
-                    if "," in tag_id
-                    else [tag_id.strip()]
+        # Convert tag_name to a list, splitting by commas if necessary
+        if tag_name is not None:
+            if isinstance(tag_name, str):
+                tag_name = (
+                    [t.strip() for t in tag_name.split(",")]
+                    if "," in tag_name
+                    else [tag_name.strip()]
                 )
             else:
-                tag_id = [tag_id]
+                tag_name = [tag_name]
 
-        # Convert character_id to a list, splitting by commas if necessary
-        if character_id is not None:
-            if isinstance(character_id, str):
-                character_id = (
-                    [c.strip() for c in character_id.split(",")]
-                    if "," in character_id
-                    else [character_id.strip()]
+        # Convert character_name to a list, splitting by commas if necessary
+        if character_name is not None:
+            if isinstance(character_name, str):
+                character_name = (
+                    [c.strip() for c in character_name.split(",")]
+                    if "," in character_name
+                    else [character_name.strip()]
                 )
             else:
-                character_id = [character_id]
+                character_name = [character_name]
 
-        # Convert speaker_id to a list, splitting by commas if necessary
-        if speaker_id is not None:
-            if isinstance(speaker_id, str):
-                speaker_id = (
-                    [s.strip() for s in speaker_id.split(",")]
-                    if "," in speaker_id
-                    else [speaker_id.strip()]
+        # Convert speaker_name to a list, splitting by commas if necessary
+        if speaker_name is not None:
+            if isinstance(speaker_name, str):
+                speaker_name = (
+                    [s.strip() for s in speaker_name.split(",")]
+                    if "," in speaker_name
+                    else [speaker_name.strip()]
                 )
             else:
-                speaker_id = [speaker_id]
+                speaker_name = [speaker_name]
+
+        # Convert scripture_name to a list, splitting by commas if necessary
+        if scripture_name is not None:
+            if isinstance(scripture_name, str):
+                scripture_name = (
+                    [s.strip() for s in scripture_name.split(",")]
+                    if "," in scripture_name
+                    else [scripture_name.strip()]
+                )
+            else:
+                scripture_name = [scripture_name]
+
+        # Convert date_added to ISO format if provided
+        if date_added is not None:
+            try:
+                # Parse the ISO format date and reformat it
+                dt = datetime.fromisoformat(date_added)
+                date_added = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+            except Exception:
+                logging.error(
+                    f"Invalid date format for 'date_added': {date_added}"
+                )
+
+                return make_response(
+                    jsonify(
+                        {
+                            "error": "Invalid date format for 'date_added'. "
+                                     "Expected ISO format."
+                        }
+                    ),
+                    400
+                )
 
         logging.info(
-            f"Adding metadata for video ID: {video_id}, "
+            f"Adding metadata for video ID: {video_name}, "
             f"Description: {description}, "
             f"URL: {url}, "
-            f"Tag IDs: {tag_id}, "
-            f"Speaker IDs: {speaker_id}, "
-            f"Character IDs: {character_id}, "
+            f"Tag IDs: {tag_name}, "
+            f"Speaker IDs: {speaker_name}, "
+            f"Character IDs: {character_name}, "
+            f"Scripture IDs: {scripture_name}, "
+            f"Date Added: {date_added}"
         )
+
+        # Add metadata to the video
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            video_id = video_mgr.name_to_id(
+                name=video_name,
+            )
+
+            if video_id is None:
+                logging.error(f"Video '{video_name}' not found.")
+                return make_response(
+                    jsonify(
+                        {
+                            "error": f"Video '{video_name}' not found"
+                        }
+                    ),
+                    404
+                )
+            logging.info(f"Video name: {video_name}, ID: {video_id}")
+
+            # Add description if provided
+            if description is not None:
+                result = video_mgr.update(
+                    id=video_id,
+                    description=description,
+                )
+
+                if not result:
+                    logging.error(
+                        f"Failed to update description for "
+                        f"video ID: {video_id}"
+                    )
+                    return make_response(
+                        jsonify(
+                            {
+                                "error": "Failed to update video description"
+                            }
+                        ),
+                        500
+                    )
+                logging.info(f"Updated video ({result}) description.")
+
+            # Add URL if provided
+            if url is not None:
+                result = video_mgr.update(
+                    id=video_id,
+                    url=url,
+                )
+
+                if not result:
+                    logging.error(
+                        f"Failed to update URL for video ID: {video_id}"
+                    )
+                    return make_response(
+                        jsonify(
+                            {
+                                "error": "Failed to update video URL"
+                            }
+                        ),
+                        500
+                    )
+
+            # Add tags if provided
+            if tag_name is not None:
+                tag_mgr = TagManager(db)
+
+                # Go through each tag name and resolve it to an ID
+                for tag in tag_name:
+                    # Get the tag ID from the database
+                    tag_id = tag_mgr.name_to_id(
+                        name=tag,
+                    )
+
+                    # If the tag does not exist, create it
+                    if tag_id is None:
+                        logging.info(f"Creating new tag: {tag}")
+                        tag_id = tag_mgr.add(
+                            name=tag,
+                        )
+
+                    # Add the tag to the video
+                    if tag_id is None:
+                        logging.error(f"Failed to create tag: {tag}")
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": f"Failed to create tag: {tag}"
+                                }
+                            ),
+                            500
+                        )
+
+                    logging.info(
+                        f"Adding tag '{tag}' with ID {tag_id} "
+                        f"to video ID: {video_id}"
+                    )
+
+                    result = tag_mgr.add_to_video(
+                        video_id=video_id,
+                        tag_id=tag_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add tag {tag} for video ID: {video_id}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": "Failed to add video tags"
+                                }
+                            ),
+                            500
+                        )
+
+            # Add speakers if provided
+            if speaker_name is not None:
+                speaker_mgr = SpeakerManager(db)
+
+                # Go through each speaker name and resolve it to an ID
+                for speaker in speaker_name:
+                    # Get the speaker ID from the database
+                    speaker_id = speaker_mgr.name_to_id(
+                        name=speaker,
+                    )
+
+                    # If the speaker does not exist, create it
+                    if speaker_id is None:
+                        logging.info(f"Creating new speaker: {speaker}")
+                        speaker_id = speaker_mgr.add(
+                            name=speaker,
+                        )
+
+                    # Add the speaker to the video
+                    if speaker_id is None:
+                        logging.error(f"Failed to create speaker: {speaker}")
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": f"Failed to create speaker: "
+                                    f"{speaker}"
+                                }
+                            ),
+                            500
+                        )
+
+                    logging.info(
+                        f"Adding speaker '{speaker}' with ID {speaker_id} "
+                        f"to video ID: {video_id}"
+                    )
+
+                    result = speaker_mgr.add_to_video(
+                        video_id=video_id,
+                        speaker_id=speaker_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add speaker {speaker} for "
+                            f"video ID: {video_id}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": "Failed to add video speakers"
+                                }
+                            ),
+                            500
+                        )
+
+            # Add characters if provided
+            if character_name is not None:
+                character_mgr = CharacterManager(db)
+
+                # Go through each character name and resolve it to an ID
+                for character in character_name:
+                    # Get the character ID from the database
+                    character_id = character_mgr.name_to_id(
+                        name=character,
+                    )
+
+                    # If the character does not exist, create it
+                    if character_id is None:
+                        logging.info(f"Creating new character: {character}")
+                        character_id = character_mgr.add(
+                            name=character,
+                        )
+
+                    # Add the character to the video
+                    if character_id is None:
+                        logging.error(
+                            f"Failed to create character: {character}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": f"Failed to create character: "
+                                    f"{character}"
+                                }
+                            ),
+                            500
+                        )
+
+                    logging.info(
+                        f"Adding character '{character}' with ID "
+                        f"{character_id} to video ID: {video_id}"
+                    )
+
+                    result = character_mgr.add_to_video(
+                        video_id=video_id,
+                        character_id=character_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add character {character} for "
+                            f"video ID: {video_id}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": "Failed to add video characters"
+                                }
+                            ),
+                            500
+                        )
+
+            # Add scripture if provided
+            if scripture_name is not None:
+                scripture_mgr = ScriptureManager(db)
+
+                for scripture in scripture_name:
+                    # Split name into book, chapter, and verse
+                    match = re.match(
+                        r"""
+                        (?P<book>          # Match the book name
+                            (?:\d\s*)?     # Match a number then whitespace
+                            \w[\w\s]*?     # Match word characters and spaces
+                        )
+                        \s+                # Match one or more spaces
+                        (?P<chapter>\d+)   # Match the chapter number (digits)
+                        :                  # Match the colon separator
+                        (?P<verse>\d+)     # Match the verse number (digits)
+                        """,
+                        scripture,
+                        re.X               # Enable verbose mode
+                    )
+                    if match:
+                        book = match.group('book').strip()
+                        chapter = int(match.group('chapter'))
+                        verse = int(match.group('verse'))
+                    else:
+                        book = chapter = verse = None
+
+                    if book is None or chapter is None or verse is None:
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": f"Scripture reference "
+                                    f"'{scripture}' is not valid. Skipping"
+                                }
+                            ),
+                            400
+                        )
+
+                    # Get the scripture ID from the database
+                    scripture_id = scripture_mgr.name_to_id(
+                        book=book,
+                        chapter=chapter,
+                        verse=verse,
+                    )
+
+                    # If the scripture does not exist, create it
+                    if scripture_id is None:
+                        logging.info(f"Creating new scripture: {scripture}")
+                        scripture_id = scripture_mgr.add(
+                            book=book,
+                            chapter=chapter,
+                            verse=verse,
+                        )
+
+                    if scripture_id is None:
+                        logging.error(
+                            f"Failed to create scripture: {scripture}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": f"Failed to create "
+                                    f"scripture: {scripture}"
+                                }
+                            ),
+                            500
+                        )
+
+                    # Add the scripture to the video
+                    logging.info(
+                        f"Adding scripture '{scripture}' "
+                        f"(book: {book}, chapter: {chapter}, verse: {verse}) "
+                        f"with ID {scripture_id} to video ID: {video_id}"
+                    )
+
+                    result = scripture_mgr.add_to_video(
+                        video_id=video_id,
+                        scripture_id=scripture_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add scripture {scripture} "
+                            f"for video ID: {video_id}"
+                        )
+                        return make_response(
+                            jsonify(
+                                {
+                                    "error": "Failed to add video scriptures"
+                                }
+                            ),
+                            500
+                        )
+
+            if date_added is not None:
+                # Update the video's date added
+                result = video_mgr.update(
+                    id=video_id,
+                    date_added=date_added,
+                )
+
+                if not result:
+                    logging.error(
+                        f"Failed to update date added for video ID: {video_id}"
+                    )
+                    return make_response(
+                        jsonify(
+                            {
+                                "error": "Failed to update video date added"
+                            }
+                        ),
+                        500
+                    )
+
+                logging.info(f"Updated video ({result}) date added.")
 
         # Return a success response
         return make_response(

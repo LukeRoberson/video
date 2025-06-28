@@ -24,11 +24,14 @@ A video may have more than one URL for different resolutions.
 
 Dependencies:
     - sqlite3: For SQLite database operations.
+    - traceback: For handling exceptions and tracebacks.
+    - logging: For logging messages and errors.
 """
 
 
 import sqlite3
 import traceback
+import logging
 
 
 class DatabaseContext:
@@ -285,7 +288,7 @@ class VideoManager:
             values.append(date_added)
 
         if not fields:
-            print("VideoManager.update: No fields to update.")
+            logging.info("VideoManager.update: No fields to update.")
             return None
 
         # Set up the query
@@ -473,7 +476,9 @@ class VideoManager:
             params.append(speaker_id)
 
         if character_id is not None:
-            joins.append("JOIN videos_bible_characters vch ON v.id = vch.video_id")
+            joins.append(
+                "JOIN videos_bible_characters vch ON v.id = vch.video_id"
+            )
             wheres.append("vch.character_id = ?")
             params.append(character_id)
 
