@@ -49,23 +49,4 @@ Select Profile
     </div>
 </div>
 
-<script>
-    document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            const profileId = this.getAttribute('data-profile-id');
-            fetch('/api/profile/set_active', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profile_id: profileId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/';
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

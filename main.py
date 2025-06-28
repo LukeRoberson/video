@@ -5,6 +5,8 @@ This module initializes the Flask application and sets up the main routes.
 It includes the home page and video details page, along with necessary imports
 
 Blueprints:
+    - web_bp:
+        Main web routes for the application.
     - category_bp:
         Web routes for category-related pages.
     - dynamic_bp:
@@ -29,25 +31,15 @@ Custom Dependencies:
 
 # Standard library imports
 import logging
-import os
-import random
-from flask import (
-    Flask,
-    Response,
-    render_template,
-    make_response
-)
+from flask import Flask
 
 # Custom imports
+from web import web_bp
 from web_categories import category_bp
 from web_dynamic import dynamic_bp
 from api import (
     api_bp,
     seconds_to_hhmmss
-)
-from local_db import (
-    LocalDbContext,
-    ProfileManager,
 )
 
 
@@ -77,124 +69,9 @@ app.secret_key = SECRET_KEY
 app.register_blueprint(category_bp)
 app.register_blueprint(dynamic_bp)
 app.register_blueprint(api_bp)
+app.register_blueprint(web_bp)
 app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
 app.jinja_env.filters['nl2br'] = nl2br
-
-
-# Define the static directory for profile images
-profile_dir = os.path.join(
-    'static',
-    'img',
-    'profiles'
-)
-
-# Define the static directory for banner images
-banner_dir = os.path.join(
-    'static',
-    'img',
-    'banner'
-)
-
-
-@app.route(
-    "/",
-    methods=["GET"],
-)
-def home() -> Response:
-    """
-    A very simple home page that renders the main HTML template.
-
-    Returns:
-        Response: A rendered HTML 'welcome' page
-    """
-
-    banner_pics = [
-        f for f in os.listdir(banner_dir)
-        if (
-            f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
-        )
-    ]
-    print("Banner Pictures:", banner_pics)
-
-    return make_response(
-        render_template(
-            "home.html",
-            banner_pics=banner_pics,
-        )
-    )
-
-
-@app.route(
-    "/select_profile",
-    methods=["GET"]
-)
-def select_profile() -> Response:
-    """
-    Render the profile selection page.
-
-    Returns:
-        Response: A rendered HTML page for selecting a profile.
-    """
-
-    # Get all profiles from the local database
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        profile_list = profile_mgr.read()
-
-    return make_response(
-        render_template(
-            'select_profile.html',
-            profiles=profile_list,
-        )
-    )
-
-
-@app.route(
-    "/create_profile",
-    methods=["GET"]
-)
-def create_profile() -> Response:
-    """
-    Render the profile creation page.
-
-    Returns:
-        Response: A rendered HTML page for creating a new profile.
-    """
-
-    profile_pics = [
-        f for f in os.listdir(profile_dir)
-        if (
-            f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) and
-            f.lower() != 'guest.png'
-        )
-    ]
-    random.shuffle(profile_pics)
-
-    return make_response(
-        render_template(
-            'create_profile.html',
-            profile_pics=profile_pics
-        )
-    )
-
-
-@app.route(
-    "/admin",
-    methods=["GET"],
-)
-def admin_dashboard() -> Response:
-    """
-    Render the admin dashboard.
-
-    Returns:
-        Response: A rendered HTML page with the admin dashboard.
-    """
-
-    return make_response(
-        render_template(
-            "admin.html"
-        )
-    )
 
 
 if __name__ == "__main__":

@@ -28,3 +28,38 @@ document.querySelector('form').addEventListener('submit', function(e) {
         window.location.href = '/select_profile';
     });
 });
+
+
+// Fetch the currently active profile from the server
+fetch('/api/profile/get_active')
+    .then(res => res.json())
+    .then(profile => {
+        console.log('Active profile:', profile.active_profile.name);
+        // Update the profile name in the DOM, defaulting to 'Guest' if not set
+        document.getElementById('profile-name').textContent = profile.active_profile.name || 'Guest';
+        // Update the profile image in the DOM, defaulting to 'guest.png' if not set
+        document.getElementById('profile-img').src = '/static/img/profiles/' + (profile.active_profile.image || 'guest.png');
+        document.getElementById('profile-img').alt = profile.active_profile.name || 'Guest';
+    });
+
+
+// Add click event listeners to all profile list items to set the active profile
+document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default link behavior
+        const profileId = this.getAttribute('data-profile-id');
+        // Send a POST request to set the selected profile as active
+        fetch('/api/profile/set_active', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile_id: profileId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // If successful, redirect to the home page
+            if (data.success) {
+                window.location.href = '/';
+            }
+        });
+    });
+});

@@ -169,22 +169,5 @@
 </div>
 
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var player = videojs('player');
-
-    // Initialize the resolution switcher
-    player.videoJsResolutionSwitcher({
-      default: 'high',
-    //   dynamicLabel: true,
-      ui: true,
-      callback: function (resolution) {
-        console.log("Resolution changed to:", resolution);
-      }
-    });
-
-    // Ensure the control bar is visible
-    player.controlBar.show();
-  });
-</script>
+<script src="{{ url_for('static', filename='js/videoRes.js') }}"></script>
 {% endblock %}
