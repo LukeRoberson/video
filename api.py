@@ -417,8 +417,11 @@ def add_video_metadata() -> Response:
                 400
             )
 
+        print(f"Received data: {data}")
+
         # Validate and extract the data
         video_id = data.get("video_id", None)
+        description = data.get("description", None)
         url = data.get("url", None)
         tag_id = data.get("tag_id", None)
         speaker_id = data.get("speaker_id", None)
@@ -486,6 +489,7 @@ def add_video_metadata() -> Response:
 
         logging.info(
             f"Adding metadata for video ID: {video_id}, "
+            f"Description: {description}, "
             f"URL: {url}, "
             f"Tag IDs: {tag_id}, "
             f"Speaker IDs: {speaker_id}, "
