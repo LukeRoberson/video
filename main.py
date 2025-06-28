@@ -100,7 +100,7 @@ banner_dir = os.path.join(
     "/",
     methods=["GET"],
 )
-def home():
+def home() -> Response:
     """
     A very simple home page that renders the main HTML template.
 
@@ -116,9 +116,11 @@ def home():
     ]
     print("Banner Pictures:", banner_pics)
 
-    return render_template(
-        "home.html",
-        banner_pics=banner_pics,
+    return make_response(
+        render_template(
+            "home.html",
+            banner_pics=banner_pics,
+        )
     )
 
 

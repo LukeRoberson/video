@@ -50,7 +50,7 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 ## Special Pages:
 
 **Dynamic Pages**
-* Pages for characters, tags, speakers, scriptures
+* Base pages for characters, tags, speakers, scriptures
 * To browse through these items
 </br></br>
 
@@ -104,10 +104,6 @@ _Page has been created, but there's no functionality there yet_
 * List of tags (AND/OR)
 </br></br>
 
-**Video Table**
-* Find datestamps for remaining videos
-</br></br>
-
 **Bible Character table**
 * Add a profile pic
 * Add a date range
@@ -125,6 +121,7 @@ _Page has been created, but there's no functionality there yet_
 
 **Data**
 * Add URLs for videos
+* Get date stamps for remaining videos
 </br></br>
 
 
