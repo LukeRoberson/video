@@ -7,6 +7,7 @@ Manages the local user details, such as profiles, watch history, etc.
 import sqlite3
 import traceback
 import logging
+from datetime import datetime
 
 
 DB_NAME = "local.db"
@@ -294,3 +295,124 @@ class ProfileManager:
             return None
 
         return profile_id
+
+    def mark_watched(
+        self,
+        profile_id: int,
+        video_id: int
+    ) -> bool:
+        """
+        Marks a video as watched for a specific profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video to mark as watched.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    INSERT INTO watch_history (
+                        profile_id,
+                        video_id,
+                        watched_at
+                    )
+                    VALUES (
+                        ?,
+                        ?,
+                        ?
+                    )
+                    """,
+                    (
+                        profile_id,
+                        video_id,
+                        datetime.now()
+                    )
+                )
+                self.db.conn.commit()
+                return True
+
+        except Exception as e:
+            logging.error(
+                f"Error marking video {video_id} as watched for "
+                f"profile {profile_id}: {e}"
+            )
+            self.db.conn.rollback()
+            return False
+
+    def mark_unwatched(
+        self,
+        profile_id: int,
+        video_id: int
+    ) -> bool:
+        """
+        Marks a video as unwatched for a specific profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video to mark as unwatched.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    DELETE FROM watch_history
+                    WHERE profile_id = ? AND video_id = ?
+                    """,
+                    (profile_id, video_id)
+                )
+                self.db.conn.commit()
+                return True
+
+        except Exception as e:
+            logging.error(
+                f"Error marking video {video_id} as unwatched for "
+                f"profile {profile_id}: {e}"
+            )
+            self.db.conn.rollback()
+            return False
+
+    def check_watched(
+        self,
+        profile_id: int,
+        video_id: int,
+    ) -> bool:
+        """
+        Checks if a video has been watched by a specific profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video to check.
+
+        Returns:
+            bool: True if the video has been watched, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    SELECT 1 FROM watch_history
+                    WHERE profile_id = ? AND video_id = ?
+                    """,
+                    (profile_id, video_id)
+                )
+                return cursor.fetchone() is not None
+
+        except Exception as e:
+            logging.error(
+                f"Error checking if video {video_id} is watched for "
+                f"profile {profile_id}: {e}"
+            )
+            return False
