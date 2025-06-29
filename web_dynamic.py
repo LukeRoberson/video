@@ -22,6 +22,7 @@ from flask import (
     Response,
     render_template,
     make_response,
+    request,
 )
 
 # Custom imports
@@ -373,5 +374,57 @@ def scripture_details(
             "scripture_details.html",
             scripture=scripture,
             videos=videos,
+        )
+    )
+
+
+@dynamic_bp.route(
+    "/search",
+    methods=["GET"],
+)
+def search_results() -> Response:
+    """
+    Render search results page for video searches.
+
+    Query Parameters:
+        q (str): The search query string.
+
+    Returns:
+        Response: A rendered HTML page with search results.
+        If no query is provided, redirects to home page.
+    """
+
+    # Get the search query from the request
+    query = request.args.get("q", "").strip()
+    if not query:
+        return make_response(
+            render_template(
+                "search_results.html",
+                query="",
+                videos=[],
+                message="Please enter a search term."
+            )
+        )
+
+    # Use the VideoManager to search for videos
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = video_mgr.search(query=query)
+
+    # If no videos found, return an empty list and a message
+    if not videos:
+        videos = []
+        message = f"No videos found for '{query}'"
+
+    # If videos are found, return them with a message
+    else:
+        message = f"Found {len(videos)} videos for '{query}'"
+
+    return make_response(
+        render_template(
+            "search_results.html",
+            query=query,
+            videos=videos,
+            message=message
         )
     )

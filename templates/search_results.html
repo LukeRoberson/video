@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if query %}Search: {{ query }}{% else %}Search{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Search Header -->
+            <div class="mb-4">
+                {% if query %}
+                    <h2 class="text-white">Search Results</h2>
+                    <p class="text-muted">{{ message }}</p>
+                {% else %}
+                    <h2 class="text-white">Search Videos</h2>
+                    <p class="text-muted">{{ message }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Search Form -->
+            <div class="card bg-dark border-secondary mb-4">
+                <div class="card-body">
+                    <form action="{{ url_for('dynamic_pages.search_results') }}" method="GET">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" 
+                                   name="q" value="{{ query }}" 
+                                   placeholder="Search videos by name or description..." 
+                                   aria-label="Search">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            {% if videos %}
+                <div class="row">
+                    {% for video in videos %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card bg-dark text-white h-100 border-secondary">
+                                <a href="{{ url_for('dynamic_pages.video_details', video_id=video.id) }}" 
+                                   class="text-decoration-none text-white">
+                                    {% if video.thumbnail %}
+                                        <img src="{{ video.thumbnail }}" 
+                                             class="card-img-top" 
+                                             alt="{{ video.name }}"
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                                             style="height: 200px;">
+                                            <i class="fas fa-video fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ video.name }}</h6>
+                                        {% if video.description %}
+                                            <p class="card-text small text-muted">
+                                                {{ video.description[:100] }}{% if video.description|length > 100 %}...{% endif %}
+                                            </p>
+                                        {% endif %}
+                                        {% if video.duration %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> {{ video.duration | seconds_to_hhmmss }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% elif query %}
+                <!-- No Results Found -->
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h4 class="text-white">No videos found</h4>
+                        <p class="text-muted mb-4">We couldn't find any videos matching "{{ query }}"</p>
+                        <div class="text-muted">
+                            <p>Try:</p>
+                            <ul class="list-unstyled">
+                                <li>• Checking your spelling</li>
+                                <li>• Using different keywords</li>
+                                <li>• Using more general terms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -9,26 +9,37 @@
 
 /**
  * An event listener to create a new profile when the form is submitted.
+ * This prevents the default form submission and sends a POST request to the server.
+ * On success, it redirects the user to the profile selection page.
  */
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault(); // Prevent default form submission
+// Only attach to the profile creation form
+const profileForm = document.getElementById('profile-create-form');
 
-    const name = document.getElementById('name').value;
-    const image = document.getElementById('profile_pic').value;
+// Continue if this is right
+if (profileForm) {
+    profileForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
 
-    fetch('/api/profile/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, image: image })
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log(data);
-        // Redirect to select_profile page after creation
-        window.location.href = '/select_profile';
+        const name = document.getElementById('name').value;
+        const image = document.getElementById('profile_pic').value;
+
+        fetch('/api/profile/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(
+                { 
+                    name: name,
+                    image: image 
+                }
+            )
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            window.location.href = '/select_profile';   // Redirect
+        });
     });
-});
-
+}
 
 // Fetch the currently active profile from the server
 fetch('/api/profile/get_active')

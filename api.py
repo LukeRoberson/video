@@ -911,3 +911,59 @@ def add_video_metadata() -> Response:
             ),
             405
         )
+
+
+@api_bp.route(
+    "/api/search/videos",
+    methods=["GET"],
+)
+def search_videos() -> Response:
+    """
+    Search for videos by name or description.
+
+    Query Parameters:
+        q (str): The search query string.
+        limit (int, optional):
+            Maximum number of results to return. Defaults to 50.
+
+    Returns:
+        Response: A JSON response containing the list of matching videos.
+        If no videos are found, an empty list is returned.
+    """
+
+    # Get query parameters
+    query = request.args.get("q", "").strip()
+    limit = request.args.get("limit", 50, type=int)
+
+    if not query:
+        logging.warning("Empty search query provided.")
+        return jsonify([])
+
+    # Use the search method to find videos
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = video_mgr.search(
+            query=query,
+            limit=limit
+        )
+
+    # If videos are found, log the count
+    if videos:
+        logging.info(f"Found {len(videos)} videos for query: '{query}'")
+
+        # Convert duration from seconds to HH:MM:SS format
+        for video in videos:
+            video['duration'] = seconds_to_hhmmss(video['duration'])
+
+    # If no videos are found, log the event
+    else:
+        videos = []
+        logging.info(f"No videos found for query: '{query}'")
+
+    # Return the list of videos as a JSON response
+    return make_response(
+        jsonify(
+            videos
+        ),
+        200
+    )

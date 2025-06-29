@@ -19,6 +19,11 @@ classes:
     ScriptureManager:
         A class for managing scripture-related operations in the database.
 
+    All classes support a CRUD interface for managing their entities.
+    Most will resolve names to IDs, allowing for easy retrieval and management.
+    Some will apply metadata to videos (tag, category, speaker, etc).
+    The video manager can also filter results, and search by name.
+
 A video may have more than one URL for different resolutions.
     They may not all be available
 
@@ -545,6 +550,57 @@ class VideoManager:
         except Exception as e:
             print(f"VideoManager.name_to_id: An error occurred while "
                   f"resolving video name '{name}' to ID:\n{e}")
+            return None
+
+    def search(
+        self,
+        query: str,
+        limit: int = 50
+    ) -> list[dict] | None:
+        """
+        Search for videos by name or description using LIKE pattern matching.
+
+        Args:
+            query (str): The search query string.
+            limit (int): Maximum number of results to return. Defaults to 50.
+
+        Returns:
+            list[dict] | None: A list of dictionaries containing video details
+                that match the search query, or None if an error occurs.
+        """
+
+        logging.info(f"Searching for videos with query: {query}")
+        try:
+            # Use LIKE with wildcards for partial matching
+            # Search in both name and description fields
+            search_pattern = f"%{query}%"
+            cursor = self.db.cursor.execute(
+                """
+                SELECT * FROM videos
+                WHERE name LIKE ? OR description LIKE ?
+                ORDER BY
+                    CASE
+                        WHEN name LIKE ? THEN 1
+                        WHEN description LIKE ? THEN 2
+                        ELSE 3
+                    END,
+                    name ASC
+                LIMIT ?
+                """,
+                (
+                    search_pattern,
+                    search_pattern,
+                    f"{query}%",
+                    f"{query}%",
+                    limit,
+                )
+            )
+
+            # Convert to a list of dictionaries and return
+            return [dict(row) for row in cursor.fetchall()]
+
+        except Exception as e:
+            logging.error(f"Error searching videos: {e}")
             return None
 
 

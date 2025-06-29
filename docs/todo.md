@@ -1,11 +1,26 @@
 # UI
 
-## Errors
+## Errors and Cleanup
 
+Profiles
 * profileMgmt.js is throwing an error in Chrome console
 * Selecting a profile does nothing
 * Trying to create a new profile throws a 'method not supported' error
 </br></br>
+
+API
+* The API for adding metadata is very long
+* Mostly this is for error messages in JSON
+* Create a helper function to make this simpler
+
+Python Files
+* Create an /app folder
+* Move python files in there
+* Create an __init__.py file
+* Add logging to __init__.py
+* Refactor all files to import from /app
+* Update workspace file?
+* Update toml file?
 
 
 ## Main Page:
@@ -76,9 +91,10 @@ A settings page
 </br></br>
 
 Admin Tools
-
 * Button to run a scrape, to check for new videos and categories from the website
 * Need a spinning wheel to show it's still working when adding lots of metadata
+* Add scripture text to a scripture reference
+* When adding metadata, clear the form after success
 </br></br>
 
 

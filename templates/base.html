@@ -66,6 +66,12 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- Search Bar -->
+                <form class="d-flex mx-3" action="{{ url_for('dynamic_pages.search_results') }}" method="GET">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search videos..." aria-label="Search" style="width: 300px;">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
                 
                 <!-- Profile icon: Aligned right -->
                 <div class="d-flex align-items-center">
@@ -74,8 +80,10 @@
                         <img id="profile-img" src="/static/img/profiles/guest.png" alt="Profile" class="rounded-circle" style="width:28px; height:28px; object-fit:cover;">
                     </a>
                 </div>
+
             </div>
         </div>
+
         <div class="body-content">
             {% block content %}
             {% endblock %}

@@ -1,5 +1,5 @@
 [project]
-name = "Streamer"
+name = "1023"
 version = "0.1.0"
 description = "Video streaming for videos on jw.org"
 
@@ -9,5 +9,6 @@ requires-python = ">=3.10"
 [project.dependencies]
 dependencies = "requirements.txt"
 
-[project.optional-dependencies]
-dev-requirements = {file = "dev-requirements.txt"}
+[tool.flake8]
+max-line-length = 88
+exclude = ["__pycache__", "static", "templates"]
