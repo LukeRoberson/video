@@ -26,7 +26,7 @@ from flask import (
 )
 
 # Custom imports
-from sql_db import (
+from app.sql_db import (
     DatabaseContext,
     VideoManager,
     CategoryManager,

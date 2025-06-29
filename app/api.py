@@ -39,7 +39,7 @@ import re
 from datetime import datetime
 
 # Custom imports
-from sql_db import (
+from app.sql_db import (
     DatabaseContext,
     VideoManager,
     TagManager,
@@ -47,7 +47,7 @@ from sql_db import (
     CharacterManager,
     ScriptureManager,
 )
-from local_db import (
+from app.local_db import (
     LocalDbContext,
     ProfileManager,
 )

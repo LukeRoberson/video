@@ -2,12 +2,20 @@
 name = "1320"
 version = "0.1.0"
 description = "Video streaming for videos on jw.org"
-
 readme = "README.md"
 requires-python = ">=3.10"
+packages = ["app"]
 
 [project.dependencies]
-dependencies = "requirements.txt"
+antiorm = "==1.2.1"
+beautifulsoup4 = "==4.13.4"
+blinker = "==1.9.0"
+db-sqlite3 = "==0.0.1"
+Flask = "==3.1.1"
+numpy = "==2.3.0"
+pandas = "==2.3.0"
+requests = "==2.32.4"
+selenium = "==4.33.0"
 
 [tool.flake8]
 max-line-length = 88

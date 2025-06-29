@@ -7,15 +7,6 @@ API
 * Mostly this is for error messages in JSON
 * Create a helper function to make this simpler
 
-Python Files
-* Create an /app folder
-* Move python files in there
-* Create an __init__.py file
-* Add logging to __init__.py
-* Refactor all files to import from /app
-* Update workspace file?
-* Update toml file?
-
 
 ## Main Page:
 
@@ -71,12 +62,6 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 
 
 ## Additional Pages
-
-A settings page
-* This may be part of the profile
-* Clear watch history
-* Check for DB updates
-</br></br>
 
 Admin Tools
 * Button to run a scrape, to check for new videos and categories from the website
@@ -149,3 +134,9 @@ Theme based on scripture
 * A theme like 'Sermon on the mount'
 * Include videos related to the theme
 * Lay out nicely, not just videos based on a category
+</br></br>
+
+A settings page
+* This may be part of the profile
+* Clear watch history
+* Check for DB updates

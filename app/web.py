@@ -20,7 +20,7 @@ from flask import (
     render_template,
     make_response,
 )
-from local_db import (
+from app.local_db import (
     LocalDbContext,
     ProfileManager,
 )

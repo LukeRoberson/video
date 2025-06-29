@@ -7,7 +7,7 @@ from colorama import Style, Fore
 parent_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_folder)
 
-from sql_db import (  # noqa: E402
+from app.sql_db import (  # noqa: E402
     DatabaseContext,
     VideoManager,
     CategoryManager,

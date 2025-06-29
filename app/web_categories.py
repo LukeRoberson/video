@@ -51,7 +51,7 @@ from flask import (
 import logging
 
 # Custom imports
-from sql_db import (
+from app.sql_db import (
     DatabaseContext,
     CategoryManager,
 )
