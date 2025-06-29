@@ -967,3 +967,143 @@ def search_videos() -> Response:
         ),
         200
     )
+
+
+@api_bp.route(
+    "/api/scripture",
+    methods=["POST"],
+)
+def add_scripture_text() -> Response:
+    """
+    Add text to a scripture.
+
+    Expects JSON:
+        {
+            "scr_name": "<scripture name>",
+            "scr_text": "<scripture text>"
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    # Get the JSON data from the request
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for adding scripture text.")
+        return make_response(
+            jsonify(
+                {
+                    "error": "No data provided"
+                }
+            ),
+            400
+        )
+
+    scr_name = data.get("scr_name")
+    scr_text = data.get("scr_text")
+
+    if not scr_name or not scr_text:
+        logging.error("Missing 'scr_name' or 'scr_text' in request data.")
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'scr_name' or 'scr_text' in request data"
+                }
+            ),
+            400
+        )
+
+    # Get the book, chapter, and verse from the scripture name
+    match = re.match(
+        r"""
+        (?P<book>          # Match the book name
+            (?:\d\s*)?     # Match a number then whitespace
+            \w[\w\s]*?     # Match word characters and spaces
+        )
+        \s+                # Match one or more spaces
+        (?P<chapter>\d+)   # Match the chapter number (digits)
+        :                  # Match the colon separator
+        (?P<verse>\d+)     # Match the verse number (digits)
+        """,
+        scr_name,
+        re.X               # Enable verbose mode
+    )
+
+    if match:
+        book = match.group('book').strip()
+        chapter = int(match.group('chapter'))
+        verse = int(match.group('verse'))
+    else:
+        book = chapter = verse = None
+
+    if book is None or chapter is None or verse is None:
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Scripture reference "
+                    f"'{scr_name}' is not valid. Skipping"
+                }
+            ),
+            400
+        )
+
+    # Get the scripture ID from the database
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+
+        # Check if the scripture already exists
+        scr_id = scripture_mgr.name_to_id(
+            book=book,
+            chapter=chapter,
+            verse=verse,
+        )
+
+    if scr_id is None:
+        logging.error(
+            f"Failed to create scripture: {scr_name}"
+        )
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to create "
+                    f"scripture: {scr_name}"
+                }
+            ),
+            500
+        )
+
+    # Add the scripture text to the database
+    logging.info(
+        f"Adding scripture text for {book} {chapter}:{verse} "
+        f"(ID: {scr_id}) with text: '{scr_text}'"
+    )
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+        result = scripture_mgr.update(
+            id=scr_id,
+            text=scr_text,
+        )
+
+    if not result:
+        logging.error(f"Failed to add scripture text for '{scr_name}'.")
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to add scripture text for '{scr_name}'"
+                }
+            ),
+            500
+        )
+
+    logging.info(f"Successfully added scripture text for '{scr_name}'.")
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": f"Added scripture text for '{scr_name}'"
+            }
+        ),
+        200
+    )

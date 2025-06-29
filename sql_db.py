@@ -2205,6 +2205,7 @@ class ScriptureManager:
         book: str = "",
         chapter: int = 0,
         verse: int = 0,
+        text: str = "",
     ) -> int | None:
         """
         Updates an existing scripture in the database.
@@ -2217,6 +2218,7 @@ class ScriptureManager:
             book (str): The new book of the scripture.
             chapter (int): The new chapter number of the scripture.
             verse (int): The new verse number of the scripture.
+            text (str): The new text of the scripture.
 
         Returns:
             int | None:
@@ -2238,6 +2240,9 @@ class ScriptureManager:
         if verse:
             fields.append("verse = ?")
             values.append(verse)
+        if text:
+            fields.append("verse_text = ?")
+            values.append(text)
 
         if not fields:
             print("ScriptureManager.update: No fields to update.")

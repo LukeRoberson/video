@@ -14,19 +14,6 @@ Admin
 {% endblock %}
 
 {% block content %}
-<!-- Scrape for new videos -->
-<div class="container d-flex justify-content-center my-5" style="min-height: 10vh;">
-    <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
-        <div class="card-body p-4">
-            <h3>Scrape for New Videos</h3>
-            <p>Scrape the video section of jw.org to find new videos or categories</p>
-            <br />
-            <button type="button" class="btn btn-primary btn-lg" style="border-radius: 8px;">
-                Scrape Now
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Add metadata to videos -->
 <div class="container d-flex justify-content-center my-5" style="min-height: 10vh;">
@@ -91,6 +78,54 @@ Admin
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add scriptures -->
+<div class="container d-flex justify-content-center my-5" style="min-height: 10vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
+        <div class="card-body p-4">
+            <h3>Add scriptures</h3>
+            <p>Add scripture and accompanying text</p>
+
+            <!-- Form -->
+            <form class="p-4" style="margin: auto;" id="addScrForm">
+
+                <!-- Scripture Name -->
+                <div class="form-group mb-3">
+                    <label for="scrName" class="form-label">Scripture Name</label>
+                    <input type="text" class="form-control" id="scrName" placeholder="Enter Scripture">
+                </div>
+
+                <!-- Verse Text -->
+                <div class="form-group mb-3">
+                    <label for="scrText" class="form-label">Scripture Text</label>
+                    <textarea class="form-control" id="scrText" rows="4" placeholder="Scripture text" style="resize:vertical;"></textarea>
+                </div>
+
+                <br />
+                <button type="submit" class="btn btn-primary w-100" style="border-radius: 8px;">
+                    Add
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scrape for new videos -->
+<div class="container d-flex justify-content-center my-5" style="min-height: 10vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
+        <div class="card-body p-4">
+            <h3>Scrape for New Videos</h3>
+            <p>Scrape the video section of jw.org to find new videos or categories</p>
+            <br />
+
+            <div class="p-4" style="margin: auto;">
+                <button type="button" class="btn btn-info w-100 text-light" style="border-radius: 8px;">
+                    Scrape Now
+                </button>
+            </div>
         </div>
     </div>
 </div>

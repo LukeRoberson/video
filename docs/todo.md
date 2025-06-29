@@ -87,8 +87,6 @@ A settings page
 Admin Tools
 * Button to run a scrape, to check for new videos and categories from the website
 * Need a spinning wheel to show it's still working when adding lots of metadata
-* Add scripture text to a scripture reference
-* When adding metadata, clear the form after success
 </br></br>
 
 
