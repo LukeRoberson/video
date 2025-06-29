@@ -2,12 +2,6 @@
 
 ## Errors and Cleanup
 
-Profiles
-* profileMgmt.js is throwing an error in Chrome console
-* Selecting a profile does nothing
-* Trying to create a new profile throws a 'method not supported' error
-</br></br>
-
 API
 * The API for adding metadata is very long
 * Mostly this is for error messages in JSON

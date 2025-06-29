@@ -2,8 +2,9 @@
  * profileMgmt.js
  * 
  * Handles API calls to manage user profiles
- *  - Get a list of profiles (for the profile selection page)
  *  - Create a new profile
+ *  - Get a list of profiles (for the profile selection page)
+ *  - Set an active profile
  */
 
 
@@ -18,6 +19,7 @@ const profileForm = document.getElementById('profile-create-form');
 // Continue if this is right
 if (profileForm) {
     profileForm.addEventListener('submit', function(e) {
+        console.log('Profile creation form submitted');
         e.preventDefault(); // Prevent default form submission
 
         const name = document.getElementById('name').value;
@@ -41,7 +43,13 @@ if (profileForm) {
     });
 }
 
-// Fetch the currently active profile from the server
+
+/**
+ * Fetches the list of profiles from the server and populates the profile selection list.
+ * Each profile is displayed as a list item with a link.
+ * The list items have a data attribute `data-profile-id` to identify the profile.
+ * Clicking on a profile sets it as the active profile and redirects to the home page.
+*/
 fetch('/api/profile/get_active')
     .then(res => res.json())
     .then(profile => {
@@ -54,7 +62,13 @@ fetch('/api/profile/get_active')
     });
 
 
-// Add click event listeners to all profile list items to set the active profile
+
+
+/**
+ * Attaches click event listeners to each profile list item.
+ * When a profile is clicked, it sends a POST request to set that profile as the active one.
+ * On success, it redirects the user to the home page.
+ */
 document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
     item.addEventListener('click', function(e) {
         e.preventDefault(); // Prevent default link behavior
