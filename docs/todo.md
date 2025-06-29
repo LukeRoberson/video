@@ -72,12 +72,6 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 
 ## Additional Pages
 
-An 'about' page
-* Explain that this is not a JW app
-* Explain this does not distribute videos
-* Show data for the most recent DB update
-</br></br>
-
 A settings page
 * This may be part of the profile
 * Clear watch history
@@ -133,7 +127,6 @@ Find similar videos
 
 ## Search:
 
-* Add basic search functionality
 * Page to show videos by topic
 * Show by speaker
 * Show by bible character

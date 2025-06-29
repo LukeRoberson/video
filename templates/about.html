@@ -1,0 +1,52 @@
+<!--
+    ==========================================================================
+    About Page
+    --------------------------------------------------------------------------
+    - A basic page to show information about the site.
+    ==========================================================================
+-->
+
+{% extends "base.html" %}
+{% block title %}
+About
+{% endblock %}
+
+{% block head %}
+<style>
+    q {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        quotes: "“" "”" "‘" "’";
+        font-style: italic;
+        color: lightgray;
+    }
+    q::before {
+        content: open-quote;
+    }
+    q::after {
+        content: close-quote;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container d-flex justify-content-center my-5" style="min-height: 10vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
+        <div class="card-body p-4">
+            <h3>1320</h3>
+            <q class="blockquote">The one walking with the wise will become wise</q>
+        </div>
+        <hr />
+        <div class="card-body p-4">
+            <h5 class="card-title">About This Site</h5>
+            <p class="card-text">
+                This site is a collection of videos and resources from jw.org. It is designed to help you find videos by topic, speaker, or bible character.
+            </p>
+            <p class="card-text">
+                This site is not affiliated with jw.org. It does not distribute any video content, as all videos are embedded from jw.org.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

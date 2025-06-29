@@ -96,6 +96,25 @@ def admin_dashboard() -> Response:
 
 
 @web_bp.route(
+    "/about",
+    methods=["GET"],
+)
+def about() -> Response:
+    """
+    Render the about page.
+
+    Returns:
+        Response: A rendered HTML page with information about the application.
+    """
+
+    return make_response(
+        render_template(
+            "about.html"
+        )
+    )
+
+
+@web_bp.route(
     "/select_profile",
     methods=["GET"]
 )
