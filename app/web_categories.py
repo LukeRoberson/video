@@ -5,6 +5,12 @@ Defines a Flask blueprint for category-related web routes.
     These are web pages that are based on a major category
     Each page contains carousels for subcategories
 
+Functions:
+    render_category_page(category_name, sub_category_list) -> Response:
+        Dynamically renders a category page with subcategories.
+        If the main category or any subcategory is not found,
+        a 404 error page is returned.
+
 Routes:
     /broadcasting
         Displays the JW Broadcasting category and its subcategories.
@@ -45,15 +51,22 @@ Custom Dependencies:
 # Standard library imports
 from flask import (
     Blueprint,
+    Response,
     render_template,
-    make_response
+    make_response,
+    session,
 )
 import logging
 
 # Custom imports
 from app.sql_db import (
     DatabaseContext,
+    VideoManager,
     CategoryManager,
+)
+from app.local_db import (
+    LocalDbContext,
+    ProfileManager,
 )
 
 
@@ -61,6 +74,103 @@ category_bp = Blueprint(
     'category_pages',
     __name__,
 )
+
+
+def render_category_page(
+    category_name,
+    sub_category_list
+) -> Response:
+    """
+    Dynamically render a category page with subcategories.
+
+    Args:
+        category_name (str): The name of the main category.
+        sub_category_list (list): A list of subcategory names.
+
+    Returns:
+        Response:
+            A rendered HTML page with the main category and its subcategories.
+        If the main category or any subcategory is not found,
+            a 404 error page is returned.
+    """
+
+    logging.debug(
+        f"Category: {category_name}. Subcategories: {sub_category_list}"
+    )
+
+    # Get an ID for the main category
+    with DatabaseContext() as db:
+        cat_mgr = CategoryManager(db)
+        main_cat_id = cat_mgr.name_to_id(name=category_name)
+
+        if not main_cat_id:
+            logging.error(f"Category '{category_name}' not found.")
+            return make_response(
+                render_template("404.html", message="Category not found"), 404
+            )
+
+        main_cat = {"id": main_cat_id, "name": category_name}
+
+    # Get the active profile from the session
+    active_profile = session.get("active_profile", None)
+
+    # Get a list of subcategory IDs
+    watch_status = []
+    with DatabaseContext() as db:
+        cat_mgr = CategoryManager(db)
+        video_mgr = VideoManager(db)
+
+        # Loop through each subcategory name
+        for sub_cat in sub_category_list:
+            entry = {}
+
+            # Get the subcategory ID from the database
+            entry['name'] = sub_cat
+            sub_cat_id = cat_mgr.name_to_id(name=sub_cat)
+
+            # Add it to the list if found
+            if sub_cat_id is not None:
+                video_list = video_mgr.get_filter(
+                    category_id=[sub_cat_id],
+                )
+
+                entry['id'] = sub_cat_id
+                entry['count'] = (
+                    len(video_list) if video_list else 0
+                )
+
+                with LocalDbContext() as local_db:
+                    profile_mgr = ProfileManager(local_db)
+
+                    # Get the watch status for the active profile
+                    if (
+                        active_profile is not None and
+                        active_profile != "guest" and
+                        video_list is not None
+                    ):
+                        watch_count = 0
+                        for video in video_list:
+                            watched = profile_mgr.check_watched(
+                                video_id=video['id'],
+                                profile_id=active_profile,
+                            )
+                            if watched:
+                                watch_count += 1
+
+                        entry['watched'] = watch_count
+
+                    else:
+                        entry['watched'] = 0
+
+                watch_status.append(entry)
+
+    return make_response(
+        render_template(
+            "category.html",
+            category=main_cat,
+            watch_status=watch_status,
+        )
+    )
 
 
 @category_bp.route(
@@ -76,66 +186,9 @@ def broadcasting():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "JW Broadcasting"
-    SUB_CATEGORY_LIST = [
-        "Monthly Programs",
-        "Talks",
-        "News and Announcements",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "JW Broadcasting",
+        ["Monthly Programs", "Talks", "News and Announcements"]
     )
 
 
@@ -152,66 +205,13 @@ def children():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Children"
-    SUB_CATEGORY_LIST = [
-        "Video Lessons",
-        "Songs",
-        "Dramas",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Children",
+        [
+            "Video Lessons",
+            "Songs",
+            "Dramas"
+        ]
     )
 
 
@@ -228,68 +228,15 @@ def teens():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Teenagers"
-    SUB_CATEGORY_LIST = [
-        "Spiritual Growth",
-        "Social Life",
-        "Goals",
-        "Interviews and Experiences",
-        "Dramas",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Teenagers",
+        [
+            "Spiritual Growth",
+            "Social Life",
+            "Goals",
+            "Interviews and Experiences",
+            "Dramas",
+        ]
     )
 
 
@@ -306,67 +253,14 @@ def family():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Family"
-    SUB_CATEGORY_LIST = [
-        "Family Challenges",
-        "Dating and Marriage",
-        "Family Worship",
-        "Dramas",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Family",
+        [
+            "Family Challenges",
+            "Dating and Marriage",
+            "Family Worship",
+            "Dramas",
+        ]
     )
 
 
@@ -383,79 +277,26 @@ def programs_events():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Programs and Events"
-    SUB_CATEGORY_LIST = [
-        "Morning Worship",
-        "Special Programs",
-        "Gilead Graduations",
-        "Annual Meetings",
-        "2025 Pure Worship Convention",
-        "2024 “Declare the Good News!” Convention",
-        "2023 “Exercise Patience”! Convention",
-        "2022 “Pursue Peace”! Convention",
-        "2021 Powerful by Faith! Convention",
-        "2020 “Always Rejoice”! Convention",
-        "2019 “Love Never Fails”! Convention",
-        "2018 “Be Courageous”! Convention",
-        "2017 Don’t Give Up! Convention",
-        "2016 Remain Loyal to Jehovah! Convention",
-        "2015 Imitate Jesus! Convention",
-        "2014 Keep Seeking First God’s Kingdom! Convention",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Programs and Events",
+        [
+            "Morning Worship",
+            "Special Programs",
+            "Gilead Graduations",
+            "Annual Meetings",
+            "2025 Pure Worship Convention",
+            "2024 “Declare the Good News!” Convention",
+            "2023 “Exercise Patience”! Convention",
+            "2022 “Pursue Peace”! Convention",
+            "2021 Powerful by Faith! Convention",
+            "2020 “Always Rejoice”! Convention",
+            "2019 “Love Never Fails”! Convention",
+            "2018 “Be Courageous”! Convention",
+            "2017 Don’t Give Up! Convention",
+            "2016 Remain Loyal to Jehovah! Convention",
+            "2015 Imitate Jesus! Convention",
+            "2014 Keep Seeking First God’s Kingdom! Convention",
+        ]
     )
 
 
@@ -472,70 +313,17 @@ def our_activities():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Our Activities"
-    SUB_CATEGORY_LIST = [
-        "Translation",
-        "Audio and Video Production",
-        "Publishing and Distribution",
-        "Construction",
-        "Relief Work",
-        "Theocratic Schools and Training",
-        "Special Events",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Our Activities",
+        [
+            "Translation",
+            "Audio and Video Production",
+            "Publishing and Distribution",
+            "Construction",
+            "Relief Work",
+            "Theocratic Schools and Training",
+            "Special Events",
+        ]
     )
 
 
@@ -552,69 +340,16 @@ def meetings_ministry():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Our Meetings and Ministry"
-    SUB_CATEGORY_LIST = [
-        "Tools for the Ministry",
-        "Essential Bible Teachings",
-        "Improving Our Skills",
-        "Preaching Methods",
-        "Expanding Our Ministry",
-        "Meetings, Assemblies, and Conventions",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Our Meetings and Ministry",
+        [
+            "Tools for the Ministry",
+            "Essential Bible Teachings",
+            "Improving Our Skills",
+            "Preaching Methods",
+            "Expanding Our Ministry",
+            "Meetings, Assemblies, and Conventions",
+        ]
     )
 
 
@@ -631,69 +366,16 @@ def organization():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Our Organization"
-    SUB_CATEGORY_LIST = [
-        "Reports From Around the World",
-        "Bethel",
-        "Organized to Accomplish Our Ministry",
-        "History",
-        "Legal Developments",
-        "Bloodless Medicine",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Our Organization",
+        [
+            "Reports From Around the World",
+            "Bethel",
+            "Organized to Accomplish Our Ministry",
+            "History",
+            "Legal Developments",
+            "Bloodless Medicine",
+        ]
     )
 
 
@@ -710,70 +392,17 @@ def bible():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "The Bible"
-    SUB_CATEGORY_LIST = [
-        "Books of the Bible",
-        "Bible Teachings",
-        "Bible Accounts",
-        "People, Places, and Things",
-        "Bible Translations",
-        "Apply Bible Principles",
-        "Creation",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "The Bible",
+        [
+            "Books of the Bible",
+            "Bible Teachings",
+            "Bible Accounts",
+            "People, Places, and Things",
+            "Bible Translations",
+            "Apply Bible Principles",
+            "Creation",
+        ]
     )
 
 
@@ -790,68 +419,15 @@ def dramas():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Dramas"
-    SUB_CATEGORY_LIST = [
-        "The Good News According to Jesus",
-        "Bible Times",
-        "Modern Day",
-        "Extra Features",
-        "Animated",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Dramas",
+        [
+            "The Good News According to Jesus",
+            "Bible Times",
+            "Modern Day",
+            "Extra Features",
+            "Animated",
+        ]
     )
 
 
@@ -868,88 +444,35 @@ def series():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Series"
-    SUB_CATEGORY_LIST = [
-        "Apply Yourself to Reading and Teaching",
-        "Become Jehovah's Friend—Songs",
-        "Become Jehovah's Friend—Video Lessons",
-        "Essential Bible Teachings",
-        "For a Happy Marriage",
-        "Imitate Their Faith",
-        "Introduction to Bible Books",
-        "Iron Sharpens Iron",
-        "Learn From Jehovah's Friends",
-        "Learn From Them",
-        "Lessons From The Watchtower",
-        "Love People—Make Disciples",
-        "My Teen Life",
-        "Neeta and Jade",
-        "Organizational Accomplishments",
-        "Our History in Motion",
-        "Reasons for Faith",
-        "The Bible Changes Lives",
-        "The Good News According to Jesus",
-        "Truth Transforms Lives",
-        "Viewpoints on the Origin of Life",
-        "Was It Designed?",
-        "What Your Peers Say",
-        "Where Are They Now?",
-        "Whiteboard Animations",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Series",
+        [
+            "Apply Yourself to Reading and Teaching",
+            "Become Jehovah's Friend—Songs",
+            "Become Jehovah's Friend—Video Lessons",
+            "Essential Bible Teachings",
+            "For a Happy Marriage",
+            "Imitate Their Faith",
+            "Introduction to Bible Books",
+            "Iron Sharpens Iron",
+            "Learn From Jehovah's Friends",
+            "Learn From Them",
+            "Lessons From The Watchtower",
+            "Love People—Make Disciples",
+            "My Teen Life",
+            "Neeta and Jade",
+            "Organizational Accomplishments",
+            "Our History in Motion",
+            "Reasons for Faith",
+            "The Bible Changes Lives",
+            "The Good News According to Jesus",
+            "Truth Transforms Lives",
+            "Viewpoints on the Origin of Life",
+            "Was It Designed?",
+            "What Your Peers Say",
+            "Where Are They Now?",
+            "Whiteboard Animations",
+        ]
     )
 
 
@@ -966,68 +489,15 @@ def music():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Music"
-    SUB_CATEGORY_LIST = [
-        "Original Songs",
-        "Children’s Songs",
-        "Convention Music Presentations",
-        "Making Music",
-        "Sing to Jehovah",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Music",
+        [
+            "Original Songs",
+            "Children’s Songs",
+            "Convention Music Presentations",
+            "Making Music",
+            "Sing to Jehovah",
+        ]
     )
 
 
@@ -1044,67 +514,14 @@ def interviews():
         This page is dynamic and fetches data from the database.
     """
 
-    # Fetch categories from the database
-    CATEGORY = "Interviews and Experiences"
-    SUB_CATEGORY_LIST = [
-        "Truth Transforms Lives",
-        "Blessings of Sacred Service",
-        "Enduring Trials",
-        "Young People",
-        "Science",
-        "From Our Archives",
-    ]
-    logging.debug(
-        f"Category: {CATEGORY}. Subcategories: {SUB_CATEGORY_LIST}"
-    )
-
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(
-            name=CATEGORY
-        )
-
-        if not main_cat_id:
-            logging.error(f"Category '{CATEGORY}' not found.")
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Category not found"
-                ),
-                404
-            )
-
-    main_cat = {
-        "id": main_cat_id,
-        "name": CATEGORY,
-    }
-    logging.debug(f"Main Category ID: {main_cat}")
-
-    # Convert subcategories to IDs
-    sub_cat_ids = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-
-        # Loop through each subcategory and get its ID
-        for sub_cat in SUB_CATEGORY_LIST:
-            sub_cat_id = cat_mgr.name_to_id(
-                name=sub_cat,
-            )
-            if sub_cat_id:
-                entry = {
-                    "id": sub_cat_id,
-                    "name": sub_cat,
-                }
-                sub_cat_ids.append(entry)
-            else:
-                logging.error(f"Subcategory '{sub_cat}' not found.")
-
-    # Render the template with the main category and subcategories
-    logging.debug(f"Main Category: {main_cat}")
-    logging.debug(f"Subcategories: {sub_cat_ids}")
-    return render_template(
-        "category.html",
-        category=main_cat,
-        sub_categories=sub_cat_ids,
+    return render_category_page(
+        "Interviews and Experiences",
+        [
+            "Truth Transforms Lives",
+            "Blessings of Sacred Service",
+            "Enduring Trials",
+            "Young People",
+            "Science",
+            "From Our Archives",
+        ]
     )

@@ -54,7 +54,8 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 **Dynamic Pages**
 * Base pages for characters, tags, speakers, scriptures
     * To browse through these items
-* Video details: Make categories clickable
+* Video details: Add URL to video page
+* Video details: Add date to video page
 </br></br>
 
 
@@ -124,6 +125,7 @@ Find similar videos
 * Goal watch time per week (like LinkedIn learning)
 * Character pictures (for bible characters)
 * Add DB fields for 'chapters' based on timestamp (good for long videos like monthly programs and graduations)
+* Cache thumbnails to make loading faster
 </br></br>
 
 Theme based on scripture

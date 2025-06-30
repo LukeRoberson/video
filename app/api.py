@@ -221,7 +221,15 @@ def category_filter(
                 )
                 video['watched'] = watched
 
-    return jsonify(videos)
+    # Sort videos by 'date_added' (newest first)
+    videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
+
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
+    )
 
 
 @api_bp.route(

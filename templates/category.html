@@ -40,11 +40,32 @@ Home
     <div class="container justify-content-center my-5">
         <div class="card shadow-lg bg-dark text-white" style="width: 100%; border-radius: 18px;">
             <div class="px-5 py-5">
-            {% for sub_cat in sub_categories %}
+            {% for sub_cat in watch_status %}
                 <div class="category-row" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
+                    
                     <!-- Category title -->
                     <div class="category-title">
                         <h3>{{ sub_cat.name }}</h3>
+                        <div class="progress" style="height: 24px; margin-bottom: 8px; position: relative;">
+                            <!-- Get the percentage watched -->
+                            {% set percent = (sub_cat.watched / sub_cat.count * 100) if sub_cat.count > 0 else 0 %}
+                            
+                            <!-- Display the progress bar -->
+                            <div class="progress-bar"
+                                role="progressbar"
+                                style="width: {{ percent }} %;"
+                                aria-valuenow="{{ percent|round(0) }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                                
+                            </div>  <!-- pylance-ignore -->
+
+                            <!-- Add the percentage label over the top -->
+                            <span class="progress-label {% if percent < 10 %}progress-label-outside{% endif %}"
+                                {% if percent < 5 %}style="left: {{ percent }}%;"{% endif %}>
+                                {{ sub_cat.watched }}/{{ sub_cat.count }} ({{ percent|round(1) }}%)
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Thumbnails wrapper with scroll arrows -->
