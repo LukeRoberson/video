@@ -15,6 +15,18 @@ Routes:
         - category_filter: Fetches videos by category and subcategory IDs.
     - /api/profile/create
         - create_profile: Creates a new user profile.
+    - /api/profile/set_active
+        - set_active_profile: Sets the active profile for the session.
+    - /api/profile/get_active
+        - get_active_profile: Retrieves the active profile for the session.
+    - /api/video/metadata
+        - add_video_metadata: Adds or resolves metadata for a video.
+    - /api/search/videos
+        - search_videos: Searches for videos by name or description.
+    - /api/scripture
+        - add_scripture_text: Adds text to a scripture.
+    - /api/mark_watched
+        - mark_watched: Marks a video as watched for the active profile.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -24,6 +36,12 @@ Dependencies:
 Custom Dependencies:
     - DatabaseContext: Context manager for database connections.
     - VideoManager: Manages video-related database operations.
+    - TagManager: Manages tag-related database operations.
+    - SpeakerManager: Manages speaker-related database operations.
+    - CharacterManager: Manages character-related database operations.
+    - ScriptureManager: Manages scripture-related database operations.
+    - LocalDbContext: Context manager for local database connections.
+    - ProfileManager: Manages user profile-related operations in the local db.
 """
 
 
@@ -936,4 +954,120 @@ def add_scripture_text() -> Response:
 
     return api_success(
         message=f"Added scripture text for '{scr_name}'"
+    )
+
+
+@api_bp.route(
+    "/api/profile/mark_watched",
+    methods=["POST"]
+)
+def mark_watched() -> Response:
+    """
+    Mark a video as watched for the active profile.
+
+    Expects JSON:
+        {
+            "video_id": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'video_id' in request data"
+                }
+            ),
+            400
+        )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        result = profile_mgr.mark_watched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+    if not result:
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to mark video {video_id} as watched"
+                }
+            ),
+            500
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": f"Marked video {video_id} as watched"
+            }
+        ),
+        200
+    )
+
+
+@api_bp.route(
+    "/api/profile/mark_unwatched",
+    methods=["POST"]
+)
+def mark_unwatched() -> Response:
+    """
+    Mark a video as unwatched for the active profile.
+
+    Expects JSON:
+        {
+            "video_id": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'video_id' in request data"
+                }
+            ),
+            400
+        )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        result = profile_mgr.mark_unwatched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+    if not result:
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to mark video {video_id} as unwatched"
+                }
+            ),
+            500
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": f"Marked video {video_id} as unwatched"
+            }
+        ),
+        200
     )

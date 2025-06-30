@@ -24,7 +24,7 @@
 ] %}
 
 <!-- The card with the main content-->
-<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+<div class="container d-flex justify-content-center my-5" style="min-height: 40vh;">
     <div class="card shadow-lg bg-dark text-white" style="width: 1000px; border-radius: 18px;">
         <div class="card-body">
 
@@ -54,6 +54,27 @@
                 <p>{{ video.duration | seconds_to_hhmmss }}</p>
             </div>
 
+            <!-- Mark as Watched -->
+            <div class="px-4 pb-2 pt-2">
+                <form
+                    id="markWatchedForm"
+                    {% if watched %}
+                        data-api-url="{{ url_for('api.mark_unwatched') }}"
+                    {% else %}
+                        data-api-url="{{ url_for('api.mark_watched') }}"
+                    {% endif %}
+                    data-video-id="{{ video.id }}"
+                >
+                    <button type="submit" class="btn btn-success">
+                        {% if watched %}
+                            Mark as Unwatched
+                        {% else %}
+                            Mark as Watched
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+            
             <div class="px-4 pb-2 pt-2">
                 <p>
                     {% for tag in tags %}
@@ -172,4 +193,6 @@
 
 
 <script src="{{ url_for('static', filename='js/videoRes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/watched.js') }}"></script>
+
 {% endblock %}

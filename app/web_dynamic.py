@@ -14,6 +14,8 @@ Dependancies:
 Custom Dependencies:
     DatabaseContext: Context manager for database operations.
     CategoryManager: Manages category-related database operations.
+    LocalDbContext: Context manager for local database operations.
+    ProfileManager: Manages user profile-related database operations.
 """
 
 # Standard library imports
@@ -23,6 +25,7 @@ from flask import (
     render_template,
     make_response,
     request,
+    session,
 )
 
 # Custom imports
@@ -34,6 +37,10 @@ from app.sql_db import (
     SpeakerManager,
     CharacterManager,
     ScriptureManager,
+)
+from app.local_db import (
+    LocalDbContext,
+    ProfileManager,
 )
 
 
@@ -106,6 +113,14 @@ def video_details(
             video_id=video_id
         )
 
+    # Check if the video is marked as watched by the user
+    with LocalDbContext() as local_db:
+        profile_mgr = ProfileManager(local_db)
+        watched = profile_mgr.check_watched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video['id']
+        )
+
     # Dummy data for similar videos
     print("Video Details:", video)
     similar_videos = [
@@ -139,6 +154,7 @@ def video_details(
             characters=characters,
             scriptures=scriptures,
             similar_videos=similar_videos,
+            watched=watched,
         )
     )
 
