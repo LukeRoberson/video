@@ -57,9 +57,16 @@
             <div class="row">
                 {% for video in videos %}
                 <div class="col-md-4 mb-4">
-                    <div class="card bg-dark text-white h-100">
+                    <div class="card bg-dark text-white h-100{% if video.watched %} watched{% endif %}" style="position: relative;">
                         <a href="/video/{{ video.id }}" class="text-decoration-none text-white">
-                            <img src="{{ video.thumbnail }}" class="card-img-top" alt="{{ video.title }}">
+                            {% if video.watched %}
+                                <div class="thumbnail-watched-icon" style="position: absolute; top: 10px; left: 10px; z-index: 2;">
+                                    <svg viewBox="0 0 24 24" width="24" height="24">
+                                        <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z" fill="#fff"/>
+                                    </svg>
+                                </div>
+                            {% endif %}
+                            <img src="{{ video.thumbnail }}" class="card-img-top{% if video.watched %} watched{% endif %}" alt="{{ video.title }}" {% if video.watched %}style="opacity:0.5;"{% endif %}>
                             <div class="card-body">
                                 <h6 class="card-title">{{ video.name }}</h6>
                             </div>
@@ -68,7 +75,7 @@
                 </div>
                 {% endfor %}
             </div>
-        </div>
+        </div>    
     </div>
 </div>
 

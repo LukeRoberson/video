@@ -20,15 +20,25 @@ function populateCategory(categoryId, subcategoryId) {
         .then(response => response.json())
         .then(videos => {
             const thumbnailsDiv = document.querySelector(`#category-${subcategoryId} .thumbnails`);
+            
+            // Add thumbnails to the category row
             thumbnailsDiv.innerHTML = videos.map(video => `
-                <div class="thumbnail">
+                <div class="thumbnail${video.watched ? ' watched' : ''}">
                     <a href="/video/${video.id}">
+                        ${video.watched ? `
+                            <div class="thumbnail-watched-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z"/>
+                                </svg>
+                            </div>
+                        ` : ''}
                         <img src="${video.thumbnail}" alt="${video.name}">
                         <div class="thumbnail-title">${video.name}</div>
                         <div class="thumbnail-duration">${video.duration}</div>
                     </a>
                 </div>
             `).join('');
+
         })
         .catch(error => {
             console.error("Error loading videos:", error);

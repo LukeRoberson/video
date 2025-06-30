@@ -207,6 +207,19 @@ def tag_details(
                 404
             )
 
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
+
     return make_response(
         render_template(
             "tag_details.html",
@@ -263,6 +276,19 @@ def speaker_details(
                 ),
                 404
             )
+
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
 
     return make_response(
         render_template(
@@ -322,6 +348,19 @@ def character_details(
                 ),
                 404
             )
+
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
 
     return make_response(
         render_template(
@@ -385,6 +424,19 @@ def scripture_details(
             f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
         )
 
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
+
     return make_response(
         render_template(
             "scripture_details.html",
@@ -435,6 +487,19 @@ def search_results() -> Response:
     # If videos are found, return them with a message
     else:
         message = f"Found {len(videos)} videos for '{query}'"
+
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
 
     return make_response(
         render_template(

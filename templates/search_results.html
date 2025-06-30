@@ -41,16 +41,22 @@
                 <div class="row">
                     {% for video in videos %}
                         <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card bg-dark text-white h-100 border-secondary">
-                                <a href="{{ url_for('dynamic_pages.video_details', video_id=video.id) }}" 
-                                   class="text-decoration-none text-white">
+                            <div class="card bg-dark text-white h-100 border-secondary{% if video.watched %} watched{% endif %}" style="position: relative;">
+                                <a href="{{ url_for('dynamic_pages.video_details', video_id=video.id) }}" class="text-decoration-none text-white">
                                     {% if video.thumbnail %}
-                                        <img src="{{ video.thumbnail }}" 
-                                             class="card-img-top" 
+                                        {% if video.watched %}
+                                            <div class="thumbnail-watched-icon" style="position: absolute; top: 10px; left: 10px; z-index: 2;">
+                                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                                    <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z" fill="#fff"/>
+                                                </svg>
+                                            </div>
+                                        {% endif %}
+                                        <img src="{{ video.thumbnail }}"
+                                             class="card-img-top{% if video.watched %} watched{% endif %}"
                                              alt="{{ video.name }}"
                                              style="height: 200px; object-fit: cover;">
                                     {% else %}
-                                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
                                              style="height: 200px;">
                                             <i class="fas fa-video fa-3x text-muted"></i>
                                         </div>
@@ -73,6 +79,7 @@
                         </div>
                     {% endfor %}
                 </div>
+            
             {% elif query %}
                 <!-- No Results Found -->
                 <div class="card bg-dark border-secondary">

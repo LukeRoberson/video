@@ -73,6 +73,12 @@ from app.local_db import (
 )
 
 
+api_bp = Blueprint(
+    'api',
+    __name__,
+)
+
+
 def seconds_to_hhmmss(
     seconds: int,
 ) -> str:
@@ -95,12 +101,6 @@ def seconds_to_hhmmss(
     if hours > 0:
         return f"{hours}:{minutes:02}:{seconds:02}"
     return f"{minutes}:{seconds:02}"
-
-
-api_bp = Blueprint(
-    'api',
-    __name__,
-)
 
 
 def api_success(
@@ -207,6 +207,19 @@ def category_filter(
     # Convert duration from seconds to HH:MM:SS format
     for video in videos:
         video['duration'] = seconds_to_hhmmss(video['duration'])
+
+    # Get watch status for the active profile
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
 
     return jsonify(videos)
 

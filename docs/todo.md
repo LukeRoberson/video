@@ -1,14 +1,14 @@
 # UI
 
-## Errors and Cleanup
-
-API
-* The API for adding metadata is very long
-* Mostly this is for error messages in JSON
-* Create a helper function to make this simpler
-
+## Cleanup
+* Reorganise styles.css, as it's getting large
+</br></br>
 
 ## Main Page:
+
+Add search bar functionality
+* Or remove? it's in the nav bar now
+</br></br>
 
 Current month's broadcasting video
 * Before 'continue watching'
@@ -43,6 +43,7 @@ Carousel Banners
 Adjust the text in the thumbnails
 * Does not fit very well
 * Investigate better ways to handle long video names
+* See 'Meetings, Conventions, ...' as an example
 </br></br>
 
 Sort videos in the carousels so the newest is first.
@@ -73,10 +74,10 @@ Admin Tools
 # Local Data
 ## Profiles:
 
-* Mark videos as watched (manually)
 * Auto mark as watched if a video finishes
-* Mark as unwatched
 * Track resume time on video
+* Show as watched on thumbnail
+* Show as in progress on thumbnail
 
 </br></br>
 
