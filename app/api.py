@@ -7,6 +7,8 @@ API endpoints that the browser will use to fetch additional information
 
 Functions:
     - seconds_to_hhmmss: Converts seconds to HH:MM:SS format.
+    - api_success: Returns a standardized success response.
+    - api_error: Returns a standardized error response.
 
 Routes:
     - /api/categories/<int>/<int>
@@ -83,6 +85,54 @@ api_bp = Blueprint(
 )
 
 
+def api_success(
+    data=None,
+    message=None,
+    status=200
+) -> Response:
+    """
+    Helper to return a standardized success response.
+
+    Args:
+        data (dict, optional): Data to include in the response.
+        message (str, optional): Message to include in the response.
+        status (int, optional): HTTP status code for the response.
+
+    Returns:
+        Response: A JSON response with a success status.
+    """
+
+    resp = {"success": True}
+
+    if message:
+        resp["message"] = message
+
+    if data is not None:
+        resp["data"] = data
+
+    return make_response(jsonify(resp), status)
+
+
+def api_error(
+    error,
+    status=400
+) -> Response:
+    """
+    Helper to return a standardized error response.
+
+    Args:
+        error (str): Error message to include in the response.
+        status (int, optional): HTTP status code for the response.
+
+    Returns:
+        Response: A JSON response with an error status.
+    """
+
+    resp = {"success": False, "error": error}
+
+    return make_response(jsonify(resp), status)
+
+
 @api_bp.route(
     "/api/categories/<int:category_id>/<int:subcategory_id>",
     methods=["GET"],
@@ -92,7 +142,9 @@ def category_filter(
     subcategory_id: int,
 ) -> Response:
     """
-    Fetch videos with the given major category ID and subcategory ID.
+    Fetch videos in a category.
+
+    Uses the given major category ID and subcategory ID.
     This is used to populate carousels with videos.
 
     Process:
@@ -147,8 +199,7 @@ def category_filter(
 )
 def create_profile() -> Response:
     """
-    Endpoint to create a new user profile.
-    This is a placeholder for future implementation.
+    Create a new user profile.
 
     Expected JSON Body:
         {
@@ -165,25 +216,11 @@ def create_profile() -> Response:
     data = request.get_json()
     if not data:
         logging.error("No data provided for profile creation.")
-        return make_response(
-            jsonify(
-                {
-                    'error': 'No data provided'
-                }
-            ),
-            400
-        )
+        return api_error('No data provided', 400)
 
     if 'name' not in data or 'image' not in data:
         logging.error("Missing required fields for profile creation.")
-        return make_response(
-            jsonify(
-                {
-                    'error': 'Missing required fields: name and image'
-                }
-            ),
-            400
-        )
+        return api_error('Missing required fields: name and image', 400)
 
     # Extract profile name and image from the data
     profile_name = data['name']
@@ -200,24 +237,10 @@ def create_profile() -> Response:
     # Handle errors
     if id is None:
         logging.error("Failed to create profile in the local database.")
-        return make_response(
-            jsonify(
-                {
-                    'error': 'Failed to create profile'
-                }
-            ),
-            500
-        )
+        return api_error('Failed to create profile', 500)
 
     # Return the response with the created profile ID
-    return make_response(
-        jsonify(
-            {
-                'message': f'Created profile with ID: {id}',
-            }
-        ),
-        200
-    )
+    return api_success(message=f'Created profile with ID: {id}')
 
 
 @api_bp.route(
@@ -241,25 +264,11 @@ def set_active_profile() -> Response:
     data = request.get_json()
     if not data:
         logging.error("No data provided for setting active profile.")
-        return make_response(
-            jsonify(
-                {
-                    "error": "No data provided"
-                }
-            ),
-            400
-        )
+        return api_error("No data provided", 400)
 
     if "profile_id" not in data:
         logging.error("Missing 'profile_id' in request data.")
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'profile_id' in request data"
-                }
-            ),
-            400
-        )
+        return api_error("Missing 'profile_id' in request data", 400)
 
     # Set the active profile in the session
     profile_id = data.get("profile_id")
@@ -267,14 +276,8 @@ def set_active_profile() -> Response:
     logging.info(f"Active profile set to: {profile_id}")
 
     # Return a JSON response indicating success
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "active_profile": profile_id
-            }
-        ),
-        200
+    return api_success(
+        data={"active_profile": profile_id}
     )
 
 
@@ -316,13 +319,8 @@ def get_active_profile() -> Response:
     logging.info(f"Profile details: {profile}")
 
     # Return a JSON response with the active profile ID
-    return make_response(
-        jsonify(
-            {
-                "active_profile": profile
-            }
-        ),
-        200
+    return api_success(
+        data={"active_profile": profile}
     )
 
 
@@ -332,7 +330,7 @@ def get_active_profile() -> Response:
 )
 def add_video_metadata() -> Response:
     """
-    Add metadata to a video, or resolves existing metadata.
+    Add metadata to a video, or update existing metadata.
 
     GET:
         Map video names to IDs
@@ -396,16 +394,13 @@ def add_video_metadata() -> Response:
                     name=character_name,
                 )
 
-        return make_response(
-            jsonify(
-                {
-                    "video_id": video_id,
-                    "tag_id": tag_id,
-                    "speaker_id": speaker_id,
-                    "character_id": character_id
-                }
-            ),
-            200
+        return api_success(
+            data={
+                "video_id": video_id,
+                "tag_id": tag_id,
+                "speaker_id": speaker_id,
+                "character_id": character_id
+            }
         )
 
     elif request.method == "POST":
@@ -413,14 +408,7 @@ def add_video_metadata() -> Response:
         data = request.get_json()
         if not data:
             logging.error("No data provided for adding video metadata.")
-            return make_response(
-                jsonify(
-                    {
-                        "error": "No data provided"
-                    }
-                ),
-                400
-            )
+            return api_error("No data provided", 400)
 
         print(f"Received data: {data}")
 
@@ -445,14 +433,7 @@ def add_video_metadata() -> Response:
         # Ensure video_name is provided
         if video_name is None:
             logging.error("Missing 'video_name' in request data.")
-            return make_response(
-                jsonify(
-                    {
-                        "error": "Missing 'video_name' in request data"
-                    }
-                ),
-                400
-            )
+            return api_error("Missing 'video_name' in request data", 400)
 
         # Ensure at least one metadata field is provided
         if all(
@@ -463,12 +444,8 @@ def add_video_metadata() -> Response:
             ]
         ):
             logging.error("No metadata fields provided for video.")
-            return make_response(
-                jsonify(
-                    {
-                        "error": "At least one metadata field must be provided"
-                    }
-                ),
+            return api_error(
+                "At least one metadata field must be provided",
                 400
             )
 
@@ -527,14 +504,8 @@ def add_video_metadata() -> Response:
                 logging.error(
                     f"Invalid date format for 'date_added': {date_added}"
                 )
-
-                return make_response(
-                    jsonify(
-                        {
-                            "error": "Invalid date format for 'date_added'. "
-                                     "Expected ISO format."
-                        }
-                    ),
+                return api_error(
+                    "Invalid date format for 'date_added'. Expect ISO format.",
                     400
                 )
 
@@ -558,14 +529,7 @@ def add_video_metadata() -> Response:
 
             if video_id is None:
                 logging.error(f"Video '{video_name}' not found.")
-                return make_response(
-                    jsonify(
-                        {
-                            "error": f"Video '{video_name}' not found"
-                        }
-                    ),
-                    404
-                )
+                return api_error(f"Video '{video_name}' not found", 404)
             logging.info(f"Video name: {video_name}, ID: {video_id}")
 
             # Add description if provided
@@ -580,14 +544,7 @@ def add_video_metadata() -> Response:
                         f"Failed to update description for "
                         f"video ID: {video_id}"
                     )
-                    return make_response(
-                        jsonify(
-                            {
-                                "error": "Failed to update video description"
-                            }
-                        ),
-                        500
-                    )
+                    return api_error("Failed to update video description", 500)
                 logging.info(f"Updated video ({result}) description.")
 
             # Add URL if provided
@@ -601,14 +558,7 @@ def add_video_metadata() -> Response:
                     logging.error(
                         f"Failed to update URL for video ID: {video_id}"
                     )
-                    return make_response(
-                        jsonify(
-                            {
-                                "error": "Failed to update video URL"
-                            }
-                        ),
-                        500
-                    )
+                    return api_error("Failed to update video URL", 500)
 
             # Add tags if provided
             if tag_name is not None:
@@ -631,14 +581,7 @@ def add_video_metadata() -> Response:
                     # Add the tag to the video
                     if tag_id is None:
                         logging.error(f"Failed to create tag: {tag}")
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": f"Failed to create tag: {tag}"
-                                }
-                            ),
-                            500
-                        )
+                        return api_error(f"Failed to create tag: {tag}", 500)
 
                     logging.info(
                         f"Adding tag '{tag}' with ID {tag_id} "
@@ -654,14 +597,7 @@ def add_video_metadata() -> Response:
                         logging.error(
                             f"Failed to add tag {tag} for video ID: {video_id}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": "Failed to add video tags"
-                                }
-                            ),
-                            500
-                        )
+                        return api_error("Failed to add video tags", 500)
 
             # Add speakers if provided
             if speaker_name is not None:
@@ -684,13 +620,8 @@ def add_video_metadata() -> Response:
                     # Add the speaker to the video
                     if speaker_id is None:
                         logging.error(f"Failed to create speaker: {speaker}")
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": f"Failed to create speaker: "
-                                    f"{speaker}"
-                                }
-                            ),
+                        return api_error(
+                            f"Failed to create speaker: {speaker}",
                             500
                         )
 
@@ -709,14 +640,7 @@ def add_video_metadata() -> Response:
                             f"Failed to add speaker {speaker} for "
                             f"video ID: {video_id}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": "Failed to add video speakers"
-                                }
-                            ),
-                            500
-                        )
+                        return api_error("Failed to add video speakers", 500)
 
             # Add characters if provided
             if character_name is not None:
@@ -741,13 +665,8 @@ def add_video_metadata() -> Response:
                         logging.error(
                             f"Failed to create character: {character}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": f"Failed to create character: "
-                                    f"{character}"
-                                }
-                            ),
+                        return api_error(
+                            f"Failed to create character: {character}",
                             500
                         )
 
@@ -766,14 +685,7 @@ def add_video_metadata() -> Response:
                             f"Failed to add character {character} for "
                             f"video ID: {video_id}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": "Failed to add video characters"
-                                }
-                            ),
-                            500
-                        )
+                        return api_error("Failed to add video characters", 500)
 
             # Add scripture if provided
             if scripture_name is not None:
@@ -803,13 +715,8 @@ def add_video_metadata() -> Response:
                         book = chapter = verse = None
 
                     if book is None or chapter is None or verse is None:
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": f"Scripture reference "
-                                    f"'{scripture}' is not valid. Skipping"
-                                }
-                            ),
+                        return api_error(
+                            f"Scripture reference '{scripture}' is not valid.",
                             400
                         )
 
@@ -833,13 +740,8 @@ def add_video_metadata() -> Response:
                         logging.error(
                             f"Failed to create scripture: {scripture}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": f"Failed to create "
-                                    f"scripture: {scripture}"
-                                }
-                            ),
+                        return api_error(
+                            f"Failed to create scripture: {scripture}",
                             500
                         )
 
@@ -860,14 +762,7 @@ def add_video_metadata() -> Response:
                             f"Failed to add scripture {scripture} "
                             f"for video ID: {video_id}"
                         )
-                        return make_response(
-                            jsonify(
-                                {
-                                    "error": "Failed to add video scriptures"
-                                }
-                            ),
-                            500
-                        )
+                        return api_error("Failed to add video scriptures", 500)
 
             if date_added is not None:
                 # Update the video's date added
@@ -880,37 +775,14 @@ def add_video_metadata() -> Response:
                     logging.error(
                         f"Failed to update date added for video ID: {video_id}"
                     )
-                    return make_response(
-                        jsonify(
-                            {
-                                "error": "Failed to update video date added"
-                            }
-                        ),
-                        500
-                    )
-
-                logging.info(f"Updated video ({result}) date added.")
+                    return api_error("Failed to update video date added", 500)
 
         # Return a success response
-        return make_response(
-            jsonify(
-                {
-                    "success": True
-                }
-            ),
-            200
-        )
+        return api_success()
 
     else:
         logging.error("Unsupported request method.")
-        return make_response(
-            jsonify(
-                {
-                    "error": "Unsupported request method"
-                }
-            ),
-            405
-        )
+        return api_error("Unsupported request method", 405)
 
 
 @api_bp.route(
@@ -937,7 +809,7 @@ def search_videos() -> Response:
 
     if not query:
         logging.warning("Empty search query provided.")
-        return jsonify([])
+        return api_success(data=[])
 
     # Use the search method to find videos
     with DatabaseContext() as db:
@@ -961,12 +833,7 @@ def search_videos() -> Response:
         logging.info(f"No videos found for query: '{query}'")
 
     # Return the list of videos as a JSON response
-    return make_response(
-        jsonify(
-            videos
-        ),
-        200
-    )
+    return api_success(data=videos)
 
 
 @api_bp.route(
@@ -991,26 +858,15 @@ def add_scripture_text() -> Response:
     data = request.get_json()
     if not data:
         logging.error("No data provided for adding scripture text.")
-        return make_response(
-            jsonify(
-                {
-                    "error": "No data provided"
-                }
-            ),
-            400
-        )
+        return api_error("No data provided", 400)
 
     scr_name = data.get("scr_name")
     scr_text = data.get("scr_text")
 
     if not scr_name or not scr_text:
         logging.error("Missing 'scr_name' or 'scr_text' in request data.")
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'scr_name' or 'scr_text' in request data"
-                }
-            ),
+        return api_error(
+            "Missing 'scr_name' or 'scr_text' in request data",
             400
         )
 
@@ -1038,13 +894,8 @@ def add_scripture_text() -> Response:
         book = chapter = verse = None
 
     if book is None or chapter is None or verse is None:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Scripture reference "
-                    f"'{scr_name}' is not valid. Skipping"
-                }
-            ),
+        return api_error(
+            f"Scripture reference '{scr_name}' is not valid. Skipping",
             400
         )
 
@@ -1063,15 +914,7 @@ def add_scripture_text() -> Response:
         logging.error(
             f"Failed to create scripture: {scr_name}"
         )
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to create "
-                    f"scripture: {scr_name}"
-                }
-            ),
-            500
-        )
+        return api_error(f"Failed to create scripture: {scr_name}", 500)
 
     # Add the scripture text to the database
     logging.info(
@@ -1087,23 +930,10 @@ def add_scripture_text() -> Response:
 
     if not result:
         logging.error(f"Failed to add scripture text for '{scr_name}'.")
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to add scripture text for '{scr_name}'"
-                }
-            ),
-            500
-        )
+        return api_error(f"Failed to add scripture text for '{scr_name}'", 500)
 
     logging.info(f"Successfully added scripture text for '{scr_name}'.")
 
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Added scripture text for '{scr_name}'"
-            }
-        ),
-        200
+    return api_success(
+        message=f"Added scripture text for '{scr_name}'"
     )

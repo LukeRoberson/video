@@ -53,12 +53,14 @@ if (profileForm) {
 fetch('/api/profile/get_active')
     .then(res => res.json())
     .then(profile => {
-        console.log('Active profile:', profile.active_profile.name);
+        console.log('Active profile:', profile.data.active_profile.name);
+
         // Update the profile name in the DOM, defaulting to 'Guest' if not set
-        document.getElementById('profile-name').textContent = profile.active_profile.name || 'Guest';
+        document.getElementById('profile-name').textContent = profile.data.active_profile.name || 'Guest';
+        
         // Update the profile image in the DOM, defaulting to 'guest.png' if not set
-        document.getElementById('profile-img').src = '/static/img/profiles/' + (profile.active_profile.image || 'guest.png');
-        document.getElementById('profile-img').alt = profile.active_profile.name || 'Guest';
+        document.getElementById('profile-img').src = '/static/img/profiles/' + (profile.data.active_profile.image || 'guest.png');
+        document.getElementById('profile-img').alt = profile.data.active_profile.name || 'Guest';       
     });
 
 
