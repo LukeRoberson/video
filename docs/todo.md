@@ -1,9 +1,5 @@
 # UI
 
-## Cleanup
-* Reorganise styles.css, as it's getting large
-</br></br>
-
 ## Main Page:
 
 Add search bar functionality

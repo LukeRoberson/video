@@ -30,20 +30,6 @@ from tqdm import tqdm
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
 urls = [
-    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenMovies/pub-ivtru_2_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502015255_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/SeriesWhatPeersSay/docid-502013268_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502014176_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/SeriesWhatPeersSay/docid-502013228_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/TeenWhatPeersSay/docid-502014231_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODIntExpTransformations/pub-jwb_201910_4_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODIntExpTransformations/pub-jwb_202003_7_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODPgmEvtMorningWorship/pub-jwbvod25_22_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwb_201808_12_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/pub-jwb_202003_11_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODActivitiesConstruction/docid-502014259_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/AccomplishMinistry/docid-502012372_1_VIDEO",
-    "https://www.jw.org/en/library/videos/#en/mediaitems/VODMinistryTools/pub-imv_3_VIDEO"
 ]
 
 
