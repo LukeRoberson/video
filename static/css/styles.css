@@ -321,3 +321,22 @@ body {
 .character-details .col-md-9 {
     min-width: 300px; /* Ensure the text column has a minimum width */
 }
+
+
+/* ===========================
+   Quote blocks
+   =========================== */
+q {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    quotes: "“" "”" "‘" "’";
+    font-style: italic;
+    color: lightgray;
+}
+
+q::before {
+    content: open-quote;
+}
+
+q::after {
+    content: close-quote;
+}

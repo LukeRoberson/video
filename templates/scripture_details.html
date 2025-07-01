@@ -32,10 +32,8 @@
                     <br />
 
                     <!-- Scripture text, if available -->
-                    {% if scripture.text %}
-                        <blockquote class="blockquote text-center">
-                            <p class="text-info">{{ scripture.text }}</p>
-                        </blockquote>
+                    {% if scripture.verse_text %}
+                        <q class="blockquote">{{ scripture.verse_text }}</q>
                     {% else %}
                         <blockquote class="blockquote text-center">
                             <p class="text-info">Not available</p>
