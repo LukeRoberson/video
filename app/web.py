@@ -5,6 +5,13 @@ Define flask routes for the web application.
 
 Routes:
     - /admin: Render the admin dashboard.
+    - /about: Render the about page.
+    - /select_profile: Render the profile selection page.
+    - /create_profile: Render the profile creation page.
+    - /character: Render the character details page.
+    - /tag: Render the tag details page.
+    - /speaker: Render the speaker details page.
+    - /scripture: Render the scripture details page.
 
 Dependencies:
     - Flask: For creating the web application.
@@ -164,5 +171,81 @@ def create_profile() -> Response:
         render_template(
             'create_profile.html',
             profile_pics=profile_pics
+        )
+    )
+
+
+@web_bp.route(
+    "/character",
+    methods=["GET"]
+)
+def characters() -> Response:
+    """
+    Render the character details page.
+
+    Returns:
+        Response: A rendered HTML page with character details.
+    """
+
+    return make_response(
+        render_template(
+            'character.html'
+        )
+    )
+
+
+@web_bp.route(
+    "/tag",
+    methods=["GET"]
+)
+def tags() -> Response:
+    """
+    Render the tag details page.
+
+    Returns:
+        Response: A rendered HTML page with tag details.
+    """
+
+    return make_response(
+        render_template(
+            'tag.html'
+        )
+    )
+
+
+@web_bp.route(
+    "/speaker",
+    methods=["GET"]
+)
+def speakers() -> Response:
+    """
+    Render the speaker details page.
+
+    Returns:
+        Response: A rendered HTML page with speaker details.
+    """
+
+    return make_response(
+        render_template(
+            'speaker.html'
+        )
+    )
+
+
+@web_bp.route(
+    "/scripture",
+    methods=["GET"]
+)
+def scriptures() -> Response:
+    """
+    Render the scripture details page.
+
+    Returns:
+        Response: A rendered HTML page with scripture details.
+    """
+
+    return make_response(
+        render_template(
+            'scripture.html'
         )
     )

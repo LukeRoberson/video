@@ -31,22 +31,32 @@
                     <h1 class="mb-2">{{ character.name }}</h1>
                     <br />
 
-                    <!-- Number of videos referring to this character -->
-                    <p class="mb-1"><strong>Video Count:</strong> {{ videos|length }}</p>
-
-                    <!-- Character description, if available -->
-                    {% if character.description %}
-                        <p class="mb-1"><strong>Profile:</strong><br /> {{ character.description }}</p>
-                    {% else %}
-                        <p class="mb-1"><strong>Description:</strong> Not available</p>
-                    {% endif %}
-                    
-                    <!-- Character date range, if available -->
-                    {% if character.date_range %}
-                        <p class="mb-1"><strong>Dates:</strong> {{ character.date_range }}</p>
-                    {% else %}
-                        <p class="mb-1"><strong>Dates:</strong> Not available</p>
-                    {% endif %}
+                    <div class="container-fluid px-0"> <!-- Remove default padding -->
+                        <div class="row mb-1 gx-2"> <!-- Reduce horizontal spacing -->
+                            <div class="col-sm-2 text-end"><strong class="text-warning">Video Count:</strong></div>
+                            <div class="col-sm-9">{{ videos|length }}</div>
+                        </div>
+                        <div class="row mb-1 gx-2"> <!-- Reduce horizontal spacing -->
+                            <div class="col-sm-2 text-end"><strong class="text-warning">Dates:</strong></div>
+                            <div class="col-sm-9">
+                                {% if character.date_range %}
+                                    {{ character.date_range }}
+                                {% else %}
+                                    Not available
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row mb-1 gx-2"> <!-- Reduce horizontal spacing -->
+                            <div class="col-sm-2 text-end"><strong class="text-warning">Profile:</strong></div>
+                            <div class="col-sm-9">
+                                {% if character.description %}
+                                    {{ character.description }}
+                                {% else %}
+                                    Not available
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

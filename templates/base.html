@@ -45,6 +45,9 @@
                     <!-- Admin Page -->
                     <a href="{{ url_for('web_pages.admin_dashboard') }}" class="navbar-brand">Admin</a>
 
+                    <!-- About Page -->
+                    <a href="{{ url_for('web_pages.about') }}" class="navbar-brand">About</a>
+
                     <!-- Dropdown for categoies -->
                     <div class="dropdown ms-3">
                         <a class="btn btn-secondary dropdown-toggle navbar-item" href="#" role="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -64,6 +67,19 @@
                             <li><a class="dropdown-item" href="{{ url_for('category_pages.series') }}">Series</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('category_pages.music') }}">Music</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('category_pages.interviews') }}">Interviews and Experiences</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Dropdown for details -->
+                    <div class="dropdown ms-3">
+                        <a class="btn btn-secondary dropdown-toggle navbar-item" href="#" role="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Dig Deeper
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="categoriesDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('web_pages.characters') }}">Bible Characters</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('web_pages.speakers') }}">Speakers</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('web_pages.scriptures') }}">Scriptures</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('web_pages.tags') }}">Tags</a></li>
                         </ul>
                     </div>
                 </div>
