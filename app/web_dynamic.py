@@ -317,6 +317,7 @@ def character_details(
         If the character is not found, a 404 error is returned.
     """
 
+    PIC_PATH = "/static/img/characters/"
     videos = []
 
     with DatabaseContext() as db:
@@ -327,6 +328,10 @@ def character_details(
         character = character_mgr.get(id=character_id)
         if character:
             character = character[0]
+            if character['profile_pic']:
+                character['profile_pic'] = (
+                    f"{PIC_PATH}{character['profile_pic']}"
+                )
         else:
             return make_response(
                 render_template(

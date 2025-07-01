@@ -1,5 +1,11 @@
 # UI
 
+## Bugs
+
+* Scriptures not showing on dynamic scripture pages
+* Left and right buttons on carousels not working
+* Left and right buttons on carousels don't always appear initially
+
 ## Main Page:
 
 Add search bar functionality
@@ -122,10 +128,14 @@ Find similar videos
 # Other Things (Bizzare Ideas)
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
-* Goal watch time per week (like LinkedIn learning)
 * Character pictures (for bible characters)
 * Add DB fields for 'chapters' based on timestamp (good for long videos like monthly programs and graduations)
 * Cache thumbnails to make loading faster
+</br></br>
+
+UI:
+* Simplified mode (slider) to hide some details
+* Button to hide watched videos
 </br></br>
 
 Theme based on scripture
@@ -135,7 +145,26 @@ Theme based on scripture
 * Lay out nicely, not just videos based on a category
 </br></br>
 
-A settings page
-* This may be part of the profile
-* Clear watch history
-* Check for DB updates
+Profiles
+* Settings page
+    * Clear watch history
+    * Check for DB updates
+* Goal watch time per week (like LinkedIn learning)
+</br></br>
+
+Video Controls
+* Skip ahead/back 5s/15s
+* Theatre mode (like in youtube)
+</br></br>
+
+AI
+* AI model to transcribe to captions
+* AI model to summarise content
+</br></br>
+
+Project
+* Break into two project
+    * Interface, that users will access
+    * Tools, that I will use
+* Get working as a phone/tablet app
+* Chromecast or Amazon Fire app

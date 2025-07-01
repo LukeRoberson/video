@@ -304,3 +304,20 @@ body {
     color: #fff;                    /* or #222 for dark text if needed */
     text-shadow: 0 1px 4px #232323;
 }
+
+
+/* ===========================
+   Character Details Page
+   =========================== */
+.character-details {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping when content overflows */
+}
+
+.character-details .col-md-3 {
+    min-width: 240px; /* Ensure the image column doesn't shrink too much */
+}
+
+.character-details .col-md-9 {
+    min-width: 300px; /* Ensure the text column has a minimum width */
+}

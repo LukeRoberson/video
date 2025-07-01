@@ -52,6 +52,7 @@
             <div class="px-4 pb-2 pt-2">
                 <h1>{{ video.name }}</h1>
                 <p>{{ video.duration | seconds_to_hhmmss }}</p>
+                <p>Date: {{ video.date_added.split(' ')[0] }}</p>
             </div>
 
             <!-- Mark as Watched -->

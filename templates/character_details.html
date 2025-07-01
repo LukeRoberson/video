@@ -15,14 +15,14 @@
 
         <!-- Character details section -->
         <div class="card-body p-4">
-            <div class="row align-items-center mb-4">
+            <div class="row align-items-center mb-4 character-details">
 
                 <!-- Use a real profile pic if available, otherwise an empty pic -->
                 <div class="col-md-3 text-center">
                     {% if character.profile_pic %}
-                        <img src="{{ character.profile_pic }}" alt="{{ character.name }} profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                        <img src="{{ character.profile_pic }}" alt="{{ character.name }} profile picture" class="img-fluid shadow" style="max-width: 200px;">
                     {% else %}
-                        <img src="{{ url_for('static', filename='img/characters/profile-icon.jpg') }}" alt="Default profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                        <img src="{{ url_for('static', filename='img/characters/profile-icon.jpg') }}" alt="Default profile picture" class="img-fluid shadow" style="max-width: 200px;">
                     {% endif %}
                 </div>
 
@@ -32,20 +32,20 @@
                     <br />
 
                     <!-- Number of videos referring to this character -->
-                    <p class="mb-1"><strong>Videos:</strong> {{ videos|length }}</p>
+                    <p class="mb-1"><strong>Video Count:</strong> {{ videos|length }}</p>
 
                     <!-- Character description, if available -->
                     {% if character.description %}
-                        <p class="mb-1"><strong>Description:</strong> {{ character.description }}</p>
+                        <p class="mb-1"><strong>Profile:</strong><br /> {{ character.description }}</p>
                     {% else %}
                         <p class="mb-1"><strong>Description:</strong> Not available</p>
                     {% endif %}
                     
                     <!-- Character date range, if available -->
                     {% if character.date_range %}
-                        <p class="mb-1"><strong>Date Range:</strong> {{ character.date_range }}</p>
+                        <p class="mb-1"><strong>Dates:</strong> {{ character.date_range }}</p>
                     {% else %}
-                        <p class="mb-1"><strong>Date Range:</strong> Not available</p>
+                        <p class="mb-1"><strong>Dates:</strong> Not available</p>
                     {% endif %}
                 </div>
             </div>
