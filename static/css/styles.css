@@ -340,3 +340,18 @@ q::before {
 q::after {
     content: close-quote;
 }
+
+
+/* ===========================
+   Card-like items (e.g., tags page)
+   =========================== */
+
+.tag-item {
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.tag-item:hover {
+    background-color: #343a40; /* Slightly lighter dark background */
+    border-color: #ffc107; /* Change border to a yellow color */
+    color: #ffc107; /* Change text color to yellow */
+}

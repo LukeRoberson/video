@@ -102,14 +102,17 @@ IGNORE_SUB_CATEGORIES = [
     "“Sing Out Joyfully”—Meetings",
 ]
 
-# Videos to ignore when scraping
-#   The scraper picks these up when they already exist, possibly due to
+# Videos to ignore when scraping; Some are aliases for other videos,
+#   The scraper picks others up when they already exist, possibly due to
 #   encoding of characters in the video name.
 IGNORE_VIDEOS = [
     "JW Broadcasting—November 2017",
     "JW Broadcasting​—December 2015",
     "JW Broadcasting​—November 2015",
     "JW Broadcasting​—September 2015",
+    "2012 Annual Meeting Highlights",
+    "How Jehovah’s Witnesses Finance Their Work",
+    "Worldwide Preaching Campaign of Jehovah’s Witnesses",
     "Mark Noumair: “Work . . . for the Food That Remains for Everlasting Life”"
 ]
 

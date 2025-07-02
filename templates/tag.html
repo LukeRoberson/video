@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
+
 {% endblock %}
 
 {% block title %}
@@ -13,6 +14,20 @@
     <div class="card shadow-lg bg-dark text-white" style="width: 80%; border-radius: 18px;">
         <div class="card-body p-4">
             <h1>Tags</h1>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row">
+                {% for tag in tags %}
+                    <div class="col-12 col-md-6 col-lg-3 mb-3">
+                        <div class="tag-item d-flex align-items-center justify-content-center p-2 border rounded .bg-dark.bg-gradient text-light" style="height: 80px;">
+                            <a href="/tag/{{ tag.id }}" class="text-center m-0 text-light text-decoration-none w-100 h-100 d-flex align-items-center justify-content-center">
+                                <strong>{{ tag.name }}</strong>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

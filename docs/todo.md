@@ -47,16 +47,6 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 </br></br>
 
 
-## Special Pages:
-
-**Dynamic Pages**
-* Base pages for characters, tags, speakers, scriptures
-    * To browse through these items
-* Video details: Add URL to video page
-* Video details: Add date to video page
-</br></br>
-
-
 ----
 # Local Data
 ## Profiles:
@@ -78,7 +68,6 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 * After a particular date
 * Shorter than (duration)
 * Longer than (duration)
-* List of tags (AND/OR)
 </br></br>
 
 **Data**
@@ -87,6 +76,10 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 * Get profile pics for speakers
 * Get profile pics for characters
 </br></br>
+
+**Scraper**
+* Add a YAML file for ignore categories and videos
+* Remove static lists in the script
 
 
 ## Correlation
@@ -112,8 +105,6 @@ Find similar videos
 # Other Things (Bizzare Ideas)
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
-* Character pictures (for bible characters)
-* Add DB fields for 'chapters' based on timestamp (good for long videos like monthly programs and graduations)
 * Cache thumbnails to make loading faster
 </br></br>
 
@@ -139,6 +130,8 @@ Profiles
 Video Controls
 * Skip ahead/back 5s/15s
 * Theatre mode (like in youtube)
+* Time range, to play a specific part of a video
+* Chapters in longer videos (like in youtube)
 </br></br>
 
 AI

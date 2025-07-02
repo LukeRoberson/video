@@ -14,6 +14,39 @@
         <div class="card-body p-4">
             <h1>Scriptures</h1>
         </div>
+
+        <!-- Loop through books dynamically -->
+        {% for book, chapters in scriptures_by_book.items() %}
+        <div class="card-body p-4">
+            <h3>{{ book }}</h3>
+            <div class="row">
+
+                {% for chapter, verses in chapters.items() %}
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="d-flex align-items-center">
+
+                        <!-- Display the chapter in a card-like box -->
+                        <div class="tag-item d-flex align-items-center justify-content-center p-2 border rounded bg-dark bg-gradient text-light" style="height: 40px; width: 40px;">
+                            <strong>{{ chapter }}</strong>
+                        </div>
+
+                        <!-- Display the verses as a horizontal list -->
+                        <div class="ms-3 d-flex flex-wrap">
+                            {% for verse in verses %}
+                                <a href="/scripture/{{ verse.id }}" class="text-light text-decoration-none me-3">
+                                    {{ verse.verse }}
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+        {% endfor %}
+
     </div>
 </div>
 {% endblock %}

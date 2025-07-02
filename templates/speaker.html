@@ -14,6 +14,57 @@
         <div class="card-body p-4">
             <h1>Speakers</h1>
         </div>
+
+        <!-- The most frequent speakers -->
+        <div class="card-body p-4">
+            <h3 class="p-2">Frequent Speakers</h3>
+            <div class="row">
+                {% for speaker in frequent_speakers %}
+                    <div class="col-12 col-md-6 mb-3">
+                        <div class="d-flex align-items-center p-2">
+                            <a href="/speaker/{{ speaker.id }}" class="m-0 text-light text-decoration-none d-flex align-items-center justify-content-center">
+                                <img src="/static/img/speakers/{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                                <span class="fs-5">{{ speaker.name }}</span>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- The moderate speakers -->
+        <div class="card-body p-4">
+            <h3 class="p-2">Moderate Speakers</h3>
+            <div class="row">
+                {% for speaker in moderate_speakers %}
+                    <div class="col-12 col-md-6 mb-3">
+                        <div class="d-flex align-items-center p-2">
+                            <a href="/speaker/{{ speaker.id }}" class="m-0 text-light text-decoration-none d-flex align-items-center justify-content-center">
+                                <img src="/static/img/speakers/{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                                <span class="fs-5">{{ speaker.name }}</span>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- The occasional speakers -->
+        <div class="card-body p-4">
+            <h3 class="p-2">Occasional Speakers</h3>
+            <div class="row">
+                {% for speaker in occasional_speakers %}
+                    <div class="col-12 col-md-6 mb-3">
+                        <div class="d-flex align-items-center p-2">
+                            <a href="/speaker/{{ speaker.id }}" class="m-0 text-light text-decoration-none d-flex align-items-center justify-content-center">
+                                <img src="/static/img/speakers/{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                                <span class="fs-5">{{ speaker.name }}</span>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

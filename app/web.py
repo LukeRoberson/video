@@ -27,12 +27,24 @@ from flask import (
     render_template,
     make_response,
 )
+import random
+import os
+from typing import List, Dict, Any
+from collections import defaultdict
+
+# Custom imports
+from app.sql_db import (
+    DatabaseContext,
+    VideoManager,
+    CharacterManager,
+    TagManager,
+    SpeakerManager,
+    ScriptureManager,
+)
 from app.local_db import (
     LocalDbContext,
     ProfileManager,
 )
-import random
-import os
 
 
 web_bp = Blueprint(
@@ -179,6 +191,10 @@ def create_profile() -> Response:
     "/character",
     methods=["GET"]
 )
+@web_bp.route(
+    "/characters",
+    methods=["GET"]
+)
 def characters() -> Response:
     """
     Render the character details page.
@@ -187,15 +203,33 @@ def characters() -> Response:
         Response: A rendered HTML page with character details.
     """
 
+    with DatabaseContext() as db:
+        character_mgr = CharacterManager(db)
+        characters: List[Dict[str, Any]] = character_mgr.get() or []
+
+    # Sort characters by name in a case-insensitive manner
+    characters = sorted(
+        characters, key=lambda character: character.get('name', '').lower()
+    )
+
+    for character in characters:
+        if not character.get('profile_pic'):
+            character['profile_pic'] = 'profile-icon.jpg'
+
     return make_response(
         render_template(
-            'character.html'
+            'character.html',
+            characters=characters,
         )
     )
 
 
 @web_bp.route(
     "/tag",
+    methods=["GET"]
+)
+@web_bp.route(
+    "/tags",
     methods=["GET"]
 )
 def tags() -> Response:
@@ -206,15 +240,34 @@ def tags() -> Response:
         Response: A rendered HTML page with tag details.
     """
 
+    with DatabaseContext() as db:
+        tag_mgr = TagManager(db)
+        tags: List[Dict[str, Any]] = tag_mgr.get() or []
+
+    # Sort tags by name in a case-insensitive manner
+    tags = sorted(tags, key=lambda tag: tag.get('name', '').lower())
+
+    # Strip 'bcast_' prefix from tag names (special handling)
+    tags = [
+        tag
+        for tag in tags
+        if not tag.get('name', '').lower().startswith('bcast_')
+    ]
+
     return make_response(
         render_template(
-            'tag.html'
+            'tag.html',
+            tags=tags,
         )
     )
 
 
 @web_bp.route(
     "/speaker",
+    methods=["GET"]
+)
+@web_bp.route(
+    "/speakers",
     methods=["GET"]
 )
 def speakers() -> Response:
@@ -225,15 +278,58 @@ def speakers() -> Response:
         Response: A rendered HTML page with speaker details.
     """
 
+    with DatabaseContext() as db:
+        speaker_mgr = SpeakerManager(db)
+        video_mgr = VideoManager(db)
+        speakers = speaker_mgr.get()
+
+        if not speakers:
+            speakers = []
+
+        # Get the video count for each speaker
+        for speaker in speakers:
+            videos = video_mgr.get_filter(
+                speaker_id=speaker['id']
+            )
+            if not videos:
+                return make_response(
+                    render_template(
+                        "404.html",
+                        message="No videos found for this speaker"
+                    ),
+                    404
+                )
+            speaker['video_count'] = len(videos)
+
+    # Sort speakers by name in a case-insensitive manner
+    speakers = sorted(speakers, key=lambda s: s.get('name', '').lower())
+
+    # Set default profile picture if not provided
+    for speaker in speakers:
+        if not speaker.get('profile_pic'):
+            speaker['profile_pic'] = 'profile-icon.jpg'
+
+    # Categorize speakers by video_count
+    speakers_lt3 = [s for s in speakers if s['video_count'] < 3]
+    speakers_3_10 = [s for s in speakers if 3 <= s['video_count'] <= 10]
+    speakers_gt10 = [s for s in speakers if s['video_count'] > 10]
+
     return make_response(
         render_template(
-            'speaker.html'
+            'speaker.html',
+            frequent_speakers=speakers_gt10,
+            moderate_speakers=speakers_3_10,
+            occasional_speakers=speakers_lt3,
         )
     )
 
 
 @web_bp.route(
     "/scripture",
+    methods=["GET"]
+)
+@web_bp.route(
+    "/scriptures",
     methods=["GET"]
 )
 def scriptures() -> Response:
@@ -244,8 +340,53 @@ def scriptures() -> Response:
         Response: A rendered HTML page with scripture details.
     """
 
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+        scriptures: List[Dict[str, Any]] = scripture_mgr.get() or []
+
+    # Group scriptures by book and then by chapter
+    scriptures_by_book = defaultdict(lambda: defaultdict(list))
+    for scripture in scriptures:
+        book = scripture["book"]
+        chapter = scripture["chapter"]
+        scriptures_by_book[book][chapter].append(scripture)
+
+    # Sort scriptures within each chapter by verse
+    for book, chapters in scriptures_by_book.items():
+        for chapter in chapters:
+            scriptures_by_book[book][chapter] = sorted(
+                scriptures_by_book[book][chapter],
+                key=lambda s: int(s.get("verse", 0))
+            )
+
+    # Define the custom order of books
+    custom_book_order = [
+        "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+        "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
+        "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
+        "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
+        "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+        "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+        "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk",
+        "Zephaniah", "Haggai", "Zechariah", "Malachi",
+        "Matthew", "Mark", "Luke", "John", "Acts",
+        "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
+        "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
+        "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews",
+        "James", "1 Peter", "2 Peter", "1 John", "2 John",
+        "3 John", "Jude", "Revelation"
+    ]
+
+    # Sort the books in the custom order
+    sorted_scriptures_by_book = {
+        book: scriptures_by_book[book]
+        for book in custom_book_order
+        if book in scriptures_by_book
+    }
+
     return make_response(
         render_template(
-            'scripture.html'
+            'scripture.html',
+            scriptures_by_book=sorted_scriptures_by_book,
         )
     )
