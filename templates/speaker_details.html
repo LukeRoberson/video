@@ -20,9 +20,9 @@
                 <!-- Use a real profile pic if available, otherwise an empty pic -->
                 <div class="col-md-3 text-center">
                     {% if speaker.profile_pic %}
-                        <img src="{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                        <img src="/static/img/speakers/{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="img-fluid shadow" style="max-width: 200px;">
                     {% else %}
-                        <img src="{{ url_for('static', filename='img/speakers/profile-icon.jpg') }}" alt="Default profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
+                        <img src="{{ url_for('static', filename='img/speakers/profile-icon.jpg') }}" alt="Default profile picture" class="img-fluid shadow" style="max-width: 150px;">
                     {% endif %}
                 </div>
 
