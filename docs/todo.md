@@ -2,15 +2,10 @@
 
 ## Bugs
 
-* Scriptures not showing on dynamic scripture pages
 * Left and right buttons on carousels not working
 * Left and right buttons on carousels don't always appear initially
 
 ## Main Page:
-
-Add search bar functionality
-* Or remove? it's in the nav bar now
-</br></br>
 
 Current month's broadcasting video
 * Before 'continue watching'
@@ -36,7 +31,7 @@ Category for a random tag
 Carousel Banners
 * Rotating banners at the top of the page
 * For now, a nice theme scripture or annotation
-* Have several, and selecct five at random on load
+* Have several, and select five at random on load
 </br></br>
 
 
@@ -46,9 +41,6 @@ Adjust the text in the thumbnails
 * Does not fit very well
 * Investigate better ways to handle long video names
 * See 'Meetings, Conventions, ...' as an example
-</br></br>
-
-Sort videos in the carousels so the newest is first.
 </br></br>
 
 Scrolling carousels with the mouse wheel is slow. See how this can be improved.
@@ -62,14 +54,6 @@ Scrolling carousels with the mouse wheel is slow. See how this can be improved.
     * To browse through these items
 * Video details: Add URL to video page
 * Video details: Add date to video page
-</br></br>
-
-
-## Additional Pages
-
-Admin Tools
-* Button to run a scrape, to check for new videos and categories from the website
-* Need a spinning wheel to show it's still working when adding lots of metadata
 </br></br>
 
 

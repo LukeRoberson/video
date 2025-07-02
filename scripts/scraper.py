@@ -1,47 +1,435 @@
 """
-This script uses Selenium to scrape video URLs from a specific webpage.
+Module: scraper.py
 
-Collects:
-    - The final URL, after redirects
-    - A list of downloadable video URLs from a dropdown menu on the page.
+Checks for new videos and categories.
 
-Requirements:
-    - Selenium
-    - BeautifulSoup
-    - Chrome WebDriver
+Classes:
+    CategoryScraper:
+        Scrapes data from JW.org using Selenium.
+        This includes major categories, sub-categories, and videos.
 
-Chrome WebDriver enables interaction with the Chrome browser.
-    Check the current chrome version: chrome://version//settings/help
-    Download the appropriate version of ChromeDriver:
-        https://googlechromelabs.github.io/chrome-for-testing/#stable
-    Extract to a location and set the DRIVER_PATH variable accordingly.
+    JwScraper:
+        Scrapes video metadata from a specific JW.org video URL.
+
+    BuildDb: Builds a DataFrame of categories and videos, and saves them.
+        Stores data within the instance of the class; Collates data.
+        Can build a dataframe of missing items.
+        Can save the data to CSV files.
+
+Usage:
+    To get major video categories, use the `fetch_major_categories` method
+    of CategoryScraper.
+        This supports headless mode, but this is not recommended
+
+    To get sub-categories from a major category, use the `fetch_sub_categories`
+        method of CategoryScraper with the category URL.
+
+    To get videos from a sub-category, use the `fetch_videos` method from
+        CategoryScraper with the category URL and sub-category name.
+
+    To get video metadata, use the JwScraper class with a specific
+        video URL. This will return a dictionary with the video URL, thumbnail,
+        duration, and other details.
+
+    The CategoryScraper class is used to get items, but doesn't collate them.
+        For this, use the `build_categories` and `build_videos` methods of
+        the BuildDb class.
+
+    To save the data to CSV files, use the `save_csv` method of the BuildDb
+        class. Optionally use these when instantiating the class to load
+        existing data from CSV files, skipping the fetch step.
+
+    Use the `missing` method of BuildDb to check for missing categories
+        and videos.
+
+Dependencies:
+    - BeautifulSoup: For parsing HTML content.
+    - selenium: For interactive web scraping.
+    - pandas: For storing data in DataFrames.
+
+Custom dependencies:
+    - app.sql_db: For database context management and video/category
+        management.
+
+Note:
+    Selenium requires a web driver to be installed
+        (e.g., ChromeDriver for Chrome).
 """
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
-import pandas as pd
-import os
-from tqdm import tqdm
+from selenium.webdriver.common.by import By
 
+from bs4 import BeautifulSoup, Tag
+import pandas as pd
+
+from types import TracebackType
+import traceback as tb
+import time
+from colorama import Fore, Style
+from tqdm import tqdm
+import os
+
+from app.sql_db import (
+    DatabaseContext,
+    CategoryManager,
+    VideoManager,
+)
+
+
+# The main URL for JW.org videos
+MAIN_URL = "https://www.jw.org/en/library/videos/#en/home"
+
+# Path to the Chrome WebDriver executable
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
-urls = [
+# Categories to ignore when scraping
+IGNORE_CATEGORIES = [
+    "Videos",
+    "Audio Descriptions",
+]
+
+# Sub-categories to ignore when scraping
+IGNORE_SUB_CATEGORIES = [
+    "Midweek Meetings",
+    "Sample Conversations (2016-2023)",
+    "Pure Worship—Chapter Introductions",
+    "Latest Videos",
+    "Video Categories",
+    "“Sing Out Joyfully”—Meetings",
+]
+
+# Videos to ignore when scraping
+#   The scraper picks these up when they already exist, possibly due to
+#   encoding of characters in the video name.
+IGNORE_VIDEOS = [
+    "JW Broadcasting—November 2017",
+    "JW Broadcasting​—December 2015",
+    "JW Broadcasting​—November 2015",
+    "JW Broadcasting​—September 2015",
+    "Mark Noumair: “Work . . . for the Food That Remains for Everlasting Life”"
 ]
 
 
-class JwScraper:
+class CategoryScraper:
     """
-    A class to scrape video URLs from JW.org using Selenium.
+    A class to scrape major video categories from JW.org using Selenium.
+
+    Args:
+        url (str): The URL of the JW.org videos page.
+        headless (bool): Whether to run the browser in headless mode.
     """
 
     def __init__(
         self,
+        url=MAIN_URL,
+        headless: bool = False,
+        suppress_warnings: bool = True
+    ) -> None:
+        """
+        Initialize the CategoryScraper with a URL.
+        This is the main video page of JW.org.
+
+        Args:
+            url (str): The URL to scrape categories from.
+            headless (bool): Whether to run the browser in headless mode.
+            suppress_warnings (bool): Whether to suppress Selenium warnings.
+
+        Returns:
+            None
+        """
+
+        self.url = url
+        self.headless = headless
+        self.suppress_warnings = suppress_warnings
+
+    def __enter__(
+        self
+    ) -> 'CategoryScraper':
+        """
+        Initialize the scraper by setting up the Selenium driver.
+        """
+
+        options = Options()
+
+        # This enables the use of Chrome in headless mode (no GUI)
+        if self.headless:
+            options.add_argument("--headless")
+
+        # This suppresses warnings from Selenium
+        if self.suppress_warnings:
+            options.add_argument("--log-level=3")
+
+        self.driver = webdriver.Chrome(options=options)
+
+        return self
+
+    def __exit__(
+        self,
+        exc_type,
+        exc_value,
+        traceback
+    ):
+        """
+        Clean up the Selenium driver.
+        """
+        if exc_type is not None:
+            print("Exception occurred in CategoryScraper context manager:")
+            tb.print_exception(exc_type, exc_value, traceback)
+
+        self.driver.quit()
+
+    def fetch_major_categories(
+        self
+    ) -> pd.DataFrame:
+        """
+        Fetch major categories from the main JW.org videos page using Selenium.
+            1. Loads the main video page with Selenium.
+            2. Waits for the JavaScript to load the content.
+            3. Parses the page source with BeautifulSoup.
+            4. Finds the "Video Categories" section (h2 tag).
+            5. Collects all categories listed under this section (h3 tags).
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the major categories.
+                Each row contains:
+                    - 'name': The name of the category.
+                    - 'url': The URL of the category.
+                    - 'exist':
+                        A boolean indicating if the category exists in the DB
+        """
+
+        # Load the URL, wait for JavaScript to load content, parse
+        self.driver.get(MAIN_URL)
+        time.sleep(5)
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+
+        # Find the <h2> tag for "Video Categories"
+        video_cat_h2 = soup.find(
+            'h2',
+            class_='sectSynHdg',
+            string='Video Categories'
+        )
+        if not video_cat_h2:
+            print("Could not find the 'Video Categories' heading.")
+            return pd.DataFrame()
+
+        # Use a pandas dataframe
+        df = pd.DataFrame(columns=['name', 'url', 'exist'])
+
+        # Collect all <a class="jsNoScroll"> inside <h3> after this <h2>
+        for tag in video_cat_h2.find_all_next():
+            if isinstance(tag, Tag) and tag.name == 'h3':
+                a = tag.find('a', class_='jsNoScroll')
+                if a:
+                    name = a.get_text(strip=True)
+                else:
+                    continue
+                if name in IGNORE_CATEGORIES:
+                    continue
+
+                # Create a dataframe row for the category
+                if isinstance(a, Tag) and a.has_attr('href'):
+                    with DatabaseContext() as db:
+                        category_manager = CategoryManager(db)
+                        exists = category_manager.name_to_id(name)
+
+                    df.loc[len(df)] = [
+                        name,
+                        a['href'],
+                        True if exists else False,
+                    ]
+
+            # Optionally, stop if you reach another <h2> (end of section)
+            if isinstance(tag, Tag) and tag.name == 'h2':
+                if tag.name == 'h2' and tag is not video_cat_h2:
+                    break
+
+        return df
+
+    def fetch_sub_categories(
+        self,
+        category_url: str,
+        category_name: str,
+    ) -> pd.DataFrame:
+        """
+        Fetch sub-categories from a given category URL.
+
+        Args:
+            category_url (str): The URL of the category to scrape.
+            category_name (str): The name of the category.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing sub-categories.
+                Each row contains:
+                    - 'name': The name of the sub-category.
+                    - 'main_category': The name of the main category.
+                    - 'main_cat_url': The URL of the main category.
+                    - 'exist':
+                        A boolean showing if the sub-category exists in the DB
+        """
+
+        # Load the URL, wait for JavaScript to load content, parse
+        self.driver.get(category_url)
+        time.sleep(5)
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+
+        # Dataframe to store sub-categories (no URL for sub-categories)
+        df = pd.DataFrame(
+            columns=['name', 'main_category', 'main_cat_url', 'exist']
+        )
+
+        for tag in soup.find_all('h2', class_='sectSynHdg'):
+            if isinstance(tag, Tag):
+                # Get the sub-category name
+                name = tag.get_text(strip=True)
+                if name in IGNORE_SUB_CATEGORIES:
+                    continue
+
+                # Check if it exists in the database
+                with DatabaseContext() as db:
+                    category_manager = CategoryManager(db)
+
+                    # Check if the sub-category exists in the database
+                    exists = category_manager.name_to_id(name)
+
+                # Add the sub-category to the DataFrame
+                df.loc[len(df)] = [
+                    name,
+                    category_name,
+                    category_url,
+                    True if exists else False,
+                ]
+
+        return df
+
+    def fetch_videos(
+        self,
+        main_cat_url: str,
+        sub_cat_name: str,
+        main_cat_name: str,
+    ) -> pd.DataFrame:
+        """
+        Fetch videos from within a subcategory
+
+        Args:
+            main_cat_url (str): The URL of the major category.
+                This contains the sub-categories, and videos as a carousel.
+            sub_cat_name (str): The name of the sub category.
+                This is on the page in an <h2> tag.
+            main_cat_name (str): The name of the main category.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing video information.
+                Each row contains:
+                    - 'video_name': The name of the video.
+                    - 'video_url': The URL of the video.
+                    - 'exist': A boolean showing if the video exists in the DB
+        """
+
+        try:
+            # Load the URL, wait for JavaScript to load content, parse
+            self.driver.get(main_cat_url)
+            time.sleep(5)
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+
+            # Find the <h2> tag for the sub-category
+            sub_cat = soup.find(
+                'h2',
+                class_='sectSynHdg',
+                string=sub_cat_name
+            )
+        except Exception as e:
+            print(
+                Fore.RED,
+                f"Error fetching videos for {sub_cat_name}: {e}",
+                Style.RESET_ALL
+            )
+            return pd.DataFrame()
+
+        # Create a DataFrame to store video information
+        df = pd.DataFrame(
+            columns=[
+                'video_name',
+                'video_url',
+                'main_cat_name',
+                'sub_cat_name',
+                'exist'
+            ]
+        )
+
+        # Iterate over elements after the subcategory <h2>
+        if isinstance(sub_cat, Tag):
+            for tag in sub_cat.find_all_next():
+                # Stop if we reach another <h2> (next subcategory)
+                if isinstance(tag, Tag) and tag.name == 'h2':
+                    break
+
+                # Look for <h3> tags with <a>
+                if isinstance(tag, Tag) and tag.name == 'h3':
+                    a = tag.find('a', class_='jsNoScroll')
+                    if isinstance(a, Tag) and a.has_attr('href'):
+                        video_name = a.get_text(strip=True)
+
+                        if 'categories' in a['href']:
+                            # Skip if the link is to a category, not a video
+                            continue
+
+                        # Check if the video exists in the database
+                        with DatabaseContext() as db:
+                            cat_mgr = CategoryManager(db)
+                            video_manager = VideoManager(db)
+                            exists = video_manager.name_to_id(
+                                video_name
+                            )
+
+                            # Get the categories for the video
+                            if exists:
+                                categories = cat_mgr.get_from_video(
+                                    video_id=exists
+                                )
+
+                                # Check if the main and sub categories exist
+                                #   on this video (video may exist, but be in
+                                #   new categories)
+                                if categories:
+                                    if main_cat_name not in [
+                                        cat['name'] for cat in categories
+                                    ]:
+                                        exists = False
+                                    elif sub_cat_name not in [
+                                        cat['name'] for cat in categories
+                                    ]:
+                                        exists = False
+
+                        df.loc[len(df)] = [
+                            video_name,
+                            a['href'],
+                            main_cat_name,
+                            sub_cat_name,
+                            True if exists else False,
+                        ]
+
+        return df
+
+
+class JwScraper:
+    """
+    A class to scrape a video URL from JW.org using Selenium.
+
+    Gets the video URL, thumbnail, duration, and other details.
+
+    Args:
+        url (str): The URL of the JW.org video page to scrape.
+    """
+
+    def __init__(
+        self,
+        url: str,
         driver_path: str = DRIVER_PATH,
-        url: list = None,
     ) -> None:
         """
         Initializes the JwScraper with a WebDriver and a list of URLs.
@@ -51,16 +439,8 @@ class JwScraper:
             url (str): A single URL to scrape
         """
 
-        # Check we have a URL
-        if urls is None:
-            raise ValueError("You must provide a URL to scrape.")
-
         self.url = url
-
-        # Set the driver path
         self.driver_path = driver_path
-
-        # A dictionary to hold the details
         self.details = {}
 
     def __enter__(
@@ -68,6 +448,12 @@ class JwScraper:
     ) -> "JwScraper":
         """
         Initializes the WebDriver when entering the context.
+
+        Args:
+            None
+
+        Returns:
+            JwScraper: The instance of the JwScraper class.
         """
 
         # Setup the Chrome WebDriver
@@ -80,18 +466,56 @@ class JwScraper:
         self,
         exc_type: type,
         exc_value: Exception,
-        traceback: object
+        traceback: TracebackType | None
     ) -> None:
         """
         Closes the WebDriver when exiting the context.
+
+        Args:
+            exc_type (type): The type of the exception raised, if any.
+            exc_value (Exception): The exception instance, if any.
+            traceback (object): The traceback object, if any.
+
+        Returns:
+            None
         """
 
         if hasattr(self, 'driver'):
             self.driver.quit()
 
+        if exc_type is not None:
+            print("Exception occurred in JwScraper context manager:")
+            tb.print_exception(exc_type, exc_value, traceback)
+
     def scrape_vids(
         self,
-    ) -> list:
+    ) -> None:
+        """
+        Scrapes the video page for URLs, thumbnail, and duration.
+
+        This method performs the following steps:
+            1. Opens the video URL.
+            2. Waits for the dropdown menu to be present.
+            3. Clicks the dropdown to expand it.
+            4. Waits for the dropdown body to load.
+            5. Parses the page source with BeautifulSoup.
+            6. Finds the dropdown body and extracts all <a> tags with
+                the class 'secondaryButton'.
+            7. Extracts the href attributes from these <a> tags.
+            8. Adds the URLs to the details dictionary based on resolution.
+            9. Scrapes the video thumbnail (background-image URL).
+            10. Scrapes the video duration.
+            11. Scrapes the div with id="regionMain" for an <article> tag.
+            12. Searches the article for an <h1> tag and adds its text to
+                the details dictionary.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
         # Open the URL
         self.driver.get(self.url)
 
@@ -123,15 +547,19 @@ class JwScraper:
 
         # Find the dropdownBody div
         dropdown_body = soup.find("div", class_="dropdownBody")
-        if not dropdown_body:
-            print("No dropdownBody found.")
-            return []
+        if not isinstance(dropdown_body, Tag):
+            print("No valid dropdownBody found.")
+            return
 
         # Find all <a> tags with the class 'secondaryButton'
         links = dropdown_body.find_all("a", class_="secondaryButton")
 
         # Extract the href attributes
-        urls = [link["href"] for link in links if "href" in link.attrs]
+        urls = [
+            link["href"]
+            for link in links
+            if isinstance(link, Tag) and "href" in link.attrs
+        ]
 
         # Add to dictionary
         for url in urls:
@@ -153,7 +581,7 @@ class JwScraper:
                 "#videoPlayerInstance .vjs-poster"
             )
             style_attribute = video_poster.get_attribute("style")
-            if "background-image" in style_attribute:
+            if style_attribute and "background-image" in style_attribute:
                 # Extract the URL from the style attribute
                 start = style_attribute.find("url(") + 4
                 end = style_attribute.find(")", start)
@@ -179,20 +607,6 @@ class JwScraper:
         except Exception as e:
             print(f"Error scraping duration: {e}")
 
-        # Scrape the video title
-        # try:
-        #     title_element = self.driver.find_element(
-        #         By.CSS_SELECTOR,
-        #         ".mediaItemTitleContainer .mediaItemTitle"
-        #     )
-        #     print(f"Title element found: {title_element}")
-        #     self.details["name"] = (
-        #         title_element.text.strip().replace("—", " - ")
-        #     )
-
-        # except Exception as e:
-        #     print(f"Error scraping title: {e}")
-
         # Scrape the div with id="regionMain"
         try:
             region_main = self.driver.find_element(By.ID, "regionMain")
@@ -200,14 +614,22 @@ class JwScraper:
             print(f"Error scraping regionMain: {e}")
 
         # Search region_main for an <article> tag with id="article"
+        region_main = None
+        article_element = None
         try:
-            article_element = region_main.find_element(By.CSS_SELECTOR, "article#article")
+            if region_main:
+                article_element = region_main.find_element(
+                    By.CSS_SELECTOR,
+                    "article#article"
+                )
         except Exception as e:
             print(f"Error finding article tag: {e}")
 
         # Search article_element for an <h1> tag
+        h1_element = None
         try:
-            h1_element = article_element.find_element(By.TAG_NAME, "h1")
+            if article_element:
+                h1_element = article_element.find_element(By.TAG_NAME, "h1")
             if h1_element:
                 print(f"Found <h1> tag: {h1_element.text}")
                 self.details["name"] = h1_element.text
@@ -215,176 +637,467 @@ class JwScraper:
             print(f"Error finding <h1> tag in article: {e}")
 
 
-
-class CreateCsv:
+class BuildDb:
     """
-    A class to create a CSV file from the scraped video details.
-
-    Instantiate, then add details as many times as needed.
-    Finally, call `write_to_csv` to save the details to a CSV file.
+    Build a dataframe of categories and videos
     """
 
     def __init__(
         self,
-        filename: str = "video_details.csv"
+        major_cat_filename: str = "",
+        sub_cat_filename: str = "",
+        videos_filename: str = ""
     ) -> None:
         """
-        Initializes the CreateCsv class with a filename.
+        Initialize the BuildDb class.
+
+        Optionally takes a filename to load existing data from a CSV file.
+
+        Args:
+            filename (str): The name of the CSV file to load data from.
+
+        Returns:
+            None
         """
 
-        self.filename = filename
-        self.detail_list = []
-        self.error_list = []
+        # Load existing data from CSV files if provided
+        if major_cat_filename != "":
+            self.major_categories = pd.read_csv(major_cat_filename)
+            self.major_loaded = True
+        else:
+            self.major_categories = pd.DataFrame()
+            self.major_loaded = False
 
-    def add_details(
+        if sub_cat_filename != "":
+            self.sub_categories = pd.read_csv(sub_cat_filename)
+            self.sub_loaded = True
+        else:
+            self.sub_categories = pd.DataFrame()
+            self.sub_loaded = False
+
+        if videos_filename != "":
+            self.videos = pd.read_csv(videos_filename)
+            self.video_loaded = True
+        else:
+            self.videos = pd.DataFrame()
+            self.video_loaded = False
+
+    def build_categories(
         self,
-        details: dict
     ) -> None:
         """
-        Adds scraped details to the object
+        Build the DataFrame of categories.
 
-        args:
-            details (dict): A dictionary containing video details.
+        Args:
+            None
 
-        Dictionary keys should include:
-            - final_url
-            - At least one video URL: 1080, 720, 480, 360, or 240
-            - thumbnail
-            - duration
-            - title
+        Returns:
+            None
         """
 
-        error_flag = False
+        if not self.major_categories.empty:
+            print(
+                Fore.GREEN,
+                "Major categories loaded from file, skipping fetch.",
+                Style.RESET_ALL
+            )
 
-        # Check that we have a dictionary
-        if not isinstance(details, dict):
-            print("Details must be a dictionary.")
+        else:
+            # Get the major categories from JW.org
+            print(
+                Fore.YELLOW,
+                "Fetching major categories from JW.org...",
+                Style.RESET_ALL
+            )
+            with CategoryScraper(headless=False) as scraper:
+                self.major_categories = scraper.fetch_major_categories()
+                print(
+                    Fore.GREEN,
+                    f"{len(self.major_categories)} major categories found.",
+                    Style.RESET_ALL
+                )
+
+        if not self.sub_categories.empty:
+            print(
+                Fore.GREEN,
+                "Subcategories loaded from file, skipping fetch.",
+                Style.RESET_ALL
+            )
             return
 
-        # Check that we have the required keys
-        required_keys = ['url', 'thumbnail', 'duration', 'name']
-        for key in required_keys:
-            if (
-                key not in details or
-                not isinstance(details[key], str) or
-                not details[key].strip()
-            ):
-                print(
-                    f"Missing or invalid value for '{key}' in: "
-                    f"{details['url']}"
+        # Get sub-categories from a specific category
+        for _, row in (tqdm(
+            self.major_categories.iterrows(),
+            desc="Fetching sub-categories",
+            total=len(self.major_categories),
+            colour='blue',
+            leave=True,
+            dynamic_ncols=True,
+        )):
+            print(
+                Fore.YELLOW,
+                f"Fetching sub categories for {row['name']}...",
+                Style.RESET_ALL
+            )
+            with CategoryScraper(headless=False) as scraper:
+                sub_category = scraper.fetch_sub_categories(
+                    row['url'],
+                    row['name']
                 )
-                error_flag = True
 
-        # Check that at least one video URL is present
-        video_keys = [
-            'url_1080', 'url_720', 'url_480', 'url_360', 'url_240'
-        ]
-        if not any(
-            key in details and isinstance(details[key], str) and
-            details[key].strip() for key in video_keys
-        ):
-            print("No valid video URL found in details:", details['url'])
-            error_flag = True
+            self.sub_categories = pd.concat(
+                [self.sub_categories, sub_category],
+                ignore_index=True
+            )
 
-        if error_flag:
-            self.error_list.append(details)
-        else:
-            self.detail_list.append(details)
-
-    def write_to_csv(
+    def build_videos(
         self,
     ) -> None:
         """
-        Create a dataframe from the details and write to a CSV file.
+        Build the DataFrame of videos.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
-        if not self.detail_list:
-            print("No details to write to 'successful' CSV.")
-            print("Looking for errors to write to 'difficult' CSV.")
+        if not self.videos.empty:
+            print(
+                Fore.GREEN,
+                "Videos loaded from file, skipping fetch.",
+                Style.RESET_ALL
+            )
+            return
 
-        # Create a DataFrame from the list of details
-        df = pd.DataFrame(self.detail_list)
+        # Get videos from a specific sub-category
+        for _, row in tqdm(
+            self.sub_categories.iterrows(),
+            desc="Fetching videos",
+            total=len(self.sub_categories),
+            colour='green',
+            leave=True,
+            dynamic_ncols=True,
+        ):
+            print(
+                Fore.YELLOW,
+                f"Fetching videos for {row['name']}...",
+                Style.RESET_ALL
+            )
+            with CategoryScraper(headless=False) as scraper:
+                videos = scraper.fetch_videos(
+                    main_cat_url=row['main_cat_url'],
+                    sub_cat_name=row['name'],
+                    main_cat_name=row['main_category'],
+                )
 
-        # Create a DataFrame for errors if there are any
-        if self.error_list:
-            print(f"Errors found in {len(self.error_list)} videos. ")
-            error_df = pd.DataFrame(self.error_list)
+            self.videos = pd.concat(
+                [self.videos, videos],
+                ignore_index=True
+            )
+
+    def save_csv(
+        self,
+        major_cat_filename: str = "major_categories.csv",
+        sub_cat_filename: str = "sub_categories.csv",
+        videos_filename: str = "videos.csv",
+    ) -> None:
+        """
+        Save the videos DataFrame to a CSV file.
+
+        Args:
+            major_cat_filename (str): The filename for major categories.
+            sub_cat_filename (str): The filename for sub-categories.
+            videos_filename (str): The filename for videos.
+
+        Returns:
+            None
+        """
+
+        # Ensure the 'csv' folder exists
+        os.makedirs('csv', exist_ok=True)
+
+        # Handle major categories
+        if self.major_loaded:
+            print(
+                Fore.YELLOW,
+                "Major categories already loaded, skipping save.",
+                Style.RESET_ALL
+            )
+
+        elif self.major_categories.empty:
+            print(
+                Fore.RED,
+                "No major categories to save.",
+                Style.RESET_ALL
+            )
+
         else:
-            error_df = None
+            major_cat_path = os.path.join('csv', major_cat_filename)
+            self.major_categories.to_csv(
+                major_cat_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                f"Major categories saved to: {major_cat_filename}",
+                Style.RESET_ALL
+            )
 
-        # Add extra columns if they don't exist
-        extra_columns = ["category_name", "description", "date_added"]
-        for col in extra_columns:
-            if col not in df.columns:
-                df[col] = ""
-            if error_df is not None and col not in error_df.columns:
-                error_df[col] = ""
+        # Handle sub-categories
+        if self.sub_loaded:
+            print(
+                Fore.YELLOW,
+                "Sub-categories already loaded, skipping save.",
+                Style.RESET_ALL
+            )
 
-        # Update the column order
-        column_order = [
-            "name", "duration", "category_name", "description", "date_added",
-            "url", "thumbnail", "url_1080", "url_720", "url_480",
-            "url_360", "url_240"
+        elif self.sub_categories.empty:
+            print(
+                Fore.RED,
+                "No sub-categories to save.",
+                Style.RESET_ALL
+            )
+
+        else:
+            sub_cat_path = os.path.join('csv', sub_cat_filename)
+            self.sub_categories.to_csv(
+                sub_cat_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                f"Sub-categories saved to: {sub_cat_filename}",
+                Style.RESET_ALL
+            )
+
+        # Handle videos
+        if self.video_loaded:
+            print(
+                Fore.YELLOW,
+                "Videos already loaded, skipping save.",
+                Style.RESET_ALL
+            )
+
+        elif self.videos.empty:
+            print(
+                Fore.RED,
+                "No videos to save.",
+                Style.RESET_ALL
+            )
+
+        else:
+            video_path = os.path.join('csv', videos_filename)
+            self.videos.to_csv(
+                video_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                f"Saving {len(self.videos)} videos to {videos_filename}...",
+                Style.RESET_ALL
+            )
+
+    def missing(
+        self,
+    ) -> None:
+        """
+        Check for missing categories and videos.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        # Collate information about missing items into DataFrames
+        missing_major = self.major_categories[~self.major_categories['exist']]
+        missing_sub = self.sub_categories[~self.sub_categories['exist']]
+        missing_videos = self.videos[~self.videos['exist']]
+
+        # Remove videos in IGNORE_VIDEOS from missing_videos
+        missing_videos = missing_videos[
+            ~missing_videos['video_name'].isin(IGNORE_VIDEOS)
         ]
 
-        # Ensure all columns exist in the DataFrame,
-        #   filling missing ones with empty strings
-        for col in column_order:
-            if col not in df.columns:
-                df[col] = ""
-            if error_df is not None and col not in error_df.columns:
-                error_df[col] = ""
+        # Print missing categories
+        if not missing_major.empty:
+            print(
+                Fore.RED,
+                "Missing major categories:",
+                Style.RESET_ALL
+            )
+            print(missing_major)
+        else:
+            print(
+                Fore.GREEN,
+                "All major categories are present.",
+                Style.RESET_ALL
+            )
 
-        df = df[column_order]
-        if error_df is not None:
-            error_df = error_df[column_order]
+        # Print missing sub-categories
+        if not missing_sub.empty:
+            print(
+                Fore.RED,
+                "Missing sub-categories:",
+                Style.RESET_ALL
+            )
+            print(missing_sub)
+        else:
+            print(
+                Fore.GREEN,
+                "All sub-categories are present.",
+                Style.RESET_ALL
+            )
 
-        # Check if the file is writable before writing
-        counter = 0
-        if os.path.exists(self.filename):
-            if not os.access(self.filename, os.W_OK):
-                print(f"File '{self.filename}' is not writable.")
+        # Print missing videos
+        if not missing_videos.empty:
+            print(
+                Fore.RED,
+                "Missing videos:",
+                Style.RESET_ALL
+            )
+            print(missing_videos)
+        else:
+            print(
+                Fore.GREEN,
+                "All videos are present.",
+                Style.RESET_ALL
+            )
 
-                # Add a counter to the filename before the extension
-                base, ext = os.path.splitext(self.filename)
-                self.filename = f"{base}_{counter}{ext}"
-                while os.path.exists(self.filename) and not os.access(
-                    self.filename, os.W_OK
-                ):
-                    counter += 1
-                    self.filename = f"{base}_{counter}{ext}"
-                    if counter > 100:
-                        raise IOError(
-                            "Unable to find a filename after 100 attempts."
-                        )
+        # Save missing items to the instance variables
+        missing_videos = missing_videos.drop(columns=['exist'])
+        self.missing_videos = missing_videos
 
-        # Write the DataFrame to a CSV file
-        if not df.empty:
-            try:
-                df.to_csv(self.filename, index=False, encoding="utf-8-sig")
+    def metadata(
+        self,
+    ) -> None:
+        """
+        Collect additional metadata about the videos.
 
-            except Exception as e:
-                print(f"Error writing to CSV: {e}")
+        Args:
+            None
 
-        # If there are errors, write them to a separate CSV file
-        if error_df is not None and not error_df.empty:
-            error_file = "difficult_vids.csv"
-            if os.path.exists(error_file):
-                error_df.to_csv(error_file, mode='a', header=False, index=False)
-            else:
-                error_df.to_csv(error_file, index=False)
+        Returns:
+            None
+        """
+
+        # Ensure the 'csv' folder exists
+        os.makedirs('csv', exist_ok=True)
+
+        # Add a new columns to the dataframe
+        self.missing_videos['url_1080'] = None
+        self.missing_videos['url_720'] = None
+        self.missing_videos['url_480'] = None
+        self.missing_videos['url_360'] = None
+        self.missing_videos['url_240'] = None
+        self.missing_videos['thumbnail'] = None
+        self.missing_videos['duration'] = None
+
+        # Iterate over the missing videos and scrape metadata
+        for video in tqdm(
+            self.missing_videos.iterrows(),
+            desc="Scraping video metadata",
+            total=len(self.missing_videos),
+            colour='magenta',
+            leave=True,
+            dynamic_ncols=True,
+        ):
+            _, row = video
+            video_url = row['video_url']
+            with JwScraper(video_url) as scraper:
+                scraper.scrape_vids()
+                url_1080 = scraper.details.get('url_1080', None)
+                url_720 = scraper.details.get('url_720', None)
+                url_480 = scraper.details.get('url_480', None)
+                url_360 = scraper.details.get('url_360', None)
+                url_240 = scraper.details.get('url_240', None)
+                thumbnail = scraper.details.get('thumbnail', None)
+                duration = scraper.details.get('duration', None)
+
+                # Update the missing_videos DataFrame with the scraped data
+                self.missing_videos.loc[
+                    self.missing_videos['video_url'] == video_url,
+                    ['url_1080', 'url_720', 'url_480', 'url_360', 'url_240',
+                     'thumbnail', 'duration']
+                ] = [
+                    url_1080, url_720, url_480, url_360, url_240,
+                    thumbnail, duration
+                ]
+
+        try:
+            meta_path = os.path.join('csv', "missing_videos.csv")
+            self.missing_videos.to_csv(
+                meta_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                "Missing videos metadata saved to: missing_videos.csv",
+                Style.RESET_ALL
+            )
+
+        except Exception as e:
+            print(
+                Fore.RED,
+                f"Error saving missing videos to CSV: {e}",
+                Style.RESET_ALL
+            )
 
 
-full_details = CreateCsv()
-for url in tqdm(urls, desc="Scraping videos", colour="green"):
-    with JwScraper(url=url) as scraper:
-        scraper.scrape_vids()
-        full_details.add_details(scraper.details)
+if __name__ == "__main__":
+    """
+    This script finds new videos and categories on JW.org.
 
-print("Writing details to CSV...")
-full_details.write_to_csv()
+    1. Find if the CSV files already exist.
+    2. Instantiate the BuildDb class with the filenames
+        Providing filenames will load existing data, skipping the fetch
+        which is time consuming.
+    3. Build the categories and videos DataFrames.
+        Will be skipped if the DataFrames already exist.
+        Also checks if these items are already in the database.
+    4. Save the DataFrames to CSV files.
+        For optional later use
+    5. Check for missing categories and videos.
+        Collate information about missing items into DataFrames.
+    6. Collect metadata for missing videos.
+        Scrape the video URLs, thumbnail, duration, etc.
+        Saves this to a CSV file named "missing_videos.csv".
+    """
 
-if full_details.error_list:
-    print("\nSome videos had errors during scraping:")
-    for error in full_details.error_list:
-        print(error['url'])
+    # Check if the CSV files already exist
+    major_cat_filename = "major_categories.csv" if os.path.exists(
+        os.path.join('csv', 'major_categories.csv')
+    ) else ""
+
+    sub_cat_filename = "sub_categories.csv" if os.path.exists(
+        os.path.join('csv', 'sub_categories.csv')
+    ) else ""
+
+    videos_filename = "videos.csv" if os.path.exists(
+        os.path.join('csv', 'videos.csv')
+    ) else ""
+
+    # Instantiate the BuildDb class with the filenames
+    db = BuildDb(
+        major_cat_filename=major_cat_filename,
+        sub_cat_filename=sub_cat_filename,
+        videos_filename=videos_filename,
+    )
+
+    # Get full categories and videos
+    db.build_categories()
+    db.build_videos()
+    db.save_csv()
+
+    # Collate information about missing items
+    db.missing()
+
+    # Collect metadata for missing videos
+    db.metadata()

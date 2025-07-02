@@ -27,6 +27,8 @@ Routes:
         - add_scripture_text: Adds text to a scripture.
     - /api/mark_watched
         - mark_watched: Marks a video as watched for the active profile.
+    - /api/videos/csv
+        - get_videos_csv: Returns a CSV file of missing videos.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -57,11 +59,14 @@ from flask import (
 import logging
 import re
 from datetime import datetime
+import pandas as pd
+import os
 
 # Custom imports
 from app.sql_db import (
     DatabaseContext,
     VideoManager,
+    CategoryManager,
     TagManager,
     SpeakerManager,
     CharacterManager,
@@ -71,6 +76,9 @@ from app.local_db import (
     LocalDbContext,
     ProfileManager,
 )
+
+
+MISSING_VIDEOS_CSV = "csv/missing_videos.csv"
 
 
 api_bp = Blueprint(
@@ -1091,4 +1099,176 @@ def mark_unwatched() -> Response:
             }
         ),
         200
+    )
+
+
+@api_bp.route(
+    "/api/videos/csv",
+    methods=["GET"]
+)
+def get_videos_csv() -> Response:
+    """
+    Get a CSV file of all videos in the database.
+
+    Returns:
+        Response: A CSV file containing all video data.
+    """
+
+    # Check the CSV exists
+    if not os.path.exists(MISSING_VIDEOS_CSV):
+        logging.error(f"CSV file not found: {MISSING_VIDEOS_CSV}")
+        return api_error("CSV file not found", 404)
+
+    # Load the CSV file into a DataFrame
+    try:
+        df = pd.read_csv(MISSING_VIDEOS_CSV)
+    except Exception as e:
+        logging.error(f"Failed to load CSV: {e}")
+        return api_error("Failed to load CSV file", 500)
+
+    # Convert the DataFrame to JSON format
+    return make_response(
+        Response(
+            df.to_json(orient='index'),
+        ),
+        200,
+    )
+
+
+@api_bp.route(
+    "/api/videos/add",
+    methods=["POST"]
+)
+def add_videos() -> Response:
+    """
+    Add a video to the database.
+
+    Browser will send a POST request with a JSON body containing:
+        {
+            "video_name": "<video name>",
+            "video_url": "<video URL>",
+            "main_cat_name": "<main category name>",
+            "sub_cat_name": "<subcategory name>",
+            "url_1080": "<1080p video URL>",
+            "url_720": "<720p video URL>",
+            "url_480": "<480p video URL>",
+            "url_360": "<360p video URL>",
+            "url_240": "<240p video URL>",
+            "thumbnail": "<thumbnail image URL>",
+            "duration": <video duration in HH:MM:SS>,
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for adding video.")
+        return api_error("No data provided", 400)
+
+    # Get fields
+    video_name = data.get("video_name", None)
+    video_url = data.get("video_url", None)
+    main_cat_name = data.get("main_cat_name", None)
+    sub_cat_name = data.get("sub_cat_name", None)
+    url_1080 = data.get("url_1080", None)
+    url_720 = data.get("url_720", None)
+    url_480 = data.get("url_480", None)
+    url_360 = data.get("url_360", None)
+    url_240 = data.get("url_240", None)
+    thumbnail = data.get("thumbnail", None)
+    duration = data.get("duration", None)
+
+    if not video_name:
+        logging.error("Missing 'video_name' in request data.")
+        return api_error("Missing 'video_name' in request data", 400)
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        cat_mgr = CategoryManager(db)
+
+        # Get category IDs
+        main_cat_id = cat_mgr.name_to_id(
+            name=main_cat_name
+        )
+        sub_cat_id = cat_mgr.name_to_id(
+            name=sub_cat_name
+        )
+
+        if main_cat_id is None:
+            logging.error(f"Main category '{main_cat_name}' not found.")
+            return api_error(f"Main category '{main_cat_name}' not found", 404)
+        if sub_cat_id is None:
+            logging.error(f"Subcategory '{sub_cat_name}' not found.")
+            return api_error(f"Subcategory '{sub_cat_name}' not found", 404)
+
+        # Convert duration to seconds if provided
+        if duration is not None:
+            try:
+                # Parse the duration string in HH:MM:SS format
+                parts = duration.split(':')
+                if len(parts) == 3:
+                    hours, minutes, seconds = map(int, parts)
+                    duration = hours * 3600 + minutes * 60 + seconds
+                elif len(parts) == 2:
+                    minutes, seconds = map(int, parts)
+                    duration = minutes * 60 + seconds
+                else:
+                    duration = int(parts[0])  # Assume it's just seconds
+
+            except ValueError:
+                logging.error(f"Invalid duration format: {duration}")
+                return api_error("Invalid duration format", 400)
+
+        # Add the video to the database
+        video_id = video_mgr.add(
+            name=video_name,
+            url=video_url,
+            url_1080=url_1080,
+            url_720=url_720,
+            url_480=url_480,
+            url_360=url_360,
+            url_240=url_240,
+            thumbnail=thumbnail,
+            duration=duration
+        )
+
+        if video_id is None:
+            logging.error(
+                f"Failed to add video '{video_name}' to the database."
+            )
+            return api_error(f"Failed to add video '{video_name}'", 500)
+
+        # Add the categories to the video
+        main_result = cat_mgr.add_to_video(
+            video_id=video_id,
+            category_id=main_cat_id,
+        )
+        sub_result = cat_mgr.add_to_video(
+            video_id=video_id,
+            category_id=sub_cat_id,
+        )
+
+        cat_str = ""
+        if not main_result:
+            logging.error(
+                f"Failed to add main category '{main_cat_name}' "
+                f"to video ID: {video_id}"
+            )
+            cat_str += f"Main category '{main_cat_name}' not added. "
+        if not sub_result:
+            logging.error(
+                f"Failed to add subcategory '{sub_cat_name}' "
+                f"to video ID: {video_id}"
+            )
+            cat_str += f"Subcategory '{sub_cat_name}' not added. "
+
+        if cat_str:
+            return api_success(
+                message="Video added, but some categories were not added.",
+            )
+
+    return api_success(
+        message="video added"
     )

@@ -118,17 +118,38 @@ Admin
     <div class="card shadow-lg bg-dark text-white" style="width: 800px; border-radius: 18px;">
         <div class="card-body p-4">
             <h3>Scrape for New Videos</h3>
-            <p>Scrape the video section of jw.org to find new videos or categories</p>
+            <p>To scrape for new videos, go to the <b>scripts</b> folder, and run the <i>scraper.py</i> script.</p>
+            <p>This will generate files in the CSV folder:</p>
+            <ul>
+                <li><b>major_categories.csv</b> - Contains all major categories</li>
+                <li><b>sub_categories.csv</b> - Contains all subcategories within major categories</li>
+                <li><b>videos.csv</b> - Contains all videos by category. There will be some duplicates based on multiple categories</li>
+                <li><b>missing_videos.csv</b> - Contains videos that are not in the database, along with metadata</li>
+            </ul>
+            <p>Note, if the first three CSV files are already there, they will be loaded, and scraping for fresh data will be skipped.</p>
             <br />
 
             <div class="p-4" style="margin: auto;">
-                <button type="button" class="btn btn-info w-100 text-light" style="border-radius: 8px;">
-                    Scrape Now
+                <button type="button" class="btn btn-info w-100 text-light" style="border-radius: 8px;" id="listVideosBtn">
+                    List Videos
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<div class="container d-flex justify-content-center my-5 d-none" id="videosTableWrapper" style="min-height: 10vh;">
+    <div class="card shadow-lg bg-dark text-white" style="width: 100%; border-radius: 18px;">
+        <div class="card-body p-4">
+            <div id="videosTableContainer" class="mt-4">
+                <!-- This is where the videos table will be rendered -->
+            </div>
+            <p><i>Note: Other metadata such as data added, speakers, etc, will still need to be added later.</i></p>
+        </div>
+    </div>
+</div>
+
+
 <script src="{{ url_for('static', filename='js/metadata.js') }}"></script>
+<script src="{{ url_for('static', filename='js/videoAdd.js') }}"></script>
 {% endblock %}
