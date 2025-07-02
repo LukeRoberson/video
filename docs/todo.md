@@ -1,10 +1,5 @@
 # UI
 
-## Bugs
-
-* Left and right buttons on carousels not working
-* Left and right buttons on carousels don't always appear initially
-
 ## Main Page:
 
 Current month's broadcasting video
@@ -32,18 +27,6 @@ Carousel Banners
 * Rotating banners at the top of the page
 * For now, a nice theme scripture or annotation
 * Have several, and select five at random on load
-</br></br>
-
-
-## Category Pages:
-
-Adjust the text in the thumbnails
-* Does not fit very well
-* Investigate better ways to handle long video names
-* See 'Meetings, Conventions, ...' as an example
-</br></br>
-
-Scrolling carousels with the mouse wheel is slow. See how this can be improved.
 </br></br>
 
 

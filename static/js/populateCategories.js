@@ -19,6 +19,7 @@ function populateCategory(categoryId, subcategoryId) {
     fetch(`/api/categories/${categoryId}/${subcategoryId}`)
         .then(response => response.json())
         .then(videos => {
+            const wrapperId = `wrapper-${subcategoryId}`;            
             const thumbnailsDiv = document.querySelector(`#category-${subcategoryId} .thumbnails`);
             
             // Add thumbnails to the category row
@@ -39,7 +40,10 @@ function populateCategory(categoryId, subcategoryId) {
                 </div>
             `).join('');
 
+            // Update arrow visibility after thumbnails are populated
+            updateArrows(wrapperId);
         })
+
         .catch(error => {
             console.error("Error loading videos:", error);
         });

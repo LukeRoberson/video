@@ -4,15 +4,39 @@
  * Handles horizontal scrolling and dynamic visibility of left/right navigation arrows
  * for horizontally scrollable thumbnail carousels in the video manager web app.
  * 
- * - Arrows are only visible if there is more content to scroll in that direction.
- * - Clicking an arrow scrolls the carousel by one visible "page" (the width of the container).
+ * Features:
+ * - Dynamically shows/hides left and right arrows based on scroll position.
+ * - Allows horizontal scrolling using mouse wheel or arrow buttons.
+ * - Smooth scrolling behavior for better user experience.
+ * 
+ * Usage:
+ * - Include this script on pages with `.thumbnails-wrapper` elements.
+ * - Ensure each `.thumbnails-wrapper` has a unique `id` and contains:
+ *   - `.thumbnails` (scrollable container for thumbnails)
+ *   - `.scroll-arrow.left` (left arrow button)
+ *   - `.scroll-arrow.right` (right arrow button)
+ * 
+ * Dependencies:
+ * - None (Vanilla JavaScript)
+ * 
+ * Event Listeners:
+ * - `scroll` on `.thumbnails`: Updates arrow visibility dynamically as the user scrolls.
+ * - `resize` on `window`: Recalculates arrow visibility when the window is resized.
+ * - `wheel` on `.thumbnails`: Enables horizontal scrolling using the mouse wheel.
+ * - `DOMContentLoaded` on `document`: Initializes scroll arrows and event listeners.
  */
 
 
 /**
  * Scrolls the thumbnails container horizontally by one page in the given direction.
+ * 
  * @param {string} wrapperId - The ID of the thumbnails wrapper element.
  * @param {number} direction - Direction to scroll: -1 for left, 1 for right.
+ * 
+ * Behavior:
+ * - Scrolls the `.thumbnails` container inside the specified wrapper.
+ * - The scroll amount is equal to the visible width of the container.
+ * - Smooth scrolling is applied for better user experience.
  */
 function scrollThumbnails(wrapperId, direction) {
     const thumbnails = document.getElementById(wrapperId).querySelector('.thumbnails');
@@ -23,7 +47,17 @@ function scrollThumbnails(wrapperId, direction) {
 
 /**
  * Updates the visibility of left and right scroll arrows based on scroll position.
+ * 
  * @param {string} wrapperId - The ID of the thumbnails wrapper element.
+ * 
+ * Behavior:
+ * - Shows the left arrow if the container can scroll left.
+ * - Shows the right arrow if the container can scroll right.
+ * - Hides arrows if scrolling is not possible in the respective direction.
+ * 
+ * Notes:
+ * - This function should be called after the thumbnails are populated.
+ * - It is also triggered on scroll and resize events.
  */
 function updateArrows(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
@@ -40,7 +74,14 @@ function updateArrows(wrapperId) {
 
 /**
  * Sets up scroll arrow visibility and event listeners for all thumbnail wrappers on the page.
- * Should be called once after the DOM is loaded.
+ * 
+ * Behavior:
+ * - Adds `scroll` and `resize` event listeners to update arrow visibility dynamically.
+ * - Initializes arrow visibility immediately after the DOM is loaded.
+ * 
+ * Notes:
+ * - This function should be called once after the DOM is fully loaded.
+ * - Ensure each `.thumbnails-wrapper` has a unique `id`.
  */
 function setupScrollArrows() {
     document.querySelectorAll('.thumbnails-wrapper').forEach(wrapper => {
@@ -56,7 +97,10 @@ function setupScrollArrows() {
 }
 
 
-// Add event listeners for mouse scrolling
+/**
+ * Event listener.
+ * Adds mouse wheel scrolling functionality to thumbnail containers.
+ */
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.thumbnails').forEach(thumbnails => {
         thumbnails.addEventListener('wheel', (event) => {
@@ -74,5 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Initialize scroll arrows when the DOM is ready
+/**
+ * Event listener.
+ * Sets up scroll arrows and event listeners when the DOM is fully loaded.
+ */
 document.addEventListener('DOMContentLoaded', setupScrollArrows);

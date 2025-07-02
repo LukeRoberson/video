@@ -15,6 +15,12 @@
     padding: 1em;
     scrollbar-color: #444 #232323;  /* For Firefox */
     scrollbar-width: thin;              /* For Firefox */
+    scroll-behavior: smooth;
+}
+
+.thumbnails-wrapper {
+    position: relative;
+    overflow: hidden;
 }
 
 
@@ -23,7 +29,7 @@
    =========================== */
 .thumbnail {
     width: 240px;
-    height: 220px;
+    height: 200px;
     background: #333;
     border-radius: 8px;
     display: flex;
@@ -59,16 +65,21 @@
 
 /* The title of the video, shown below the thumbnail */
 .thumbnail-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     margin: 0.5em;
     font-size: 0.95em;
     text-align: center;
     color: #f0f0f0;
     word-break: break-word;
-    max-height: 4.0em;
+    overflow-wrap: break-word;
+    max-height: 4.0em; /* Default height for 2 lines */
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-overflow: ellipsis;
+    white-space: normal;
+    transition: max-height 0.3s ease; /* Smooth transition */
 }
 
 /* Duration badge on the thumbnail */
@@ -126,6 +137,15 @@
     width: 20px;
     height: 20px;
     fill: #fff;
+}
+
+.continue-thumb {
+    width: 330px;
+    height: 186px; /* 16:9 ratio */
+    object-fit: cover;
+    border-radius: 12px;
+    background: #222;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 
