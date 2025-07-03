@@ -38,8 +38,16 @@ Carousel Banners
 * Track resume time on video
 * Show as watched on thumbnail
 * Show as in progress on thumbnail
-
 </br></br>
+
+Steps:
+1. Create a new table for in progress videos
+2. Update local_db.py with new methods for this table
+3. API to save the playback position for a video
+4. API to get a list of in progress videos
+5. Get video.js to track the video time, and update the database through the API
+6. Add a 'resume playback' button to video details page
+7. Update local_database.md
 
 
 ----
@@ -51,6 +59,7 @@ Carousel Banners
 * After a particular date
 * Shorter than (duration)
 * Longer than (duration)
+* Search page: check box to show unwatched only
 </br></br>
 
 **Data**

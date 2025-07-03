@@ -76,6 +76,7 @@
                 </form>
             </div>
             
+            <!-- Video tags -->
             <div class="px-4 pb-2 pt-2">
                 <p>
                     {% for tag in tags %}
@@ -84,9 +85,21 @@
                 </p>
             </div>
 
+            <!-- Video description -->
             <div class="px-4 pb-2 pt-2">
                 <p>{{ video.description | nl2br | safe }}</p>
             </div>
+
+            <!-- Video URL -->
+            {% if video.url %}
+                <div class="px-4 pb-2 pt-2">
+                    <p>
+                        <a href="{{ video.url }}" class="text-info" target="_blank" rel="noopener noreferrer">
+                            {{ video.url }}
+                        </a>
+                    </p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -168,11 +181,6 @@
                         </div>
                     </div>
 
-                    <p>
-                        <a href="{{ video.url }}" class="text-info" target="_blank" rel="noopener noreferrer">
-                            {{ video.url }}
-                        </a>
-                    </p>
                 </div>
             </div>
         </div>

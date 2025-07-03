@@ -1,4 +1,12 @@
-# Database
+# Global Database
+
+The global database stores information about videos and other metadata.
+
+This is the database that any user would need access to. It's updated by an admin only, not a user.
+
+Also see **local_database.md** which contains information on a database of local user information.
+</br></br>
+
 
 ## Tables
 
@@ -26,6 +34,8 @@ CREATE TABLE bible_characters (
     description TEXT
 );
 ```
+
+</br></br>
 
 
 ### Table: *categories*
