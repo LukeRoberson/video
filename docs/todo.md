@@ -19,14 +19,6 @@ Category for newest videos
 
 ## Database
 
-**Filtering**
-* Before a particular date
-* After a particular date
-* Shorter than (duration)
-* Longer than (duration)
-* Search page: check box to show unwatched only
-</br></br>
-
 **Data**
 * Add URLs for videos
 * Get date stamps for remaining videos
@@ -44,18 +36,9 @@ Find similar videos
 </br></br>
 
 
-## Search
-
-* Page to show videos by topic
-* Show by speaker
-* Show by bible character
-* Show by scripture
-
-</br></br>
-
 
 ----
-# Other Things (Bizzare Ideas)
+# Next Version (Bizzare Ideas)
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
 * Cache thumbnails to make loading faster
@@ -78,6 +61,7 @@ Profiles
     * Clear watch history
     * Check for DB updates
 * Goal watch time per week (like LinkedIn learning)
+* Include watch history in recommended video calculation
 </br></br>
 
 Video Controls
@@ -98,3 +82,14 @@ Project
     * Tools, that I will use
 * Get working as a phone/tablet app
 * Chromecast or Amazon Fire app
+</br></br>
+
+
+Filtering
+* Before a particular date
+* After a particular date
+* Shorter than (duration)
+* Longer than (duration)
+* Search page: check box to show unwatched only
+</br></br>
+
