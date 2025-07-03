@@ -48,6 +48,7 @@ from collections import defaultdict
 from app.sql_db import (
     DatabaseContext,
     VideoManager,
+    CategoryManager,
     CharacterManager,
     TagManager,
     SpeakerManager,
@@ -140,11 +141,44 @@ def home() -> Response:
             reverse=True
         )
 
+    # Get latest Monthly Programs video
+    monthly = None
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        cat_mgr = CategoryManager(db)
+
+        # Get the category ID for 'Monthly Programs'
+        monthly_cat = cat_mgr.name_to_id(name='Monthly Programs')
+
+        if monthly_cat is not None:
+            monthly = video_mgr.get_filter(
+                category_id=[monthly_cat],
+                latest=1,
+            )
+
+    # Get the latest News video
+    news = None
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        cat_mgr = CategoryManager(db)
+
+        # Get the category ID for 'News and Announcements'
+        news_cat = cat_mgr.name_to_id(name='News and Announcements')
+
+        if news_cat is not None:
+            news = video_mgr.get_filter(
+                category_id=[news_cat],
+                latest=1,
+            )
+    print(f"{monthly=}, {news=}")
+
     return make_response(
         render_template(
             "home.html",
             banner_pics=banner_pics,
             in_progress_videos=in_progress_videos,
+            latest_monthly=monthly,
+            latest_news=news,
         )
     )
 

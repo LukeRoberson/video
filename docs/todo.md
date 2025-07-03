@@ -2,9 +2,12 @@
 
 ## Main Page:
 
+Continue watching:
+* Add title to thumbnails
+
 Big items:
 * place right after 'continue watching'
-* Two videos only'
+* Two videos only
     * Latest monthly program
     * Latest news
 </br></br>

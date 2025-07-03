@@ -410,7 +410,8 @@ class VideoManager:
         speaker_id: int | None = None,
         character_id: int | None = None,
         scripture_id: int | None = None,
-        missing_date: bool = False
+        missing_date: bool = False,
+        latest: int = 0,
     ) -> list[dict] | None:
         """
         Retrieves a filtered list of videos from the database.
@@ -437,6 +438,9 @@ class VideoManager:
             missing_date (bool):
                 Filters for videos that are missing a 'date_added' value.
                 If False, does not filter by date. Defaults to False.
+            latest (int):
+                If set, retrieves the latest 'n' videos.
+                If 0, does not limit to latest. Defaults to 0.
 
         Returns:
             list[dict] | None:
@@ -495,6 +499,12 @@ class VideoManager:
         if missing_date:
             wheres.append("(v.date_added IS NULL OR v.date_added = '')")
 
+        if latest > 0:
+            # If latest is set, limit the results to the latest 'n' videos
+            wheres.append(
+                "v.date_added IS NOT NULL AND v.date_added != 'Unknown'"
+            )
+
         # Convert the list of JOIN and WHERE statements to strings
         if joins:
             query += " " + " ".join(joins)
@@ -509,6 +519,11 @@ class VideoManager:
         ):
             query += " GROUP BY v.id HAVING COUNT(DISTINCT vc.category_id) = ?"
             params.append(len(category_id))
+
+        if latest > 0:
+            # If latest is set, order by date_added and limit results
+            query += " ORDER BY v.date_added DESC LIMIT ?"
+            params.append(latest)
 
         # Execute the query with the parameters
         cursor = self.db.cursor.execute(query, tuple(params))
