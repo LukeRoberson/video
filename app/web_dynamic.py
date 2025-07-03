@@ -85,7 +85,6 @@ def video_details(
                 404
             )
         video = video_list[0]
-        print("Video Details:", video)
 
         # Fetch the category name for the video
         cat_list = cat_mgr.get_from_video(
@@ -122,7 +121,6 @@ def video_details(
         )
 
     # Dummy data for similar videos
-    print("Video Details:", video)
     similar_videos = [
         {
             "title": "Similar Video 1",

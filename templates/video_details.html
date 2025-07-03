@@ -36,6 +36,8 @@
                     controls
                     preload="auto"
                     poster="{{ video.thumbnail or '' }}"
+                    data-profile-id="{{ session.get('active_profile', 'guest') }}"
+                    data-video-id="{{ video.id }}"
                     data-setup='{}'
                     style="border-radius: 12px; background: #181a1b;"
                 >
@@ -207,7 +209,7 @@
 </div>
 
 
-<script src="{{ url_for('static', filename='js/videoRes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/videoPlayer.js') }}"></script>
 <script src="{{ url_for('static', filename='js/watched.js') }}"></script>
 
 {% endblock %}

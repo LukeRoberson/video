@@ -323,19 +323,28 @@ def mark_watched() -> Response:
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
+        progress_mgr = ProgressManager(db)
+
+        # Mark the video as watched for the active profile
         result = profile_mgr.mark_watched(
             profile_id=session.get("active_profile", "guest"),
             video_id=video_id
         )
 
-    if not result:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to mark video {video_id} as watched"
-                }
-            ),
-            500
+        if not result:
+            return make_response(
+                jsonify(
+                    {
+                        "error": f"Failed to mark video {video_id} as watched"
+                    }
+                ),
+                500
+            )
+
+        # Remove from in progress list if needed
+        result = progress_mgr.delete(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
         )
 
     return make_response(
@@ -483,7 +492,7 @@ def in_progress_videos() -> Response:
         video_id = data.get("video_id")
         position = data.get("current_time")
 
-        if not isinstance(video_id, int) or not isinstance(position, int):
+        if not video_id or not isinstance(position, int):
             return api_error(
                 """
                 Invalid data types for 'video_id' or 'current_time'.
@@ -552,7 +561,11 @@ def in_progress_videos() -> Response:
 
     # Remove a video from the in-progress list
     elif method_used == "DELETE":
-        video_id = request.args.get("video_id", None)
+        data = request.get_json()
+        if not data:
+            return api_error("No data provided", 400)
+
+        video_id = data.get("video_id")
 
         if video_id is None:
             return api_error(

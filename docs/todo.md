@@ -45,12 +45,13 @@ Steps:
 2. Update local_db.py with new methods for this table (Done)
 3. API to save the playback position for a video (Done)
 4. API to get a list of in progress videos (Done)
-5. Get video.js to track the video time, and update the database through the API
-6. Update local_database.md (Done)
-7. Add a 'resume playback' button to video details page
-8. Update 'mark as watched' to clear any in-progress entries
+5. Update local_database.md (Done)
+6. Get video.js to track the video time, and update the database through the API (must watch 5s or more) (done)
+7. Update 'mark as watched' to clear any in-progress entries (done)
+8. Add a 'resume playback' button to video details page
 9. Homepage: Display a list of in progress videos
-10. Get video.js to see that the video is complete, and mark as watched (clear any in progress entry)
+10. Get video.js to see that the video is complete (within 5s of end), and mark as watched (clear any in progress entry)
+
 
 
 ----

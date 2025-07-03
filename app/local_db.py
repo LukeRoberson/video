@@ -139,7 +139,6 @@ class LocalDbContext:
                 """
             )
             conn.commit()
-            logging.info("Database created or already exists.")
 
 
 class ProfileManager:
