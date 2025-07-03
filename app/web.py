@@ -170,15 +170,17 @@ def home() -> Response:
                 category_id=[news_cat],
                 latest=1,
             )
-    print(f"{monthly=}, {news=}")
+
+    latest_monthly = monthly[0] if monthly else None
+    latest_news = news[0] if news else None
 
     return make_response(
         render_template(
             "home.html",
             banner_pics=banner_pics,
             in_progress_videos=in_progress_videos,
-            latest_monthly=monthly,
-            latest_news=news,
+            latest_monthly=latest_monthly,
+            latest_news=latest_news,
         )
     )
 

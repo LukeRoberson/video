@@ -93,33 +93,67 @@ Home
                     </button>
                 </div>
             {% endif %}
+        </div>
 
-            <!-- Newest Carousel -->
-            <h4 class="mb-3 p-4">Newest</h4>
-            <div id="newestCarousel" class="carousel slide mb-5">
-                <div class="carousel-inner">
-                    <!-- Example carousel items (replace with dynamic content later) -->
-                    <div class="carousel-item active">
-                        <div class="d-flex gap-3 justify-content-center">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/502015535/univ/art/502015535_univ_lss_lg.jpg" class="rounded continue-thumb" alt="Video 1">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201801/art/jwb_univ_201801_lss_02_lg.jpg" class="rounded continue-thumb" alt="Video 2">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/mwbv/univ/202203/art/mwbv_univ_202203_lss_03_lg.jpg" class="rounded continue-thumb" alt="Video 3">
-                        </div>
-                    </div>
-                    <div class="carousel-item">
-                        <div class="d-flex gap-3 justify-content-center">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/1001071829/univ/art/1001071829_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 4">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/702012013/univ/art/702012013_univ_lsr_xl.jpg" class="rounded continue-thumb" alt="Video 5">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/1102016357/univ/art/1102016357_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 6">
-                        </div>
+        <!-- Latest News and Monthly Program -->
+        <div class="card-body mb-5">
+            <h4 class="mb-3 p-4">Latest</h4>
+            <div class="row justify-content-center d-flex gap-3">
+                <!-- Latest News -->
+                <div class="col-md-5">
+                    <!-- The container for the thumbnail -->
+                    <div class="card bg-dark text-white h-100 border-secondary" style="position: relative;">
+                        <a href="{{ url_for('dynamic_pages.video_details', video_id=latest_news.id) }}" class="text-decoration-none text-white">
+                            
+                            <!-- Thumbnail image -->
+                                <img src="{{ latest_news.thumbnail }}"
+                                        class="card-img-top{% if latest_news.watched %} watched{% endif %}"
+                                        alt="{{ latest_news.name }}"
+                                        style="height: 300px; object-fit: cover;">
+                                                        
+                            <!-- Video text -->
+                            <div class="card-body">
+                                <!-- title -->
+                                <h6 class="card-title">{{ latest_news.name }}</h6>
+                                
+                                <!-- Duration -->
+                                {% if latest_news.duration %}
+                                    <small class="text-light">
+                                        <i class="fas fa-clock"></i> {{ latest_news.duration | seconds_to_hhmmss }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </a>
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#newestCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#newestCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
+            
+                <!-- Monthly Program -->
+                <div class="col-md-5">
+                    <!-- The container for the thumbnail -->
+                    <div class="card bg-dark text-white h-100 border-secondary" style="position: relative;">
+                        <a href="{{ url_for('dynamic_pages.video_details', video_id=latest_monthly.id) }}" class="text-decoration-none text-white">
+                            
+                            <!-- Thumbnail image -->
+                                <img src="{{ latest_monthly.thumbnail }}"
+                                        class="card-img-top{% if latest_monthly.watched %} watched{% endif %}"
+                                        alt="{{ latest_monthly.name }}"
+                                        style="height: 300px; object-fit: cover;">
+                                                        
+                            <!-- Video text -->
+                            <div class="card-body">
+                                <!-- title -->
+                                <h6 class="card-title">{{ latest_monthly.name }}</h6>
+                                
+                                <!-- Duration -->
+                                {% if latest_monthly.duration %}
+                                    <small class="text-light">
+                                        <i class="fas fa-clock"></i> {{ latest_monthly.duration | seconds_to_hhmmss }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
