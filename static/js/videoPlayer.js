@@ -1,19 +1,46 @@
 /**
  * @file videoPlayer.js
- * @description Handles resolution switching functionality for the video player using video.js and the videoJsResolutionSwitcher plugin.
+ * @description Handles everything related to the video.js player
  *
- * Initializes the video.js player, sets up the resolution switcher with a default resolution,
- * and ensures the control bar is visible. Logs resolution changes to the console.
+ * Initializes the video.js player
+ * Sets up the resolution switcher with a default resolution
+ * Ensures the control bar is visible
+ * Tracks video playback progress
+ * Marks a video as watched when 96% of it has been viewed
+ * Handles the form submission for marking a video as watched
  */
 
 
+/**
+ * An event listener for the DOMContentLoaded event that initializes the video player,
+ * sets up the resolution switcher, and tracks video playback progress.
+ */
 document.addEventListener('DOMContentLoaded', function () {
     const player = videojs('player');
     const videoElement = document.getElementById('player');
     const profileId = videoElement.getAttribute('data-profile-id');
     const videoId = videoElement.getAttribute('data-video-id');
+    const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
+
     let lastUpdateTime = 0;
     let hasMarkedWatched = false;
+
+    // Set the starting position when the player is ready
+    player.on('loadedmetadata', function () {
+        if (currentTime > 0) {
+            console.log('Setting playback position to:', currentTime);
+            player.currentTime(currentTime); // Set the playback position
+        }
+    });
+
+    // Remove the custom progress bar when the video starts playing
+    player.on('play', function () {
+        const progressOverlay = document.querySelector('.progress-overlay');
+        if (progressOverlay) {
+            progressOverlay.remove(); // Remove the progress bar overlay
+            console.log('Custom progress bar removed.');
+        }
+    });
 
     // Initialize the resolution switcher
     player.videoJsResolutionSwitcher({
@@ -85,6 +112,43 @@ document.addEventListener('DOMContentLoaded', function () {
                     video_id: videoId,
                 })
             }).catch(err => console.error('Error marking video as watched:', err));
+        }
+    });
+});
+
+
+
+/**
+ * Handles the form submission for marking a video as watched.
+ * It prevents the default form submission, sends an AJAX request,
+ * and updates the button text to indicate success.
+ */
+document.getElementById('markWatchedForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Get the API URL and video ID from data attributes
+    const apiUrl = this.dataset.apiUrl;
+    const videoId = this.dataset.videoId;
+
+    // Send a POST request to the server to mark the video as watched
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ video_id: videoId })
+    })
+    .then(response => response.json()) // Parse the JSON response
+    .then(data => {
+        // If the server responds with success, update the button
+        if (data.success && this.dataset.apiUrl === '/api/profile/mark_watched') {
+            this.querySelector('button').textContent = 'Watched!';
+            this.dataset.apiUrl = '/api/profile/mark_unwatched';
+        }
+        else if (data.success && this.dataset.apiUrl === '/api/profile/mark_unwatched') {
+            this.querySelector('button').textContent = 'Unwatched!';
+            this.dataset.apiUrl = '/api/profile/mark_watched';
         }
     });
 });

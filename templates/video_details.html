@@ -29,7 +29,7 @@
         <div class="card-body">
 
             <!-- Video player -->
-            <div class="video-player mb-4">
+            <div class="video-player mb-4 position-relative">
                 <video
                     id="player"
                     class="video-js vjs-theme-city vjs-big-play-centered vjs-16-9 vjs-fluid"
@@ -38,6 +38,7 @@
                     poster="{{ video.thumbnail or '' }}"
                     data-profile-id="{{ session.get('active_profile', 'guest') }}"
                     data-video-id="{{ video.id }}"
+                    data-current-time="{{ current_time or 0 }}"
                     data-setup='{}'
                     style="border-radius: 12px; background: #181a1b;"
                 >
@@ -48,6 +49,13 @@
                         {% endif %}
                     {% endfor %}
                 </video>
+
+                <!-- Progress bar overlay -->
+                {% if current_time and video.duration %}
+                    <div class="progress-overlay">
+                        <div class="progress-bar" style="width: {{ (current_time / video.duration) * 100 }}%;"></div>
+                    </div>
+                {% endif %}
             </div>
 
             <!-- Video details -->
@@ -210,6 +218,5 @@
 
 
 <script src="{{ url_for('static', filename='js/videoPlayer.js') }}"></script>
-<script src="{{ url_for('static', filename='js/watched.js') }}"></script>
 
 {% endblock %}

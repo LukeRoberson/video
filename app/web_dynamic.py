@@ -41,6 +41,7 @@ from app.sql_db import (
 from app.local_db import (
     LocalDbContext,
     ProfileManager,
+    ProgressManager,
 )
 
 
@@ -112,13 +113,25 @@ def video_details(
             video_id=video_id
         )
 
-    # Check if the video is marked as watched by the user
+    # Check if the video is marked as watched by the user, or in progress
+    current_time = 0
     with LocalDbContext() as local_db:
         profile_mgr = ProfileManager(local_db)
+        progress_mgr = ProgressManager(local_db)
+
         watched = profile_mgr.check_watched(
             profile_id=session.get("active_profile", "guest"),
             video_id=video['id']
         )
+
+        # If not watched, check if the video is in progress
+        if not watched:
+            in_progress = progress_mgr.read(
+                profile_id=session.get("active_profile", "guest"),
+                video_id=video['id']
+            )
+
+            current_time = in_progress[0]['current_time'] if in_progress else 0
 
     # Dummy data for similar videos
     similar_videos = [
@@ -153,6 +166,7 @@ def video_details(
             scriptures=scriptures,
             similar_videos=similar_videos,
             watched=watched,
+            current_time=current_time,
         )
     )
 
