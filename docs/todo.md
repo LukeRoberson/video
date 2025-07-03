@@ -41,18 +41,26 @@ Carousel Banners
 </br></br>
 
 Steps:
-1. Create a new table for in progress videos
-2. Update local_db.py with new methods for this table
-3. API to save the playback position for a video
-4. API to get a list of in progress videos
+1. Create a new table for in progress videos (Done)
+2. Update local_db.py with new methods for this table (Done)
+3. API to save the playback position for a video (Done)
+4. API to get a list of in progress videos (Done)
 5. Get video.js to track the video time, and update the database through the API
 6. Add a 'resume playback' button to video details page
 7. Update 'mark as watched' to clear any in-progress entries
-8. Update local_database.md
+8. Update local_database.md (Done)
 
 
 ----
 # Backend
+
+## Cleanup
+
+* API: Use helper functions for returning success and error (partially implemented)
+* Make API paths consistent (eg, 'video' or 'videos', but not both)
+* Consolidate functions/routes for APIs, and base them on method
+</br></br>
+
 ## Database
 
 **Filtering**
@@ -84,7 +92,7 @@ Find similar videos
 </br></br>
 
 
-## Search:
+## Search
 
 * Page to show videos by topic
 * Show by speaker

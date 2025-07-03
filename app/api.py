@@ -75,6 +75,7 @@ from app.sql_db import (
 from app.local_db import (
     LocalDbContext,
     ProfileManager,
+    ProgressManager,
 )
 
 
@@ -157,87 +158,6 @@ def api_error(
     resp = {"success": False, "error": error}
 
     return make_response(jsonify(resp), status)
-
-
-@api_bp.route(
-    "/api/categories/<int:category_id>/<int:subcategory_id>",
-    methods=["GET"],
-)
-def category_filter(
-    category_id: int,
-    subcategory_id: int,
-) -> Response:
-    """
-    Fetch videos in a category.
-
-    Uses the given major category ID and subcategory ID.
-    This is used to populate carousels with videos.
-
-    Process:
-        1. Select all videos with the given category ID and subcategory ID.
-        2. If no videos are found, return a 404 error.
-        3. Convert the duration from seconds to HH:MM:SS format.
-        4. Return a JSON response with the list of videos.
-
-    Args:
-        category_id (int): The ID of the major category to filter videos by.
-        subcategory_id (int): The ID of the subcategory to filter videos by.
-
-    Returns:
-        Response: A JSON response containing the list of videos
-            in the specified category and subcategory.
-        If no videos are found, an empty list is returned.
-    """
-
-    logging.info(
-        f"Fetching videos for Category ID: {category_id}, "
-        f"Subcategory ID: {subcategory_id}"
-    )
-
-    # Select all videos with the given category ID and subcategory ID
-    cat_list = [category_id, subcategory_id]
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        videos = video_mgr.get_filter(
-            category_id=cat_list,
-        )
-
-    if videos:
-        logging.info(
-            f"Found {len(videos)} videos for Category ID: {category_id}, "
-            f"Subcategory ID: {subcategory_id}"
-        )
-
-    # If no videos are found, return a 404 error
-    if not videos:
-        videos = []
-
-    # Convert duration from seconds to HH:MM:SS format
-    for video in videos:
-        video['duration'] = seconds_to_hhmmss(video['duration'])
-
-    # Get watch status for the active profile
-    active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
-
-    # Sort videos by 'date_added' (newest first)
-    videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
-
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
-    )
 
 
 @api_bp.route(
@@ -369,6 +289,301 @@ def get_active_profile() -> Response:
     return api_success(
         data={"active_profile": profile}
     )
+
+
+@api_bp.route(
+    "/api/profile/mark_watched",
+    methods=["POST"]
+)
+def mark_watched() -> Response:
+    """
+    Mark a video as watched for the active profile.
+
+    Expects JSON:
+        {
+            "video_id": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'video_id' in request data"
+                }
+            ),
+            400
+        )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        result = profile_mgr.mark_watched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+    if not result:
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to mark video {video_id} as watched"
+                }
+            ),
+            500
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": f"Marked video {video_id} as watched"
+            }
+        ),
+        200
+    )
+
+
+@api_bp.route(
+    "/api/profile/mark_unwatched",
+    methods=["POST"]
+)
+def mark_unwatched() -> Response:
+    """
+    Mark a video as unwatched for the active profile.
+
+    Expects JSON:
+        {
+            "video_id": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return make_response(
+            jsonify(
+                {
+                    "error": "Missing 'video_id' in request data"
+                }
+            ),
+            400
+        )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        result = profile_mgr.mark_unwatched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+    if not result:
+        return make_response(
+            jsonify(
+                {
+                    "error": f"Failed to mark video {video_id} as unwatched"
+                }
+            ),
+            500
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": f"Marked video {video_id} as unwatched"
+            }
+        ),
+        200
+    )
+
+
+@api_bp.route(
+    "/api/profile/in_progress",
+    methods=["GET", "POST", "UPDATE", "DELETE"]
+)
+def in_progress_videos() -> Response:
+    """
+    Manage in-progress videos for the active profile.
+
+    Handles CRUD operations:
+        - GET: Retrieve in-progress videos for the active profile.
+            Optional 'video_id' parameter to filter by specific video.
+        - POST: Add a video to the in-progress list.
+        - UPDATE: Update the playback position of an in-progress video.
+        - DELETE: Remove a video from the in-progress list.
+
+    Expects JSON for POST and UPDATE requests:
+        {
+            "video_id": <int>,
+            "current_time": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+            Includes in-progress videos for a GET request.
+    """
+
+    method_used = request.method
+
+    # Get the active profile from the session
+    active_profile = session.get("active_profile", "guest")
+    if active_profile is None or active_profile == "guest":
+        return api_success(
+            message="No in progress videos for guest profile"
+        )
+
+    # Ensure active_profile is an integer
+    try:
+        active_profile = int(active_profile)
+    except ValueError:
+        return api_error(
+            error="Invalid profile ID"
+        )
+
+    # Get one or more in progress videos
+    if method_used == "GET":
+        video_id = request.args.get("video_id", None)
+
+        with LocalDbContext() as db:
+            progress_mgr = ProgressManager(db)
+
+            # Retrieve all in-progress videos for the active profile
+            if video_id is None:
+                in_progress_videos = progress_mgr.read(
+                    profile_id=active_profile
+                )
+
+            else:
+                in_progress_videos = progress_mgr.read(
+                    profile_id=active_profile,
+                    video_id=int(video_id)
+                )
+
+            return api_success(
+                data=in_progress_videos,
+                message="Retrieved in-progress videos successfully"
+            )
+
+    # Add a video to the in-progress list
+    elif method_used == "POST":
+        data = request.get_json()
+        if not data:
+            return api_error("No data provided", 400)
+
+        video_id = data.get("video_id")
+        position = data.get("current_time")
+
+        if not isinstance(video_id, int) or not isinstance(position, int):
+            return api_error(
+                """
+                Invalid data types for 'video_id' or 'current_time'.
+                Must be integers.
+                """,
+                400
+            )
+
+        with LocalDbContext() as db:
+            progress_mgr = ProgressManager(db)
+            result = progress_mgr.create(
+                profile_id=active_profile,
+                video_id=video_id,
+                current_time=position
+            )
+
+        if not result:
+            return api_error(
+                f"Failed to add in-progress video {video_id}",
+                500
+            )
+
+        return api_success(
+            message=(
+                f"Added in-progress video {video_id} at position {position}"
+            )
+        )
+
+    # Update the playback position of an in-progress video
+    elif method_used == "UPDATE":
+        data = request.get_json()
+        if not data:
+            return api_error("No data provided", 400)
+
+        video_id = data.get("video_id")
+        position = data.get("current_time")
+
+        if not isinstance(video_id, int) or not isinstance(position, int):
+            return api_error(
+                """
+                Invalid data types for 'video_id' or 'current_time'.
+                Must be integers.
+                """,
+                400
+            )
+
+        with LocalDbContext() as db:
+            progress_mgr = ProgressManager(db)
+            result = progress_mgr.update(
+                profile_id=active_profile,
+                video_id=video_id,
+                current_time=position
+            )
+
+        if not result:
+            return api_error(
+                f"Failed to update in-progress video {video_id}",
+                500
+            )
+
+        return api_success(
+            message=(
+                f"Updated in-progress video {video_id} at position {position}"
+            )
+        )
+
+    # Remove a video from the in-progress list
+    elif method_used == "DELETE":
+        video_id = request.args.get("video_id", None)
+
+        if video_id is None:
+            return api_error(
+                "Missing 'video_id' in request data",
+                400
+            )
+
+        with LocalDbContext() as db:
+            progress_mgr = ProgressManager(db)
+
+            result = progress_mgr.delete(
+                profile_id=active_profile,
+                video_id=int(video_id)
+            )
+
+            if not result:
+                return api_error(
+                    f"Failed to remove in-progress video {video_id}",
+                    500
+                )
+
+            return api_success(
+                message="Removed in-progress videos successfully"
+            )
+
+    # Handle unsupported methods
+    else:
+        return api_error(
+            f"Method {method_used} not allowed for this endpoint",
+            405
+        )
 
 
 @api_bp.route(
@@ -833,276 +1048,6 @@ def add_video_metadata() -> Response:
 
 
 @api_bp.route(
-    "/api/search/videos",
-    methods=["GET"],
-)
-def search_videos() -> Response:
-    """
-    Search for videos by name or description.
-
-    Query Parameters:
-        q (str): The search query string.
-        limit (int, optional):
-            Maximum number of results to return. Defaults to 50.
-
-    Returns:
-        Response: A JSON response containing the list of matching videos.
-        If no videos are found, an empty list is returned.
-    """
-
-    # Get query parameters
-    query = request.args.get("q", "").strip()
-    limit = request.args.get("limit", 50, type=int)
-
-    if not query:
-        logging.warning("Empty search query provided.")
-        return api_success(data=[])
-
-    # Use the search method to find videos
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        videos = video_mgr.search(
-            query=query,
-            limit=limit
-        )
-
-    # If videos are found, log the count
-    if videos:
-        logging.info(f"Found {len(videos)} videos for query: '{query}'")
-
-        # Convert duration from seconds to HH:MM:SS format
-        for video in videos:
-            video['duration'] = seconds_to_hhmmss(video['duration'])
-
-    # If no videos are found, log the event
-    else:
-        videos = []
-        logging.info(f"No videos found for query: '{query}'")
-
-    # Return the list of videos as a JSON response
-    return api_success(data=videos)
-
-
-@api_bp.route(
-    "/api/scripture",
-    methods=["POST"],
-)
-def add_scripture_text() -> Response:
-    """
-    Add text to a scripture.
-
-    Expects JSON:
-        {
-            "scr_name": "<scripture name>",
-            "scr_text": "<scripture text>"
-        }
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    # Get the JSON data from the request
-    data = request.get_json()
-    if not data:
-        logging.error("No data provided for adding scripture text.")
-        return api_error("No data provided", 400)
-
-    scr_name = data.get("scr_name")
-    scr_text = data.get("scr_text")
-
-    if not scr_name or not scr_text:
-        logging.error("Missing 'scr_name' or 'scr_text' in request data.")
-        return api_error(
-            "Missing 'scr_name' or 'scr_text' in request data",
-            400
-        )
-
-    # Get the book, chapter, and verse from the scripture name
-    match = re.match(
-        r"""
-        (?P<book>          # Match the book name
-            (?:\d\s*)?     # Match a number then whitespace
-            \w[\w\s]*?     # Match word characters and spaces
-        )
-        \s+                # Match one or more spaces
-        (?P<chapter>\d+)   # Match the chapter number (digits)
-        :                  # Match the colon separator
-        (?P<verse>\d+)     # Match the verse number (digits)
-        """,
-        scr_name,
-        re.X               # Enable verbose mode
-    )
-
-    if match:
-        book = match.group('book').strip()
-        chapter = int(match.group('chapter'))
-        verse = int(match.group('verse'))
-    else:
-        book = chapter = verse = None
-
-    if book is None or chapter is None or verse is None:
-        return api_error(
-            f"Scripture reference '{scr_name}' is not valid. Skipping",
-            400
-        )
-
-    # Get the scripture ID from the database
-    with DatabaseContext() as db:
-        scripture_mgr = ScriptureManager(db)
-
-        # Check if the scripture already exists
-        scr_id = scripture_mgr.name_to_id(
-            book=book,
-            chapter=chapter,
-            verse=verse,
-        )
-
-    if scr_id is None:
-        logging.error(
-            f"Failed to create scripture: {scr_name}"
-        )
-        return api_error(f"Failed to create scripture: {scr_name}", 500)
-
-    # Add the scripture text to the database
-    logging.info(
-        f"Adding scripture text for {book} {chapter}:{verse} "
-        f"(ID: {scr_id}) with text: '{scr_text}'"
-    )
-    with DatabaseContext() as db:
-        scripture_mgr = ScriptureManager(db)
-        result = scripture_mgr.update(
-            id=scr_id,
-            text=scr_text,
-        )
-
-    if not result:
-        logging.error(f"Failed to add scripture text for '{scr_name}'.")
-        return api_error(f"Failed to add scripture text for '{scr_name}'", 500)
-
-    logging.info(f"Successfully added scripture text for '{scr_name}'.")
-
-    return api_success(
-        message=f"Added scripture text for '{scr_name}'"
-    )
-
-
-@api_bp.route(
-    "/api/profile/mark_watched",
-    methods=["POST"]
-)
-def mark_watched() -> Response:
-    """
-    Mark a video as watched for the active profile.
-
-    Expects JSON:
-        {
-            "video_id": <int>
-        }
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    data = request.get_json()
-    video_id = data.get("video_id", None)
-
-    if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
-
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        result = profile_mgr.mark_watched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
-        )
-
-    if not result:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to mark video {video_id} as watched"
-                }
-            ),
-            500
-        )
-
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as watched"
-            }
-        ),
-        200
-    )
-
-
-@api_bp.route(
-    "/api/profile/mark_unwatched",
-    methods=["POST"]
-)
-def mark_unwatched() -> Response:
-    """
-    Mark a video as unwatched for the active profile.
-
-    Expects JSON:
-        {
-            "video_id": <int>
-        }
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    data = request.get_json()
-    video_id = data.get("video_id", None)
-
-    if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
-
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        result = profile_mgr.mark_unwatched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
-        )
-
-    if not result:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to mark video {video_id} as unwatched"
-                }
-            ),
-            500
-        )
-
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as unwatched"
-            }
-        ),
-        200
-    )
-
-
-@api_bp.route(
     "/api/videos/csv",
     methods=["GET"]
 )
@@ -1271,4 +1216,239 @@ def add_videos() -> Response:
 
     return api_success(
         message="video added"
+    )
+
+
+@api_bp.route(
+    "/api/search/videos",
+    methods=["GET"],
+)
+def search_videos() -> Response:
+    """
+    Search for videos by name or description.
+
+    Query Parameters:
+        q (str): The search query string.
+        limit (int, optional):
+            Maximum number of results to return. Defaults to 50.
+
+    Returns:
+        Response: A JSON response containing the list of matching videos.
+        If no videos are found, an empty list is returned.
+    """
+
+    # Get query parameters
+    query = request.args.get("q", "").strip()
+    limit = request.args.get("limit", 50, type=int)
+
+    if not query:
+        logging.warning("Empty search query provided.")
+        return api_success(data=[])
+
+    # Use the search method to find videos
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = video_mgr.search(
+            query=query,
+            limit=limit
+        )
+
+    # If videos are found, log the count
+    if videos:
+        logging.info(f"Found {len(videos)} videos for query: '{query}'")
+
+        # Convert duration from seconds to HH:MM:SS format
+        for video in videos:
+            video['duration'] = seconds_to_hhmmss(video['duration'])
+
+    # If no videos are found, log the event
+    else:
+        videos = []
+        logging.info(f"No videos found for query: '{query}'")
+
+    # Return the list of videos as a JSON response
+    return api_success(data=videos)
+
+
+@api_bp.route(
+    "/api/scripture",
+    methods=["POST"],
+)
+def add_scripture_text() -> Response:
+    """
+    Add text to a scripture.
+
+    Expects JSON:
+        {
+            "scr_name": "<scripture name>",
+            "scr_text": "<scripture text>"
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    # Get the JSON data from the request
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for adding scripture text.")
+        return api_error("No data provided", 400)
+
+    scr_name = data.get("scr_name")
+    scr_text = data.get("scr_text")
+
+    if not scr_name or not scr_text:
+        logging.error("Missing 'scr_name' or 'scr_text' in request data.")
+        return api_error(
+            "Missing 'scr_name' or 'scr_text' in request data",
+            400
+        )
+
+    # Get the book, chapter, and verse from the scripture name
+    match = re.match(
+        r"""
+        (?P<book>          # Match the book name
+            (?:\d\s*)?     # Match a number then whitespace
+            \w[\w\s]*?     # Match word characters and spaces
+        )
+        \s+                # Match one or more spaces
+        (?P<chapter>\d+)   # Match the chapter number (digits)
+        :                  # Match the colon separator
+        (?P<verse>\d+)     # Match the verse number (digits)
+        """,
+        scr_name,
+        re.X               # Enable verbose mode
+    )
+
+    if match:
+        book = match.group('book').strip()
+        chapter = int(match.group('chapter'))
+        verse = int(match.group('verse'))
+    else:
+        book = chapter = verse = None
+
+    if book is None or chapter is None or verse is None:
+        return api_error(
+            f"Scripture reference '{scr_name}' is not valid. Skipping",
+            400
+        )
+
+    # Get the scripture ID from the database
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+
+        # Check if the scripture already exists
+        scr_id = scripture_mgr.name_to_id(
+            book=book,
+            chapter=chapter,
+            verse=verse,
+        )
+
+    if scr_id is None:
+        logging.error(
+            f"Failed to create scripture: {scr_name}"
+        )
+        return api_error(f"Failed to create scripture: {scr_name}", 500)
+
+    # Add the scripture text to the database
+    logging.info(
+        f"Adding scripture text for {book} {chapter}:{verse} "
+        f"(ID: {scr_id}) with text: '{scr_text}'"
+    )
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+        result = scripture_mgr.update(
+            id=scr_id,
+            text=scr_text,
+        )
+
+    if not result:
+        logging.error(f"Failed to add scripture text for '{scr_name}'.")
+        return api_error(f"Failed to add scripture text for '{scr_name}'", 500)
+
+    logging.info(f"Successfully added scripture text for '{scr_name}'.")
+
+    return api_success(
+        message=f"Added scripture text for '{scr_name}'"
+    )
+
+
+@api_bp.route(
+    "/api/categories/<int:category_id>/<int:subcategory_id>",
+    methods=["GET"],
+)
+def category_filter(
+    category_id: int,
+    subcategory_id: int,
+) -> Response:
+    """
+    Fetch videos in a category.
+
+    Uses the given major category ID and subcategory ID.
+    This is used to populate carousels with videos.
+
+    Process:
+        1. Select all videos with the given category ID and subcategory ID.
+        2. If no videos are found, return a 404 error.
+        3. Convert the duration from seconds to HH:MM:SS format.
+        4. Return a JSON response with the list of videos.
+
+    Args:
+        category_id (int): The ID of the major category to filter videos by.
+        subcategory_id (int): The ID of the subcategory to filter videos by.
+
+    Returns:
+        Response: A JSON response containing the list of videos
+            in the specified category and subcategory.
+        If no videos are found, an empty list is returned.
+    """
+
+    logging.info(
+        f"Fetching videos for Category ID: {category_id}, "
+        f"Subcategory ID: {subcategory_id}"
+    )
+
+    # Select all videos with the given category ID and subcategory ID
+    cat_list = [category_id, subcategory_id]
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = video_mgr.get_filter(
+            category_id=cat_list,
+        )
+
+    if videos:
+        logging.info(
+            f"Found {len(videos)} videos for Category ID: {category_id}, "
+            f"Subcategory ID: {subcategory_id}"
+        )
+
+    # If no videos are found, return a 404 error
+    if not videos:
+        videos = []
+
+    # Convert duration from seconds to HH:MM:SS format
+    for video in videos:
+        video['duration'] = seconds_to_hhmmss(video['duration'])
+
+    # Get watch status for the active profile
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
+
+    # Sort videos by 'date_added' (newest first)
+    videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
+
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
     )
