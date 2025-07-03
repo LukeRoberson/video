@@ -46,9 +46,11 @@ Steps:
 3. API to save the playback position for a video (Done)
 4. API to get a list of in progress videos (Done)
 5. Get video.js to track the video time, and update the database through the API
-6. Add a 'resume playback' button to video details page
-7. Update 'mark as watched' to clear any in-progress entries
-8. Update local_database.md (Done)
+6. Update local_database.md (Done)
+7. Add a 'resume playback' button to video details page
+8. Update 'mark as watched' to clear any in-progress entries
+9. Homepage: Display a list of in progress videos
+10. Get video.js to see that the video is complete, and mark as watched (clear any in progress entry)
 
 
 ----

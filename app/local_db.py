@@ -592,7 +592,7 @@ class ProgressManager:
         current_time: int,
     ) -> bool:
         """
-        Updates an in-progress entry.
+        Updates an in-progress entry. If it does not exist, create it.
 
         Args:
             profile_id (int): The ID of the profile.
@@ -612,34 +612,21 @@ class ProgressManager:
             )
             return None
 
-        # Check the entry exists before updating
-        try:
-            result = self.read(profile_id, video_id)
-            if not result:
-                logging.error(
-                    f"[ProfileManager.update] No in-progress entry found "
-                    f"for video {video_id} on profile {profile_id}."
-                )
-                return False
-
-        except Exception as e:
-            logging.error(
-                f"[ProfileManager.update] Error checking in-progress entry "
-                f"for video {video_id} on profile {profile_id}: {e}"
-            )
-            return False
-
         # Update the in-progress entry
         try:
             with self.db.conn:
                 cursor = self.db.cursor
                 cursor.execute(
                     """
-                    UPDATE in_progress_videos
-                    SET current_time = ?, updated_at = CURRENT_TIMESTAMP
-                    WHERE profile_id = ? AND video_id = ?
+                    INSERT OR REPLACE INTO in_progress_videos (
+                        profile_id,
+                        video_id,
+                        current_time,
+                        updated_at
+                    )
+                    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                     """,
-                    (current_time, profile_id, video_id)
+                    (profile_id, video_id, current_time)
                 )
 
         except Exception as e:
