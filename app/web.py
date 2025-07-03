@@ -94,10 +94,26 @@ def home() -> Response:
     """
 
     banner_pics = [
-        f for f in os.listdir(banner_dir)
-        if (
-            f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
-        )
+        {
+            "filename": "banner_1.jpg",
+            "description": "Sermon on the Mount",
+        },
+        {
+            "filename": "banner_2.jpg",
+            "description": "Prayer",
+        },
+        {
+            "filename": "banner_3.jpg",
+            "description": "People of all Nations",
+        },
+        {
+            "filename": "banner_4.jpg",
+            "description": "Guidance",
+        },
+        {
+            "filename": "banner_5.jpg",
+            "description": "Prophets of old",
+        },
     ]
 
     # Get the session profile ID from the request context

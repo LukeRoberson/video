@@ -2,24 +2,8 @@
 
 ## Main Page:
 
-Continue watching:
-* Add title to thumbnails
-
-Big items:
-* place right after 'continue watching'
-* Two videos only
-    * Latest monthly program
-    * Latest news
-</br></br>
-
 Category for newest videos
 * As a carousel, below the big items
-</br></br>
-
-Carousel Banners
-* Rotating banners at the top of the page
-* For now, a nice theme scripture or annotation
-* Have several, and select five at random on load
 </br></br>
 
 
