@@ -1,0 +1,26 @@
+# An ignore file for the scraper
+# Some categories are unused for this app
+# Some videos are duplicates
+
+categories:
+  - Videos
+  - Audio Descriptions
+
+subcategories:
+  - Midweek Meetings
+  - Sample Conversations (2016-2023)
+  - Pure Worship—Chapter Introductions
+  - Latest Videos
+  - Video Categories
+  - “Sing Out Joyfully”—Meetings
+
+videos:
+  - JW Broadcasting—November 2017
+  - JW Broadcasting​—December 2015
+  - JW Broadcasting​—November 2015
+  - JW Broadcasting​—September 2015
+  - 2012 Annual Meeting Highlights
+  - How Jehovah’s Witnesses Finance Their Work
+  - Worldwide Preaching Campaign of Jehovah’s Witnesses
+  - "Mark Noumair: “Work . . . for the Food That Remains for Everlasting Life”"
+  

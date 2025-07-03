@@ -65,6 +65,7 @@ from selenium.webdriver.common.by import By
 
 from bs4 import BeautifulSoup, Tag
 import pandas as pd
+import yaml
 
 from types import TracebackType
 import traceback as tb
@@ -72,8 +73,11 @@ import time
 from colorama import Fore, Style
 from tqdm import tqdm
 import os
+import sys
 
-from app.sql_db import (
+# Add the parent directory of 'app' to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app.sql_db import (    # noqa: E402
     DatabaseContext,
     CategoryManager,
     VideoManager,
@@ -86,35 +90,15 @@ MAIN_URL = "https://www.jw.org/en/library/videos/#en/home"
 # Path to the Chrome WebDriver executable
 DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
 
-# Categories to ignore when scraping
-IGNORE_CATEGORIES = [
-    "Videos",
-    "Audio Descriptions",
-]
-
-# Sub-categories to ignore when scraping
-IGNORE_SUB_CATEGORIES = [
-    "Midweek Meetings",
-    "Sample Conversations (2016-2023)",
-    "Pure Worship—Chapter Introductions",
-    "Latest Videos",
-    "Video Categories",
-    "“Sing Out Joyfully”—Meetings",
-]
-
-# Videos to ignore when scraping; Some are aliases for other videos,
-#   The scraper picks others up when they already exist, possibly due to
-#   encoding of characters in the video name.
-IGNORE_VIDEOS = [
-    "JW Broadcasting—November 2017",
-    "JW Broadcasting​—December 2015",
-    "JW Broadcasting​—November 2015",
-    "JW Broadcasting​—September 2015",
-    "2012 Annual Meeting Highlights",
-    "How Jehovah’s Witnesses Finance Their Work",
-    "Worldwide Preaching Campaign of Jehovah’s Witnesses",
-    "Mark Noumair: “Work . . . for the Food That Remains for Everlasting Life”"
-]
+# Load ignore lists from ignore.yaml if it exists
+IGNORE_YAML_PATH = os.path.join(os.path.dirname(__file__), "ignore.yaml")
+if os.path.exists(IGNORE_YAML_PATH):
+    with open(IGNORE_YAML_PATH, "r", encoding="utf-8") as f:
+        ignore_data = yaml.safe_load(f)
+        if isinstance(ignore_data, dict):
+            IGNORE_CATEGORIES = ignore_data.get("categories", [])
+            IGNORE_SUB_CATEGORIES = ignore_data.get("subcategories", [])
+            IGNORE_VIDEOS = ignore_data.get("videos", [])
 
 
 class CategoryScraper:
