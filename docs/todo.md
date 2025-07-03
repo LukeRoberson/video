@@ -2,25 +2,15 @@
 
 ## Main Page:
 
-Current month's broadcasting video
-* Before 'continue watching'
-* Only display one from the last 30 days
-* If two, within 30 days, show the latest
-* If marked as read, don't show at all
-</br></br>
-
-Latest GB update (up to 1 month old)
-* Between monthly program and continue watching
-* Only one within the last 30 days
-* Hide when marked as watched
+Big items:
+* place right after 'continue watching'
+* Two videos only'
+    * Latest monthly program
+    * Latest news
 </br></br>
 
 Category for newest videos
-* As a carousel, below 'continue watching'
-</br></br>
-
-Category for a random tag
-* Another carousel below
+* As a carousel, below the big items
 </br></br>
 
 Carousel Banners
@@ -28,30 +18,6 @@ Carousel Banners
 * For now, a nice theme scripture or annotation
 * Have several, and select five at random on load
 </br></br>
-
-
-----
-# Local Data
-## Profiles:
-
-* Auto mark as watched if a video finishes
-* Track resume time on video
-* Show as watched on thumbnail
-* Show as in progress on thumbnail
-</br></br>
-
-Steps:
-1. Create a new table for in progress videos (Done)
-2. Update local_db.py with new methods for this table (Done)
-3. API to save the playback position for a video (Done)
-4. API to get a list of in progress videos (Done)
-5. Update local_database.md (Done)
-6. Get video.js to track the video time, and update the database through the API (must watch 5s or more) (done)
-7. Update 'mark as watched' to clear any in-progress entries (done)
-8. Add a 'resume playback' button to video details page
-9. Homepage: Display a list of in progress videos
-10. Get video.js to see that the video is complete (within 5s of end), and mark as watched (clear any in progress entry)
-
 
 
 ----

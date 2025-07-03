@@ -282,9 +282,6 @@ def get_active_profile() -> Response:
                 "image": "guest.png"
             }
 
-    logging.info(f"Active profile retrieved: {active_profile}")
-    logging.info(f"Profile details: {profile}")
-
     # Return a JSON response with the active profile ID
     return api_success(
         data={"active_profile": profile}

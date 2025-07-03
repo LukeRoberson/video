@@ -18,6 +18,17 @@ Dependencies:
     - Blueprint: For organizing routes.
     - render_template: For rendering HTML templates.
     - make_response: For creating HTTP responses.
+
+Custom Dependencies:
+    - DatabaseContext: For managing database connections.
+    - VideoManager: For managing video data.
+    - CharacterManager: For managing character data.
+    - TagManager: For managing tag data.
+    - SpeakerManager: For managing speaker data.
+    - ScriptureManager: For managing scripture data.
+    - LocalDbContext: For managing local database connections.
+    - ProfileManager: For managing user profiles.
+    - ProgressManager: For managing user progress in videos.
 """
 
 # Standard library imports
@@ -26,6 +37,7 @@ from flask import (
     Response,
     render_template,
     make_response,
+    session,
 )
 import random
 import os
@@ -44,6 +56,7 @@ from app.sql_db import (
 from app.local_db import (
     LocalDbContext,
     ProfileManager,
+    ProgressManager,
 )
 
 
@@ -85,12 +98,53 @@ def home() -> Response:
             f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
         )
     ]
-    print("Banner Pictures:", banner_pics)
+
+    # Get the session profile ID from the request context
+    in_progress_videos = []
+    profile_id = session.get('active_profile')
+
+    # Get in progress videos
+    if profile_id != 0 and profile_id is not None:
+        profile_id = (
+            int(profile_id) if isinstance(profile_id, str) else profile_id
+        )
+        with LocalDbContext() as db:
+            progress_mgr = ProgressManager(db)
+
+            in_progress_videos = progress_mgr.read(
+                profile_id=profile_id,
+            )
+
+            # Make sure it's a list
+            in_progress_videos = (
+                [] if not in_progress_videos else in_progress_videos
+            )
+
+    # Get details for each in-progress video
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+
+        for video in in_progress_videos:
+            video_details = video_mgr.get(
+                id=video['video_id']
+            )
+            if video_details:
+                video['id'] = video_details[0].get('id')
+                video['name'] = video_details[0].get('name')
+                video['thumbnail'] = video_details[0].get('thumbnail')
+                video['duration'] = video_details[0].get('duration')
+
+        # Sort, so the most recently updated videos are first
+        in_progress_videos.sort(
+            key=lambda v: v.get('updated_at', ''),
+            reverse=True
+        )
 
     return make_response(
         render_template(
             "home.html",
             banner_pics=banner_pics,
+            in_progress_videos=in_progress_videos,
         )
     )
 

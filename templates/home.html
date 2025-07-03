@@ -59,32 +59,40 @@ Home
         <div class="card-body">
 
             <!-- Continue Watching Carousel -->
-            <h4 class="mb-3 p-4">Continue Watching</h4>
-            <div id="continueWatchingCarousel" class="carousel slide mb-5">
-                <div class="carousel-inner">
-                    <!-- Example carousel items (replace with dynamic content later) -->
-                    <div class="carousel-item active">
-                        <div class="d-flex gap-3 justify-content-center">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/502015535/univ/art/502015535_univ_lss_lg.jpg" class="rounded continue-thumb" alt="Video 1">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201801/art/jwb_univ_201801_lss_02_lg.jpg" class="rounded continue-thumb" alt="Video 2">
-                            <img src="https://assetsnffrgf-a.akamaihd.net/assets/m/mwbv/univ/202203/art/mwbv_univ_202203_lss_03_lg.jpg" class="rounded continue-thumb" alt="Video 3">
-                        </div>
+            {% if in_progress_videos %}
+                <h4 class="mb-3 p-4">Continue Watching</h4>
+                <div id="continueWatchingCarousel" class="carousel slide mb-5">
+                    
+                    <!-- Thumbnails -->
+                    <div class="carousel-inner">
+                        <!-- Batches of three, to make scrolling nice -->
+                        {% for chunk in in_progress_videos|batch(3, fill_with=None) %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                <div class="d-flex gap-3 justify-content-center">
+                                    <!-- Populate thumbnails -->
+                                    {% for video in chunk %}
+                                        {% if video %}
+                                            <a href="/video/{{ video.video_id }}" class="text-decoration-none">
+                                                <img src="{{ video.thumbnail }}" class="rounded continue-thumb" alt="{{ video.name }}">
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                    <div class="carousel-item">
-                        <div class="d-flex gap-3 justify-content-center">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/1001071829/univ/art/1001071829_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 4">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/702012013/univ/art/702012013_univ_lsr_xl.jpg" class="rounded continue-thumb" alt="Video 5">
-                            <img src="https://cms-imgp.jw-cdn.org/img/p/1102016357/univ/art/1102016357_univ_wsr_lg.jpg" class="rounded continue-thumb" alt="Video 6">
-                        </div>
-                    </div>
+
+                    <!-- Previous button -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+
+                    <!-- Next button -->
+                    <button class="carousel-control-next" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#continueWatchingCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
-            </div>
+            {% endif %}
 
             <!-- Newest Carousel -->
             <h4 class="mb-3 p-4">Newest</h4>
