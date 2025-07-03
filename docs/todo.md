@@ -47,10 +47,6 @@ Carousel Banners
 * Get profile pics for characters
 </br></br>
 
-**Scraper**
-* Add a YAML file for ignore categories and videos
-* Remove static lists in the script
-
 
 ## Correlation
 

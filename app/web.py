@@ -104,7 +104,7 @@ def home() -> Response:
     profile_id = session.get('active_profile')
 
     # Get in progress videos
-    if profile_id != 0 and profile_id is not None:
+    if profile_id != 0 and profile_id is not None and profile_id != 'guest':
         profile_id = (
             int(profile_id) if isinstance(profile_id, str) else profile_id
         )
