@@ -66,11 +66,38 @@ CREATE TABLE watch_history (
 </br></br>
 
 
+## Table: *in_progress_videos*
+_Stores information about videos that are in progress, allowing resume, etc_
+
+| Field Name   | Datatype  | Constraints                        | Description                           |
+| ------------ | --------- | ---------------------------------- | ------------------------------------- |
+| profile_id   | INTEGER   | PRIMARY KEY, FOREIGN KEY, NOT NULL | Link to the user's profile            |
+| video_id     | INTEGER   | PRIMARY KEY, NOT NULL              | A video ID, as in the global DB       |
+| current_time | INTEGER   | NOT NULL                           | The time, in seconds, the video up to |
+| updated_at   | TIMESTAMP |                                    | When this entry was updated           |
+
+
+**Schema:**
+```sql
+CREATE TABLE in_progress_videos (
+    profile_id INTEGER NOT NULL,
+    video_id INTEGER NOT NULL,
+    current_time INTEGER NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (profile_id, video_id),
+    FOREIGN KEY (profile_id) REFERENCES profiles(id)
+)
+```
+</br></br>
+
+
+
 # Database Manager
 
 The database is managed by classes in **local_db.py**. These are:
 * LocalDbContext
 * ProfileManager
+* ProgressManager
 </br></br>
 
 
@@ -111,4 +138,13 @@ Additionally, there are methods to manage a list of videos that have been watche
 * mark_watched
 * mark_unwatched
 * check_watched
+</br></br>
 
+
+## Class: ProgressManager
+
+This manages the list of videos that are in progress. This also supports basic CRUD operations:
+* Create - Make a new entry (a video has been started, but not finished)
+* Read - Get one or more entries from the database
+* Update - Update an entry (eg, more of the video has been watched)
+* Delete - Delete an entry (eg, the video has been finished)

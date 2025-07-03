@@ -2,6 +2,18 @@
 Module: local_mgmt.py
 
 Manages the local user details, such as profiles, watch history, etc.
+
+Classes:
+    - LocalDbContext:
+        A context manager for handling SQLite database connections.
+    - ProfileManager:
+        Manages CRUD operations for user profiles in the local database.
+    - ProfileManager:
+        Manages CRUD operations for user profiles in the local database.
+
+Dependencies:
+    - sqlite3: For SQLite database operations.
+    - traceback: For handling exceptions and tracebacks.
 """
 
 import sqlite3
@@ -87,6 +99,8 @@ class LocalDbContext:
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
+
+            # Profiles table
             cursor.execute(
                 """
                 CREATE TABLE IF NOT EXISTS profiles (
@@ -97,6 +111,8 @@ class LocalDbContext:
                 )
                 """
             )
+
+            # Watch history table
             cursor.execute(
                 """
                 CREATE TABLE IF NOT EXISTS watch_history (
@@ -104,6 +120,20 @@ class LocalDbContext:
                     profile_id INTEGER NOT NULL,
                     video_id INTEGER NOT NULL,
                     watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (profile_id) REFERENCES profiles(id)
+                )
+                """
+            )
+
+            # In progress table
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS in_progress_videos (
+                    profile_id INTEGER NOT NULL,
+                    video_id INTEGER NOT NULL,
+                    current_time INTEGER NOT NULL DEFAULT 0,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (profile_id, video_id),
                     FOREIGN KEY (profile_id) REFERENCES profiles(id)
                 )
                 """
@@ -117,7 +147,7 @@ class ProfileManager:
     Manages CRUD operations for user profiles in the local database.
     Works alongside LocalDbContext for database operations.
 
-    Attributes:
+    Args:
         db_path (str): Path to the SQLite database file.
     """
 
@@ -416,3 +446,253 @@ class ProfileManager:
                 f"profile {profile_id}: {e}"
             )
             return False
+
+
+class ProgressManager:
+    """
+    Manages CRUD operations for in-progress videos in the local database.
+    Works alongside LocalDbContext for database operations.
+
+    Args:
+        db (LocalDbContext): The database context for operations.
+    """
+
+    def __init__(
+        self,
+        db: LocalDbContext
+    ) -> None:
+        """
+        Initializes the ProgressManager with the database context.
+
+        Args:
+            db (LocalDbContext): The database context for operations.
+        """
+
+        self.db = db
+
+    def create(
+        self,
+        profile_id: int,
+        video_id: int,
+        current_time: int,
+    ) -> bool:
+        """
+        Adds a video to the in-progress list for a specific profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video.
+            current_time (int): The current playback time of the video.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    INSERT OR REPLACE INTO in_progress_videos (
+                        profile_id,
+                        video_id,
+                        current_time
+                    )
+                    VALUES (?, ?, ?)
+                    """,
+                    (profile_id, video_id, current_time)
+                )
+            self.db.conn.commit()
+
+        except Exception as e:
+            logging.error(
+                f"[ProgressManager.create] Error adding profile: {e}"
+            )
+            self.db.conn.rollback()
+            return False
+
+        return True
+
+    def read(
+        self,
+        profile_id: int,
+        video_id: int | None = None,
+    ) -> list[dict] | None:
+        """
+        Gets one or more videos from the in-progress list for a profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+                Mandatory to retrieve in-progress videos.
+            video_id (int | None): The ID of the video to retrieve.
+                If None, retrieves all in-progress videos for the profile.
+
+        Returns:
+            list[dict] | None: A list of in-progress videos as dictionaries,
+                or None if no in-progress videos are found.
+        """
+
+        if profile_id is None:
+            logging.error(
+                """
+                [ProfileManager.read]
+                Profile ID must be provided to retrieve in-progress videos.
+                """
+            )
+            return None
+
+        # Get all in-progress videos for the profile
+        if video_id is None:
+            try:
+                with self.db.conn:
+                    cursor = self.db.cursor
+                    cursor.execute(
+                        """
+                        SELECT * FROM in_progress_videos
+                        WHERE profile_id = ?
+                        """,
+                        (profile_id,)
+                    )
+                    videos = cursor.fetchall()
+                    return [dict(videos) for videos in videos]
+
+            except Exception as e:
+                logging.error(
+                    f"[ProfileManager.read] "
+                    f"Error retrieving in progress videos: {e}"
+                )
+                return None
+
+        # Get a specific in-progress video for the profile
+        else:
+            try:
+                with self.db.conn:
+                    cursor = self.db.cursor
+                    cursor.execute(
+                        """
+                        SELECT * FROM in_progress_videos
+                        WHERE profile_id = ? AND video_id = ?
+                        """,
+                        (profile_id, video_id,)
+                    )
+                    video = cursor.fetchone()
+                    return [dict(video)] if video else None
+
+            except Exception as e:
+                logging.error(
+                    f"[ProfileManager.read] Error retrieving video "
+                    f"{video_id}: {e}"
+                )
+                return None
+
+    def update(
+        self,
+        profile_id: int,
+        video_id: int,
+        current_time: int,
+    ) -> bool:
+        """
+        Updates an in-progress entry.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video to update.
+            current_time (int): The current playback time of the video.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        if profile_id is None or video_id is None or current_time is None:
+            logging.error(
+                """
+                [ProfileManager.update] Profile and video IDs,
+                and a current time, must be provided for update.
+                """
+            )
+            return None
+
+        # Check the entry exists before updating
+        try:
+            result = self.read(profile_id, video_id)
+            if not result:
+                logging.error(
+                    f"[ProfileManager.update] No in-progress entry found "
+                    f"for video {video_id} on profile {profile_id}."
+                )
+                return False
+
+        except Exception as e:
+            logging.error(
+                f"[ProfileManager.update] Error checking in-progress entry "
+                f"for video {video_id} on profile {profile_id}: {e}"
+            )
+            return False
+
+        # Update the in-progress entry
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    UPDATE in_progress_videos
+                    SET current_time = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE profile_id = ? AND video_id = ?
+                    """,
+                    (current_time, profile_id, video_id)
+                )
+
+        except Exception as e:
+            logging.error(
+                f"[ProfileManager.update] Error updating progress on video "
+                f"{video_id} for profile {profile_id}: {e}"
+            )
+            return False
+
+        return True
+
+    def delete(
+        self,
+        profile_id: int,
+        video_id: int,
+    ) -> int | None:
+        """
+        Delete an in-progress entry.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int): The ID of the video to delete.
+
+        Returns:
+            int | None: The ID of the deleted in-progress entry,
+        """
+
+        if profile_id is None or video_id is None:
+            logging.error(
+                """
+                [ProfileManager.delete] Profile and video IDs must be
+                provided for deletion.
+                """
+            )
+            return None
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    DELETE FROM in_progress_videos
+                    WHERE profile_id = ? AND video_id = ?
+                    """,
+                    (profile_id, video_id)
+                )
+                self.db.conn.commit()
+                return cursor.rowcount > 0
+
+        except Exception as e:
+            logging.error(
+                f"[ProfileManager.update] Error deleting in progress entry "
+                f" for video {video_id} on profile {profile_id}: {e}"
+            )
+            self.db.conn.rollback()
+            return None
