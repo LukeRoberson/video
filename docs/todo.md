@@ -1,9 +1,8 @@
 # UI
 
-## Main Page:
+## Video details:
 
-Category for newest videos
-* As a carousel, below the big items
+Show similar videos
 </br></br>
 
 
@@ -12,20 +11,10 @@ Category for newest videos
 
 ## Cleanup
 
-* API: Use helper functions for returning success and error (partially implemented)
 * Make API paths consistent (eg, 'video' or 'videos', but not both)
 * Consolidate functions/routes for APIs, and base them on method
 </br></br>
 
-## Database
-
-**Data**
-* Add URLs for videos
-* Get date stamps for remaining videos
-* Get profile pics for speakers
-* Get profile pics for characters
-* Build table of similarities
-</br></br>
 
 
 ----
@@ -33,6 +22,13 @@ Category for newest videos
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
 * Cache thumbnails to make loading faster
+</br></br>
+
+Regular tasks (a continuing process):
+* Add URLs for videos
+* Get date stamps for remaining videos
+* Get profile pics for speakers
+* Get profile pics for characters
 </br></br>
 
 UI:
