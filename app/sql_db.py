@@ -381,6 +381,18 @@ class VideoManager:
             list[dict] | None:
                 A list of dictionaries containing video details if successful.
                 Or a None if an error occurs.
+                id (int)
+                name (str)
+                description (str)
+                url (str)
+                url_1080 (str)
+                url_720 (str)
+                url_480 (str)
+                url_360 (str)
+                url_240 (str)
+                thumbnail (str)
+                duration (int)
+                date_added (str)
         """
 
         # Fetch all videos

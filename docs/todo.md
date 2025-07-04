@@ -32,6 +32,7 @@ Category for newest videos
 Find similar videos
 * Look at similar tags, speakers, characters, description
 * Need to do research on how to do this best
+* Add categories to the calculation
 
 </br></br>
 
