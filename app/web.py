@@ -190,6 +190,16 @@ def home() -> Response:
     latest_monthly = monthly[0] if monthly else None
     latest_news = news[0] if news else None
 
+    # Get the latest videos in general
+    latest = None
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+
+        # Get the latest 9 videos
+        latest = video_mgr.get_filter(
+            latest=9,
+        )
+
     return make_response(
         render_template(
             "home.html",
@@ -197,6 +207,7 @@ def home() -> Response:
             in_progress_videos=in_progress_videos,
             latest_monthly=latest_monthly,
             latest_news=latest_news,
+            latest_videos=latest,
         )
     )
 

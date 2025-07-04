@@ -161,6 +161,53 @@ Home
                 </div>
             </div>
         </div>
+
+        <div class="card-body">
+
+            <!-- Latest Videos Carousel -->
+            {% if latest_videos %}
+                <h4 class="mb-3 p-4">Latest Videos</h4>
+                <div id="latestCarousel" class="carousel slide mb-5">
+                    
+                    <!-- Thumbnails -->
+                    <div class="carousel-inner">
+                        <!-- Batches of three, to make scrolling nice -->
+                        {% for chunk in latest_videos|batch(3, fill_with=None) %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                <div class="d-flex gap-3 justify-content-center">
+                                    
+                                    <!-- Populate thumbnails -->
+                                    {% for video in chunk %}
+                                        {% if video %}
+                                            <div class="thumbnail-home">
+                                                <a href="/video/{{ video.video_id }}">
+                                                    <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
+                                                    <div class="thumbnail-title">
+                                                        {{ video.name }}
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Previous button -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#latestCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+
+                    <!-- Next button -->
+                    <button class="carousel-control-next" type="button" data-bs-target="#latestCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 {% endblock %}
