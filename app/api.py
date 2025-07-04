@@ -309,14 +309,7 @@ def mark_watched() -> Response:
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
+        return api_error(error="Missing 'video_id' in request data")
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
@@ -329,13 +322,9 @@ def mark_watched() -> Response:
         )
 
         if not result:
-            return make_response(
-                jsonify(
-                    {
-                        "error": f"Failed to mark video {video_id} as watched"
-                    }
-                ),
-                500
+            return api_error(
+                error=f"Failed to mark video {video_id} as watched",
+                status=500
             )
 
         # Remove from in progress list if needed
@@ -344,15 +333,7 @@ def mark_watched() -> Response:
             video_id=video_id
         )
 
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as watched"
-            }
-        ),
-        200
-    )
+    return api_success(message=f"Marked video {video_id} as watched")
 
 
 @api_bp.route(
@@ -376,14 +357,7 @@ def mark_unwatched() -> Response:
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
+        return api_error(error="Missing 'video_id' in request data")
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
@@ -393,24 +367,12 @@ def mark_unwatched() -> Response:
         )
 
     if not result:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to mark video {video_id} as unwatched"
-                }
-            ),
-            500
+        return api_error(
+            error=f"Failed to mark video {video_id} as unwatched",
+            status=500
         )
 
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as unwatched"
-            }
-        ),
-        200
-    )
+    return api_success(message=f"Marked video {video_id} as unwatched")
 
 
 @api_bp.route(
@@ -1082,11 +1044,9 @@ def get_videos_csv() -> Response:
         return api_error("Failed to load CSV file", 500)
 
     # Convert the DataFrame to JSON format
-    return make_response(
-        Response(
-            df.to_json(orient='index'),
-        ),
-        200,
+    return api_success(
+        data=df.to_dict(orient='records'),
+        message="CSV data retrieved successfully"
     )
 
 
@@ -1456,9 +1416,8 @@ def category_filter(
     # Sort videos by 'date_added' (newest first)
     videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
 
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
+    return api_success(
+        data=videos,
+        message=f"Fetched {len(videos)} videos for Category ID: "
+                f"{category_id}, Subcategory ID: {subcategory_id}"
     )
