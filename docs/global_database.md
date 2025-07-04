@@ -165,6 +165,36 @@ CREATE TABLE videos (
     url TEXT
 );
 ```
+</br></br>
+
+
+### Table: *video_similarity*
+_Pre-calculated similarity between videos_
+
+See **similar_videos.md** for more information on how this works.
+
+| Field Name  | Datatype  | Constraints                        | Description               |
+| ----------- | --------- | ---------------------------------- | ------------------------- |
+| video_1_id  | INTEGER   | PRIMARY KEY, FOREIGN KEY, NOT NULL | Video with the lowest ID  |
+| video_2_id  | INTEGER   | PRIMARY KEY, FOREIGN KEY, NOT NULL | Video with the highest ID |
+| score       | FLOAT     | NOT NULL                           | Similarity score          |
+
+**Schema:**
+```sql
+CREATE TABLE "video_similarity" (
+    video_1_id INTEGER NOT NULL,
+    video_2_id INTEGER NOT NULL,
+    score FLOAT NOT NULL,
+    PRIMARY KEY (video_1_id, video_2_id),
+    FOREIGN KEY (video_1_id) REFERENCES videos(id),
+    FOREIGN KEY (video_2_id) REFERENCES videos(id),
+    CHECK (video_1_id < video_2_id)
+);
+
+CREATE UNIQUE INDEX `sqlite_autoindex_video_similarity_1`
+ON `video_similarity` (video_1_id, video_2_id);
+```
+
 
 ## Relationship (Junction) Tables
 

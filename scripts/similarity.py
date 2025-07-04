@@ -30,6 +30,7 @@ from app.sql_db import (    # noqa: E402
     SpeakerManager,
     ScriptureManager,
     CharacterManager,
+    SimilarityManager,
 )
 
 

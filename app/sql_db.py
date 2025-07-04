@@ -18,6 +18,8 @@ classes:
         A class for managing character-related operations in the database.
     ScriptureManager:
         A class for managing scripture-related operations in the database.
+    SimilarityManager:
+        A class for managing video similarity operations in the database.
 
     All classes support a CRUD interface for managing their entities.
     Most will resolve names to IDs, allowing for easy retrieval and management.
@@ -2558,6 +2560,216 @@ class ScriptureManager:
             print(f"ScriptureManager.name_to_id: An error occurred while "
                   f"resolving scripture '{book} {chapter}:{verse}' "
                   f"to ID:\n{e}")
+            return None
+
+
+class SimilarityManager:
+    """
+    A class for managing video similarity operations in the database.
+
+        - Add/Update/Delete/Get similarity entries
+
+    Args:
+        db (DatabaseContext):
+            An instance of DatabaseContext for database operations.
+            This uses a 'composition' approach to manage database interactions.
+    """
+
+    def __init__(
+        self,
+        db: DatabaseContext
+    ) -> None:
+        """
+        Initializes the class with a DatabaseContext instance.
+            This uses a 'composition' approach
+
+        Args:
+            db (DatabaseContext): An instance of DatabaseContext for
+                database operations.
+
+        Returns:
+            None
+        """
+
+        self.db = db
+
+    def add(
+        self,
+        video1_id: int,
+        video2_id: int,
+        score: float,
+    ) -> bool:
+        """
+        Adds a new entry to the database.
+
+        Note, the database requires that video1 is the smaller ID,
+        and video2 is the larger ID.
+
+        If the entry already exists, it will be updated instead.
+
+        Args:
+            video1_id (int): The ID of the first video.
+            video2_id (int): The ID of the second video.
+            score (float): The similarity score between the two videos.
+
+        Returns:
+            bool:
+                True if the entry was successfully added.
+                False if an error occurs or the entry already exists.
+        """
+
+        # Validate the video IDs
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            for video in (video1_id, video2_id):
+                result = video_mgr.get(id=video)
+                if not result:
+                    logging.error(f"Video with ID {video} does not exist.")
+                    return False
+
+        # Ensure video1_id is always the smaller, video2_id the larger
+        smaller_video_id, larger_video_id = sorted((video1_id, video2_id))
+
+        # Add the entry
+        try:
+            self.db.cursor.execute(
+                """
+                INSERT INTO video_similarity (video_1_id, video_2_id, score)
+                VALUES (?, ?, ?)
+                ON CONFLICT(video_1_id, video_2_id)
+                DO UPDATE SET score = excluded.score;
+                """,
+                (smaller_video_id, larger_video_id, score)
+            )
+            self.db.conn.commit()
+
+        except Exception as e:
+            print(
+                f"SimilarityManager.add: "
+                f"An error occurred while adding the entry:\n{e}"
+            )
+            self.db.conn.rollback()
+            return False
+
+        return True
+
+    def update(
+        self,
+        video1_id: int,
+        video2_id: int,
+        score: float,
+    ) -> bool:
+        """
+        Updates an existing entry in the database.
+
+        This is an alias of the add method. If the entry does not exist,
+        it will be created.
+
+        Args:
+            video1_id (int): The ID of the first video.
+            video2_id (int): The ID of the second video.
+            score (float): The new similarity score between the two videos.
+
+        Returns:
+            bool:
+                True if the entry was successfully updated.
+                False if an error occurs or the entry does not exist.
+        """
+
+        result = self.add(video1_id, video2_id, score)
+        return result
+
+    def delete(
+        self,
+        video1_id: int,
+        video2_id: int,
+    ) -> bool:
+        """
+        Deletes an entry from the database.
+
+        Args:
+            video1_id (int): The ID of the first video.
+            video2_id (int): The ID of the second video.
+
+        Returns:
+            bool:
+                True if the entry was successfully deleted.
+                False if an error occurs or the entry does not exist.
+        """
+
+        # Ensure video1_id is always the smaller, video2_id the larger
+        smaller_video_id, larger_video_id = sorted((video1_id, video2_id))
+
+        try:
+            self.db.cursor.execute(
+                """
+                DELETE FROM video_similarity
+                WHERE video_1_id = ? AND video_2_id = ?
+                """,
+                (smaller_video_id, larger_video_id)
+            )
+
+            if self.db.cursor.rowcount == 0:
+                print(
+                    f"SimilarityManager.delete: "
+                    f"No entry found for videos {video1_id} and {video2_id}."
+                )
+                self.db.conn.rollback()
+                return False
+
+            self.db.conn.commit()
+
+        except Exception as e:
+            print(
+                f"SimilarityManager.delete: "
+                f"An error occurred while deleting the entry:\n{e}"
+            )
+            self.db.conn.rollback()
+            return False
+
+        return True
+
+    def get(
+        self,
+        video1_id: int,
+        video2_id: int,
+    ) -> float | None:
+        """
+        Retrieves an entry from the database.
+
+        Args:
+            video1_id (int): The ID of the first video.
+            video2_id (int): The ID of the second video.
+
+        Returns:
+            float or None:
+                The similarity score between the two videos if found.
+                None if the entry does not exist or an error occurs.
+        """
+
+        # Ensure video1_id is always the smaller, video2_id the larger
+        smaller_video_id, larger_video_id = sorted((video1_id, video2_id))
+
+        try:
+            self.db.cursor.execute(
+                """
+                SELECT score FROM video_similarity
+                WHERE video_1_id = ? AND video_2_id = ?
+                """,
+                (smaller_video_id, larger_video_id)
+            )
+            row = self.db.cursor.fetchone()
+
+            if row:
+                return row["score"]
+            else:
+                return None
+
+        except Exception as e:
+            print(
+                f"SimilarityManager.get: "
+                f"An error occurred while retrieving the entry:\n{e}"
+            )
             return None
 
 
