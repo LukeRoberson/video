@@ -2732,45 +2732,76 @@ class SimilarityManager:
     def get(
         self,
         video1_id: int,
-        video2_id: int,
-    ) -> float | None:
+        video2_id: int = 0,
+    ) -> list | None:
         """
         Retrieves an entry from the database.
+
+        If two videos are provided, it retrieves the similarity score
+            between them.
+        If only one video is provided, it retrieves all entries
+            for that video.
 
         Args:
             video1_id (int): The ID of the first video.
             video2_id (int): The ID of the second video.
+                Optional, defaults to 0
 
         Returns:
-            float or None:
-                The similarity score between the two videos if found.
+            list or None:
+                The entry as a list of dictionaries if it exists.
                 None if the entry does not exist or an error occurs.
         """
 
-        # Ensure video1_id is always the smaller, video2_id the larger
-        smaller_video_id, larger_video_id = sorted((video1_id, video2_id))
+        # Get similarity for a single video
+        if not video2_id:
+            try:
+                self.db.cursor.execute(
+                    """
+                    SELECT video_1_id, video_2_id, score
+                    FROM video_similarity
+                    WHERE video_1_id = ? OR video_2_id = ?
+                    """,
+                    (video1_id, video1_id)
+                )
+                rows = self.db.cursor.fetchall()
 
-        try:
-            self.db.cursor.execute(
-                """
-                SELECT score FROM video_similarity
-                WHERE video_1_id = ? AND video_2_id = ?
-                """,
-                (smaller_video_id, larger_video_id)
-            )
-            row = self.db.cursor.fetchone()
+                # Convert to a list of dictionaries
+                return [dict(row) for row in rows]
 
-            if row:
-                return row["score"]
-            else:
+            except Exception as e:
+                print(
+                    f"SimilarityManager.get: "
+                    f"An error occurred while retrieving entries:\n{e}"
+                )
                 return None
 
-        except Exception as e:
-            print(
-                f"SimilarityManager.get: "
-                f"An error occurred while retrieving the entry:\n{e}"
-            )
-            return None
+        # Get specific entries
+        else:
+            # Ensure video1_id is always the smaller, video2_id the larger
+            smaller_video_id, larger_video_id = sorted((video1_id, video2_id))
+
+            try:
+                self.db.cursor.execute(
+                    """
+                    SELECT score FROM video_similarity
+                    WHERE video_1_id = ? AND video_2_id = ?
+                    """,
+                    (smaller_video_id, larger_video_id)
+                )
+                row = self.db.cursor.fetchone()
+
+                if row:
+                    return row
+                else:
+                    return None
+
+            except Exception as e:
+                print(
+                    f"SimilarityManager.get: "
+                    f"An error occurred while retrieving the entry:\n{e}"
+                )
+                return None
 
 
 if __name__ == "__main__":

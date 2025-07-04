@@ -1,22 +1,3 @@
-# UI
-
-## Video details:
-
-Show similar videos
-</br></br>
-
-
-----
-# Backend
-
-## Cleanup
-
-* Make API paths consistent (eg, 'video' or 'videos', but not both)
-* Consolidate functions/routes for APIs, and base them on method
-</br></br>
-
-
-----
 # Final
 
 * Update project to restrict access to admin tasks

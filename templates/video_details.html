@@ -206,8 +206,10 @@
                 <div class="thumbnails d-flex justify-content-center flex-wrap">
                     {% for similar in similar_videos %}
                         <div class="thumbnail m-2">
-                            <img src="{{ similar.thumb }}" alt="{{ similar.title }}">
-                            <div class="thumbnail-title text-center">{{ similar.title }}</div>
+                            <a href="/video/{{ similar.id }}" class="text-decoration-none text-white">
+                            <img src="{{ similar.thumbnail }}" alt="{{ similar.name }}">
+                            <div class="thumbnail-title text-center">{{ similar.name }}</div>
+                            </a>
                         </div>
                     {% endfor %}
                 </div>

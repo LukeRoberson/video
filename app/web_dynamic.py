@@ -27,6 +27,7 @@ from flask import (
     request,
     session,
 )
+import random
 
 # Custom imports
 from app.sql_db import (
@@ -37,6 +38,7 @@ from app.sql_db import (
     SpeakerManager,
     CharacterManager,
     ScriptureManager,
+    SimilarityManager,
 )
 from app.local_db import (
     LocalDbContext,
@@ -133,27 +135,34 @@ def video_details(
 
             current_time = in_progress[0]['current_time'] if in_progress else 0
 
-    # Dummy data for similar videos
-    similar_videos = [
-        {
-            "title": "Similar Video 1",
-            "thumb": """
-            https://assetsnffrgf-a.akamaihd.net/assets/m/502015535/univ/art/502015535_univ_lss_lg.jpg
-            """
-        },
-        {
-            "title": "Similar Video 2",
-            "thumb": """
-            https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201801/art/jwb_univ_201801_lss_02_lg.jpg
-            """
-        },
-        {
-            "title": "Similar Video 3",
-            "thumb": """
-            https://assetsnffrgf-a.akamaihd.net/assets/m/mwbv/univ/202203/art/mwbv_univ_202203_lss_03_lg.jpg
-            """
-        },
-    ]
+    # Get similar videos
+    with DatabaseContext() as db:
+        similarity_mgr = SimilarityManager(db)
+        similar_videos = similarity_mgr.get(
+            video1_id=video_id,
+        )
+
+    if similar_videos:
+        similar_videos = random.sample(
+            similar_videos, min(3, len(similar_videos))
+        )
+    else:
+        similar_videos = []
+
+    video_ids = []
+    for similar in similar_videos:
+        if similar['video_2_id'] != video_id:
+            id = similar['video_2_id']
+        else:
+            id = similar['video_1_id']
+
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            video_details = video_mgr.get(id)
+            if video_details:
+                video_ids.append(video_details[0])
+            else:
+                print(f"Video with ID {id} not found in database.")
 
     return make_response(
         render_template(
@@ -164,7 +173,7 @@ def video_details(
             speakers=speakers,
             characters=characters,
             scriptures=scriptures,
-            similar_videos=similar_videos,
+            similar_videos=video_ids,
             watched=watched,
             current_time=current_time,
         )
