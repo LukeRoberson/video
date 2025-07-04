@@ -1046,11 +1046,9 @@ def get_videos_csv() -> Response:
         return api_error("Failed to load CSV file", 500)
 
     # Convert the DataFrame to JSON format
-    return make_response(
-        Response(
-            df.to_json(orient='index'),
-        ),
-        200,
+    return api_success(
+        data=df.to_dict(orient='records'),
+        message="CSV data retrieved successfully"
     )
 
 
@@ -1420,9 +1418,8 @@ def category_filter(
     # Sort videos by 'date_added' (newest first)
     videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
 
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
+    return api_success(
+        data=videos,
+        message=f"Fetched {len(videos)} videos for Category ID: "
+                f"{category_id}, Subcategory ID: {subcategory_id}"
     )
