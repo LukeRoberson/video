@@ -1418,8 +1418,9 @@ def category_filter(
     # Sort videos by 'date_added' (newest first)
     videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
 
-    return api_success(
-        data=videos,
-        message=f"Fetched {len(videos)} videos for Category ID: "
-                f"{category_id}, Subcategory ID: {subcategory_id}"
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
     )
