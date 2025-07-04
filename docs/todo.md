@@ -16,6 +16,12 @@ Show similar videos
 </br></br>
 
 
+----
+# Final
+
+* Update project to restrict access to admin tasks
+* Build docker container
+
 
 ----
 # Next Version (Bizzare Ideas)

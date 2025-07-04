@@ -309,14 +309,7 @@ def mark_watched() -> Response:
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
+        return api_error(error="Missing 'video_id' in request data")
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
@@ -329,13 +322,9 @@ def mark_watched() -> Response:
         )
 
         if not result:
-            return make_response(
-                jsonify(
-                    {
-                        "error": f"Failed to mark video {video_id} as watched"
-                    }
-                ),
-                500
+            return api_error(
+                error=f"Failed to mark video {video_id} as watched",
+                status=500
             )
 
         # Remove from in progress list if needed
@@ -344,14 +333,8 @@ def mark_watched() -> Response:
             video_id=video_id
         )
 
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as watched"
-            }
-        ),
-        200
+    return api_success(
+        message=f"Marked video {video_id} as watched"
     )
 
 
@@ -376,14 +359,7 @@ def mark_unwatched() -> Response:
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return make_response(
-            jsonify(
-                {
-                    "error": "Missing 'video_id' in request data"
-                }
-            ),
-            400
-        )
+        return api_error(error="Missing 'video_id' in request data")
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
@@ -393,24 +369,12 @@ def mark_unwatched() -> Response:
         )
 
     if not result:
-        return make_response(
-            jsonify(
-                {
-                    "error": f"Failed to mark video {video_id} as unwatched"
-                }
-            ),
-            500
+        return api_error(
+            error=f"Failed to mark video {video_id} as unwatched",
+            status=500
         )
 
-    return make_response(
-        jsonify(
-            {
-                "success": True,
-                "message": f"Marked video {video_id} as unwatched"
-            }
-        ),
-        200
-    )
+    return api_success(message=f"Marked video {video_id} as unwatched")
 
 
 @api_bp.route(
