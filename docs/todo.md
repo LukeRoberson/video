@@ -24,18 +24,8 @@ Category for newest videos
 * Get date stamps for remaining videos
 * Get profile pics for speakers
 * Get profile pics for characters
+* Build table of similarities
 </br></br>
-
-
-## Correlation
-
-Find similar videos
-* Look at similar tags, speakers, characters, description
-* Need to do research on how to do this best
-* Add categories to the calculation
-
-</br></br>
-
 
 
 ----

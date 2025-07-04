@@ -5,6 +5,19 @@ Calculate the similarities between two videos based on their metadata.
 
 Classes:
     Similarity: A class to calculate the similarity between two videos.
+    SimScraper: A class to scrape and calculate similarity between videos.
+
+Usage:
+    Use the Similarity class to compare two videos by their IDs.
+        Use the context manager, and provide two video IDs to compare.
+        Will return a float between 0 and 1, where 1 is identical.
+
+    Use the SimScraper class to compare multiple videos.
+        No context manager is available.
+        Initialize with a list of video IDs or leave empty to compare all.
+        Call the run_comparison method to perform the comparisons.
+        Each video in the list will be compared against every video in the DB.
+        The top 10 similarities will be stored in the database.
 
 Dependencies:
     logging: For logging information and errors.
@@ -17,7 +30,7 @@ import logging
 import types
 import os
 import sys
-
+from tqdm import tqdm
 # Add the parent directory of 'app' to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -50,6 +63,15 @@ COMMON_STOP_WORDS = [
     "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too",
     "very", "s", "t", "can", "will", "just", "don", "should", "now"
 ]
+
+WEIGHTS = {
+    "categories": 0.25,
+    "tags": 0.15,
+    "scriptures": 0.35,
+    "text": 0.1,
+    "characters": 0.1,
+    "speakers": 0.05,
+}
 
 
 logging.basicConfig(level=logging.INFO)
@@ -474,28 +496,165 @@ class Similarity:
 
         # Calculate the weighted score
         self.weighted_similarity = (
-            (self.category_similarity * 0.3) +
-            (self.tag_similarity * 0.2) +
-            (self.scripture_similarity * 0.2) +
-            (self.text_similarity * 0.15) +
-            (self.character_similarity * 0.1) +
-            (self.speaker_similarity * 0.05)
+            (self.category_similarity * WEIGHTS["categories"]) +
+            (self.tag_similarity * WEIGHTS["tags"]) +
+            (self.scripture_similarity * WEIGHTS["scriptures"]) +
+            (self.text_similarity * WEIGHTS["text"]) +
+            (self.character_similarity * WEIGHTS["characters"]) +
+            (self.speaker_similarity * WEIGHTS["speakers"])
         )
 
 
+class SimScraper:
+    """
+    Class to scrape and calculate similarity between videos.
+
+    Args:
+        video_list (list): A list of video IDs to compare.
+            Assumes all videos in the DB if not provided.
+    """
+
+    def __init__(
+        self,
+        video_list: list[int] = [],
+    ) -> None:
+        """
+        Initialize the SimScraper class.
+
+        Requires:
+            1. A list of video ID's
+            2. A second list of video ID's to compare against.
+
+        Tracks which videos have been compared already to avoid
+            asymmetric comparisons.
+
+        Args:
+            video_list (list): A list of video IDs to compare.
+                Assumes all videos in the DB if not provided.
+
+        Returns:
+            None
+        """
+
+        # Initialize the video list
+        self.video_list = video_list
+        if not self.video_list:
+            self.video_list = self._full_list()
+
+        # Initialise comparison list
+        self.comparison_list = self._full_list()
+
+        # Store a list of ID's that are done
+        self.done_list = []
+
+    def _full_list(
+        self,
+    ) -> list[int]:
+        """
+        Fetch all video IDs from the database if no video list is provided.
+
+        Args:
+            None
+
+        Returns:
+            list[int]: A list of video IDs from the database.
+        """
+
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            video_list = video_mgr.get()
+
+        # Convert to list of IDs
+        if video_list:
+            video_list = [video['id'] for video in video_list]
+
+        else:
+            logger.warning("No videos found in the database.")
+            video_list = []
+
+        return video_list
+
+    def run_comparison(
+        self,
+    ) -> None:
+        """
+        Run the similarity comparison for all video pairs.
+
+        Compares each video in the list against every other video
+        and stores the results in the comparison list.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        # Loop through provided list
+        for video in tqdm(
+            self.video_list,
+            desc="Total Progress",
+            leave=True,
+            colour="magenta",
+        ):
+            self.done_list.append(video)
+            top_10 = []
+
+            # Inner loop through comparison list
+            for comparison in tqdm(
+                self.comparison_list,
+                leave=False,
+                colour="green",
+                desc=f"Working on video {video}",
+            ):
+                # Skip if the video is the same or already done
+                if comparison in self.done_list:
+                    continue
+
+                with Similarity(
+                    video1_id=video,
+                    video2_id=comparison,
+                ) as similarity:
+                    # Calculate the weighted similarity
+                    similarity.weighted()
+                    if similarity.weighted_similarity is None:
+                        continue
+
+                    # Log the similarity score (top 10 only)
+                    if len(top_10) < 10:
+                        top_10.append({
+                            'video1': video,
+                            'video2': comparison,
+                            'score': similarity.weighted_similarity,
+                        })
+
+                    # If the list is full, check if the new score is higher
+                    else:
+                        top_10.sort(key=lambda x: x['score'], reverse=True)
+                        if (
+                            similarity.weighted_similarity >
+                            top_10[-1]['score']
+                        ):
+                            top_10[-1]['score'] = (
+                                similarity.weighted_similarity
+                            )
+                            top_10.sort(
+                                key=lambda x: x['score'],
+                                reverse=True
+                            )
+
+            # Write the top 10 similarities for the current video
+            with DatabaseContext() as db:
+                sim_mgr = SimilarityManager(db)
+
+                for item in top_10:
+                    sim_mgr.add(
+                        video1_id=item['video1'],
+                        video2_id=item['video2'],
+                        score=item['score'],
+                    )
+
+
 if __name__ == "__main__":
-    # Example usage of the Similarity class
-    video1_id = 1  # Replace with actual video ID
-    video2_id = 2  # Replace with actual video ID
-
-    with Similarity(video1_id, video2_id) as similarity:
-        similarity.weighted()
-
-        # Print the similarity scores
-        print(f"Category similarity: {similarity.category_similarity}")
-        print(f"Tag similarity: {similarity.tag_similarity}")
-        print(f"Speaker similarity: {similarity.speaker_similarity}")
-        print(f"Scripture similarity: {similarity.scripture_similarity}")
-        print(f"Character similarity: {similarity.character_similarity}")
-        print(f"Text similarity: {similarity.text_similarity}")
-        print(f"Similarity score: {similarity.weighted_similarity}")
+    scraper = SimScraper()
+    scraper.run_comparison()
