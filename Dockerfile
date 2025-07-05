@@ -12,6 +12,18 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 # Set the working directory in the container
 WORKDIR /app
 
+# Install uWSGI and other dependencies, then clean up in the same layer
+RUN apk add --no-cache gcc musl-dev linux-headers && \
+    pip install --upgrade pip uwsgi && \
+    apk del gcc musl-dev linux-headers
+
+# Install Git, to check for updates
+RUN apk add --no-cache git
+
+# Set permsissions while still running as root
+RUN chown -R appuser:appgroup /app
+RUN chmod -R 755 /app
+
 # Switch to the non-root user
 USER appuser
 
@@ -22,8 +34,14 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
+
 # Start the application using uWSGI
-CMD python3 -m app.main
+CMD ["uwsgi", \
+    "--http", "0.0.0.0:5000", \
+    "--module", "app.main:app", \
+    "--master", \
+    "--processes", "4", \
+    "--threads", "2"]
 
 # Build and upload with:
 # docker build -t yourusername/1320:latest .

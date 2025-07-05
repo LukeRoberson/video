@@ -11,3 +11,4 @@ scripts/chrome/
 .git/
 .pytest_cache/
 __pycache__/
+local.db

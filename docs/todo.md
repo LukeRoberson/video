@@ -2,6 +2,8 @@
 
 * Update project to restrict access to admin tasks
 * Build docker container
+* decouple local_db
+* Git to update videos_db
 * Add uWSGI
 
 

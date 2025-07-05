@@ -45,6 +45,14 @@ from app.api import seconds_to_hhmmss
 
 
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
+LOCAL_DB_PATH = "/local.db"
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
 
 
 # Define the custom filter
@@ -62,13 +70,6 @@ def nl2br(
     """
 
     return value.replace('\n', '<br>')
-
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-)
 
 
 def create_app():
