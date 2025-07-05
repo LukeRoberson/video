@@ -9,6 +9,8 @@
 # Future Versions
 
 UI:
+* Home page needs to be responsive
+* Navbar needs to be responsive
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
 * Cache thumbnails to make loading faster
@@ -79,5 +81,6 @@ Filtering
 * Shorter than (duration)
 * Longer than (duration)
 * Search page: check box to show unwatched only
+* Consider adding location metadata
 </br></br>
 
