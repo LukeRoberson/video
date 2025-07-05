@@ -83,6 +83,10 @@ from app.sql_db import (    # noqa: E402
     VideoManager,
 )
 
+# Handle script and CSV directory paths
+script_dir = os.path.dirname(os.path.abspath(__file__))
+csv_folder = os.path.join(script_dir, "csv")
+os.makedirs(csv_folder, exist_ok=True)
 
 # The main URL for JW.org videos
 MAIN_URL = "https://www.jw.org/en/library/videos/#en/home"
@@ -649,21 +653,27 @@ class BuildDb:
 
         # Load existing data from CSV files if provided
         if major_cat_filename != "":
-            self.major_categories = pd.read_csv(major_cat_filename)
+            self.major_categories = pd.read_csv(
+                os.path.join(csv_folder, major_cat_filename)
+            )
             self.major_loaded = True
         else:
             self.major_categories = pd.DataFrame()
             self.major_loaded = False
 
         if sub_cat_filename != "":
-            self.sub_categories = pd.read_csv(sub_cat_filename)
+            self.sub_categories = pd.read_csv(
+                os.path.join(csv_folder, sub_cat_filename)
+            )
             self.sub_loaded = True
         else:
             self.sub_categories = pd.DataFrame()
             self.sub_loaded = False
 
         if videos_filename != "":
-            self.videos = pd.read_csv(videos_filename)
+            self.videos = pd.read_csv(
+                os.path.join(csv_folder, videos_filename)
+            )
             self.video_loaded = True
         else:
             self.videos = pd.DataFrame()
@@ -802,9 +812,6 @@ class BuildDb:
             None
         """
 
-        # Ensure the 'csv' folder exists
-        os.makedirs('csv', exist_ok=True)
-
         # Handle major categories
         if self.major_loaded:
             print(
@@ -821,7 +828,7 @@ class BuildDb:
             )
 
         else:
-            major_cat_path = os.path.join('csv', major_cat_filename)
+            major_cat_path = os.path.join(csv_folder, major_cat_filename)
             self.major_categories.to_csv(
                 major_cat_path,
                 index=False,
@@ -849,7 +856,7 @@ class BuildDb:
             )
 
         else:
-            sub_cat_path = os.path.join('csv', sub_cat_filename)
+            sub_cat_path = os.path.join(csv_folder, sub_cat_filename)
             self.sub_categories.to_csv(
                 sub_cat_path,
                 index=False,
@@ -877,7 +884,7 @@ class BuildDb:
             )
 
         else:
-            video_path = os.path.join('csv', videos_filename)
+            video_path = os.path.join(csv_folder, videos_filename)
             self.videos.to_csv(
                 video_path,
                 index=False,
@@ -974,9 +981,6 @@ class BuildDb:
             None
         """
 
-        # Ensure the 'csv' folder exists
-        os.makedirs('csv', exist_ok=True)
-
         # Add a new columns to the dataframe
         self.missing_videos['url_1080'] = None
         self.missing_videos['url_720'] = None
@@ -1018,7 +1022,7 @@ class BuildDb:
                 ]
 
         try:
-            meta_path = os.path.join('csv', "missing_videos.csv")
+            meta_path = os.path.join(csv_folder, "missing_videos.csv")
             self.missing_videos.to_csv(
                 meta_path,
                 index=False,
@@ -1060,15 +1064,15 @@ if __name__ == "__main__":
 
     # Check if the CSV files already exist
     major_cat_filename = "major_categories.csv" if os.path.exists(
-        os.path.join('csv', 'major_categories.csv')
+        os.path.join(csv_folder, 'major_categories.csv')
     ) else ""
 
     sub_cat_filename = "sub_categories.csv" if os.path.exists(
-        os.path.join('csv', 'sub_categories.csv')
+        os.path.join(csv_folder, 'sub_categories.csv')
     ) else ""
 
     videos_filename = "videos.csv" if os.path.exists(
-        os.path.join('csv', 'videos.csv')
+        os.path.join(csv_folder, 'videos.csv')
     ) else ""
 
     # Instantiate the BuildDb class with the filenames

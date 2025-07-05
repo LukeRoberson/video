@@ -2,26 +2,21 @@
 
 * Update project to restrict access to admin tasks
 * Build docker container
+* Add uWSGI
 
 
 ----
-# Next Version (Bizzare Ideas)
+# Future Versions
+
+UI:
 * Stats page (fun stats globally and for the user)
 * Profiles of suggested categories on the main page (topics for the main carousel)
 * Cache thumbnails to make loading faster
-</br></br>
-
-Regular tasks (a continuing process):
-* Add URLs for videos
-* Get date stamps for remaining videos
-* Get profile pics for speakers
-* Get profile pics for characters
-</br></br>
-
-UI:
 * Simplified mode (slider) to hide some details
 * Button to hide watched videos
+* Investigate accessibility for template files (eg, 'alt' tags for images)
 </br></br>
+
 
 Theme based on scripture
 * See on the main page as banners
@@ -29,6 +24,24 @@ Theme based on scripture
 * Include videos related to the theme
 * Lay out nicely, not just videos based on a category
 </br></br>
+
+
+General Improvements:
+* Organise api.py better
+* Use consistent logging, not just print statements
+* Add a helper function to get similar videos
+* Add error handler pages for 500, 400, etc (like 404)
+* The code to check for watch status is duplicated over many routes (eg, tag_details, speaker_details, etc)
+
+
+Regular tasks (a continuing process):
+* Add URLs for videos
+* Get date stamps for remaining videos
+* Get profile pics for speakers
+* Get profile pics for characters
+* A simpler scraper for new items (avoid scanning the entire site)
+</br></br>
+
 
 Profiles
 * Settings page
@@ -38,6 +51,7 @@ Profiles
 * Include watch history in recommended video calculation
 </br></br>
 
+
 Video Controls
 * Skip ahead/back 5s/15s
 * Theatre mode (like in youtube)
@@ -45,17 +59,17 @@ Video Controls
 * Chapters in longer videos (like in youtube)
 </br></br>
 
+
 AI
 * AI model to transcribe to captions
 * AI model to summarise content
 </br></br>
 
+
 Project
-* Break into two project
-    * Interface, that users will access
-    * Tools, that I will use
 * Get working as a phone/tablet app
 * Chromecast or Amazon Fire app
+* Add unit testing
 </br></br>
 
 

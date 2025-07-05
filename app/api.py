@@ -79,8 +79,10 @@ from app.local_db import (
 )
 
 
-MISSING_VIDEOS_CSV = "csv/missing_videos.csv"
-
+# Handle script and CSV directory paths
+local_dir = os.path.dirname(os.path.abspath(__file__))
+csv_folder = os.path.normpath(os.path.join(local_dir, "../scripts/csv"))
+MISSING_VIDEOS_CSV = os.path.join(csv_folder, "missing_videos.csv")
 
 api_bp = Blueprint(
     'api',
@@ -119,6 +121,9 @@ def api_success(
 ) -> Response:
     """
     Helper to return a standardized success response.
+
+    Note: It's best to use this for simple success responses only.
+        Custom responses should be used in more complex cases.
 
     Args:
         data (dict, optional): Data to include in the response.
@@ -1046,9 +1051,12 @@ def get_videos_csv() -> Response:
         return api_error("Failed to load CSV file", 500)
 
     # Convert the DataFrame to JSON format
-    return api_success(
-        data=df.to_dict(orient='records'),
-        message="CSV data retrieved successfully"
+    logging.debug(f"Missing videos:\n{df.to_dict(orient='records')}")
+    return make_response(
+        Response(
+            df.to_json(orient='index'),
+        ),
+        200,
     )
 
 

@@ -1,0 +1,13 @@
+.venv/
+.vscode/
+*.pyc
+*.pyo
+*.cer
+*.key
+*.pem
+*.ps1
+Backup/
+scripts/chrome/
+.git/
+.pytest_cache/
+__pycache__/

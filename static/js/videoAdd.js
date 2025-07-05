@@ -19,6 +19,7 @@ document.getElementById('listVideosBtn').addEventListener('click', function() {
 
             // Convert the object to an array
             const items = Array.isArray(data) ? data : Object.values(data);
+            console.log('Converted items:', items);
 
             if (!items.length) {
                 document.getElementById('videosTableContainer').innerHTML = '<p class="text-warning">No videos found.</p>';
