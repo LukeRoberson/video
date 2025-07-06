@@ -81,6 +81,25 @@ banner_dir = os.path.join(
 )
 
 
+@web_bp.app_context_processor
+def inject_admin_status() -> Dict[str, Any]:
+    """
+    Injects the admin status into the template context.
+
+    Checks if the selected user is an admin, which is stored in the session.
+
+    Args:
+        None
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the admin status.
+    """
+
+    return {
+        'is_admin': session.get('profile_admin', False)
+    }
+
+
 @web_bp.route(
     "/",
     methods=["GET"],

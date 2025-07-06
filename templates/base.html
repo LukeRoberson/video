@@ -44,7 +44,9 @@
                     <a href="{{ url_for('web_pages.home') }}" class="navbar-brand">Home</a>
                     
                     <!-- Admin Page -->
-                    <a href="{{ url_for('web_pages.admin_dashboard') }}" class="navbar-brand">Admin</a>
+                    {% if is_admin %}
+                        <a href="{{ url_for('web_pages.admin_dashboard') }}" class="navbar-brand">Admin</a>
+                    {% endif %}
 
                     <!-- About Page -->
                     <a href="{{ url_for('web_pages.about') }}" class="navbar-brand">About</a>
