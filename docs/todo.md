@@ -1,7 +1,12 @@
 # Final
 
 * Update project to restrict access to admin tasks
-* Git to update videos_db
+    * 'Admin' field in local DB, set to '1' for True (done)
+    * When selecting a profile, get this value (done)
+    * Store this value in the session (done)
+    * Navbar: Use jinja template to show admin link if admin is True
+    * Create a protected route decorator that checks if the user is an admin
+    * Add the decorator to the admin routes
 
 
 ----

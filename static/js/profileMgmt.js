@@ -75,11 +75,19 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
     item.addEventListener('click', function(e) {
         e.preventDefault(); // Prevent default link behavior
         const profileId = this.getAttribute('data-profile-id');
+        const profileAdmin = this.getAttribute('data-profile-admin');
+        console.log('Setting admin status:', profileAdmin);
+
         // Send a POST request to set the selected profile as active
         fetch('/api/profile/set_active', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profile_id: profileId })
+            body: JSON.stringify(
+                {
+                    profile_id: profileId,
+                    profile_admin: profileAdmin
+                }
+        )
         })
         .then(res => res.json())
         .then(data => {

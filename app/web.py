@@ -266,6 +266,7 @@ def select_profile() -> Response:
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
         profile_list = profile_mgr.read()
+        print(f"{profile_list=}")
 
     return make_response(
         render_template(

@@ -242,10 +242,16 @@ def set_active_profile() -> Response:
         logging.error("Missing 'profile_id' in request data.")
         return api_error("Missing 'profile_id' in request data", 400)
 
-    # Set the active profile in the session
-    profile_id = data.get("profile_id")
+    # Set the active profile
+    profile_id = data.get("profile_id", "guest")
     session["active_profile"] = profile_id
     logging.info(f"Active profile set to: {profile_id}")
+
+    # Set admin status
+    profile_admin = data.get("profile_admin", None)
+    session["profile_admin"] = True if profile_admin == '1' else False
+    if session["profile_admin"]:
+        logging.info(f"Profile {profile_id} is an admin")
 
     # Return a JSON response indicating success
     return api_success(

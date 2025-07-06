@@ -32,7 +32,7 @@ Select Profile
                 
                 <!-- Existing profiles -->
                 {% for profile in profiles %}
-                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-profile-id="{{ profile.id }}">
+                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-profile-id="{{ profile.id }}" data-profile-admin="{{ profile.admin }}">
                     <img src="/static/img/profiles/{{ profile.image }}" alt="{{ profile.name }}" class="rounded-circle me-3" style="width:48px; height:48px;">
                     <span>{{ profile.name }}</span>
                 </a>
