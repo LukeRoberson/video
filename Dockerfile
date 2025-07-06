@@ -1,28 +1,30 @@
-# Use the official Python image from the Docker Hub
-# 3.12 is required for now to support Alpine's uwsgi-python3 package
-# This tag is the latest Alpine with the latest Python 3.12
-# https://pkgs.alpinelinux.org/package/edge/main/x86/uwsgi-python3
+# Use the official Alpine Python image from the Docker Hub
+# Using Python 3.13 to match the development
 
-FROM python:3.12-alpine
-LABEL org.opencontainers.image.base.name="python:3.12-alpine"
+FROM python:3.13-alpine
+LABEL org.opencontainers.image.base.name="python:3.13-alpine"
+
+# Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Create non-root user with no password
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Set the working directory in the container
+# Set the working directory in the container, set permissions
 WORKDIR /app
+RUN chown -R appuser:appgroup /app
+RUN chmod -R 755 /app
 
 # Install uWSGI and other dependencies, then clean up in the same layer
 RUN apk add --no-cache gcc musl-dev linux-headers && \
     pip install --upgrade pip uwsgi && \
     apk del gcc musl-dev linux-headers
 
-# Install Git, to check for updates
-RUN apk add --no-cache git
-
-# Set permsissions while still running as root
-RUN chown -R appuser:appgroup /app
-RUN chmod -R 755 /app
+# Update packages
+RUN apk update
+RUN apk upgrade
+RUN rm -rf /var/cache/apk/*
 
 # Switch to the non-root user
 USER appuser
@@ -34,6 +36,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
+# Expose the application port
+EXPOSE 5000
 
 # Start the application using uWSGI
 CMD ["uwsgi", \

@@ -1,10 +1,7 @@
 # Final
 
 * Update project to restrict access to admin tasks
-* Build docker container
-* decouple local_db
 * Git to update videos_db
-* Add uWSGI
 
 
 ----
@@ -19,6 +16,7 @@ UI:
 * Simplified mode (slider) to hide some details
 * Button to hide watched videos
 * Investigate accessibility for template files (eg, 'alt' tags for images)
+* Watch history page (see videos watched in order, and when)
 </br></br>
 
 
@@ -53,6 +51,7 @@ Profiles
     * Check for DB updates
 * Goal watch time per week (like LinkedIn learning)
 * Include watch history in recommended video calculation
+* Edit/delete profile
 </br></br>
 
 

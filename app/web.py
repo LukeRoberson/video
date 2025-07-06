@@ -112,7 +112,7 @@ def home() -> Response:
         },
         {
             "filename": "banner_5.jpg",
-            "description": "Prophets of old",
+            "description": "Prophets of Old",
         },
     ]
 
