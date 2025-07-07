@@ -37,6 +37,18 @@ body {
     font-weight: bold;
 }
 
+.custom-dropdown-menu {
+    background-color: #343a40; /* Dark background */
+    color: #fff; /* White text */
+}
+
+.custom-dropdown-menu .dropdown-item {
+    color: #fff; /* White text for dropdown items */
+}
+
+.custom-dropdown-menu .dropdown-item:hover {
+    background-color: #495057; /* Slightly lighter background on hover */
+}
 
 
 /* ===========================

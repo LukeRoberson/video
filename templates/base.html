@@ -11,6 +11,7 @@
     <!-- Head block -->
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- Title is set by the child template -->
         <title>{% block title %}{% endblock %}</title>
@@ -22,8 +23,8 @@
         <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}">
 
         <!-- Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />        
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/thumbnails.css')}}" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/carousel.css')}}" />
         
@@ -36,73 +37,85 @@
     <!-- Body Block -->
     <body>
         <!-- Navigation bar -->
-        <div class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid d-flex justify-content-between align-items-center">
-                <!-- Links to other pages: Aligned left -->
-                <div class="d-flex align-items-center">
-                    <!-- Home Link -->
-                    <a href="{{ url_for('web_pages.home') }}" class="navbar-brand">Home</a>
-                    
-                    <!-- Admin Page -->
-                    {% if is_admin %}
-                        <a href="{{ url_for('web_pages.admin_dashboard') }}" class="navbar-brand">Admin</a>
-                    {% endif %}
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <div class="container-fluid position-relative">
+                <!-- Home Link -->
+                <a href="{{ url_for('web_pages.home') }}" class="navbar-brand">Home</a>
 
-                    <!-- About Page -->
-                    <a href="{{ url_for('web_pages.about') }}" class="navbar-brand">About</a>
+                <!-- Expand Button (always centered) -->
+                <button class="navbar-toggler position-absolute start-50 translate-middle-x top-0 mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-                    <!-- Dropdown for categoies -->
-                    <div class="dropdown ms-3">
-                        <a class="btn btn-secondary dropdown-toggle navbar-item" href="#" role="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Categories
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="categoriesDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.broadcasting') }}">Broadcasting</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.children') }}">Children</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.teens') }}">Teenagers</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.family') }}">Family</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.programs_events') }}">Programs and Events</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.our_activities') }}">Our Activities</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.meetings_ministry') }}">Our Meetings and Ministry</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.organization') }}">Our Organization</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.bible') }}">The Bible</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.dramas') }}">Dramas</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.series') }}">Series</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.music') }}">Music</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('category_pages.interviews') }}">Interviews and Experiences</a></li>
-                        </ul>
-                    </div>
+                <!-- Collapsible content (for small screens) -->
+                <div class="collapse navbar-collapse" id="navbarContent">
 
-                    <!-- Dropdown for details -->
-                    <div class="dropdown ms-3">
-                        <a class="btn btn-secondary dropdown-toggle navbar-item" href="#" role="button" id="categoriesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Dig Deeper
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="categoriesDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('web_pages.characters') }}">Bible Characters</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('web_pages.speakers') }}">Speakers</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('web_pages.scriptures') }}">Scriptures</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('web_pages.tags') }}">Tags</a></li>
-                        </ul>
-                    </div>
+                    <!-- Navbar links -->
+                    <ul class="navbar-nav mr-auto">
+                        <!-- Admin link (for admins only) -->
+                        {% if is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('web_pages.admin_dashboard') }}">Admin</a>
+                        </li>
+                        {% endif %}
+      
+                        <!-- About Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('web_pages.about') }}">About</a>
+                        </li>
+
+                        <!-- Categories -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropCategories" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Categories
+                            </a>
+                            <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="navbarDropCategories">
+                                <a class="dropdown-item" href="{{ url_for('category_pages.broadcasting') }}">Broadcasting</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.children') }}">Children</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.teens') }}">Teenagers</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.family') }}">Family</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.programs_events') }}">Programs and Events</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.our_activities') }}">Our Activities</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.meetings_ministry') }}">Our Meetings and Ministry</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.organization') }}">Our Organization</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.bible') }}">The Bible</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.dramas') }}">Dramas</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.series') }}">Series</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.music') }}">Music</a>
+                                <a class="dropdown-item" href="{{ url_for('category_pages.interviews') }}">Interviews and Experiences</a>
+                            </div>
+                        </li>
+
+                        <!-- Dig Deeper -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropDig" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Dig Deeper
+                            </a>
+                            <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="navbarDropDig">
+                                <a class="dropdown-item" href="{{ url_for('web_pages.characters') }}">Bible Characters</a>
+                                <a class="dropdown-item" href="{{ url_for('web_pages.speakers') }}">Speakers</a>
+                                <a class="dropdown-item" href="{{ url_for('web_pages.scriptures') }}">Scriptures</a>
+                                <a class="dropdown-item" href="{{ url_for('web_pages.tags') }}">Tags</a>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Search -->
+                    <form class="d-flex my-2 my-lg-0 mx-4" action="{{ url_for('dynamic_pages.search_results') }}" method="GET">
+                        <input class="form-control mr-sm-2" type="search"  name="q" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0 mx-1" type="submit">Search</button>
+                    </form>
                 </div>
 
-                <!-- Search Bar -->
-                <form class="d-flex mx-3" action="{{ url_for('dynamic_pages.search_results') }}" method="GET">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Search videos..." aria-label="Search" style="width: 300px;">
-                    <button class="btn btn-outline-light" type="submit">Search</button>
-                </form>
-                
-                <!-- Profile icon: Aligned right -->
-                <div class="d-flex align-items-center">
+                <!-- Profile Icon (fixed to top right) -->
+                <div class="position-absolute top-0 end-0 d-flex align-items-center mt-2 me-2">
                     <span id="profile-name" class="me-2 text-white">Guest</span>
                     <a href="{{ url_for('web_pages.select_profile') }}" class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-decoration-none" style="width:32px; height:32px;">
                         <img id="profile-img" src="/static/img/profiles/guest.png" alt="Profile" class="rounded-circle" style="width:28px; height:28px; object-fit:cover;">
                     </a>
                 </div>
-
             </div>
-        </div>
+        </nav>
 
         <div class="body-content">
             {% block content %}
@@ -110,7 +123,8 @@
         </div>
 
         <!-- Bootstrap JS (with Popper) -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous"></script>
         <script src="{{ url_for('static', filename='js/profileMgmt.js') }}"></script>
     </body>
 </html>
