@@ -3,6 +3,10 @@ Module: web.py
 
 Define flask routes for the web application.
 
+Functions:
+    inject_admin_status:
+        Injects the admin status into the template context (for jinja).
+
 Routes:
     - /admin: Render the admin dashboard.
     - /about: Render the about page.
@@ -13,11 +17,19 @@ Routes:
     - /speaker: Render the speaker details page.
     - /scripture: Render the scripture details page.
 
-Dependencies:
-    - Flask: For creating the web application.
+Flask Dependencies:
     - Blueprint: For organizing routes.
+    - Response: For creating HTTP responses.
     - render_template: For rendering HTML templates.
     - make_response: For creating HTTP responses.
+    - abort: For aborting requests with an error code.
+    - session: For managing user sessions.
+
+Dependencies:
+    - random: For selecting similar videos randomly.
+    - os: For building file paths.
+    - functools: For creating decorators.
+    - typing: For type hinting.
 
 Custom Dependencies:
     - DatabaseContext: For managing database connections.
@@ -37,12 +49,15 @@ from flask import (
     Response,
     render_template,
     make_response,
+    abort,
     session,
 )
 import random
 import os
 from typing import List, Dict, Any
 from collections import defaultdict
+from functools import wraps
+from typing import Callable
 
 # Custom imports
 from app.sql_db import (
@@ -98,6 +113,48 @@ def inject_admin_status() -> Dict[str, Any]:
     return {
         'is_admin': session.get('profile_admin', False)
     }
+
+
+def admin_required(
+    f: Callable[..., Response]
+) -> Callable[..., Response]:
+    """
+    Decorator to restrict access to admin-only routes.
+
+    Args:
+        f (function): The route function to protect.
+
+    Returns:
+        function: The wrapped function.
+    """
+
+    @wraps(f)
+    def decorated_function(
+        *args,
+        **kwargs
+    ) -> Response:
+        """
+        Checks if the user has admin privileges.
+
+        Looks for 'profile_admin' in the session to determine if the user
+            (current porfile) is an admin.
+        'profile_admin' is set to True if the user is an admin,
+            otherwise it is False.
+
+        Args:
+            *args: Positional arguments for the route function.
+            **kwargs: Keyword arguments for the route function.
+
+        Returns:
+            Response:
+                The response from the route function if the user is an admin,
+        """
+
+        if not session.get('profile_admin', False):
+            return abort(403)
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 
 @web_bp.route(
@@ -235,6 +292,7 @@ def home() -> Response:
     "/admin",
     methods=["GET"],
 )
+@admin_required
 def admin_dashboard() -> Response:
     """
     Render the admin dashboard.

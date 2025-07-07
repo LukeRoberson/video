@@ -14,6 +14,7 @@ Blueprints Registered:
     - dynamic_bp: Routes for dynamic pages
         (tags, speakers, characters, scriptures).
     - api_bp: API endpoints for video data.
+    - error_bp: Custom error pages (e.g., 403 Forbidden).
 
 Dependencies:
     - Flask: Web framework.
@@ -42,6 +43,11 @@ from app.web_dynamic import dynamic_bp
 from app.api import api_bp
 from app.web import web_bp
 from app.api import seconds_to_hhmmss
+from app.web_errors import (
+    error_bp,
+    forbidden,
+    not_found,
+)
 
 
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
@@ -84,6 +90,7 @@ def create_app():
     app.register_blueprint(web_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(dynamic_bp)
+    app.register_blueprint(error_bp)
 
     # Add jinja filters
     app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
@@ -91,5 +98,9 @@ def create_app():
 
     # Set the secret key for the Flask application
     app.secret_key = SECRET_KEY
+
+    # Register the 4xx error handlers globally
+    app.register_error_handler(403, forbidden)
+    app.register_error_handler(404, not_found)
 
     return app

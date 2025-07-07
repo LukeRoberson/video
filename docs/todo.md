@@ -1,15 +1,3 @@
-# Final
-
-* Update project to restrict access to admin tasks
-    * 'Admin' field in local DB, set to '1' for True (done)
-    * When selecting a profile, get this value (done)
-    * Store this value in the session (done)
-    * Navbar: Use jinja template to show admin link if admin is True
-    * Create a protected route decorator that checks if the user is an admin
-    * Add the decorator to the admin routes
-
-
-----
 # Future Versions
 
 UI:
@@ -22,6 +10,7 @@ UI:
 * Button to hide watched videos
 * Investigate accessibility for template files (eg, 'alt' tags for images)
 * Watch history page (see videos watched in order, and when)
+* Track bible reading progress
 </br></br>
 
 
@@ -57,6 +46,7 @@ Profiles
 * Goal watch time per week (like LinkedIn learning)
 * Include watch history in recommended video calculation
 * Edit/delete profile
+* Options for a PIN on profiles
 </br></br>
 
 

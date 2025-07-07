@@ -1,0 +1,35 @@
+/* 
+    errors.css
+    Stylesheet for Error Pages.
+*/
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    color: #e63946;
+}
+
+p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+a {
+    font-size: 1.25rem;
+    color: #457b9d;
+    text-decoration: none;
+    font-weight: 500;
+}
