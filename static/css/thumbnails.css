@@ -68,6 +68,14 @@
 }
 
 
+/* Avoid FOUC (Flash of Unstyled Content) */
+.carousel[data-dynamic="true"] {
+    visibility: hidden; /* Hide the carousel initially */
+    opacity: 0; /* Make it invisible */
+    transition: opacity 0.3s ease-in-out; /* Smooth fade-in effect */
+}
+
+
 /* ===========================
    3. Thumbnail Image
    =========================== */

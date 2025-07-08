@@ -4,6 +4,21 @@ Home
 {% endblock %}
 
 {% block content %}
+
+<!--
+Scripts for the home page
+==============================================================================
+scroll.js:
+    - Handles horizontal scrolling of thumbnails within each category
+homeThumbs.js:
+    - Dynamically sets the width of thumbnails based on the parent container size
+==============================================================================
+-->
+<script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
+<script src="{{ url_for('static', filename='js/homeThumbs.js') }}"></script>
+
+
+<!-- The big banner carousel -->
 <div id="bannerCarousel" class="carousel slide"
     data-bs-ride="carousel"
     data-bs-interval="7000"
@@ -61,30 +76,24 @@ Home
             <!-- Continue Watching Carousel -->
             {% if in_progress_videos %}
                 <h4 class="p-4">Continue Watching</h4>
-                <div id="continueWatchingCarousel" class="carousel slide mb-5">
+                <div id="continueWatchingCarousel" class="carousel slide mb-5" data-dynamic="true">
                     
                     <!-- Thumbnails -->
                     <div class="carousel-inner">
-                        <!-- Batches of three, to make scrolling nice -->
-                        {% for chunk in in_progress_videos|batch(3, fill_with=None) %}
-                            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <div class="d-flex gap-3 justify-content-center">
-                                    <!-- Populate thumbnails -->
-                                    {% for video in chunk %}
-                                        {% if video %}
-                                            <div class="thumbnail-home">
-                                                <a href="/video/{{ video.video_id }}">
-                                                    <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
-                                                    <div class="thumbnail-title">
-                                                        {{ video.name }}
-                                                    </div>
-                                                </a>
+                        <div class="carousel-item active">
+                            <div class="d-flex gap-3 justify-content-center">
+                                {% for video in in_progress_videos %}
+                                    <div class="thumbnail-home">
+                                        <a href="/video/{{ video.video_id }}">
+                                            <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
+                                            <div class="thumbnail-title">
+                                                {{ video.name }}
                                             </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                        </div>
                     </div>
 
                     <!-- Previous button -->
@@ -167,32 +176,24 @@ Home
             <!-- Latest Videos Carousel -->
             {% if latest_videos %}
                 <h4 class="mb-3 p-4">Latest Videos</h4>
-                <div id="latestCarousel" class="carousel slide mb-5">
+                <div id="latestCarousel" class="carousel slide mb-5" data-dynamic="true">
                     
                     <!-- Thumbnails -->
                     <div class="carousel-inner">
-                        <!-- Batches of three, to make scrolling nice -->
-                        {% for chunk in latest_videos|batch(3, fill_with=None) %}
-                            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <div class="d-flex gap-3 justify-content-center">
-                                    
-                                    <!-- Populate thumbnails -->
-                                    {% for video in chunk %}
-                                        {% if video %}
-                                            <div class="thumbnail-home">
-                                                <a href="/video/{{ video.video_id }}">
-                                                    <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
-                                                    <div class="thumbnail-title">
-                                                        {{ video.name }}
-                                                    </div>
-                                                </a>
+                        <div class="carousel-item active">
+                            <div class="d-flex gap-3 justify-content-center">
+                                {% for video in latest_videos %}
+                                    <div class="thumbnail-home">
+                                        <a href="/video/{{ video.video_id }}">
+                                            <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
+                                            <div class="thumbnail-title">
+                                                {{ video.name }}
                                             </div>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                </div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                        </div>
                     </div>
 
                     <!-- Previous button -->
@@ -210,4 +211,5 @@ Home
 
     </div>
 </div>
+
 {% endblock %}
