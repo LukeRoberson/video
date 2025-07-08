@@ -30,6 +30,8 @@
   - [ ] Split api.py into smaller files based on blueprints
   - [ ] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
   - [ ] Scripture chapters are displayed out of order
+  - [x] Scraper for the latest videos only
+  - [ ] Add categories to the metadata section of admin page
 
 
 ## Video Controls
