@@ -302,6 +302,7 @@ class CategoryScraper:
         main_cat_url: str,
         sub_cat_name: str,
         main_cat_name: str,
+        ignore_cats: bool = False,
     ) -> pd.DataFrame:
         """
         Fetch videos from within a subcategory
@@ -312,6 +313,8 @@ class CategoryScraper:
             sub_cat_name (str): The name of the sub category.
                 This is on the page in an <h2> tag.
             main_cat_name (str): The name of the main category.
+            ignore_cats (bool): If True, ignore video category check.
+                Needed to find videos in 'latest videos' category.
 
         Returns:
             pd.DataFrame: A DataFrame containing video information.
@@ -378,7 +381,7 @@ class CategoryScraper:
                             )
 
                             # Get the categories for the video
-                            if exists:
+                            if exists and ignore_cats is False:
                                 categories = cat_mgr.get_from_video(
                                     video_id=exists
                                 )
@@ -794,6 +797,48 @@ class BuildDb:
                 ignore_index=True
             )
 
+    def build_latest(
+        self,
+        filename: str,
+    ) -> None:
+        """
+        Build a DataFrame and CSV of latest videos only.
+
+        This looks at the 'latest videos' category.
+
+        Args:
+            filename (str): The name of the CSV file to save the latest videos.
+
+        Returns:
+            None
+        """
+
+        with CategoryScraper(headless=False) as scraper:
+            videos = scraper.fetch_videos(
+                main_cat_url=MAIN_URL,
+                sub_cat_name="Latest Videos",
+                main_cat_name="Latest Videos",
+                ignore_cats=True,
+            )
+
+            self.videos = pd.concat(
+                [self.videos, videos],
+                ignore_index=True
+            )
+
+            print(filename, type(filename))
+            video_path = os.path.join(csv_folder, filename)
+            self.videos.to_csv(
+                video_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                f"Saving {len(self.videos)} videos to {video_path}...",
+                Style.RESET_ALL
+            )
+
     def save_csv(
         self,
         major_cat_filename: str = "major_categories.csv",
@@ -1060,7 +1105,17 @@ if __name__ == "__main__":
     6. Collect metadata for missing videos.
         Scrape the video URLs, thumbnail, duration, etc.
         Saves this to a CSV file named "missing_videos.csv".
+
+    If 'latest_only' is set to True, it will only fetch the latest videos
+        from the "Latest Videos" category, skipping the full categories
+        and videos.
+    Note, this will not check for the categories these videos are in,
+        so there is some manual intervention needed to add these
+        videos to the database.
     """
+
+    # Set to true to fetch only the latest videos
+    latest_only = True
 
     # Check if the CSV files already exist
     major_cat_filename = "major_categories.csv" if os.path.exists(
@@ -1082,10 +1137,29 @@ if __name__ == "__main__":
         videos_filename=videos_filename,
     )
 
-    # Get full categories and videos
-    db.build_categories()
-    db.build_videos()
-    db.save_csv()
+    if latest_only:
+        print(
+            Fore.YELLOW,
+            "Fetching latest videos only...",
+            Style.RESET_ALL
+        )
+
+        # Build latest videos only
+        db.build_latest(
+            filename="latest_videos.csv",
+        )
+
+    else:
+        print(
+            Fore.YELLOW,
+            "Fetching all videos...",
+            Style.RESET_ALL
+        )
+
+        # Get full categories and videos
+        db.build_categories()
+        db.build_videos()
+        db.save_csv()
 
     # Collate information about missing items
     db.missing()
