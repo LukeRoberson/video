@@ -21,6 +21,23 @@ body {
 }
 
 
+.character-card {
+    width: 80%;
+}
+
+
+@media (max-width: 576px) {
+    .character-card {
+        width: 95%;
+    }
+    .character-details .text-end {
+        text-align: left !important;
+        margin-top: 1em;
+    }
+}
+
+
+
 /* ===========================
    Navigation Bar
    =========================== */
@@ -64,60 +81,6 @@ body {
 }
 
 
-/* Responsive: Medium screens (tablets) */
-/* Thumbnail is 160x90, with title height 40px */
-@media (max-width: 900px) {
-    .body-content {
-        padding: 1em;
-    }
-    .thumbnail {
-        width: 160px;
-        height: 130px;
-    }
-    .thumbnail img {
-        height: 90px;
-    }
-    .thumbnail-title {
-        min-height: 32px;
-        font-size: 0.85em;
-    }
-    .thumbnails {
-        gap: 0.7em;
-    }
-}
-
-/* Responsive: Small screens (phones) */
-/* Thumbnail is 80x45, with title height 60px */
-@media (max-width: 600px) {
-    .body-content {
-        padding: 0.5em;
-    }
-    .category-title {
-        font-size: 1em;
-        margin-bottom: 0.3em;
-    }
-    .thumbnail {
-        width: 80px;
-        height: 105px;
-        font-size: 0.9em;
-    }
-    .thumbnail img {
-        height: 45px;
-    }
-    .thumbnail-title {
-        min-height: 20px;
-        font-size: 0.85em;
-        margin-top: 0.2em;
-    }
-    .thumbnails {
-        gap: 0.4em;
-    }
-    .scroll-arrow {
-        width: 28px;
-    }
-}
-
-
 /* ===========================
    VideoJS Custom Styles
    ---------------------
@@ -133,7 +96,6 @@ body {
 .vjs-resolution-button-staticlabel {
     display: none; /* Hides the incorrect icon */
 }
-
 
 /* ===========================
    Other video player styles
@@ -214,10 +176,18 @@ q::after {
 
 .tag-item {
     transition: all 0.3s ease; /* Smooth transition for hover effect */
+    height: 80px;
 }
 
 .tag-item:hover {
     background-color: #343a40; /* Slightly lighter dark background */
     border-color: #ffc107; /* Change border to a yellow color */
     color: #ffc107; /* Change text color to yellow */
+}
+
+@media (max-width: 576px) {
+    .tag-item {
+        width: auto;
+        height: auto;
+    }
 }

@@ -8,25 +8,64 @@
 /* ===========================
    1. Thumbnails Container
    =========================== */
+
+.video-card {
+    padding-left: 3em;
+    padding-right: 3em;
+    padding-top: 3em;
+    padding-bottom: 3em;
+}
+
+.vertical-gap {
+    margin-bottom: 4rem;
+}
+
+@media (max-width: 768px) {
+    .video-card {
+        padding-left: 2em;
+        padding-right: 2em;
+    }
+    .vertical-gap {
+        margin-bottom: 3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .video-card {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+    .vertical-gap {
+        margin-bottom: 2rem;
+    }
+}
+
+/* The wrapper for the thumbnails, used in carousels.
+   Contains thumbnails and left/right arrows */
+.thumbnails-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+/* A row of thumbnails, within the wrapper */
 .thumbnails {
     display: flex;
     overflow-x: auto;
     gap: 1em;
-    padding: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
     scrollbar-color: #444 #232323;  /* For Firefox */
     scrollbar-width: thin;              /* For Firefox */
     scroll-behavior: smooth;
-}
-
-.thumbnails-wrapper {
-    position: relative;
-    overflow: hidden;
 }
 
 
 /* ===========================
    2. Thumbnail Card
    =========================== */
+
+/* Category carousel thumbnails
+   Similar video thumbnails */
 .thumbnail {
     width: 240px;
     height: 200px;
@@ -46,7 +85,20 @@
     position: relative;
 }
 
+@media (max-width: 768px) {
+    .thumbnail {
+        width: 180px;
+    }
+}
 
+@media (max-width: 576px) {
+    .thumbnail {
+        width: 160px;
+    }
+}
+
+
+/* Home page thumbnail */
 .thumbnail-home {
     width: 330px;
     height: 260px;
@@ -133,6 +185,28 @@
     pointer-events: none;
 }
 
+@media (max-width: 768px) {
+    .thumbnail-title {
+        font-size: 0.90em;
+    }
+    .thumbnail-duration {
+        padding: 2px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 576px) {
+    .thumbnail-title {
+        font-size: 0.8em;
+    }
+    .thumbnail-duration {
+        padding: 1px 4px;
+        font-size: 10px;
+        top: 10px;
+        right: 8px;
+    }
+}
+
 
 /* =============================
    5. Overlay for Watched Videos
@@ -185,6 +259,19 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+@media (max-width: 768px) {
+    .thumbnail-watched-icon {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 576px) {
+    .thumbnail-watched-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
 
 /* ===========================
    6. Effects and Links

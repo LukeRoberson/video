@@ -11,14 +11,14 @@
 
 <!-- The card with the main content-->
 <div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
-    <div class="card shadow-lg bg-dark text-white" style="width: 80%; border-radius: 18px;">
+    <div class="card shadow-lg bg-dark text-white character-card" style="border-radius: 18px;">
 
         <!-- Scripture details section -->
         <div class="card-body p-4">
             <div class="row align-items-center mb-4">
 
                 <!-- Use a real profile pic if available, otherwise an empty pic -->
-                <div class="col-md-3 text-center">
+                <div class="col-md-4 text-center mb-3">
                     {% if scripture.profile_pic %}
                         <img src="{{ scripture.profile_pic }}" alt="{{ scripture.name }} profile picture" class="img-fluid rounded-circle shadow" style="max-width: 150px;">
                     {% else %}
@@ -27,7 +27,7 @@
                 </div>
 
                 <!-- Scripture name and stats -->
-                <div class="col-md-9">
+                <div class="col-md-8">
                     <h1 class="mb-2">{{ scripture.name }}</h1>
                     <br />
 

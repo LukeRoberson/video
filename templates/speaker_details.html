@@ -11,14 +11,14 @@
 
 <!-- The card with the main content-->
 <div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
-    <div class="card shadow-lg bg-dark text-white" style="width: 80%; border-radius: 18px;">
+    <div class="card shadow-lg bg-dark text-white character-card" style="border-radius: 18px;">
         <div class="card-body p-4">
 
             <!-- Speaker details section -->
             <div class="row align-items-center mb-4">
 
                 <!-- Use a real profile pic if available, otherwise an empty pic -->
-                <div class="col-md-3 text-center">
+                <div class="col-md-5 text-center mb-3">
                     {% if speaker.profile_pic %}
                         <img src="/static/img/speakers/{{ speaker.profile_pic }}" alt="{{ speaker.name }} profile picture" class="img-fluid shadow" style="max-width: 200px;">
                     {% else %}
@@ -27,7 +27,7 @@
                 </div>
 
                 <!-- Speaker name and stats -->
-                <div class="col-md-9">
+                <div class="col-md-7">
                     <h1 class="mb-2">{{ speaker.name }}</h1>
                     <p class="mb-1"><strong>Videos:</strong> {{ videos|length }}</p>
                 </div>
