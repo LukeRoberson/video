@@ -19,6 +19,9 @@
   - [ ] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
   - [x] Scraper for the latest videos only
   - [ ] Add categories to the metadata section of admin page
+- [ ] Limit access
+  - [ ] Limit to known URL paths only
+  - [ ] Block scrapers
 
 
 ## Video Controls
