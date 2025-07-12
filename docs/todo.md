@@ -5,31 +5,28 @@
 - [ ] Tablet
 - [ ] TV
 
-| Viewport | Size      | Orientation | Notes         |
-|----------|-----------|-------------|---------------|
-| Desktop  | 1920x1080 | N/A         | Full HD       |
-| Desktop  | 1633x768  | N/A         |               |
-| Desktop  | 1280x720  | N/A         | Laptop        |
-| Tablet   | 768x1024  | Portrait    |               |
-| Tablet   | 1280x800  | Landscape   |               |
-| Phone    | 360x800   | Portrait    | Android       |
-| Phone    | 375x667   | Portrait    | iPhones       |
-| Phone    | 390x844   | Portrait    | iPhone 12/13  |
-| Phone    | 412x915   | Portrait    | Bigger phones |
+**Small Screen**
+* Categories need some margin for title and progress bar for small screen
+* Thinner progress bar
+* Landscape mode: Category cards should be wider
+* Similar videos look silly
+* Character card headings are right aligned again
+
+**Other**
+* Hide progress bar for guest
 
 </br></br>
 
 
 ## Platform
-- [ ] Chromecast support
-  - [ ] Add Chromecast JS library script
-  - [ ] Add Google cast launcher button
-  - [ ] Add JS function to launch the video on Chromecast
+- [ ] Bugs
+  - [ ] Videos in the 'latest' category on home pade do not load (404)
+  - [ ] Scripture chapters are displayed out of order
+- [x] Chromecast support
 - [ ] General cleanup
   - [ ] Split api.py into separate blueprints
   - [ ] Split api.py into smaller files based on blueprints
   - [ ] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
-  - [ ] Scripture chapters are displayed out of order
   - [x] Scraper for the latest videos only
   - [ ] Add categories to the metadata section of admin page
 

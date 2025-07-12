@@ -61,6 +61,14 @@
     border-radius: 8px 0px 0px 8px;
 }
 
+/* Hide scroll arrows on screens smaller than 768px */
+@media (max-width: 768px) {
+    .scroll-arrow {
+        display: none !important;
+    }
+}
+
+
 /* ===========================
    2. Custom Scrollbar Styling
    =========================== */
