@@ -184,7 +184,7 @@ homeThumbs.js:
                             <div class="d-flex gap-3 justify-content-center">
                                 {% for video in latest_videos %}
                                     <div class="thumbnail-home">
-                                        <a href="/video/{{ video.video_id }}">
+                                        <a href="/video/{{ video.id }}">
                                             <img src="{{ video.thumbnail }}" alt="{{ video.name }}">
                                             <div class="thumbnail-title">
                                                 {{ video.name }}

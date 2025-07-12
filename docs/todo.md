@@ -10,7 +10,7 @@
 
 ## Platform
 - [ ] Bugs
-  - [ ] Videos in the 'latest' category on home pade do not load (404)
+  - [x] Videos in the 'latest' category on home pade do not load (404)
   - [ ] Scripture chapters are displayed out of order
 - [x] Chromecast support
 - [ ] General cleanup
@@ -34,7 +34,10 @@
 - [ ] Update general search to use description, tags, etc, not just title
 - [ ] Class method: Find videos shorter or longer than a certain duration
 - [ ] Create an advanced search page (speaker, category, duration, etc.)
-- [ ] Add a field for location
+- [ ] Extra field
+  - [ ] Add a field for location
+  - [ ] Migrate location tags to the new field
+  - [ ] Add to admin tools page
 
 </br></br>
 
