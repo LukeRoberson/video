@@ -18,6 +18,8 @@ body {
 
 .body-content {
     padding: 0;
+    width: 100%;
+    margin: 0 auto;
 }
 
 
@@ -36,6 +38,17 @@ body {
     }
 }
 
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .container {
+        max-width: 98vw;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .card {
+        width: 98vw !important;
+    }
+}
 
 
 /* ===========================

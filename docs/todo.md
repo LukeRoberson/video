@@ -1,13 +1,9 @@
 # Version 2
 
 ## Responsive Design
-- [ ] Phone
-- [ ] Tablet
+- [x] Phone
+- [x] Tablet
 - [ ] TV
-
-**Small Screen**
-* Landscape mode: Category cards should be wider
-* Similar videos look silly
 
 </br></br>
 
