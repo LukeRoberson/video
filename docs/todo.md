@@ -6,14 +6,8 @@
 - [ ] TV
 
 **Small Screen**
-* Categories need some margin for title and progress bar for small screen
-* Thinner progress bar
 * Landscape mode: Category cards should be wider
 * Similar videos look silly
-* Character card headings are right aligned again
-
-**Other**
-* Hide progress bar for guest
 
 </br></br>
 
@@ -44,6 +38,7 @@
 - [ ] Update general search to use description, tags, etc, not just title
 - [ ] Class method: Find videos shorter or longer than a certain duration
 - [ ] Create an advanced search page (speaker, category, duration, etc.)
+- [ ] Add a field for location
 
 </br></br>
 

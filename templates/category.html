@@ -53,6 +53,7 @@ Home
                     </div>
                         
                     <!-- The progress bar (full width of the parent) -->
+                    {% if active_profile != 'guest' %}
                     <div class="progress" style="height: 24px; margin-bottom: 8px; position: relative;">
                         
                         <!-- Get the percentage watched -->
@@ -74,6 +75,7 @@ Home
                             {{ sub_cat.watched }}/{{ sub_cat.count }} ({{ percent|round(1) }}%)
                         </span>
                     </div>
+                    {% endif %}
 
                     <!-- Thumbnails wrapper with scroll arrows -->
                     <div class="thumbnails-wrapper" id="wrapper-{{ sub_cat.id }}">

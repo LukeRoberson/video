@@ -113,6 +113,7 @@ def render_category_page(
 
     # Get the active profile from the session
     active_profile = session.get("active_profile", None)
+    print(f"Active profile: {active_profile}")
 
     # Get a list of subcategory IDs
     watch_status = []
@@ -169,6 +170,7 @@ def render_category_page(
             "category.html",
             category=main_cat,
             watch_status=watch_status,
+            active_profile=active_profile,
         )
     )
 

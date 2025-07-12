@@ -172,3 +172,27 @@
     color: #fff;                        /* Or #222 for dark text */
     text-shadow: 0 1px 4px #232323;
 }
+
+
+/* Medium screens */
+@media (max-width: 768px) {
+    .progress {
+        height: 16px;
+    }
+    .progress-label {
+        font-weight: normal;
+        font-size: 0.8em;
+    }
+}
+
+/* Small screens */
+@media (max-width: 414px) {
+    .progress {
+        height: 8px;
+    }
+    .progress-label {
+        font-weight: normal;
+        font-size: 0;
+    }
+}
+
