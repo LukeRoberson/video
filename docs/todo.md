@@ -9,9 +9,9 @@
 
 
 ## Platform
-- [ ] Bugs
+- [x] Bugs
   - [x] Videos in the 'latest' category on home pade do not load (404)
-  - [ ] Scripture chapters are displayed out of order
+  - [x] Scripture chapters are displayed out of order
 - [x] Chromecast support
 - [ ] General cleanup
   - [ ] Split api.py into separate blueprints
@@ -26,8 +26,9 @@
 
 ## Video Controls
 - [ ] Skip ahead/back 5s/15s
+  - Requires 8.2.0 or later
+  - https://videojs.com/guides/options/#skipbuttons
 - [ ] Theatre mode (like in YouTube)
-- [ ] Time range to play a specific part of a video
 - [ ] Chapters in longer videos (like in YouTube)
 
 </br></br>
@@ -74,6 +75,7 @@
 - [ ] Use consistent logging, not just print statements
 - [ ] Add a helper function to get similar videos
 - [ ] Add error handler pages for 500, 400, etc. (like 404)
+- [ ] Support to add custom videos (eg, local assemblies); Think about this a bit though
 
 ## Regular Tasks (Ongoing)
 - [ ] Add URLs for videos
@@ -104,6 +106,9 @@
 - [ ] After a particular date
 - [ ] Search page: checkbox to show unwatched only
 - [ ] Consider adding location metadata
+
+## Video Player
+- [ ] Time range to play a specific part of a video
 
 ## Other Ideas
 - [ ] Add a 'watch later' feature
