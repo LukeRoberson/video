@@ -5,7 +5,24 @@ Defines a Flask blueprint for dynamic web routes.
     These are web pages that are based on an item, such as tag, speaker,
     bible chapter, or scripture.
 
+Functions:
+    - get_one_video: Fetches a single video or item from the database by ID.
+    - get_videos_by_filter: Fetches videos based on filter criteria.
+    - set_watched_status: Sets the watched status for each video in a list.
+
 Routes:
+    - /video/<int:video_id>:
+        Displays details of a specific video.
+    - /tag/<int:tag_id>:
+        Displays details of a specific tag and associated videos.
+    - /speaker/<int:speaker_id>:
+        Displays details of a specific speaker and associated videos.
+    - /character/<int:character_id>:
+        Displays details of a specific character and associated videos.
+    - /scripture/<int:scripture_id>:
+        Displays details of a specific scripture and associated videos.
+    - /search:
+        Displays search results for videos based on a query string.
 
 Dependancies:
     Flask: To define the blueprint for web pages.
@@ -27,6 +44,7 @@ from flask import (
     request,
     session,
 )
+from typing import Union
 import random
 
 # Custom imports
@@ -45,6 +63,122 @@ from app.local_db import (
     ProfileManager,
     ProgressManager,
 )
+
+
+# Setup type variables for manager types
+ManagerType = Union[
+    VideoManager,
+    TagManager,
+    SpeakerManager,
+    CharacterManager,
+    ScriptureManager,
+]
+
+
+def get_one_video(
+    manager: ManagerType,
+    id: int,
+    item_name: str = "Item",
+) -> Response | dict:
+    """
+    Fetch a single item from the database by its ID.
+
+    Args:
+        manager (ManagerType):
+            The manager instance to use for fetching the item.
+        id (int):
+            The ID of the item to fetch.
+        item_name (str):
+            The name of the item for error messages.
+
+    Returns:
+        Response | dict: The item if found, or a 404 response if not found.
+    """
+
+    # User the manager to get the video by ID
+    video = manager.get(id=id)
+
+    # If the video is found, return the first item in the list
+    if video:
+        return video[0]
+
+    # If the video is not found, return a 404 response
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message=f"{item_name} not found"
+            ),
+            404
+        )
+
+
+def get_videos_by_filter(
+    video_mgr: VideoManager,
+    filter_kwargs: dict,
+    message: str,
+) -> list | Response:
+    """
+    Fetch videos from the database based on filter criteria.
+
+    Args:
+        video_mgr (VideoManager):
+            The video manager instance to use for fetching videos.
+        filter_kwargs (dict):
+            The filter criteria to apply when fetching videos.
+        message (str):
+            The message to display if no videos are found.
+
+    Returns:
+        list | Response: A list of videos if found, or a 404 response if no
+    """
+
+    # Get a list of videos based on the filter criteria
+    videos = video_mgr.get_filter(**filter_kwargs)
+
+    # If no videos are found, return a 404 response with the provided message
+    if not videos:
+        return make_response(
+            render_template(
+                "404.html",
+                message=message
+            ),
+            404
+        )
+
+    # If videos are found, return the list of videos
+    return videos
+
+
+def set_watched_status(
+    videos: list,
+    profile_id: int,
+    profile_mgr: ProfileManager,
+) -> None:
+    """
+    Set the watched status for each video in the list for the current user.
+
+    Args:
+        videos (list):
+            A list of video dictionaries to update with watched status.
+        profile_id (int):
+            The ID of the user profile to check watched status against.
+        profile_mgr (ProfileManager):
+            The profile manager instance to use for checking watched status.
+
+    Returns:
+        None: The function modifies the videos list in place.
+    """
+
+    # Loop through each video and check if it has been watched
+    for video in videos:
+        watched = profile_mgr.check_watched(
+            video_id=video['id'],
+            profile_id=profile_id,
+        )
+
+        # Set the 'watched' key to True
+        video['watched'] = watched
 
 
 dynamic_bp = Blueprint(
@@ -203,43 +337,23 @@ def tag_details(
         video_mgr = VideoManager(db)
 
         # Get the tag name from the tag ID
-        tag = tag_mgr.get(id=tag_id)
-        if tag:
-            tag = tag[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Tag not found"
-                ),
-                404
-            )
+        tag = get_one_video(tag_mgr, tag_id, "Tag")
+        if isinstance(tag, Response):
+            return tag
 
         # Fetch videos associated with the tag
-        videos = video_mgr.get_filter(
-            tag_id=tag_id
+        videos = get_videos_by_filter(
+            video_mgr, {"tag_id": tag_id}, "No videos found for this tag"
         )
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this tag"
-                ),
-                404
-            )
+        if isinstance(videos, Response):
+            return videos
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
+    if active_profile and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
+            set_watched_status(videos, active_profile, profile_mgr)
 
     return make_response(
         render_template(
@@ -273,43 +387,25 @@ def speaker_details(
         video_mgr = VideoManager(db)
 
         # Get speaker details
-        speaker = speaker_mgr.get(id=speaker_id)
-        if speaker:
-            speaker = speaker[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Speaker not found"
-                ),
-                404
-            )
+        speaker = get_one_video(speaker_mgr, speaker_id, "Speaker")
+        if isinstance(speaker, Response):
+            return speaker
 
         # Fetch videos associated with the speaker
-        videos = video_mgr.get_filter(
-            speaker_id=speaker_id
+        videos = get_videos_by_filter(
+            video_mgr,
+            {"speaker_id": speaker_id},
+            "No videos found for this speaker"
         )
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this speaker"
-                ),
-                404
-            )
+        if isinstance(videos, Response):
+            return videos
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
+    if active_profile and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
+            set_watched_status(videos, active_profile, profile_mgr)
 
     return make_response(
         render_template(
@@ -339,54 +435,33 @@ def character_details(
     """
 
     PIC_PATH = "/static/img/characters/"
-    videos = []
 
     with DatabaseContext() as db:
         character_mgr = CharacterManager(db)
         video_mgr = VideoManager(db)
 
         # Get character details
-        character = character_mgr.get(id=character_id)
-        if character:
-            character = character[0]
-            if character['profile_pic']:
-                character['profile_pic'] = (
-                    f"{PIC_PATH}{character['profile_pic']}"
-                )
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Character not found"
-                ),
-                404
-            )
+        character = get_one_video(character_mgr, character_id, "Character")
+        if isinstance(character, Response):
+            return character
+        if character.get('profile_pic'):
+            character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
 
         # Fetch videos associated with the character
-        videos = video_mgr.get_filter(
-            character_id=character_id
+        videos = get_videos_by_filter(
+            video_mgr,
+            {"character_id": character_id},
+            "No videos found for this character"
         )
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this character"
-                ),
-                404
-            )
+        if isinstance(videos, Response):
+            return videos
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
+    if active_profile and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
+            set_watched_status(videos, active_profile, profile_mgr)
 
     return make_response(
         render_template(
@@ -420,30 +495,18 @@ def scripture_details(
         video_mgr = VideoManager(db)
 
         # Get scripture details
-        scripture = scripture_mgr.get(id=scripture_id)
-        if scripture:
-            scripture = scripture[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Scripture not found"
-                ),
-                404
-            )
+        scripture = get_one_video(scripture_mgr, scripture_id, "Scripture")
+        if isinstance(scripture, Response):
+            return scripture
 
         # Fetch videos associated with the scripture
-        videos = video_mgr.get_filter(
-            scripture_id=scripture_id
+        videos = get_videos_by_filter(
+            video_mgr,
+            {"scripture_id": scripture_id},
+            "No videos found for this scripture"
         )
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this scripture"
-                ),
-                404
-            )
+        if isinstance(videos, Response):
+            return videos
 
         # Build a name for the scripture
         scripture['name'] = (
@@ -452,16 +515,10 @@ def scripture_details(
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
+    if active_profile and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
+            set_watched_status(videos, active_profile, profile_mgr)
 
     return make_response(
         render_template(

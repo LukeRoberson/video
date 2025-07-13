@@ -21,7 +21,7 @@ Responsive issues (phone screen):
 - [ ] General cleanup
   - [x] Split api.py into separate blueprints
   - [x] Split api.py into smaller files based on blueprints
-  - [ ] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
+  - [x] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
   - [x] Scraper for the latest videos only
   - [ ] Add categories to the metadata section of admin page
   - [ ] There are some duplicate categories in the database
