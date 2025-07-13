@@ -70,9 +70,9 @@
                 <form
                     id="markWatchedForm"
                     {% if watched %}
-                        data-api-url="{{ url_for('api.mark_unwatched') }}"
+                        data-api-url="{{ url_for('profile_api.mark_unwatched') }}"
                     {% else %}
-                        data-api-url="{{ url_for('api.mark_watched') }}"
+                        data-api-url="{{ url_for('profile_api.mark_watched') }}"
                     {% endif %}
                     data-video-id="{{ video.id }}"
                 >

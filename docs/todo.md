@@ -7,6 +7,11 @@
 
 </br></br>
 
+Responsive issues (phone screen):
+* Home page/Latest videos: Look a bit funny on profiles other than mine
+
+</br></br>
+
 
 ## Platform
 - [x] Bugs
@@ -14,11 +19,12 @@
   - [x] Scripture chapters are displayed out of order
 - [x] Chromecast support
 - [ ] General cleanup
-  - [ ] Split api.py into separate blueprints
-  - [ ] Split api.py into smaller files based on blueprints
+  - [x] Split api.py into separate blueprints
+  - [x] Split api.py into smaller files based on blueprints
   - [ ] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
   - [x] Scraper for the latest videos only
   - [ ] Add categories to the metadata section of admin page
+  - [ ] There are some duplicate categories in the database
 - [ ] Limit access
   - [ ] Limit to known URL paths only
   - [ ] Block scrapers

@@ -40,14 +40,17 @@ from flask import Flask
 # Custom imports
 from app.web_categories import category_bp
 from app.web_dynamic import dynamic_bp
-from app.api import api_bp
 from app.web import web_bp
-from app.api import seconds_to_hhmmss
 from app.web_errors import (
     error_bp,
     forbidden,
     not_found,
 )
+from app.api import (
+    api_bp,
+    seconds_to_hhmmss,
+)
+from app.api_profile import profile_api_bp
 
 
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
@@ -87,6 +90,7 @@ def create_app():
 
     # Import and register blueprints
     app.register_blueprint(api_bp)
+    app.register_blueprint(profile_api_bp)
     app.register_blueprint(web_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(dynamic_bp)
