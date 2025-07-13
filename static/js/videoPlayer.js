@@ -16,7 +16,26 @@
  * sets up the resolution switcher, and tracks video playback progress.
  */
 document.addEventListener('DOMContentLoaded', function () {
-    const player = videojs('player');
+    //const player = videojs('player');
+
+    const player = videojs('player', {
+        controlBar: {
+            skipButtons: {
+                forward: 10,
+                backward: 5
+            },
+            qualitySelector: true,
+            remainingTimeDisplay: {
+                displayNegative: false
+            }
+        },
+        aspectRatio: '16:9',
+        fluid: true,
+        enableSmoothSeeking: true
+    });
+
+
+
     const videoElement = document.getElementById('player');
     const profileId = videoElement.getAttribute('data-profile-id');
     const videoId = videoElement.getAttribute('data-video-id');

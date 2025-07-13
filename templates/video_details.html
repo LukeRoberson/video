@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/videojs-resolution-switcher@0.4.2/lib/videojs-resolution-switcher.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>    
+    <!-- CSS styling for the player -->
+    <link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/videojs-resolution-switcher@0.4.2/lib/videojs-resolution-switcher.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />
 {% endblock %}
 
@@ -32,15 +31,13 @@
             <div class="video-player mb-4 position-relative">
                 <video
                     id="player"
-                    class="video-js vjs-theme-city vjs-big-play-centered vjs-16-9 vjs-fluid"
+                    class="video-js"
                     controls
                     preload="auto"
                     poster="{{ video.thumbnail or '' }}"
                     data-profile-id="{{ session.get('active_profile', 'guest') }}"
                     data-video-id="{{ video.id }}"
                     data-current-time="{{ current_time or 0 }}"
-                    data-setup='{}'
-                    style="border-radius: 12px; background: #181a1b;"
                 >
                     <!-- Set up the available resolutions -->
                     {% for res, url in resolutions %}
@@ -48,6 +45,12 @@
                             <source src="{{ url }}" type="video/mp4" label="{{ res }}p" res="{{ res|replace('p', '') }}">
                         {% endif %}
                     {% endfor %}
+
+                    <!-- fallback content for browsers that do not support HTML5 video -->
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                    </p>
                 </video>
 
                 <!-- Progress bar overlay -->
@@ -113,7 +116,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Video Metadata -->
 <div class="container d-flex justify-content-center my-5" style="min-height: 30vh;">
@@ -219,6 +221,11 @@
 </div>
 
 
+<!-- Video.js and Quality Selector scripts -->
+<script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
+<script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+
+<!-- Custom script for video player -->
 <script src="{{ url_for('static', filename='js/videoPlayer.js') }}"></script>
 
 {% endblock %}
