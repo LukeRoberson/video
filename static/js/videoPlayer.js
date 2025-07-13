@@ -16,8 +16,7 @@
  * sets up the resolution switcher, and tracks video playback progress.
  */
 document.addEventListener('DOMContentLoaded', function () {
-    //const player = videojs('player');
-
+    // Initialize the video.js player with custom options
     const player = videojs('player', {
         controlBar: {
             skipButtons: {
@@ -33,14 +32,41 @@ document.addEventListener('DOMContentLoaded', function () {
         fluid: true,
         enableSmoothSeeking: true
     });
+    
+    // Get the parent of the video player (the div)
+    const container = document.getElementById('player').parentElement;
 
+    // Add a custom button (for theatre mode)
+    const Button = videojs.getComponent('Button');
+    class TheatreButton extends Button {
+        constructor(player, options) {
+            super(player, options);
+            this.controlText("Theatre Mode");
+            this.addClass('vjs-theatre-button');
+        }
+        handleClick() {
+            container.classList.toggle('theatre-mode');
+        }
+    }
 
+    // Register the custom button with video.js
+    videojs.registerComponent('TheatreButton', TheatreButton);
+    
+    // Find the index of the fullscreen button in the control bar    
+    const controlBar = player.getChild('controlBar');
+    const fullscreenIndex = controlBar.children().findIndex(child => child.name && child.name() === 'FullscreenToggle');
 
+    // Insert TheatreButton just before the fullscreen button (second from right)
+    const insertIndex = fullscreenIndex > 0 ? fullscreenIndex : controlBar.children().length - 1;
+    controlBar.addChild('TheatreButton', {}, insertIndex);
+    
+    // Get the video element and its data attributes
     const videoElement = document.getElementById('player');
     const profileId = videoElement.getAttribute('data-profile-id');
     const videoId = videoElement.getAttribute('data-video-id');
     const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
 
+    // Initialize variables for tracking playback progress
     let lastUpdateTime = 0;
     let hasMarkedWatched = false;
 
@@ -58,15 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (progressOverlay) {
             progressOverlay.remove(); // Remove the progress bar overlay
             console.log('Custom progress bar removed.');
-        }
-    });
-
-    // Initialize the resolution switcher
-    player.videoJsResolutionSwitcher({
-        default: 'high',
-        ui: true,
-        callback: function (resolution) {
-            console.log("Resolution changed to:", resolution);
         }
     });
 

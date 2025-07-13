@@ -31,10 +31,8 @@ Responsive issues (phone screen):
 
 
 ## Video Controls
-- [ ] Skip ahead/back 5s/15s
-  - Requires 8.2.0 or later
-  - https://videojs.com/guides/options/#skipbuttons
-- [ ] Theatre mode (like in YouTube)
+- [x] Skip ahead/back 5s/15s
+- [x] Theatre mode (like in YouTube)
 - [ ] Chapters in longer videos (like in YouTube)
 
 </br></br>

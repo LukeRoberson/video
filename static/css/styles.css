@@ -97,22 +97,44 @@ body {
 /* ===========================
    VideoJS Custom Styles
    ---------------------
-   Required to get the gear icon to appear correctly
+   Adds theatre mode button
+   Adds a progress bar overlay
    =========================== */
-.vjs-resolution-button .vjs-menu-button .vjs-icon-placeholder::before {
-  font-family: VideoJS;
-  content: '\f110';
-  font-size: 1.8em;
-  line-height: 1.67;
+
+.theatre-mode {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 80vw !important;
+    height: auto !important;
+    z-index: 2000;
+    background: rgba(17, 17, 17, 0.98);
+    padding: 10px !important;
+    border-radius: 10px;
 }
 
-.vjs-resolution-button-staticlabel {
-    display: none; /* Hides the incorrect icon */
+.theatre-mode .video-js {
+    width: 80vw !important;
+    max-width: 80vw !important;
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+    max-height: 90vh !important;
+    margin: 0 auto;
+    display: block;
+    background: #111;
 }
 
-/* ===========================
-   Other video player styles
-   =========================== */
+/* Hide the progress overlay in theatre mode */
+.theatre-mode .progress-overlay {
+    display: none;
+}
+
+.vjs-theatre-button .vjs-icon-placeholder:before {
+    content: "🖵"; /* Or use any emoji/icon you like */
+    font-size: 1.8em;
+}
+
 
 .video-player {
     position: relative;
