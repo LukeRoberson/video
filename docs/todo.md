@@ -67,6 +67,8 @@ Responsive issues (phone screen):
 - [ ] Watch history page (see videos watched in order, and when)
 - [ ] Track bible reading progress
 - [ ] Share Links
+- [ ] Tags page: Add video count to tag label
+- [ ] Video details: Organise scriptures by book first
 
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
@@ -104,6 +106,8 @@ Responsive issues (phone screen):
 ## Project
 - [ ] Chromecast or Amazon Fire app
 - [ ] Add unit testing
+- [ ] Add DB entries for illustrations
+- [ ] Add DB entries for ministry ideas (group topics)
 
 ## Search and Filtering
 - [ ] Before a particular date
