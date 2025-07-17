@@ -69,6 +69,8 @@ Responsive issues (phone screen):
 - [ ] Share Links
 - [ ] Tags page: Add video count to tag label
 - [ ] Video details: Organise scriptures by book first
+- [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
+- [ ] Can NGINX cache images? Or pre-cache?
 
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
