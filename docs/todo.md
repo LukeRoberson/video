@@ -39,7 +39,7 @@ Responsive issues (phone screen):
 
 
 ## Search and Filtering
-- [ ] Update general search to use description, tags, etc, not just title
+- [ ] Update general search to use description, tags, etc, not just title (elasticsearch container)
 - [ ] Class method: Find videos shorter or longer than a certain duration
 - [ ] Create an advanced search page (speaker, category, duration, etc.)
 - [ ] Extra field
@@ -119,6 +119,8 @@ Responsive issues (phone screen):
 
 ## Video Player
 - [ ] Time range to play a specific part of a video
+- [ ] Share video link at a particular time
+- [ ] Hover mouse over time bar thing: Show thumbnail of that position in the video
 
 ## Other Ideas
 - [ ] Add a 'watch later' feature
