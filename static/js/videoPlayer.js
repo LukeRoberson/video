@@ -36,15 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Check if there is a 't' parameter in the URL to jump to a specific time
     const urlParams = new URLSearchParams(window.location.search);
     const jumpTo = urlParams.get('t');
-    const spinner = document.getElementById('video-loading-spinner');
-    if (jumpTo && spinner) {
-        spinner.style.display = 'flex';
+    if (jumpTo) {
         player.ready(function() {
             player.currentTime(parseInt(jumpTo, 10));
             player.pause();
             player.bigPlayButton.hide();
             player.on('seeked', function() {
-                spinner.style.display = 'none';
                 player.bigPlayButton.show();
                 player.posterImage.hide();
                 player.controlBar.show();

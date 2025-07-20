@@ -34,7 +34,7 @@ Responsive issues (phone screen):
 ## Video Controls
 - [x] Skip ahead/back 5s/15s
 - [x] Theatre mode (like in YouTube)
-- [ ] Chapters in longer videos (like in YouTube)
+- [x] Chapters in longer videos (like in YouTube)
 - [x] If in theatre mode and the video ends, wait 1 sec, then close theatre mode
 
 </br></br>

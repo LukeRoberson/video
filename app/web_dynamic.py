@@ -46,6 +46,8 @@ from flask import (
 )
 from typing import Union
 import random
+import os
+from flask import current_app
 
 # Custom imports
 from app.sql_db import (
@@ -297,6 +299,14 @@ def video_details(
                 video_ids.append(video_details[0])
             else:
                 print(f"Video with ID {id} not found in database.")
+    # Check for webVTT file for chapters
+    vtt_file = os.path.join(
+        str(current_app.static_folder),
+        'vtt',
+        f'{video_id}.vtt'
+    )
+    has_chapters = os.path.exists(vtt_file)
+    print(vtt_file)
 
     return make_response(
         render_template(
@@ -310,6 +320,12 @@ def video_details(
             similar_videos=video_ids,
             watched=watched,
             current_time=current_time,
+            has_chapters=has_chapters,
+            chapters_url=(
+                f"/static/vtt/{video_id}.vtt"
+                if has_chapters
+                else None
+            ),
         )
     )
 
