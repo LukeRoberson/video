@@ -22,6 +22,7 @@ document.getElementById('addMetadataForm').addEventListener('submit', async func
     const speaker_name = document.getElementById('speakerName').value;
     const character_name = document.getElementById('characterName').value;
     const scripture_name = document.getElementById('scriptureName').value;
+    const category_name = document.getElementById('categoryName').value;
     const date_added = document.getElementById('dateAdded').value;
 
 
@@ -34,6 +35,7 @@ document.getElementById('addMetadataForm').addEventListener('submit', async func
         speaker_name: speaker_name,
         character_name: character_name,
         scripture_name: scripture_name,
+        category_name: category_name,
         date_added: date_added ? new Date(date_added).toISOString() : null
     };
 

@@ -17,14 +17,15 @@ Responsive issues (phone screen):
 - [x] Bugs
   - [x] Videos in the 'latest' category on home pade do not load (404)
   - [x] Scripture chapters are displayed out of order
+  - [x] Theatre mode doesn't quite fit into the screen correctly
 - [x] Chromecast support
-- [ ] General cleanup
+- [x] General cleanup
   - [x] Split api.py into separate blueprints
   - [x] Split api.py into smaller files based on blueprints
   - [x] Refactor duplicated code for watch status checks (e.g., `tag_details`, `speaker_details`, etc.)
   - [x] Scraper for the latest videos only
-  - [ ] Add categories to the metadata section of admin page
-  - [ ] There are some duplicate categories in the database
+  - [x] Add categories to the metadata section of admin page
+  - [x] There are some duplicate categories in the database
 - [ ] Limit access
   - [ ] Limit to known URL paths only
   - [ ] Block scrapers
@@ -34,6 +35,7 @@ Responsive issues (phone screen):
 - [x] Skip ahead/back 5s/15s
 - [x] Theatre mode (like in YouTube)
 - [ ] Chapters in longer videos (like in YouTube)
+- [ ] If in theatre mode and the video ends, wait 1 sec, then close theatre mode
 
 </br></br>
 
@@ -53,6 +55,7 @@ Responsive issues (phone screen):
 ## Profiles
 - [ ] Option to edit profile
 - [ ] Option to delete profile
+- [ ] Profile selection screen when opening the app
 
 
 ----
@@ -68,9 +71,11 @@ Responsive issues (phone screen):
 - [ ] Track bible reading progress
 - [ ] Share Links
 - [ ] Tags page: Add video count to tag label
+- [ ] Tags page: Sort alphabetically, or by video count
 - [ ] Video details: Organise scriptures by book first
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
 - [ ] Can NGINX cache images? Or pre-cache?
+- [ ] Scriptures page: Book can link to the book overview video
 
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
@@ -110,6 +115,7 @@ Responsive issues (phone screen):
 - [ ] Add unit testing
 - [ ] Add DB entries for illustrations
 - [ ] Add DB entries for ministry ideas (group topics)
+- [ ] DDB entry for video type (talk, interview, dramatization, etc)
 
 ## Search and Filtering
 - [ ] Before a particular date

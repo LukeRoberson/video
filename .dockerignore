@@ -7,7 +7,7 @@
 *.pem
 *.ps1
 Backup/
-scripts/chrome/
+scripts/
 .git/
 .pytest_cache/
 __pycache__/

@@ -183,6 +183,7 @@ def add_video_metadata() -> Response:
                 "speaker_id": <int>,
                 "character_id": <int>,
                 "scripture_id": <int>,
+                "category_name": <string>,
                 "date_added": <string>,
             }
 
@@ -254,6 +255,7 @@ def add_video_metadata() -> Response:
         speaker_name = data.get("speaker_name", None)
         character_name = data.get("character_name", None)
         scripture_name = data.get("scripture_name", None)
+        category_name = data.get("category_name", None)
         date_added = data.get("date_added", None)
 
         # If they're empty strings, convert to None
@@ -262,6 +264,7 @@ def add_video_metadata() -> Response:
         tag_name = None if tag_name == '' else tag_name
         speaker_name = None if speaker_name == '' else speaker_name
         character_name = None if character_name == '' else character_name
+        category_name = None if category_name == '' else category_name
         scripture_name = None if scripture_name == '' else scripture_name
 
         # Ensure video_name is provided
@@ -327,6 +330,17 @@ def add_video_metadata() -> Response:
             else:
                 scripture_name = [scripture_name]
 
+        # Convert category_name to a list, splitting by commas if necessary
+        if category_name is not None:
+            if isinstance(category_name, str):
+                category_name = (
+                    [s.strip() for s in category_name.split(",")]
+                    if "," in category_name
+                    else [category_name.strip()]
+                )
+            else:
+                category_name = [category_name]
+
         # Convert date_added to ISO format if provided
         if date_added is not None:
             try:
@@ -351,6 +365,7 @@ def add_video_metadata() -> Response:
             f"Speaker IDs: {speaker_name}, "
             f"Character IDs: {character_name}, "
             f"Scripture IDs: {scripture_name}, "
+            f"Category Name: {category_name}, "
             f"Date Added: {date_added}"
         )
 
@@ -597,6 +612,41 @@ def add_video_metadata() -> Response:
                             f"for video ID: {video_id}"
                         )
                         return api_error("Failed to add video scriptures", 500)
+
+            # Add category if provided
+            if isinstance(category_name, str):
+                cat_mgr = CategoryManager(db)
+
+                # Get the category ID from the database
+                category_id = cat_mgr.name_to_id(
+                    name=category_name,
+                )
+
+                # If the category does not exist, return an error
+                if category_id is None:
+                    logging.error(f"Category {category_name} does not exist")
+                    return api_error(
+                        f"Category {category_name} does not exist",
+                        500
+                    )
+
+                # Add the category to the video
+                logging.info(
+                    f"Adding category '{category_name}' with ID "
+                    f"{category_id} to video ID: {video_id}"
+                )
+
+                result = cat_mgr.add_to_video(
+                    video_id=video_id,
+                    category_id=category_id,
+                )
+
+                if not result:
+                    logging.error(
+                        f"Failed to add category {category_name} for "
+                        f"video ID: {video_id}"
+                    )
+                    return api_error("Failed to add video categories", 500)
 
             if date_added is not None:
                 # Update the video's date added
