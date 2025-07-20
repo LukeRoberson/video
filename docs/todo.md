@@ -26,16 +26,16 @@ Responsive issues (phone screen):
   - [x] Scraper for the latest videos only
   - [x] Add categories to the metadata section of admin page
   - [x] There are some duplicate categories in the database
-- [ ] Limit access
-  - [ ] Limit to known URL paths only
-  - [ ] Block scrapers
+- [x] Limit access
+  - [x] Limit to known URL paths only
+  - [x] Block scrapers
 
 
 ## Video Controls
 - [x] Skip ahead/back 5s/15s
 - [x] Theatre mode (like in YouTube)
 - [ ] Chapters in longer videos (like in YouTube)
-- [ ] If in theatre mode and the video ends, wait 1 sec, then close theatre mode
+- [x] If in theatre mode and the video ends, wait 1 sec, then close theatre mode
 
 </br></br>
 

@@ -33,6 +33,25 @@ document.addEventListener('DOMContentLoaded', function () {
         enableSmoothSeeking: true
     });
     
+    // Check if there is a 't' parameter in the URL to jump to a specific time
+    const urlParams = new URLSearchParams(window.location.search);
+    const jumpTo = urlParams.get('t');
+    const spinner = document.getElementById('video-loading-spinner');
+    if (jumpTo && spinner) {
+        spinner.style.display = 'flex';
+        player.ready(function() {
+            player.currentTime(parseInt(jumpTo, 10));
+            player.pause();
+            player.bigPlayButton.hide();
+            player.on('seeked', function() {
+                spinner.style.display = 'none';
+                player.bigPlayButton.show();
+                player.posterImage.hide();
+                player.controlBar.show();
+            });
+        });
+    }
+
     // Get the parent of the video player (the div)
     const container = document.getElementById('player').parentElement;
 
@@ -149,6 +168,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             }).catch(err => console.error('Error marking video as watched:', err));
         }
+
+        // Check if the video is completely done
+        player.on('ended', function () {
+            console.log('Video playback completed.');
+            if (container.classList.contains('theatre-mode')) {
+                container.classList.remove('theatre-mode');
+            }
+        });
     });
 });
 
