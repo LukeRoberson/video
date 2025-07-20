@@ -9,27 +9,27 @@ A configuration file (nginx.conf) is passed to NGINX at runtime.
 ## nginx.conf
 
 ```
-# Rate Limiting
-limit_req_zone $binary_remote_addr zone=general:10m rate=10r/m;
-limit_req_zone $binary_remote_addr zone=strict:10m rate=2r/m;
-limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
-
-# Track 404 errors
-limit_req_zone $binary_remote_addr zone=not_found:10m rate=5r/m;
-
-# Bot detection
-map $http_user_agent $is_bot {
-    default 0;
-    ~*bot 1;
-    ~*crawl 1;
-    ~*spider 1;
-    ~*scrape 1;
-    "" 1;  # Empty user agent
-}
-
 events {}
 
 http {
+	# Rate Limiting
+	limit_req_zone $binary_remote_addr zone=general:10m rate=10r/m;
+	limit_req_zone $binary_remote_addr zone=strict:10m rate=2r/m;
+	limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
+
+	# Track 404 errors
+	limit_req_zone $binary_remote_addr zone=not_found:10m rate=5r/m;
+
+	# Bot detection
+	map $http_user_agent $is_bot {
+		default 0;
+		~*bot 1;
+		~*crawl 1;
+		~*spider 1;
+		~*scrape 1;
+		"" 1;  # Empty user agent
+	}
+
     # Redirect HTTP to HTTPS
 	server {
 		listen 80;
@@ -92,12 +92,27 @@ http {
         }
 
         # Whitelist Known Routes
-		location / {
+		location = / {
+            limit_req zone=general burst=10 nodelay;
+			proxy_pass http://frontend:5000;
+		}
+
+		location ~ ^/4\d{2}$ {
             limit_req zone=general burst=10 nodelay;
 			proxy_pass http://frontend:5000;
 		}
 
 		location /about {
+            limit_req zone=general burst=10 nodelay;
+			proxy_pass http://frontend:5000;
+		}
+
+		location /select_profile {
+            limit_req zone=general burst=10 nodelay;
+			proxy_pass http://frontend:5000;
+		}
+
+		location /create_profile {
             limit_req zone=general burst=10 nodelay;
 			proxy_pass http://frontend:5000;
 		}
