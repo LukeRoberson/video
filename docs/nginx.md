@@ -13,12 +13,10 @@ events {}
 
 http {
 	# Rate Limiting
-	limit_req_zone $binary_remote_addr zone=general:10m rate=10r/m;
-	limit_req_zone $binary_remote_addr zone=strict:10m rate=2r/m;
-	limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
-
-	# Track 404 errors
-	limit_req_zone $binary_remote_addr zone=not_found:10m rate=5r/m;
+	limit_req_zone $binary_remote_addr zone=general:10m rate=240r/m;	# 2 request per second
+	limit_req_zone $binary_remote_addr zone=strict:10m rate=40r/m;
+	limit_req_zone $binary_remote_addr zone=api:10m rate=240r/m;
+	limit_req_zone $binary_remote_addr zone=not_found:10m rate=60r/m;
 
 	# Bot detection
 	map $http_user_agent $is_bot {
@@ -46,9 +44,6 @@ http {
         if ($is_bot) {
             return 429;
         }
-        
-        # General rate limiting
-        limit_req zone=general burst=20 nodelay;
         
         # Strict limiting for suspicious patterns
         location ~* \.(php|asp|aspx|jsp)$ {
@@ -97,7 +92,7 @@ http {
 			proxy_pass http://frontend:5000;
 		}
 
-		location ~ ^/4\d{2}$ {
+		location ~ "^/4[0-9]{2}$" {
             limit_req zone=general burst=10 nodelay;
 			proxy_pass http://frontend:5000;
 		}
@@ -118,7 +113,6 @@ http {
 		}
 
 		location /characters {
-            limit_req zone=general burst=10 nodelay;
 			proxy_pass http://frontend:5000;
 		}
 
@@ -128,7 +122,6 @@ http {
 		}
 
 		location /speakers {
-            limit_req zone=general burst=10 nodelay;
 			proxy_pass http://frontend:5000;
 		}
 
