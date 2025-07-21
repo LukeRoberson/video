@@ -62,6 +62,7 @@ from app.sql_db import (
     VideoManager,
     CategoryManager,
     TagManager,
+    LocationManager,
     SpeakerManager,
     CharacterManager,
     ScriptureManager,
@@ -169,6 +170,7 @@ def add_video_metadata() -> Response:
     GET:
         Map video names to IDs
         Map Tags to IDs
+        Map Locations to IDs
         Map Speakers to IDs
         Map Characters to IDs
         Map Scriptures to IDs
@@ -180,6 +182,7 @@ def add_video_metadata() -> Response:
                 "video_id": <int>,
                 "url": <string>,
                 "tag_id": <int>,
+                "location_id": <int>,
                 "speaker_id": <int>,
                 "character_id": <int>,
                 "scripture_id": <int>,
@@ -195,12 +198,14 @@ def add_video_metadata() -> Response:
     if request.method == "GET":
         video_id = None
         tag_id = None
+        location_id = None
         speaker_id = None
         character_id = None
 
         # Get the query parameters
         video_name = request.args.get("video_name", None)
         tag_name = request.args.get("tag_name", None)
+        location_name = request.args.get("location_name", None)
         speaker_name = request.args.get("speaker_name", None)
         character_name = request.args.get("character_name", None)
 
@@ -215,6 +220,12 @@ def add_video_metadata() -> Response:
                 tag_mgr = TagManager(db)
                 tag_id = tag_mgr.name_to_id(
                     name=tag_name,
+                )
+
+            if location_name:
+                loc_mgr = LocationManager(db)
+                location_id = loc_mgr.name_to_id(
+                    name=location_name,
                 )
 
             if speaker_name:
@@ -233,6 +244,7 @@ def add_video_metadata() -> Response:
             data={
                 "video_id": video_id,
                 "tag_id": tag_id,
+                "location_id": location_id,
                 "speaker_id": speaker_id,
                 "character_id": character_id
             }
@@ -252,6 +264,7 @@ def add_video_metadata() -> Response:
         description = data.get("description", None)
         url = data.get("url", None)
         tag_name = data.get("tag_name", None)
+        location_name = data.get("location_name", None)
         speaker_name = data.get("speaker_name", None)
         character_name = data.get("character_name", None)
         scripture_name = data.get("scripture_name", None)
@@ -262,6 +275,7 @@ def add_video_metadata() -> Response:
         description = None if description == '' else description
         url = None if url == '' else url
         tag_name = None if tag_name == '' else tag_name
+        location_name = None if location_name == '' else location_name
         speaker_name = None if speaker_name == '' else speaker_name
         character_name = None if character_name == '' else character_name
         category_name = None if category_name == '' else category_name
@@ -276,7 +290,7 @@ def add_video_metadata() -> Response:
         if all(
             field is None
             for field in [
-                description, url, tag_name, speaker_name,
+                description, url, tag_name, location_name, speaker_name,
                 character_name, scripture_name, date_added
             ]
         ):
@@ -296,6 +310,17 @@ def add_video_metadata() -> Response:
                 )
             else:
                 tag_name = [tag_name]
+
+        # Convert location_name to a list, splitting by commas if necessary
+        if location_name is not None:
+            if isinstance(location_name, str):
+                location_name = (
+                    [t.strip() for t in location_name.split(",")]
+                    if "," in location_name
+                    else [location_name.strip()]
+                )
+            else:
+                location_name = [location_name]
 
         # Convert character_name to a list, splitting by commas if necessary
         if character_name is not None:
@@ -362,6 +387,7 @@ def add_video_metadata() -> Response:
             f"Description: {description}, "
             f"URL: {url}, "
             f"Tag IDs: {tag_name}, "
+            f"Location IDs: {location_name}, "
             f"Speaker IDs: {speaker_name}, "
             f"Character IDs: {character_name}, "
             f"Scripture IDs: {scripture_name}, "
@@ -447,6 +473,49 @@ def add_video_metadata() -> Response:
                             f"Failed to add tag {tag} for video ID: {video_id}"
                         )
                         return api_error("Failed to add video tags", 500)
+
+            # Add locations if provided
+            if location_name is not None:
+                loc_mgr = LocationManager(db)
+
+                # Go through each location name and resolve it to an ID
+                for location in location_name:
+                    # Get the location ID from the database
+                    location_id = loc_mgr.name_to_id(
+                        name=location,
+                    )
+
+                    # If the tag does not exist, create it
+                    if location_id is None:
+                        logging.info(f"Creating new location: {location}")
+                        location_id = loc_mgr.add(
+                            name=location,
+                        )
+
+                    # Add the location to the video
+                    if location_id is None:
+                        logging.error(f"Failed to create location: {location}")
+                        return api_error(
+                            f"Failed to create location: {location}",
+                            500
+                        )
+
+                    logging.info(
+                        f"Adding location '{location}' with ID {location_id} "
+                        f"to video ID: {video_id}"
+                    )
+
+                    result = loc_mgr.add_to_video(
+                        video_id=video_id,
+                        location_id=location_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add location {location} "
+                            f"for video ID: {video_id}"
+                        )
+                        return api_error("Failed to add video locations", 500)
 
             # Add speakers if provided
             if speaker_name is not None:

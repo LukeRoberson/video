@@ -57,6 +57,8 @@ CREATE TABLE categories (
 );
 ```
 
+</br></br>
+
 
 ### Table: *scriptures*
 
@@ -84,6 +86,8 @@ CREATE TABLE scriptures (
 );
 ```
 
+</br></br>
+
 
 ### Table: *speakers*
 
@@ -106,6 +110,8 @@ CREATE TABLE speakers (
 );
 ```
 
+</br></br>
+
 
 ### Table: *tags*
 
@@ -123,6 +129,28 @@ _Stores a collection of tags that may be attached to a video_
 CREATE TABLE tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
+);
+```
+
+</br></br>
+
+
+### Table: *location*
+
+**Purpose:**
+_Stores a collection of location tags that may be attached to a video_
+
+| Field Name | Datatype | Constraints               | Description                    |
+| ---------- | -------- | ------------------------- | ------------------------------ |
+| id         | INTEGER  | PRIMARY KEY AUTOINCREMENT | Unique identifier for each row |
+| name       | TEXT     | NOT NULL, UNIQUE          | Location name                  | 
+
+
+**Schema:**
+```sql
+CREATE TABLE location (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
 );
 ```
 
@@ -194,6 +222,8 @@ CREATE TABLE "video_similarity" (
 CREATE UNIQUE INDEX `sqlite_autoindex_video_similarity_1`
 ON `video_similarity` (video_1_id, video_2_id);
 ```
+</br></br>
+
 
 
 ## Relationship (Junction) Tables
@@ -220,6 +250,9 @@ CREATE TABLE video_categories (
 );
 ```
 
+</br></br>
+
+
 
 ### Table: *videos_bible_characters*
 
@@ -242,6 +275,9 @@ CREATE TABLE videos_bible_categories (
     FOREIGN KEY (category_id) REFERENCES bible_characters(id)
 );
 ```
+
+</br></br>
+
 
 
 ### Table: *videos_scriptures*
@@ -266,6 +302,9 @@ CREATE TABLE videos_scriptures (
 );
 ```
 
+</br></br>
+
+
 
 ### Table: *videos_speakers*
 
@@ -289,6 +328,9 @@ CREATE TABLE videos_speakers (
 );
 ```
 
+</br></br>
+
+
 
 ### Table: *videos_tags*
 
@@ -311,6 +353,32 @@ CREATE TABLE videos_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 ```
+
+</br></br>
+
+
+### Table: *videos_locations*
+
+**Purpose:**
+_Associates videos with location (many-to-many relationship)._
+
+| Field Name  | Datatype  | Constraints                        | References   |
+| ----------- | --------- | ---------------------------------- | ------------ |
+| video_id    | INTEGER   | PRIMARY KEY, FOREIGN KEY, NOT NULL | videos(id)   |
+| location_id | INTEGER   | PRIMARY KEY, FOREIGN KEY, NOT NULL | tags(id)     |
+
+
+**Schema:**
+```sql
+CREATE TABLE videos_locations (
+    video_id INTEGER NOT NULL, 
+    location_id INTEGER NOT NULL,
+    PRIMARY KEY (video_id, location_id),
+    FOREIGN KEY (video_id) REFERENCES videos(id),
+    FOREIGN KEY (location_id) REFERENCES location(id)
+)
+```
+
 
 
 # Database Manager
@@ -344,6 +412,7 @@ There are classes for managing each of the main databases:
 * VideoManager
 * CategoryManager
 * TagManager
+* LocationManager
 * SpeakerManager
 * CharacterManager
 * ScriptureManager
@@ -406,6 +475,7 @@ The _name_to_id_ method resolves a videos name (if found) to it's ID. The ID is 
 To filter results, use the _get_filter_ method. This allows us to pass:
 * Category ID
 * Tag ID
+* Location ID
 * Speaker ID
 * Character ID
 * Scripture ID

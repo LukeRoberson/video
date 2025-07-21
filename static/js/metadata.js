@@ -19,6 +19,7 @@ document.getElementById('addMetadataForm').addEventListener('submit', async func
     const description = document.getElementById('description').value;
     const url = document.getElementById('url').value;
     const tag_name = document.getElementById('tagName').value;
+    const location_name = document.getElementById('locationName').value;
     const speaker_name = document.getElementById('speakerName').value;
     const character_name = document.getElementById('characterName').value;
     const scripture_name = document.getElementById('scriptureName').value;
@@ -32,6 +33,7 @@ document.getElementById('addMetadataForm').addEventListener('submit', async func
         description: description,
         url: url,
         tag_name: tag_name,
+        location_name: location_name,
         speaker_name: speaker_name,
         character_name: character_name,
         scripture_name: scripture_name,

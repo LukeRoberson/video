@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block title %}
+    {{ location.name }}
+{% endblock %}
+
+{% block content %}
+
+<!-- The card with the main content-->
+<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+    <div class="card shadow-lg bg-dark text-white character-card" style="border-radius: 18px;">
+        <div class="card-body p-4">
+            <h1>location: {{ location.name }}</h1>
+            <p class="mb-3">{{ videos|length }} videos found.</p>
+            <br />
+
+            <!-- Grid of videos-->
+            <div class="card-body p-4">
+                <div class="row">
+                    {% for video in videos %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card bg-dark text-white h-100{% if video.watched %} watched{% endif %}" style="position: relative;">
+                            <a href="/video/{{ video.id }}" class="text-decoration-none text-white">
+                                {% if video.watched %}
+                                    <div class="thumbnail-watched-icon" style="position: absolute; top: 10px; left: 10px; z-index: 2;">
+                                        <svg viewBox="0 0 24 24" width="24" height="24">
+                                            <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z" fill="#fff"/>
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                                <img src="{{ video.thumbnail }}" class="card-img-top{% if video.watched %} watched{% endif %}" alt="{{ video.title }}" {% if video.watched %}style="opacity:0.5;"{% endif %}>
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ video.name }}</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>    
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -78,7 +78,6 @@
             <div class="px-4 pb-2 pt-2">
                 <h1>{{ video.name }}</h1>
                 <p>{{ video.duration | seconds_to_hhmmss }}</p>
-                <p>Date: {{ video.date_added.split(' ')[0] }}</p>
             </div>
 
             <!-- Mark as Watched -->
@@ -102,6 +101,12 @@
                 </form>
             </div>
             
+            <!-- Video description -->
+            <div class="px-4 pb-2 pt-2">
+                <p>{{ video.description | nl2br | safe }}</p>
+                <p>Date: {{ video.date_added.split(' ')[0] }}</p>
+            </div>
+
             <!-- Video tags -->
             <div class="px-4 pb-2 pt-2">
                 <p>
@@ -111,9 +116,13 @@
                 </p>
             </div>
 
-            <!-- Video description -->
+            <!-- Video locations -->
             <div class="px-4 pb-2 pt-2">
-                <p>{{ video.description | nl2br | safe }}</p>
+                <p>
+                    {% for location in locations %}
+                        <a href="/location/{{ location.id }}" class="badge badge-dark-grey me-1 my-1">{{ location.name }}</a>
+                    {% endfor %}
+                </p>
             </div>
 
             <!-- Video URL -->

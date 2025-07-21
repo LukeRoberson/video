@@ -12,6 +12,8 @@ classes:
         A class for managing category-related operations in the database.
     TagManager:
         A class for managing tag-related operations in the database.
+    LocationManager:
+        A class for managing location-related operations in the database.
     SpeakerManager:
         A class for managing speaker-related operations in the database.
     CharacterManager:
@@ -421,6 +423,7 @@ class VideoManager:
         self,
         category_id: list[int] | None = None,
         tag_id: int | None = None,
+        location_id: int | None = None,
         speaker_id: int | None = None,
         character_id: int | None = None,
         scripture_id: int | None = None,
@@ -440,6 +443,9 @@ class VideoManager:
             tag_id (int | None):
                 The ID of the tag to filter by.
                 If None, does not filter by tag. Defaults to None.
+            location_id (int | None):
+                The ID of the location to filter by.
+                If None, does not filter by location. Defaults to None.
             speaker_id (int | None):
                 The ID of the speaker to filter by.
                 If None, does not filter by speaker. Defaults to None.
@@ -492,6 +498,11 @@ class VideoManager:
             joins.append("JOIN videos_tags vt ON v.id = vt.video_id")
             wheres.append("vt.tag_id = ?")
             params.append(tag_id)
+
+        if location_id is not None:
+            joins.append("JOIN videos_locations vl ON v.id = vl.video_id")
+            wheres.append("vl.location_id = ?")
+            params.append(location_id)
 
         if speaker_id is not None:
             joins.append("JOIN videos_speakers vs ON v.id = vs.video_id")
@@ -1383,13 +1394,391 @@ class TagManager:
             return None
 
 
+class LocationManager:
+    """
+    A class for managing location-related operations in the database.
+        - Add/Update/Delete locations
+        - Add/Update/Remove locations to/from videos
+        - Get locations (all, assigned to a video)
+        - Resolve location name to ID
+
+    Args:
+        db (DatabaseContext):
+            An instance of DatabaseContext for database operations.
+            This uses a 'composition' approach to manage database interactions.
+    """
+
+    def __init__(
+        self,
+        db: DatabaseContext
+    ) -> None:
+        """
+        Initializes the class with a DatabaseContext instance.
+            This uses a 'composition' approach
+
+        Args:
+            db (DatabaseContext): An instance of DatabaseContext for
+                database operations.
+
+        Returns:
+            None
+        """
+
+        self.db = db
+
+    def add(
+        self,
+        name: str,
+    ) -> int | None:
+        """
+        Adds a new location to the database.
+
+        Args:
+            name (str): The name of the location to be added.
+
+        Returns:
+            int | None:
+                The ID of the newly added location if successful.
+                Or None if an error occurs.
+        """
+
+        # Check that 'name' is a valid non-empty string
+        if not isinstance(name, str) or not name.strip():
+            print("LocationManager.add: Invalid location name provided.")
+            return None
+
+        # Add the entry
+        try:
+            # Will just ignore it if it already exists
+            self.db.cursor.execute(
+                "INSERT OR IGNORE INTO location (name) VALUES (?)",
+                (name,)
+            )
+            self.db.conn.commit()
+
+            # Get the ID of the location,
+            #   whether it was just added or already existed
+            self.db.cursor.execute(
+                "SELECT id FROM location WHERE name = ?",
+                (name,)
+            )
+            row = self.db.cursor.fetchone()
+            location_id = row[0] if row else None
+
+        except Exception as e:
+            print(
+                f"LocationManager.add: "
+                f"An error occurred while adding the location:\n{e}"
+            )
+            self.db.conn.rollback()
+            return None
+
+        return location_id
+
+    def update(
+        self,
+        id: int,
+        name: str,
+    ) -> int | None:
+        """
+        Updates an existing location in the database.
+            Identified by its ID, which is immutable.
+
+        Args:
+            id (int): The ID of the location to update.
+            name (str): The new name of the location.
+
+        Returns:
+            int | None:
+                The ID of the updated location if successful.
+                Or None if an error occurs.
+        """
+
+        # Check that 'name' is a valid non-empty string
+        if not isinstance(name, str) or not name.strip():
+            print("LocationManager.add: Invalid location name provided.")
+            return None
+
+        # Update the entry
+        try:
+            self.db.cursor.execute(
+                "UPDATE location SET name = ? WHERE id = ?",
+                (name, id)
+            )
+
+            # Check if any rows were affected
+            if self.db.cursor.rowcount == 0:
+                print(
+                    f"LocationManager.update: No location found with ID {id}."
+                )
+                self.db.conn.rollback()
+                return None
+
+            # If good, commit the changes
+            self.db.conn.commit()
+
+        except Exception as e:
+            print(
+                f"LocationManager.update: "
+                f"An error occurred while updating the location:\n{e}"
+            )
+            self.db.conn.rollback()
+            return None
+
+        return id
+
+    def delete(
+        self,
+        id: int,
+    ) -> int | None:
+        """
+        Deletes a location from the database.
+            Uses the locations's ID to identify it.
+
+        Args:
+            id (int): The ID of the location to delete.
+
+        Returns:
+            int | None:
+                The ID of the deleted location if successful.
+                Or None if an error occurs.
+        """
+
+        try:
+            self.db.cursor.execute(
+                "DELETE FROM location WHERE id = ?",
+                (id,)
+            )
+
+            # Check if any rows were affected
+            if self.db.cursor.rowcount == 0:
+                print(
+                    f"LocationManager.delete: No location found with ID {id}."
+                )
+                self.db.conn.rollback()
+                return None
+
+            # If good, commit the changes
+            self.db.conn.commit()
+
+        except Exception as e:
+            print(
+                f"LocationManager.update: "
+                f"An error occurred while updating the location:\n{e}"
+            )
+            self.db.conn.rollback()
+            return None
+
+        return id
+
+    def get(
+        self,
+        id: int | None = None,
+    ) -> list[dict] | None:
+        """
+        Retrieves locations from the database.
+            - Get a single location by a given ID
+            - Get all locations
+
+        Args:
+            id (int | None): The ID of the location to retrieve.
+                If None, retrieves all locations. Defaults to None.
+
+        Returns:
+            list[dict] | None:
+                A list of dictionaries containing location if successful.
+                Or a None if an error occurs.
+        """
+
+        # Fetch all
+        if id is None:
+            query = self.db.cursor.execute("SELECT * FROM location")
+
+        # Fetch a single item by ID
+        else:
+            query = self.db.cursor.execute(
+                "SELECT * FROM location WHERE id = ?",
+                (id,)
+            )
+
+        # Convert to a list of dictionaries, even for a single item
+        try:
+            items = [dict(row) for row in query.fetchall()]
+
+        except Exception:
+            return None
+
+        return items
+
+    def get_from_video(
+        self,
+        video_id: int,
+    ) -> list[dict] | None:
+        """
+        Retrieves locations associated with a specific video.
+
+        Args:
+            video_id (int):
+                The ID of the video for which to retrieve locations.
+
+        Returns:
+            list[dict] | None:
+                A list of dictionaries containing locations if successful.
+                Or None if an error occurs.
+        """
+
+        try:
+            self.db.cursor.execute(
+                """
+                SELECT l.* FROM location l
+                JOIN videos_locations vl ON l.id = vl.location_id
+                WHERE vl.video_id = ?
+                """,
+                (video_id,)
+            )
+            items = [dict(row) for row in self.db.cursor.fetchall()]
+
+        except Exception as e:
+            print(f"Error retrieving locations for video {video_id}: {e}")
+            return None
+
+        return items
+
+    def add_to_video(
+        self,
+        video_id: int,
+        location_id: int
+    ) -> bool:
+        """
+        Adds a category to a video in the database.
+            Uses the 'videos_locations' junction table to associate
+            a video with a location.
+
+        Args:
+            video_id (int):
+                The ID of the video to which the location will be added.
+            location_id (int): The ID of the location to add to the video.
+
+        Returns:
+            bool:
+                True if the location was successfully added to the video.
+                False if an error occurs or the association already exists.
+        """
+
+        # Verify video exists
+        self.db.cursor.execute(
+            "SELECT 1 FROM videos WHERE id = ?", (video_id,)
+        )
+        if not self.db.cursor.fetchone():
+            print(f"Video with ID {video_id} does not exist.")
+            return False
+
+        # Verify location exists
+        self.db.cursor.execute(
+            "SELECT 1 FROM location WHERE id = ?", (location_id,)
+        )
+        if not self.db.cursor.fetchone():
+            print(f"Location with ID {location_id} does not exist.")
+            return False
+
+        try:
+            self.db.cursor.execute(
+                """
+                INSERT OR IGNORE INTO videos_locations (video_id, location_id)
+                VALUES (?, ?)
+                """, (video_id, location_id)
+            )
+            self.db.conn.commit()
+            return True
+
+        except Exception as e:
+            self.db.conn.rollback()
+            print(f"Error linking location to video: {e}")
+            return False
+
+    def remove_from_video(
+        self,
+        video_id: int,
+        location_id: int
+    ) -> bool:
+        """
+        Removes a location from a video in the database.
+            Uses the 'videos_locations' junction table to disassociate
+
+        Args:
+            video_id (int): The ID of the video from which the
+                location will be removed.
+            location_id (int): The ID of the location to remove from the video.
+
+        Returns:
+            bool:
+                True if the location was successfully removed from the video.
+                False if an error occurs or the association does not exist.
+        """
+
+        try:
+            self.db.cursor.execute(
+                """
+                DELETE FROM videos_locations
+                WHERE video_id = ?
+                AND location_id = ?
+                """,
+                (video_id, location_id)
+            )
+            self.db.conn.commit()
+            return True
+
+        except Exception as e:
+            self.db.conn.rollback()
+            print(f"Error unlinking location from video: {e}")
+            return False
+
+    def name_to_id(
+        self,
+        name: str
+    ) -> int | None:
+        """
+        Resolve a location name to its ID.
+
+        Args:
+            name (str): The name of the location.
+
+        Returns:
+            int | None:
+                The ID of the location if found
+                None if the location does not exist.
+        """
+
+        # Check that 'name' is a valid non-empty string
+        if not isinstance(name, str) or not name.strip():
+            print(
+                "locationManager.name_to_id: Invalid location name provided."
+            )
+            return None
+
+        try:
+            self.db.cursor.execute(
+                "SELECT id FROM location WHERE name = ?",
+                (name,)
+            )
+            result = self.db.cursor.fetchone()
+
+            # There should be only one result, or nothing
+            return result[0] if result else None
+
+        except Exception as e:
+            print(f"LocationManager.name_to_id: An error occurred while "
+                  f"resolving location name '{name}' to ID:\n{e}")
+            return None
+
+
 class SpeakerManager:
     """
     A class for managing speaker-related operations in the database.
         - Add/Update/Delete speaker
         - Add/Update/Remove speaker to/from videos
         - Get speaker (all, assigned to a video)
-        - Resolve tag name to ID
+        - Resolve speaker name to ID
 
     Args:
         db (DatabaseContext):
@@ -1485,7 +1874,7 @@ class SpeakerManager:
 
         # Check that 'name' is a valid non-empty string
         if not isinstance(name, str) or not name.strip():
-            print("SpeakerManager.add: Invalid speaker name provided.")
+            print("SpeakerManager.update: Invalid speaker name provided.")
             return None
 
         # Update the entry
@@ -1761,7 +2150,7 @@ class CharacterManager:
         - Add/Update/Delete character
         - Add/Update/Remove character to/from videos
         - Get character (all, assigned to a video)
-        - Resolve tag name to ID
+        - Resolve character name to ID
 
     Args:
         db (DatabaseContext):
@@ -1857,7 +2246,7 @@ class CharacterManager:
 
         # Check that 'name' is a valid non-empty string
         if not isinstance(name, str) or not name.strip():
-            print("CharacterManager.add: Invalid character name provided.")
+            print("CharacterManager.update: Invalid character name provided.")
             return None
 
         # Update the entry

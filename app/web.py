@@ -66,6 +66,7 @@ from app.sql_db import (
     CategoryManager,
     CharacterManager,
     TagManager,
+    LocationManager,
     SpeakerManager,
     ScriptureManager,
 )
@@ -453,6 +454,40 @@ def tags() -> Response:
         render_template(
             'tag.html',
             tags=tags,
+        )
+    )
+
+
+@web_bp.route(
+    "/location",
+    methods=["GET"]
+)
+@web_bp.route(
+    "/location",
+    methods=["GET"]
+)
+def location() -> Response:
+    """
+    Render the location details page.
+
+    Returns:
+        Response: A rendered HTML page with location details.
+    """
+
+    with DatabaseContext() as db:
+        loc_mgr = LocationManager(db)
+        locations: List[Dict[str, Any]] = loc_mgr.get() or []
+
+    # Sort locations by name in a case-insensitive manner
+    locations = sorted(
+        locations,
+        key=lambda location: location.get('name', '').lower()
+    )
+
+    return make_response(
+        render_template(
+            'location.html',
+            locations=locations,
         )
     )
 

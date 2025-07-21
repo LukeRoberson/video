@@ -55,6 +55,7 @@ from app.sql_db import (
     VideoManager,
     CategoryManager,
     TagManager,
+    LocationManager,
     SpeakerManager,
     CharacterManager,
     ScriptureManager,
@@ -71,6 +72,7 @@ from app.local_db import (
 ManagerType = Union[
     VideoManager,
     TagManager,
+    LocationManager,
     SpeakerManager,
     CharacterManager,
     ScriptureManager,
@@ -235,16 +237,25 @@ def video_details(
         tags = tag_mgr.get_from_video(
             video_id=video_id
         )
+
+        # Fetch locations for the video
+        loc_mgr = LocationManager(db)
+        locations = loc_mgr.get_from_video(
+            video_id=video_id
+        )
+
         # Fetch speakers for the video
         speaker_mgr = SpeakerManager(db)
         speakers = speaker_mgr.get_from_video(
             video_id=video_id
         )
+
         # Fetch characters for the video
         character_mgr = CharacterManager(db)
         characters = character_mgr.get_from_video(
             video_id=video_id
         )
+
         # Fetch scriptures for the video
         scripture_mgr = ScriptureManager(db)
         scriptures = scripture_mgr.get_from_video(
@@ -314,6 +325,7 @@ def video_details(
             video=video,
             categories=cat_list,
             tags=tags,
+            locations=locations,
             speakers=speakers,
             characters=characters,
             scriptures=scriptures,
@@ -375,6 +387,59 @@ def tag_details(
         render_template(
             "tag_details.html",
             tag=tag,
+            videos=videos,
+        )
+    )
+
+
+@dynamic_bp.route(
+    "/location/<int:location_id>",
+    methods=["GET"],
+)
+def location_details(
+    location_id: int,
+) -> Response:
+    """
+    Details of a specific location and the videos associated with it.
+
+    Args:
+        location_id (int): The ID of the location to fetch details for.
+
+    Returns:
+        Response:
+            A rendered HTML page with location details and associated videos.
+        If the location is not found, a 404 error is returned.
+    """
+
+    with DatabaseContext() as db:
+        loc_mgr = LocationManager(db)
+        video_mgr = VideoManager(db)
+
+        # Get the tag name from the tag ID
+        location = get_one_video(loc_mgr, location_id, "Location")
+        if isinstance(location, Response):
+            return location
+
+        # Fetch videos associated with the tag
+        videos = get_videos_by_filter(
+            video_mgr,
+            {"location_id": location_id},
+            "No videos found for this location"
+        )
+        if isinstance(videos, Response):
+            return videos
+
+    # Check watched status for the videos
+    active_profile = session.get("active_profile", None)
+    if active_profile and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+            set_watched_status(videos, active_profile, profile_mgr)
+
+    return make_response(
+        render_template(
+            "location_details.html",
+            location=location,
             videos=videos,
         )
     )

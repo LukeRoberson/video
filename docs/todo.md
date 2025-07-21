@@ -43,11 +43,23 @@ Responsive issues (phone screen):
 ## Search and Filtering
 - [ ] Update general search to use description, tags, etc, not just title (elasticsearch container)
 - [ ] Class method: Find videos shorter or longer than a certain duration
-- [ ] Create an advanced search page (speaker, category, duration, etc.)
-- [ ] Extra field
-  - [ ] Add a field for location
-  - [ ] Migrate location tags to the new field
-  - [ ] Add to admin tools page
+- [ ] Create an advanced search/filter page (speaker, category, duration, etc.)
+
+</br></br>
+
+
+## Location
+- [x] Add DB table for location
+- [x] Add DB table to link videos to locaiton
+- [x] Document the new tables
+- [x] Add a LocationManager class with methods
+- [x] Add a filter to get videos based on location
+- [x] Add to admin tools page
+- [x] Add locations to video details page
+- [x] Dynamic locations page
+- [x] Add a 'dig deeper' page for locations
+- [x] Add page to navbar
+- [ ] Migrate location tags to the new field
 
 </br></br>
 
