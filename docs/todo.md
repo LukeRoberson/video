@@ -76,6 +76,8 @@ Responsive issues (phone screen):
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
 - [ ] Can NGINX cache images? Or pre-cache?
 - [ ] Scriptures page: Book can link to the book overview video
+- [ ] Show chapters to the side (on larger screens); Like on Youtube
+- [ ] Tiny icon on thumbnails to show that a video has chapters
 
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
