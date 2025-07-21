@@ -60,6 +60,7 @@ Responsive issues (phone screen):
 - [x] Add a 'dig deeper' page for locations
 - [x] Add page to navbar
 - [ ] Migrate location tags to the new field
+- [ ] Update similarity algorithm to use location
 
 </br></br>
 
@@ -141,6 +142,7 @@ Responsive issues (phone screen):
 - [ ] Time range to play a specific part of a video
 - [ ] Share video link at a particular time
 - [ ] Hover mouse over time bar thing: Show thumbnail of that position in the video
+- [ ] Marks on the progress bar to show chapters
 
 ## Other Ideas
 - [ ] Add a 'watch later' feature

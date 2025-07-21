@@ -656,5 +656,5 @@ class SimScraper:
 
 
 if __name__ == "__main__":
-    scraper = SimScraper([1599])
+    scraper = SimScraper()
     scraper.run_comparison()
