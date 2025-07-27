@@ -366,6 +366,7 @@ def tag_details(
 
         # Get the tag name from the tag ID
         tag = get_one_video(tag_mgr, tag_id, "Tag")
+        print(f"Tag details for tag_id {tag_id}: {tag}")
         if isinstance(tag, Response):
             return tag
 

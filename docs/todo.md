@@ -18,6 +18,7 @@ Responsive issues (phone screen):
   - [x] Videos in the 'latest' category on home pade do not load (404)
   - [x] Scripture chapters are displayed out of order
   - [x] Theatre mode doesn't quite fit into the screen correctly
+  - [ ] Link to a time broken in prod; Works locally
 - [x] Chromecast support
 - [x] General cleanup
   - [x] Split api.py into separate blueprints
@@ -148,3 +149,5 @@ Responsive issues (phone screen):
 - [ ] Add a 'watch later' feature
 - [ ] Custom import assembly programs from jw stream
 - [ ] Music service, like spotify, for JW music
+- [ ] Convert 'speakers' into 'people' (so references to people can be included)
+- [ ] A timeline of characters
