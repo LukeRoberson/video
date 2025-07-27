@@ -92,7 +92,8 @@ os.makedirs(csv_folder, exist_ok=True)
 MAIN_URL = "https://www.jw.org/en/library/videos/#en/home"
 
 # Path to the Chrome WebDriver executable
-DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
+# DRIVER_PATH = r"D:\python\video\scripts\chrome\chromedriver.exe"
+DRIVER_PATH = r"scripts\chrome\chromedriver.exe"
 
 # Load ignore lists from ignore.yaml if it exists
 IGNORE_YAML_PATH = os.path.join(os.path.dirname(__file__), "ignore.yaml")
