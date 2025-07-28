@@ -24,12 +24,19 @@
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+        
+        <!-- Custom CSS -->
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />        
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/thumbnails.css')}}" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/carousel.css')}}" />
         
         <!-- Child templates add <head> tags here -->
         {% block head %}
+            <!-- TV specific styles -->
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tv.css') }}" />
+    
+            <!-- TV navigation script -->
+            <script src="{{ url_for('static', filename='js/tvNavigation.js') }}"></script>
         {% endblock %}
     </head>
     <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>

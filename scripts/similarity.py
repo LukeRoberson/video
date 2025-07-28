@@ -40,6 +40,7 @@ from app.sql_db import (    # noqa: E402
     VideoManager,
     CategoryManager,
     TagManager,
+    LocationManager,
     SpeakerManager,
     ScriptureManager,
     CharacterManager,
@@ -65,8 +66,9 @@ COMMON_STOP_WORDS = [
 ]
 
 WEIGHTS = {
-    "categories": 0.25,
+    "categories": 0.15,
     "tags": 0.15,
+    "location": 0.1,
     "scriptures": 0.35,
     "text": 0.1,
     "characters": 0.1,
@@ -110,6 +112,7 @@ class Similarity:
 
         self.category_similarity = None
         self.tag_similarity = None
+        self.location_similarity = None
         self.speaker_similarity = None
         self.scripture_similarity = None
         self.character_similarity = None
@@ -192,6 +195,7 @@ class Similarity:
             video_mgr = VideoManager(db)
             cat_mgr = CategoryManager(db)
             tag_mgr = TagManager(db)
+            location_mgr = LocationManager(db)
             speaker_mgr = SpeakerManager(db)
             scripture_mgr = ScriptureManager(db)
             character_mgr = CharacterManager(db)
@@ -237,6 +241,20 @@ class Similarity:
                     video['tags'] = tags
                 else:
                     video['tags'] = []
+
+                # Get location
+                location = location_mgr.get_from_video(
+                    video_id=video['id']
+                )
+                if location is not None:
+                    location = [
+                        location['name']
+                        for location in location
+                        if 'name' in location
+                    ]
+                    video['location'] = location
+                else:
+                    video['location'] = []
 
                 # Get speakers
                 speakers = speaker_mgr.get_from_video(
@@ -452,13 +470,7 @@ class Similarity:
         """
         Calculate the weighted similarity score between the two videos.
 
-        The score is calculated as follows:
-        - 30% for categories
-        - 20% for tags
-        - 20% for scriptures
-        - 15% for name and description
-        - 10% for characters
-        - 5% for speakers
+        Use the values in WEIGHTS to calculate the final score.
 
         Args:
             None
@@ -474,6 +486,10 @@ class Similarity:
         self.tag_similarity = self._jaccard(
             self.video1['tags'],
             self.video2['tags'],
+        )
+        self.location_similarity = self._jaccard(
+            self.video1['location'],
+            self.video2['location'],
         )
         self.speaker_similarity = self._max_norm(
             self.video1['speakers'],
@@ -501,7 +517,8 @@ class Similarity:
             (self.scripture_similarity * WEIGHTS["scriptures"]) +
             (self.text_similarity * WEIGHTS["text"]) +
             (self.character_similarity * WEIGHTS["characters"]) +
-            (self.speaker_similarity * WEIGHTS["speakers"])
+            (self.speaker_similarity * WEIGHTS["speakers"]) +
+            (self.location_similarity * WEIGHTS["location"])
         )
 
 

@@ -33,6 +33,67 @@ document.addEventListener('DOMContentLoaded', function () {
         enableSmoothSeeking: true
     });
     
+    // Check if this device is a TV
+    const isTV = window.innerWidth >= 1920 || 
+                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    
+    // If it's a TV, load the video.js library if not already loaded
+    if (isTV) {
+        // Larger control bar for TV
+        player.ready(function() {
+            const controlBar = player.controlBar.el();
+            controlBar.style.height = '60px';
+            controlBar.style.fontSize = '1.2em';
+            
+            // Auto-hide controls after longer delay on TV
+            player.off('userinactive');
+            player.on('userinactive', function() {
+                setTimeout(() => {
+                    if (!player.paused()) {
+                        player.userActive(false);
+                    }
+                }, 8000); // 8 seconds instead of default 3
+            });
+        });
+        
+    // Enhanced keyboard controls for TV remotes
+    // Only add these if the player has focus
+    document.addEventListener('keydown', function(e) {
+        // Only handle these keys if the video player area has focus
+        if (!document.activeElement || !document.activeElement.closest('.video-js')) {
+            return; // Let the main TV navigation handle it
+        }
+        
+        switch(e.which) {
+            case 37: // Left arrow - rewind 10s
+                e.preventDefault();
+                player.currentTime(Math.max(0, player.currentTime() - 10));
+                break;
+            case 39: // Right arrow - fast forward 10s
+                e.preventDefault();
+                player.currentTime(player.currentTime() + 10);
+                break;
+            case 38: // Up arrow - volume up
+                e.preventDefault();
+                player.volume(Math.min(1, player.volume() + 0.1));
+                break;
+            case 40: // Down arrow - volume down
+                e.preventDefault();
+                player.volume(Math.max(0, player.volume() - 0.1));
+                break;
+            case 13: // Enter - play/pause
+                e.preventDefault();
+                if (player.paused()) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+                break;
+        }
+    });
+}
+
+
     // Check if there is a 't' parameter in the URL to jump to a specific time
     const urlParams = new URLSearchParams(window.location.search);
     const jumpTo = urlParams.get('t');

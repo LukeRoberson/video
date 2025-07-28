@@ -13,6 +13,45 @@
  * It calculates the appropriate batch size and thumbnail width, then applies these styles to the thumbnails.
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if the device is a TV or large screen
+    const isTV = window.innerWidth >= 1920 || 
+                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    
+    // Apply specific styles and behaviors for TV or large screens
+    if (isTV) {
+        // Larger thumbnails and fewer per row for TV
+        const updateCarouselsForTV = () => {
+            const screenWidth = window.innerWidth;
+            let batchSize = 4; // Fewer items per row on TV
+            let thumbnailWidth = 320; // Larger thumbnails
+            
+            if (screenWidth >= 3840) { // 4K TVs
+                batchSize = 6;
+                thumbnailWidth = 350;
+            }
+            
+            const thumbnails = document.querySelectorAll('.thumbnail-home');
+            thumbnails.forEach(thumbnail => {
+                thumbnail.style.width = `${thumbnailWidth}px`;
+                thumbnail.style.height = `${thumbnailWidth * 0.75}px`; // Maintain aspect ratio
+            });
+            
+            // Auto-advance carousel every 10 seconds
+            const carousels = document.querySelectorAll('.carousel[data-dynamic="true"]');
+            carousels.forEach(carousel => {
+                setInterval(() => {
+                    const nextButton = carousel.querySelector('.carousel-control-next');
+                    if (nextButton && !document.querySelector('.tv-focused')) {
+                        nextButton.click();
+                    }
+                }, 10000);
+            });
+        };
+        
+        updateCarouselsForTV();
+    }
+
+
     const updateCarousels = () => {
         // Get the screen width
         const screenWidth = window.innerWidth;

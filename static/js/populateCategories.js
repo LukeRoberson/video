@@ -71,3 +71,57 @@ document.addEventListener("DOMContentLoaded", () => {
         observer.observe(row);
     });
 });
+
+
+/**
+ * Enhances the category navigation for TV devices.
+ */
+function enhanceCategoryNavigationForTV() {
+    // Check if the device is a TV based on screen width and touch capability
+    const isTV = window.innerWidth >= 1920 || 
+                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    if (!isTV) return;
+    
+    // Make category rows more prominent
+    document.querySelectorAll('.category-row').forEach(row => {
+        row.style.marginBottom = '3em';
+        
+        const title = row.querySelector('.category-title');
+        if (title) {
+            title.style.fontSize = '1.4em';
+            title.style.marginBottom = '1em';
+        }
+    });
+    
+    // Add visual indicators for scrollable content
+    document.querySelectorAll('.thumbnails').forEach(container => {
+        if (container.scrollWidth > container.clientWidth) {
+            container.style.position = 'relative';
+            
+            // Add scroll indicators
+            const scrollIndicator = document.createElement('div');
+            scrollIndicator.innerHTML = '→';
+            scrollIndicator.style.cssText = `
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0,0,0,0.7);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 50%;
+                font-size: 1.2em;
+                z-index: 10;
+            `;
+            container.appendChild(scrollIndicator);
+        }
+    });
+}
+
+/**
+ * Updates visibility after categories are fully loaded
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for categories to load before enhancing for TV
+    setTimeout(enhanceCategoryNavigationForTV, 500);
+});

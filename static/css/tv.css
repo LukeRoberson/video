@@ -1,0 +1,137 @@
+/* 
+    tv.css
+    Stylesheet for large screens (TV's).
+    Enhances the experience for the larger screen, as well as remote control for input.
+*/
+
+
+/* TV Detection: Large screens with coarse pointing devices (remote controls) */
+@media (min-width: 1920px) and (pointer: coarse), 
+       (min-width: 1200px) and (any-hover: none) {
+    
+    /* Remove hover effects that don't work with remotes */
+    .thumbnail:hover {
+        transform: none !important;
+    }
+    
+    /* Larger, more spaced out elements */
+    .thumbnail {
+        width: 280px !important;
+        height: 220px !important;
+        margin: 10px !important;
+    }
+    
+    /* Bigger text for readability from distance */
+    body {
+        font-size: 1.2em;
+    }
+    
+    .thumbnail-title {
+        font-size: 1.1em;
+        padding: 0.8em;
+    }
+    
+    /* More prominent navigation */
+    .navbar {
+        padding: 1.5em;
+        font-size: 1.1em;
+    }
+    
+    /* Larger buttons */
+    .btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1.1em;
+    }
+
+    .tv-focused {
+        transform: scale(1.05) !important;
+        box-shadow: 0 0 20px rgba(0, 123, 255, 0.5) !important;
+        z-index: 100 !important;
+        position: relative !important;
+        border: 3px solid #007bff !important;
+    }
+}
+
+
+
+/* ===========================
+   Improved TV Mode Styles
+   =========================== */
+
+@media (min-width: 1920px) and (pointer: coarse), 
+       (min-width: 1200px) and (any-hover: none) {
+    
+    /* Smooth animations for focus changes */
+    * {
+        transition: border 0.2s ease, transform 0.2s ease;
+    }
+    
+    /* Better focus visibility */
+    .tv-focused {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+        z-index: 10;
+        position: relative;
+    }
+    .video-js.tv-focused {
+        outline: 3px solid #007bff !important;
+        outline-offset: 5px;
+        transform: none !important; /* Don't scale video player */
+        box-shadow: 0 0 30px rgba(0, 123, 255, 0.8) !important;
+    }    
+    
+    /* Hide mouse cursor after inactivity */
+    body.tv-mode {
+        cursor: none;
+    }
+    
+    /* Larger spacing for easier navigation */
+    .thumbnails {
+        gap: 2em;
+        padding: 2em 1em;
+    }
+    
+    /* More prominent buttons */
+    .carousel-control-prev, 
+    .carousel-control-next {
+        opacity: 1 !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        border-radius: 50% !important;
+        width: 4rem !important;
+        height: 4rem !important;
+    }
+    
+    /* Better category section spacing */
+    .category-row {
+        margin-bottom: 4em;
+    }
+    
+    .carousel-control-prev:focus,
+    .carousel-control-next:focus {
+        opacity: 1 !important;
+    }
+
+    .carousel .thumbnail {
+        margin: 15px !important;
+    }
+        
+    /* Enhanced video player controls */
+    .video-js .vjs-control-bar {
+        height: 60px !important;
+        font-size: 1.2em !important;
+    }
+    
+    .video-js .vjs-button {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    /* Better dropdown navigation for TV */
+    .dropdown-menu {
+        font-size: 1.1em !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.8rem 1.2rem !important;
+    }
+}
