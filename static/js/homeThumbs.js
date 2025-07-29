@@ -14,8 +14,7 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
     // Check if the device is a TV or large screen
-    const isTV = window.innerWidth >= 1920 || 
-                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    const isTV = window.tvDetection.isTV();
     
     // Apply specific styles and behaviors for TV or large screens
     if (isTV) {
@@ -49,6 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         updateCarouselsForTV();
+
+        // Listen for TV mode changes
+        window.addEventListener('tvModeChanged', (e) => {
+            if (e.detail.isTV) {
+                updateCarouselsForTV();
+            } else {
+                // Reset to normal carousel behavior
+                location.reload(); // Simple approach to reset
+            }
+        });
     }
 
 

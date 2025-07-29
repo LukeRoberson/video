@@ -29,14 +29,16 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />        
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/thumbnails.css')}}" />
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/carousel.css')}}" />
+
+        <!-- TV specific styles -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tv.css') }}" />
         
+        <!-- TV scripts -->
+        <script src="{{ url_for('static', filename='js/tvDetection.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/tvNavigation.js') }}"></script>
+
         <!-- Child templates add <head> tags here -->
         {% block head %}
-            <!-- TV specific styles -->
-            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tv.css') }}" />
-    
-            <!-- TV navigation script -->
-            <script src="{{ url_for('static', filename='js/tvNavigation.js') }}"></script>
         {% endblock %}
     </head>
     <script src="{{ url_for('static', filename='js/scroll.js') }}"></script>
@@ -125,10 +127,58 @@
             </div>
         </nav>
 
+        <!-- TV mode controls, for debugging -->
+        <!--
+        <div class="tv-mode-controls" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
+            <button id="tvModeToggle" class="btn btn-sm">
+                <span id="tvModeText">TV Mode: Auto</span>
+            </button>
+        </div>
+        -->
+
         <div class="body-content">
             {% block content %}
             {% endblock %}
         </div>
+
+        <!-- TV Mode toggle -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleBtn = document.getElementById('tvModeToggle');
+                const toggleText = document.getElementById('tvModeText');
+                
+                function updateTVModeUI() {
+                    const isTV = window.tvDetection.isTV();
+                    const userPreference = localStorage.getItem('tvMode');
+                    
+                    if (userPreference === null) {
+                        toggleText.textContent = `TV Mode: Auto (${isTV ? 'TV' : 'Desktop'})`;
+                    } else {
+                        toggleText.textContent = `TV Mode: ${isTV ? 'TV' : 'Desktop'}`;
+                    }
+                    
+                    // Apply CSS class for TV mode
+                    document.body.classList.toggle('tv-mode', isTV);
+                }
+                
+                toggleBtn.addEventListener('click', function() {
+                    const newMode = window.tvDetection.toggleTVMode();
+                    updateTVModeUI();
+                });
+                
+                // Reset to auto on double-click
+                toggleBtn.addEventListener('dblclick', function() {
+                    window.tvDetection.resetToAuto();
+                    updateTVModeUI();
+                });
+                
+                // Listen for TV mode changes
+                window.addEventListener('tvModeChanged', updateTVModeUI);
+                
+                // Initial setup
+                updateTVModeUI();
+            });
+        </script>
 
         <!-- Bootstrap JS (with Popper) -->
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>

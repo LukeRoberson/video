@@ -34,28 +34,69 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     
     // Check if this device is a TV
-    const isTV = window.innerWidth >= 1920 || 
-                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    let isTV = window.tvDetection.isTV();
     
-    // If it's a TV, load the video.js library if not already loaded
-    if (isTV) {
-        // Larger control bar for TV
-        player.ready(function() {
-            const controlBar = player.controlBar.el();
-            controlBar.style.height = '60px';
-            controlBar.style.fontSize = '1.2em';
-            
-            // Auto-hide controls after longer delay on TV
-            player.off('userinactive');
-            player.on('userinactive', function() {
-                setTimeout(() => {
-                    if (!player.paused()) {
-                        player.userActive(false);
-                    }
-                }, 8000); // 8 seconds instead of default 3
+    // Function to apply TV-specific settings
+    function applyTVSettings() {
+        if (isTV) {
+            // Larger control bar for TV
+            player.ready(function() {
+                const controlBar = player.controlBar.el();
+                controlBar.style.height = '60px';
+                controlBar.style.fontSize = '1.2em';
+                
+                // Auto-hide controls after longer delay on TV
+                player.off('userinactive');
+                player.on('userinactive', function() {
+                    setTimeout(() => {
+                        if (!player.paused()) {
+                            player.userActive(false);
+                        }
+                    }, 8000); // 8 seconds instead of default 3
+                });
             });
-        });
+        }
+    }
+
+    // Apply initial TV settings
+    applyTVSettings();
+
+    // Listen for TV mode changes
+    window.addEventListener('tvModeChanged', (e) => {
+        isTV = e.detail.isTV;
+        applyTVSettings();
+    });
+    
+    // Get the parent of the video player (the div)
+    const container = document.getElementById('player').parentElement;
+
+    // Add Theatre Mode button - This should happen regardless of TV mode
+    player.ready(function() {
+        // Add a custom button (for theatre mode)
+        const Button = videojs.getComponent('Button');
+        class TheatreButton extends Button {
+            constructor(player, options) {
+                super(player, options);
+                this.controlText("Theatre Mode");
+                this.addClass('vjs-theatre-button');
+            }
+            handleClick() {
+                container.classList.toggle('theatre-mode');
+            }
+        }
+
+        // Register the custom button with video.js
+        videojs.registerComponent('TheatreButton', TheatreButton);
         
+        // Find the index of the fullscreen button in the control bar    
+        const controlBar = player.getChild('controlBar');
+        const fullscreenIndex = controlBar.children().findIndex(child => child.name && child.name() === 'FullscreenToggle');
+
+        // Insert TheatreButton just before the fullscreen button (second from right)
+        const insertIndex = fullscreenIndex > 0 ? fullscreenIndex : controlBar.children().length - 1;
+        controlBar.addChild('TheatreButton', {}, insertIndex);
+    });
+
     // Enhanced keyboard controls for TV remotes
     // Only add these if the player has focus
     document.addEventListener('keydown', function(e) {
@@ -63,25 +104,32 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!document.activeElement || !document.activeElement.closest('.video-js')) {
             return; // Let the main TV navigation handle it
         }
-        
-        switch(e.which) {
-            case 37: // Left arrow - rewind 10s
+
+        // Only apply these controls in TV mode
+        if (!isTV) return;
+
+        switch(e.key) {
+            case "ArrowLeft": // Left arrow - rewind 10s
                 e.preventDefault();
                 player.currentTime(Math.max(0, player.currentTime() - 10));
                 break;
-            case 39: // Right arrow - fast forward 10s
+            
+            case "ArrowRight": // Right arrow - fast forward 10s
                 e.preventDefault();
                 player.currentTime(player.currentTime() + 10);
                 break;
-            case 38: // Up arrow - volume up
+            
+            case "ArrowUp": // Up arrow - volume up
                 e.preventDefault();
                 player.volume(Math.min(1, player.volume() + 0.1));
                 break;
-            case 40: // Down arrow - volume down
+            
+            case "ArrowDown": // Down arrow - volume down
                 e.preventDefault();
                 player.volume(Math.max(0, player.volume() - 0.1));
                 break;
-            case 13: // Enter - play/pause
+            
+            case "Enter": // Enter - play/pause
                 e.preventDefault();
                 if (player.paused()) {
                     player.play();
@@ -91,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 break;
         }
     });
-}
 
 
     // Check if there is a 't' parameter in the URL to jump to a specific time
@@ -109,33 +156,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
-    // Get the parent of the video player (the div)
-    const container = document.getElementById('player').parentElement;
-
-    // Add a custom button (for theatre mode)
-    const Button = videojs.getComponent('Button');
-    class TheatreButton extends Button {
-        constructor(player, options) {
-            super(player, options);
-            this.controlText("Theatre Mode");
-            this.addClass('vjs-theatre-button');
-        }
-        handleClick() {
-            container.classList.toggle('theatre-mode');
-        }
-    }
-
-    // Register the custom button with video.js
-    videojs.registerComponent('TheatreButton', TheatreButton);
-    
-    // Find the index of the fullscreen button in the control bar    
-    const controlBar = player.getChild('controlBar');
-    const fullscreenIndex = controlBar.children().findIndex(child => child.name && child.name() === 'FullscreenToggle');
-
-    // Insert TheatreButton just before the fullscreen button (second from right)
-    const insertIndex = fullscreenIndex > 0 ? fullscreenIndex : controlBar.children().length - 1;
-    controlBar.addChild('TheatreButton', {}, insertIndex);
     
     // Get the video element and its data attributes
     const videoElement = document.getElementById('player');
@@ -226,14 +246,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             }).catch(err => console.error('Error marking video as watched:', err));
         }
+    });
 
-        // Check if the video is completely done
-        player.on('ended', function () {
-            console.log('Video playback completed.');
-            if (container.classList.contains('theatre-mode')) {
-                container.classList.remove('theatre-mode');
-            }
-        });
+    // Check if the video is completely done
+    player.on('ended', function () {
+        console.log('Video playback completed.');
+        if (container.classList.contains('theatre-mode')) {
+            container.classList.remove('theatre-mode');
+        }
     });
 });
 
@@ -273,3 +293,4 @@ document.getElementById('markWatchedForm').addEventListener('submit', function(e
         }
     });
 });
+

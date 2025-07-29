@@ -2,136 +2,398 @@
     tv.css
     Stylesheet for large screens (TV's).
     Enhances the experience for the larger screen, as well as remote control for input.
+    
+    This is controlled by JavaScript, so it takes precedence over media queries.
+    Includes a desktop override, so we can use desktop styles on a TV.
 */
 
 
-/* TV Detection: Large screens with coarse pointing devices (remote controls) */
-@media (min-width: 1920px) and (pointer: coarse), 
-       (min-width: 1200px) and (any-hover: none) {
-    
-    /* Remove hover effects that don't work with remotes */
-    .thumbnail:hover {
-        transform: none !important;
-    }
-    
-    /* Larger, more spaced out elements */
-    .thumbnail {
-        width: 280px !important;
-        height: 220px !important;
-        margin: 10px !important;
-    }
-    
-    /* Bigger text for readability from distance */
-    body {
-        font-size: 1.2em;
-    }
-    
-    .thumbnail-title {
-        font-size: 1.1em;
-        padding: 0.8em;
-    }
-    
-    /* More prominent navigation */
-    .navbar {
-        padding: 1.5em;
-        font-size: 1.1em;
-    }
-    
-    /* Larger buttons */
-    .btn {
-        padding: 0.8rem 1.5rem;
-        font-size: 1.1em;
-    }
+/* ===========================
+   1. TV Mode Styles
+   =========================== */
 
-    .tv-focused {
-        transform: scale(1.05) !important;
-        box-shadow: 0 0 20px rgba(0, 123, 255, 0.5) !important;
-        z-index: 100 !important;
-        position: relative !important;
-        border: 3px solid #007bff !important;
-    }
+body.tv-mode {
+    font-size: 1.2em;
+    cursor: none;
+}
+
+body.tv-mode .tv-focused {
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.5) !important;
+    z-index: 100 !important;
+    position: relative !important;
+    border: 3px solid #007bff !important;
+}
+
+body.tv-mode * {
+    transition: border 0.2s ease, transform 0.2s ease;
+}
+
+body.tv-mode .btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1em;
+}
+
+body.tv-mode .category-row {
+    margin-bottom: 4em;
 }
 
 
 
+
 /* ===========================
-   Improved TV Mode Styles
+   1a. Thumbnails and carousel
    =========================== */
 
-@media (min-width: 1920px) and (pointer: coarse), 
-       (min-width: 1200px) and (any-hover: none) {
-    
-    /* Smooth animations for focus changes */
-    * {
-        transition: border 0.2s ease, transform 0.2s ease;
-    }
-    
-    /* Better focus visibility */
-    .tv-focused {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-        z-index: 10;
-        position: relative;
-    }
-    .video-js.tv-focused {
-        outline: 3px solid #007bff !important;
-        outline-offset: 5px;
-        transform: none !important; /* Don't scale video player */
-        box-shadow: 0 0 30px rgba(0, 123, 255, 0.8) !important;
-    }    
-    
-    /* Hide mouse cursor after inactivity */
-    body.tv-mode {
-        cursor: none;
-    }
-    
-    /* Larger spacing for easier navigation */
-    .thumbnails {
-        gap: 2em;
-        padding: 2em 1em;
-    }
-    
-    /* More prominent buttons */
-    .carousel-control-prev, 
-    .carousel-control-next {
-        opacity: 1 !important;
-        background: rgba(0, 0, 0, 0.8) !important;
-        border-radius: 50% !important;
-        width: 4rem !important;
-        height: 4rem !important;
-    }
-    
-    /* Better category section spacing */
-    .category-row {
-        margin-bottom: 4em;
-    }
-    
-    .carousel-control-prev:focus,
-    .carousel-control-next:focus {
-        opacity: 1 !important;
-    }
+/* General thumbnail styles */
+body.tv-mode .thumbnail {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
 
-    .carousel .thumbnail {
-        margin: 15px !important;
-    }
-        
-    /* Enhanced video player controls */
-    .video-js .vjs-control-bar {
-        height: 60px !important;
-        font-size: 1.2em !important;
-    }
-    
-    .video-js .vjs-button {
-        width: 60px !important;
-        height: 60px !important;
-    }
+body.tv-mode .thumbnail:hover {
+    transform: none !important;
+}
 
-    /* Better dropdown navigation for TV */
-    .dropdown-menu {
-        font-size: 1.1em !important;
+/* For non-carousel thumbnails (like in grid layouts) */
+body.tv-mode .thumbnails .thumbnail,
+body.tv-mode .row .thumbnail:not(.carousel *) {
+    width: 280px !important;
+    height: 220px !important;
+    margin: 15px !important;
+}
+
+body.tv-mode .thumbnails .thumbnail-title,
+body.tv-mode .row .thumbnail:not(.carousel *) .thumbnail-title {
+    font-size: 1.1em !important;
+    padding: 0.8em !important;
+}
+
+
+/* CAROUSEL SPECIFIC STYLES */
+/* Make carousel containers properly sized */
+body.tv-mode .carousel {
+    width: 100% !important;
+    min-height: 300px !important;
+    overflow: hidden !important;
+    margin-bottom: 2em !important;
+    padding: 0 !important;
+}
+
+body.tv-mode .carousel-inner {
+    width: 100% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+body.tv-mode .carousel-item {
+    width: 100% !important;
+    display: flex !important;
+    gap: 30px !important;
+    padding: 20px 40px !important;
+    align-items: flex-start !important;
+    overflow: hidden !important;
+    justify-content: center !important; /* Changed from flex-start to center */
+    flex-wrap: nowrap !important;
+}
+
+/* Ensure only active carousel item is visible */
+body.tv-mode .carousel-item:not(.active) {
+    display: none !important;
+}
+
+body.tv-mode .carousel-item.active {
+    display: flex !important;
+}
+
+/* Force carousel to only show 3 items per slide */
+body.tv-mode .carousel-item .thumbnail:nth-child(n+4) {
+    display: none !important;
+}
+
+/* Carousel thumbnails - make them properly sized */
+body.tv-mode .carousel .thumbnail,
+body.tv-mode .carousel .thumbnail-home {
+    width: 320px !important;
+    height: 240px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    background: transparent !important;
+    overflow: hidden !important;
+}
+
+/* Carousel thumbnail images - force aspect ratio */
+body.tv-mode .carousel .thumbnail img,
+body.tv-mode .carousel .thumbnail-home img {
+    width: 320px !important;
+    height: 180px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+    object-fit: cover !important;
+    border-radius: 8px 8px 0 0 !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+}
+
+
+/* Replace the carousel thumbnail title rule (lines 147-165) with this: */
+
+/* Carousel thumbnail titles - fix cut-off text */
+body.tv-mode .carousel .thumbnail-title {
+    width: 320px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    font-size: 0.9em !important;
+    padding: 0.6em 0.8em !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    color: white !important;
+    border-radius: 0 0 8px 8px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    line-height: 1.2 !important;
+}
+
+/* Focused carousel thumbnail styles */
+body.tv-mode .carousel .thumbnail.tv-focused,
+body.tv-mode .carousel .thumbnail-home.tv-focused {
+    transform: scale(1.05) !important;
+    z-index: 1000 !important;
+    /* Border styling is applied by JS */
+}
+
+/* Hide carousel controls */
+body.tv-mode .carousel-control-prev,
+body.tv-mode .carousel-control-next {
+    display: none !important;
+}
+
+
+
+/* Visual indicators for more content */
+body.tv-mode .carousel {
+    position: relative !important;
+}
+
+/* Left indicator - shows when there are previous slides */
+body.tv-mode .carousel::before {
+    content: "‹" !important;
+    position: absolute !important;
+    left: 5px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 3em !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 50% !important;
+    width: 50px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10 !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    pointer-events: none !important;
+    font-weight: bold !important;
+}
+
+/* Right indicator - shows when there are next slides */
+body.tv-mode .carousel::after {
+    content: "›" !important;
+    position: absolute !important;
+    right: 5px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 3em !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 50% !important;
+    width: 50px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10 !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    pointer-events: none !important;
+    font-weight: bold !important;
+}
+
+/* Show indicators when carousel has multiple slides */
+body.tv-mode .carousel[data-has-prev="true"]::before {
+    opacity: 1 !important;
+}
+
+body.tv-mode .carousel[data-has-next="true"]::after {
+    opacity: 1 !important;
+}
+
+/* Pulse animation when focused element is at edge */
+body.tv-mode .carousel[data-at-start="true"]::before {
+    animation: pulse-left 1s ease-in-out infinite !important;
+}
+
+body.tv-mode .carousel[data-at-end="true"]::after {
+    animation: pulse-right 1s ease-in-out infinite !important;
+}
+
+@keyframes pulse-left {
+    0%, 100% { 
+        opacity: 0.7; 
+        transform: translateY(-50%) scale(1); 
     }
-    
-    .dropdown-item {
-        padding: 0.8rem 1.2rem !important;
+    50% { 
+        opacity: 1; 
+        transform: translateY(-50%) scale(1.1); 
     }
+}
+
+@keyframes pulse-right {
+    0%, 100% { 
+        opacity: 0.7; 
+        transform: translateY(-50%) scale(1); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translateY(-50%) scale(1.1); 
+    }
+}
+
+/* Hide indicators in desktop mode */
+body.desktop-mode .carousel::before,
+body.desktop-mode .carousel::after {
+    display: none !important;
+}
+
+
+/* ===========================
+   1b. Video player
+   =========================== */
+
+body.tv-mode .video-js.tv-focused {
+    outline: 3px solid #007bff !important;
+    outline-offset: 5px;
+    transform: none !important;
+    box-shadow: 0 0 30px rgba(0, 123, 255, 0.8) !important;
+}
+
+body.tv-mode .video-js .vjs-control-bar {
+    height: 60px !important;
+    font-size: 1.2em !important;
+}
+
+body.tv-mode .video-js .vjs-button {
+    width: 60px !important;
+    height: 60px !important;
+}
+
+
+/* =============================================================
+   1c. Nav bar
+   -------------------------------------------------------------
+   Needs to override the default bootstrap styles for dropdowns.
+   In TV mode, we don't want dropdowns to expand automatically.
+   ============================================================= */
+
+body.tv-mode .navbar {
+    padding: 1.5em;
+    font-size: 1.1em;
+}
+
+body.tv-mode .dropdown-menu {
+    font-size: 1.1em !important;
+}
+
+body.tv-mode .dropdown-item {
+    padding: 0.8rem 1.2rem !important;
+}
+
+/* Prevent dropdown expansion in TV mode */
+body.tv-mode .dropdown-toggle {
+    pointer-events: none !important;
+}
+
+body.tv-mode .dropdown-toggle.tv-focused {
+    pointer-events: auto !important;
+}
+
+/* Hide dropdown menus in TV mode unless explicitly shown */
+body.tv-mode .dropdown-menu:not(.tv-dropdown-open) {
+    display: none !important;
+}
+
+/* Custom dropdown styles for TV mode */
+body.tv-mode .dropdown-menu.tv-dropdown-open {
+    display: block !important;
+    font-size: 1.1em !important;
+}
+
+body.tv-mode .dropdown-item {
+    padding: 0.8rem 1.2rem !important;
+}
+
+
+
+
+/* ======================================================
+   2. Desktop Override
+   ------------------------------------------------------
+   For when a users wants the desktop experience on a TV.
+   ====================================================== */
+
+body.desktop-mode {
+    font-size: 1em !important;
+    cursor: auto !important;
+}
+
+body.desktop-mode .thumbnail {
+    width: auto !important;
+    height: auto !important;
+    margin: auto !important;
+}
+
+body.desktop-mode .thumbnail-title {
+    font-size: 1em !important;
+    padding: 0.5em !important;
+}
+
+body.desktop-mode .navbar {
+    padding: 1rem !important;
+    font-size: 1em !important;
+}
+
+body.desktop-mode .btn {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 1rem !important;
+}
+
+body.desktop-mode .tv-focused {
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+body.desktop-mode .video-js .vjs-control-bar {
+    height: auto !important;
+    font-size: 1em !important;
+}
+
+body.desktop-mode .video-js .vjs-button {
+    width: auto !important;
+    height: auto !important;
 }

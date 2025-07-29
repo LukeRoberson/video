@@ -105,6 +105,7 @@ Responsive issues (phone screen):
 - [ ] Add a helper function to get similar videos
 - [ ] Add error handler pages for 500, 400, etc. (like 404)
 - [ ] Support to add custom videos (eg, local assemblies); Think about this a bit though
+- [ ] Scraper to get real categories of a video, not just 'latest'
 
 ## Regular Tasks (Ongoing)
 - [ ] Add URLs for videos
@@ -151,3 +152,4 @@ Responsive issues (phone screen):
 - [ ] Music service, like spotify, for JW music
 - [ ] Convert 'speakers' into 'people' (so references to people can be included)
 - [ ] A timeline of characters
+- [ ] Locations: Links to maps / 'see the good land'

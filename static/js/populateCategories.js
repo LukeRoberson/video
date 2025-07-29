@@ -78,8 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function enhanceCategoryNavigationForTV() {
     // Check if the device is a TV based on screen width and touch capability
-    const isTV = window.innerWidth >= 1920 || 
-                 (window.innerWidth >= 1200 && !('ontouchstart' in window));
+    const isTV = window.tvDetection.isTV();
     if (!isTV) return;
     
     // Make category rows more prominent
