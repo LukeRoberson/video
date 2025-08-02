@@ -86,9 +86,15 @@ Responsive issues (phone screen):
 - [ ] Show chapters to the side (on larger screens); Like on Youtube
 - [ ] Tiny icon on thumbnails to show that a video has chapters
 
+</br></br>
+
+
 ## TV
 - [ ] Capture remote control input (for navigation)
 - [ ] Menu should not be collapsed (as seen on Amazon Fire)
+
+</br></br>
+
 
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
@@ -96,6 +102,9 @@ Responsive issues (phone screen):
 - [ ] Include videos related to the theme
 - [ ] Lay out nicely, not just videos based on a category
 - [ ] Profiles of suggested categories on the main page (topics for the main carousel)
+
+</br></br>
+
 
 ## General Improvements
 - [ ] Use consistent logging, not just print statements
@@ -106,6 +115,9 @@ Responsive issues (phone screen):
 - [ ] Scraper to add date automatically
 - [ ] Video bar: Show time passed, not just remaining
 - [ ] Update general search to use description, tags, etc, not just title (elasticsearch container)
+
+</br></br>
+
 
 ## Profiles
 - [ ] Option to edit profile
@@ -119,14 +131,23 @@ Responsive issues (phone screen):
 - [ ] Edit/delete profile
 - [ ] Options for a PIN on profiles
 
+</br></br>
+
+
 ## AI
 - [ ] AI model to transcribe to captions
 - [ ] AI model to summarize content
+
+</br></br>
+
 
 ## Project
 - [ ] Add DB entries for illustrations
 - [ ] Add DB entries for ministry ideas (group topics)
 - [ ] DDB entry for video type (talk, interview, dramatization, etc)
+
+</br></br>
+
 
 ## Search and Filtering
 - [ ] Before a particular date
@@ -134,11 +155,17 @@ Responsive issues (phone screen):
 - [ ] Search page: checkbox to show unwatched only
 - [ ] Class method: Find videos shorter or longer than a certain duration
 
+</br></br>
+
+
 ## Video Player
 - [ ] Time range to play a specific part of a video
 - [ ] Share video link at a particular time
 - [ ] Hover mouse over time bar thing: Show thumbnail of that position in the video
 - [ ] Marks on the progress bar to show chapters
+
+</br></br>
+
 
 ## Other Ideas
 - [ ] Add a 'watch later' feature
@@ -147,3 +174,6 @@ Responsive issues (phone screen):
 - [ ] Convert 'speakers' into 'people' (so references to people can be included)
 - [ ] A timeline of characters
 - [ ] Locations: Links to maps / 'see the good land'
+
+</br></br>
+

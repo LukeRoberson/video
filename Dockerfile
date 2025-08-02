@@ -1,7 +1,7 @@
 # Use the official Alpine Python image from the Docker Hub
 # Using Python 3.13 to match the development
 
-FROM python:3.13-alpine
+FROM python:3.13.5-alpine
 LABEL org.opencontainers.image.base.name="python:3.13-alpine"
 
 # Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
@@ -22,9 +22,10 @@ RUN apk add --no-cache gcc musl-dev linux-headers && \
     apk del gcc musl-dev linux-headers
 
 # Update packages
-RUN apk update
-RUN apk upgrade
-RUN rm -rf /var/cache/apk/*
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache sqlite && \
+    rm -rf /var/cache/apk/*
 
 # Switch to the non-root user
 USER appuser
