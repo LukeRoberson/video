@@ -88,25 +88,27 @@ document.addEventListener('DOMContentLoaded', () => {
             batchSize = 3;
         }
 
-        // Determine the thumbnail width
-        let thumbnailWidth = (parentWidth - padding) / batchSize;
-        if (thumbnailWidth > 330) {
-            // Maximum thumbnail width is 330px
-            thumbnailWidth = 330;
-        }
-        
-        // Apply the width to all .thumbnail-home elements
-        const thumbnails = document.querySelectorAll('.thumbnail-home');
-        thumbnails.forEach(thumbnail => {
-            thumbnail.style.width = `${thumbnailWidth}px`;
-        });
-
         // Select all carousels on the page
         const carousels = document.querySelectorAll('.carousel[data-dynamic="true"]');
         carousels.forEach(carousel => {
             const carouselInner = carousel.querySelector('.carousel-inner');
             const videos = Array.from(carouselInner.querySelectorAll('.thumbnail-home'));
             carouselInner.innerHTML = ''; // Clear existing items
+
+            // Use the width of the current carousel
+            const parentWidth = carousel.offsetWidth || window.innerWidth;
+
+            // Determine the thumbnail width
+            let thumbnailWidth = (parentWidth - padding) / batchSize;
+            if (thumbnailWidth > 330) {
+                // Maximum thumbnail width is 330px
+                thumbnailWidth = 330;
+            }
+            
+            // Apply the width to all .thumbnail-home elements
+            videos.forEach(thumbnail => {
+                thumbnail.style.width = `${thumbnailWidth}px`;
+            });
 
             // Create batches
             for (let i = 0; i < videos.length; i += batchSize) {

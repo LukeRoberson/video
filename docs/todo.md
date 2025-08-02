@@ -7,7 +7,7 @@
 </br></br>
 
 Responsive issues (phone screen):
-- [ ] Home page/Latest videos: Look a bit funny on profiles other than mine
+- [x] Home page/Latest videos: Look a bit funny on profiles other than mine
 
 </br></br>
 
