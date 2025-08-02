@@ -284,3 +284,81 @@ q::after {
         height: auto;
     }
 }
+
+
+/* ===========================
+   Advanced Search Input
+   =========================== */
+
+/* Custom dark theme for search inputs */
+.search-input {
+    background-color: #14171d !important;
+    border: 1px solid #2d3748 !important;
+    color: #e2e8f0 !important;
+}
+
+.search-input:focus {
+    background-color: #1a202c !important;
+    border-color: #4299e1 !important;
+    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25) !important;
+    color: #e2e8f0 !important;
+}
+
+.search-input::placeholder {
+    color: #718096 !important;
+}
+
+/* Dropdown styling */
+.dropdown-list {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 1050 !important;
+}
+
+.dropdown-item {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+    border: none !important;
+    transition: background-color 0.15s ease-in-out;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #4a5568 !important;
+    color: #ffffff !important;
+}
+
+.dropdown-item.text-muted {
+    color: #a0aec0 !important;
+}
+
+/* Selected badges styling */
+.badge.bg-primary {
+    background-color: #3182ce !important;
+    color: white;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Custom scrollbar for dropdown */
+.dropdown-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-list::-webkit-scrollbar-track {
+    background: #4a5568;
+    border-radius: 3px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb {
+    background: #718096;
+    border-radius: 3px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}

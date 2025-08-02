@@ -43,11 +43,11 @@ Responsive issues (phone screen):
 
 
 ## Search and Filtering
-- [ ] Create an advanced search/filter page (speaker, category, duration, etc.)
-  - [ ] Design layout
-  - [ ] Make responsive for small screens
-  - [ ] Update page to display results
-  - [ ] Create API endpoint for searches
+- [x] Create an advanced search/filter page (speaker, category, duration, etc.)
+  - [x] Design layout
+  - [x] Make responsive for small screens
+  - [x] Update page to display results
+  - [x] Create API endpoint for searches
 
 </br></br>
 

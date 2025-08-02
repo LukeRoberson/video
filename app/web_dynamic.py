@@ -688,30 +688,34 @@ def advanced_search() -> Response:
         Response: A rendered HTML page.
     """
 
-    # Sample data for now
-    speakers = [
-        {"id": 1, "name": "Speaker One"},
-        {"id": 2, "name": "Speaker Two"},
-        {"id": 3, "name": "Speaker Three"},
-    ]
+    with DatabaseContext() as db:
+        # Get speakers
+        speaker_mgr = SpeakerManager(db)
+        speakers = speaker_mgr.get() or []
+        speakers = sorted(
+            speakers, key=lambda spkr: spkr.get('name', '').lower()
+        )
 
-    characters = [
-        {"id": 1, "name": "Character One"},
-        {"id": 2, "name": "Character Two"},
-        {"id": 3, "name": "Character Three"},
-    ]
+        # Get characters
+        character_mgr = CharacterManager(db)
+        characters = character_mgr.get() or []
+        characters = sorted(
+            characters, key=lambda char: char.get('name', '').lower()
+        )
 
-    locations = [
-        {"id": 1, "name": "Location One"},
-        {"id": 2, "name": "Location Two"},
-        {"id": 3, "name": "Location Three"},
-    ]
+        # Get locations
+        loc_mgr = LocationManager(db)
+        locations = loc_mgr.get() or []
+        locations = sorted(
+            locations, key=lambda location: location.get('name', '').lower()
+        )
 
-    tags = [
-        {"id": 1, "name": "Tag One"},
-        {"id": 2, "name": "Tag Two"},
-        {"id": 3, "name": "Tag Three"},
-    ]
+        # Get tags
+        tag_mgr = TagManager(db)
+        tags = tag_mgr.get() or []
+        tags = sorted(
+            tags, key=lambda tag: tag.get('name', '').lower()
+        )
 
     return make_response(
         render_template(

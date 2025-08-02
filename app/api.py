@@ -11,18 +11,20 @@ Functions:
     - api_error: Returns a standardized error response.
 
 Routes:
-    - /api/categories/<int>/<int>
-        - category_filter: Fetches videos by category and subcategory IDs.
     - /api/video/metadata
         - add_video_metadata: Adds or resolves metadata for a video.
-    - /api/search/videos
-        - search_videos: Searches for videos by name or description.
-    - /api/scripture
-        - add_scripture_text: Adds text to a scripture.
-    - /api/mark_watched
-        - mark_watched: Marks a video as watched for the active profile.
     - /api/videos/csv
         - get_videos_csv: Returns a CSV file of missing videos.
+    - /api/videos/add
+        - add_videos: Adds a new video with metadata to the database.
+    - /api/search/videos
+        - search_videos: Searches for videos by name or description.
+    - /api/search/advanced
+        - advanced_search: Performs an advanced search for videos.
+    - /api/scripture
+        - add_scripture_text: Adds text to a scripture.
+    - /api/categories/<int>/<int>
+        - category_filter: Fetches videos by category and subcategory IDs.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -959,6 +961,87 @@ def search_videos() -> Response:
         logging.info(f"No videos found for query: '{query}'")
 
     # Return the list of videos as a JSON response
+    return api_success(data=videos)
+
+
+@api_bp.route(
+    "/api/search/advanced",
+    methods=["GET"],
+)
+def advanced_search() -> Response:
+    """
+    Advanced search for videos with multiple filter criteria.
+
+    Query Parameters:
+        query (str, optional): Text search in title/description
+        speaker_ids (list, optional): Speaker IDs to filter by
+        character_ids (list, optional): Character IDs to filter by
+        location_ids (list, optional): Location IDs to filter by
+        tag_ids (list, optional): Tag IDs to filter by
+        limit (int, optional): Maximum results. Defaults to 50.
+
+    Returns:
+        Response: JSON response with matching videos
+    """
+
+    # Get query parameters
+    query = request.args.get("query", "").strip()
+    speaker_ids = request.args.getlist("speaker_ids")
+    character_ids = request.args.getlist("character_ids")
+    location_ids = request.args.getlist("location_ids")
+    tag_ids = request.args.getlist("tag_ids")
+    limit = request.args.get("limit", 50, type=int)
+
+    # Convert string IDs to integers
+    try:
+        speaker_ids = [int(id) for id in speaker_ids if id]
+        character_ids = [int(id) for id in character_ids if id]
+        location_ids = [int(id) for id in location_ids if id]
+        tag_ids = [int(id) for id in tag_ids if id]
+    except ValueError:
+        return api_error("Invalid ID format", 400)
+
+    # Build the search query
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+
+        # Build filter kwargs for get_filter method
+        filter_kwargs = {}
+
+        if query:
+            videos = video_mgr.search(query=query, limit=1000)
+        else:
+            videos = []
+
+        if speaker_ids:
+            filter_kwargs["speaker_id"] = speaker_ids
+        if character_ids:
+            filter_kwargs["character_id"] = character_ids
+        if location_ids:
+            filter_kwargs["location_id"] = location_ids
+        if tag_ids:
+            filter_kwargs["tag_id"] = tag_ids
+
+        if filter_kwargs:
+            if videos:
+                # Apply additional filters to search results
+                video_ids = [v['id'] for v in videos]
+                filter_kwargs["video_id"] = video_ids
+
+            filtered_videos = video_mgr.get_filter(**filter_kwargs)
+            videos = filtered_videos if filtered_videos else videos
+        elif not query:
+            # No search query and no filters - return empty
+            videos = []
+
+    # Limit results
+    videos = videos[:limit] if videos else []
+
+    # Convert duration format
+    for video in videos:
+        if video.get('duration'):
+            video['duration'] = seconds_to_hhmmss(video['duration'])
+
     return api_success(data=videos)
 
 

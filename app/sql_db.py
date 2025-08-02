@@ -427,6 +427,7 @@ class VideoManager:
         speaker_id: int | None = None,
         character_id: int | None = None,
         scripture_id: int | None = None,
+        video_id: list[int] | None = None,
         missing_date: bool = False,
         latest: int = 0,
     ) -> list[dict] | None:
@@ -455,6 +456,10 @@ class VideoManager:
             scripture_id (int | None):
                 The ID of the scripture to filter by.
                 If None, does not filter by scripture. Defaults to None.
+            video_id (list[int] | None):
+                A list of video ID's to filter by.
+                Used to further filter existing search results.
+                If None, does not filter by video ID. Defaults to None.
             missing_date (bool):
                 Filters for videos that are missing a 'date_added' value.
                 If False, does not filter by date. Defaults to False.
@@ -481,6 +486,16 @@ class VideoManager:
         wheres = []
         params = []
 
+        # Helper function to normalize ID parameters
+        def normalize_ids(ids):
+            if ids is None:
+                return []
+            if isinstance(ids, int):
+                return [ids]
+            if isinstance(ids, list):
+                return ids
+            return []
+
         # Dymanically build the query fields based on provided filters
         #   This creates a list of JOIN and WHERE statements
         if (
@@ -494,32 +509,58 @@ class VideoManager:
             )
             params.extend(category_id)
 
-        if tag_id is not None:
+        # Handle tag filtering
+        tag_ids = normalize_ids(tag_id)
+        if tag_ids:
             joins.append("JOIN videos_tags vt ON v.id = vt.video_id")
-            wheres.append("vt.tag_id = ?")
-            params.append(tag_id)
+            wheres.append(
+                f"vt.tag_id IN ({','.join(['?'] * len(tag_ids))})"
+            )
+            params.extend(tag_ids)
 
-        if location_id is not None:
+        # Handle location filtering
+        location_ids = normalize_ids(location_id)
+        if location_ids:
             joins.append("JOIN videos_locations vl ON v.id = vl.video_id")
-            wheres.append("vl.location_id = ?")
-            params.append(location_id)
+            wheres.append(
+                f"vl.location_id IN ({','.join(['?'] * len(location_ids))})"
+            )
+            params.extend(location_ids)
 
-        if speaker_id is not None:
+        # Handle speaker filtering
+        speaker_ids = normalize_ids(speaker_id)
+        if speaker_ids:
             joins.append("JOIN videos_speakers vs ON v.id = vs.video_id")
-            wheres.append("vs.speaker_id = ?")
-            params.append(speaker_id)
+            wheres.append(
+                f"vs.speaker_id IN ({','.join(['?'] * len(speaker_ids))})"
+            )
+            params.extend(speaker_ids)
 
-        if character_id is not None:
+        # Handle character filtering
+        character_ids = normalize_ids(character_id)
+        if character_ids:
             joins.append(
                 "JOIN videos_bible_characters vch ON v.id = vch.video_id"
             )
-            wheres.append("vch.character_id = ?")
-            params.append(character_id)
+            wheres.append(
+                f"vch.character_id IN ({','.join(['?'] * len(character_ids))})"
+            )
+            params.extend(character_ids)
 
-        if scripture_id is not None:
+        # Handle scripture filtering
+        scripture_ids = normalize_ids(scripture_id)
+        if scripture_ids:
             joins.append("JOIN videos_scriptures vscr ON v.id = vscr.video_id")
-            wheres.append("vscr.scripture_id = ?")
-            params.append(scripture_id)
+            wheres.append(
+                f"vscr.scripture_id IN "
+                f"({','.join(['?'] * len(scripture_ids))})"
+            )
+            params.extend(scripture_ids)
+
+        # Handle video ID filtering (for further filtering existing results)
+        if video_id is not None and isinstance(video_id, list) and video_id:
+            wheres.append(f"v.id IN ({','.join(['?'] * len(video_id))})")
+            params.extend(video_id)
 
         if missing_date:
             wheres.append("(v.date_added IS NULL OR v.date_added = '')")
@@ -551,10 +592,15 @@ class VideoManager:
             params.append(latest)
 
         # Execute the query with the parameters
-        cursor = self.db.cursor.execute(query, tuple(params))
-
-        # Convert to a list of dictionaries and return
-        return [dict(row) for row in cursor.fetchall()]
+        try:
+            cursor = self.db.cursor.execute(query, tuple(params))
+            # Convert to a list of dictionaries and return
+            return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            print(f"Error in get_filter: {e}")
+            print(f"Query: {query}")
+            print(f"Params: {params}")
+            return None
 
     def name_to_id(
         self,
