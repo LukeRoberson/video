@@ -3,12 +3,11 @@
 ## Responsive Design
 - [x] Phone
 - [x] Tablet
-- [ ] TV
 
 </br></br>
 
 Responsive issues (phone screen):
-* Home page/Latest videos: Look a bit funny on profiles other than mine
+- [ ] Home page/Latest videos: Look a bit funny on profiles other than mine
 
 </br></br>
 
@@ -18,7 +17,7 @@ Responsive issues (phone screen):
   - [x] Videos in the 'latest' category on home pade do not load (404)
   - [x] Scripture chapters are displayed out of order
   - [x] Theatre mode doesn't quite fit into the screen correctly
-  - [ ] Link to a time broken in prod; Works locally
+  - [x] Link to a time broken in prod; Works locally
 - [x] Chromecast support
 - [x] General cleanup
   - [x] Split api.py into separate blueprints
@@ -31,6 +30,8 @@ Responsive issues (phone screen):
   - [x] Limit to known URL paths only
   - [x] Block scrapers
 
+</br></br>
+
 
 ## Video Controls
 - [x] Skip ahead/back 5s/15s
@@ -42,8 +43,6 @@ Responsive issues (phone screen):
 
 
 ## Search and Filtering
-- [ ] Update general search to use description, tags, etc, not just title (elasticsearch container)
-- [ ] Class method: Find videos shorter or longer than a certain duration
 - [ ] Create an advanced search/filter page (speaker, category, duration, etc.)
 
 </br></br>
@@ -60,16 +59,10 @@ Responsive issues (phone screen):
 - [x] Dynamic locations page
 - [x] Add a 'dig deeper' page for locations
 - [x] Add page to navbar
-- [ ] Migrate location tags to the new field
-- [ ] Update similarity algorithm to use location
+- [x] Migrate location tags to the new field
+- [x] Update similarity algorithm to use location
 
 </br></br>
-
-
-## Profiles
-- [ ] Option to edit profile
-- [ ] Option to delete profile
-- [ ] Profile selection screen when opening the app
 
 
 ----
@@ -93,6 +86,10 @@ Responsive issues (phone screen):
 - [ ] Show chapters to the side (on larger screens); Like on Youtube
 - [ ] Tiny icon on thumbnails to show that a video has chapters
 
+## TV
+- [ ] Capture remote control input (for navigation)
+- [ ] Menu should not be collapsed (as seen on Amazon Fire)
+
 ## Theme Based on Scripture
 - [ ] See on the main page as banners
 - [ ] A theme like 'Sermon on the mount'
@@ -106,15 +103,14 @@ Responsive issues (phone screen):
 - [ ] Add error handler pages for 500, 400, etc. (like 404)
 - [ ] Support to add custom videos (eg, local assemblies); Think about this a bit though
 - [ ] Scraper to get real categories of a video, not just 'latest'
-
-## Regular Tasks (Ongoing)
-- [ ] Add URLs for videos
-- [ ] Get date stamps for remaining videos
-- [ ] Get profile pics for speakers
-- [ ] Get profile pics for characters
-- [ ] Create a simpler scraper for new items (avoid scanning the entire site)
+- [ ] Scraper to add date automatically
+- [ ] Video bar: Show time passed, not just remaining
+- [ ] Update general search to use description, tags, etc, not just title (elasticsearch container)
 
 ## Profiles
+- [ ] Option to edit profile
+- [ ] Option to delete profile
+- [ ] Profile selection screen when opening the app
 - [ ] Settings page
   - [ ] Clear watch history
   - [ ] Check for DB updates
@@ -128,8 +124,6 @@ Responsive issues (phone screen):
 - [ ] AI model to summarize content
 
 ## Project
-- [ ] Chromecast or Amazon Fire app
-- [ ] Add unit testing
 - [ ] Add DB entries for illustrations
 - [ ] Add DB entries for ministry ideas (group topics)
 - [ ] DDB entry for video type (talk, interview, dramatization, etc)
@@ -138,7 +132,7 @@ Responsive issues (phone screen):
 - [ ] Before a particular date
 - [ ] After a particular date
 - [ ] Search page: checkbox to show unwatched only
-- [ ] Consider adding location metadata
+- [ ] Class method: Find videos shorter or longer than a certain duration
 
 ## Video Player
 - [ ] Time range to play a specific part of a video

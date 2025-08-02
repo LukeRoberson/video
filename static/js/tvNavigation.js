@@ -9,19 +9,54 @@ document.addEventListener('DOMContentLoaded', function() {
     let focusableElements = [];
     let navigationActive = false;
     
-    // Check if tvDetection is available
+    // Detect TV browsers:
     function updateTVStatus() {
         if (window.tvDetection && typeof window.tvDetection.isTV === 'function') {
             isTV = window.tvDetection.isTV();
         } else {
-            isTV = false;
+            // Enhanced TV detection based on user agent
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isSamsungTV = userAgent.includes('tizen') || userAgent.includes('samsung');
+            const isFireTV = userAgent.includes('silk') || userAgent.includes('afts');
+            const isLGTV = userAgent.includes('webos') || userAgent.includes('netcast');
+
+            isTV = isSamsungTV || isFireTV || isLGTV ||
+                userAgent.includes('smart-tv') ||
+                userAgent.includes('smarttv') ||
+                userAgent.includes('roku') ||
+                userAgent.includes('googletv') ||
+                userAgent.includes('operatv') ||
+                (window.navigator.maxTouchPoints === 0 && window.screen.width >= 1920);
         }
+
+        console.log('Enhanced TV Detection:', {
+            isTV: isTV,
+            userAgent: navigator.userAgent,
+            isSamsung: navigator.userAgent.toLowerCase().includes('tizen'),
+            isFireTV: navigator.userAgent.toLowerCase().includes('silk'),
+            isLG: navigator.userAgent.toLowerCase().includes('webos')
+        });
+        
+        // Force start TV navigation if detected
+        if (isTV) {
+            setTimeout(() => {
+                startTVNavigation();
+            }, 1000);
+        }
+
         return isTV;
-    }
-    
+    }    
     // Initial TV status check
     updateTVStatus();
     
+    // Remove any existing listeners first
+    document.removeEventListener('keydown', handleKeydown);
+
+    // Add multiple event types for better TV compatibility
+    document.addEventListener('keydown', handleKeydown, true);
+    document.addEventListener('keyup', handleKeydown, true);
+    document.addEventListener('keypress', handleKeydown, true);
+
     /**
      * Updates the list of focusable elements on the page
      */
@@ -377,10 +412,64 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.activeElement && document.activeElement.closest('.video-js')) {
             return;
         }
-        
+
+        // For TV remotes, we want to handle keydown events, but prevent default behavior
+        if (e.type !== 'keydown') return;
+
         let nextIndex = -1;
         const currentElement = focusableElements[currentFocusIndex];
+
+        // Enhanced key mapping for TV remotes
+        let normalizedKey = null;
+
+        console.log('Raw key event:', {
+            type: e.type,
+            key: e.key,
+            keyCode: e.keyCode,
+            which: e.which,
+            code: e.code,
+            userAgent: navigator.userAgent.substring(0, 100)
+        });
+
+        // Standard keyboard codes
+        if (e.keyCode === 37 || e.code === 'ArrowLeft' || e.key === 'ArrowLeft') normalizedKey = 'ArrowLeft';
+        if (e.keyCode === 38 || e.code === 'ArrowUp' || e.key === 'ArrowUp') normalizedKey = 'ArrowUp';
+        if (e.keyCode === 39 || e.code === 'ArrowRight' || e.key === 'ArrowRight') normalizedKey = 'ArrowRight';
+        if (e.keyCode === 40 || e.code === 'ArrowDown' || e.key === 'ArrowDown') normalizedKey = 'ArrowDown';
+        if (e.keyCode === 13 || e.code === 'Enter' || e.key === 'Enter') normalizedKey = 'Enter';
+        if (e.keyCode === 27 || e.code === 'Escape' || e.key === 'Escape') normalizedKey = 'Escape';
+        if (e.keyCode === 32 || e.code === 'Space' || e.key === ' ') normalizedKey = ' ';
         
+        // Samsung TV remote key mappings (Tizen)
+        if (e.keyCode === 4 || e.keyCode === 10009) normalizedKey = 'Escape';     // Back/Return
+        if (e.keyCode === 10252 || e.keyCode === 415) normalizedKey = ' ';        // Play/Pause
+        if (e.keyCode === 10182) normalizedKey = 'Enter';                         // OK/Select
+        
+        // Fire TV / Amazon remote key mappings
+        if (e.keyCode === 21) normalizedKey = 'ArrowLeft';    // DPAD_LEFT
+        if (e.keyCode === 19) normalizedKey = 'ArrowUp';      // DPAD_UP  
+        if (e.keyCode === 22) normalizedKey = 'ArrowRight';   // DPAD_RIGHT
+        if (e.keyCode === 20) normalizedKey = 'ArrowDown';    // DPAD_DOWN
+        if (e.keyCode === 23) normalizedKey = 'Enter';        // DPAD_CENTER
+        
+        // WebOS (LG TV) key mappings
+        if (e.keyCode === 461) normalizedKey = 'Escape';      // BACK
+        if (e.keyCode === 13) normalizedKey = 'Enter';        // OK
+        
+        // Additional TV remote codes from various manufacturers
+        if (e.keyCode === 166) normalizedKey = 'Escape';      // Back (some TVs)
+        if (e.keyCode === 8) normalizedKey = 'Escape';        // Backspace (sometimes used as back)
+        
+        console.log('Normalized key:', normalizedKey);
+
+        // If we don't recognize the key, ignore it
+        if (!normalizedKey) return;
+
+        // Always prevent default for recognized TV remote keys
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
         // Check if current element is a dropdown toggle
         const isDropdownToggle = currentElement && (
             currentElement.hasAttribute('data-bs-toggle') && currentElement.getAttribute('data-bs-toggle') === 'dropdown' ||
@@ -395,9 +484,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'ArrowDown':
                 // Only prevent dropdown expansion if dropdown is CLOSED
                 if (isDropdownToggle && !openDropdown) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
+                    // e.preventDefault();
+                    // e.stopPropagation();
+                    // e.stopImmediatePropagation();
                     
                     // Force close any dropdown that might be opening
                     const dropdownMenu = currentElement.nextElementSibling;
@@ -488,8 +577,8 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'ArrowUp':
                 // If we're on a dropdown item, allow moving up within dropdown or back to toggle
                 if (currentElement?.closest('.dropdown-menu')) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    // e.preventDefault();
+                    // e.stopPropagation();
                     
                     // Find previous dropdown item or go back to toggle
                     nextIndex = findNextInDirection('up');
@@ -565,8 +654,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 break;
                 
-            // Replace the ArrowRight/ArrowLeft case with this corrected version:
-            
             case 'ArrowRight':
             case 'ArrowLeft':
                 // Close dropdown if moving horizontally
@@ -587,8 +674,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Normal horizontal navigation
-                e.preventDefault();
-                e.stopPropagation();
+                // e.preventDefault();
+                // e.stopPropagation();
                 
                 const direction = e.key === 'ArrowRight' ? 'right' : 'left';
                 console.log('Horizontal navigation:', direction);
@@ -615,8 +702,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             case 'Enter':
             case ' ':
-                e.preventDefault();
-                e.stopPropagation();
+                // e.preventDefault();
+                // e.stopPropagation();
                 if (currentElement) {
                     // For dropdown toggles, manually control dropdown
                     if (isDropdownToggle) {
@@ -697,8 +784,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
 
             case 'Escape':
-                e.preventDefault();
-                e.stopPropagation();
+                // e.preventDefault();
+                // e.stopPropagation();
                 
                 // Close any open TV dropdowns first
                 const openTVDropdowns = document.querySelectorAll('.dropdown-menu.tv-dropdown-open');
@@ -867,7 +954,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Add keyboard event listener
-    document.addEventListener('keydown', handleKeydown, true);
+    // document.addEventListener('keydown', handleKeydown, true);
     
     // Listen for TV mode changes
     window.addEventListener('tvModeChanged', (e) => {

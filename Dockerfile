@@ -33,8 +33,16 @@ USER appuser
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy the rest of the application code
-COPY . .
+# Copy files (not all at once to minimize layer size)
+COPY robots.txt .
+COPY static/icons/ ./static/icons/
+COPY static/img/ ./static/img/
+COPY static/css/ ./static/css/
+COPY static/js/ ./static/js/
+COPY templates/ ./templates/
+COPY static/vtt/ ./static/vtt/
+COPY app/ ./app/
+COPY videos.db .
 
 # Expose the application port
 EXPOSE 5000

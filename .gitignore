@@ -9,7 +9,6 @@ venv.bak/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
 .pytest_cache/
 
 # Flask stuff:
@@ -20,3 +19,6 @@ instance/
 chromedriver.exe
 LICENSE.chromedriver
 THIRD_PARTY_LICENSES.chromedriver
+
+# PowerShell
+*.ps1
