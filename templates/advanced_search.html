@@ -1,0 +1,462 @@
+<!--
+    ==========================================================================
+    Advanced Search Template
+    --------------------------------------------------------------------------
+    - Allows searching across multiple fields with various filters.
+    - Default search is only for the 'title' field.
+    - This supports metadata search across tags, categories, and more.
+    ==========================================================================
+-->
+
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    /* Custom dark theme for search inputs */
+    .search-input {
+        background-color: #14171d !important;
+        border: 1px solid #2d3748 !important;
+        color: #e2e8f0 !important;
+    }
+    
+    .search-input:focus {
+        background-color: #1a202c !important;
+        border-color: #4299e1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25) !important;
+        color: #e2e8f0 !important;
+    }
+    
+    .search-input::placeholder {
+        color: #718096 !important;
+    }
+
+    /* Dropdown styling */
+    .dropdown-list {
+        background-color: #2d3748 !important;
+        border: 1px solid #4a5568 !important;
+        border-radius: 0.375rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        z-index: 1050 !important;
+    }
+
+    .dropdown-item {
+        background-color: transparent !important;
+        color: #e2e8f0 !important;
+        border: none !important;
+        transition: background-color 0.15s ease-in-out;
+        cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+        background-color: #4a5568 !important;
+        color: #ffffff !important;
+    }
+
+    .dropdown-item.text-muted {
+        color: #a0aec0 !important;
+    }
+
+    /* Selected badges styling */
+    .badge.bg-primary {
+        background-color: #3182ce !important;
+        color: white;
+    }
+
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* Custom scrollbar for dropdown */
+    .dropdown-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .dropdown-list::-webkit-scrollbar-track {
+        background: #4a5568;
+        border-radius: 3px;
+    }
+
+    .dropdown-list::-webkit-scrollbar-thumb {
+        background: #718096;
+        border-radius: 3px;
+    }
+
+    .dropdown-list::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+    }
+</style>
+
+{% endblock %}
+
+{% block title %}
+Advanced Search
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-6">
+            <div class="card shadow">
+                <div class="card-body bg-dark text-white">
+                    <form id="advanced-search-form" method="GET" action="/api/search/advanced">
+                        
+                        <!-- Text Search Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-warning mb-3">
+                                    Search Text
+                                </h5>
+                                <div class="form-group">
+                                    <label for="query" class="form-label">Title or Keywords</label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg search-input" 
+                                           id="query" 
+                                           name="query" 
+                                           placeholder="Enter title, keywords, or description..."
+                                           value="{{ request.args.get('query', '') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <br/>
+
+                        <!-- Filter Options Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-warning mb-3">
+                                    Filter Options
+                                </h5>
+                            </div>
+                            
+                            <!-- Speakers -->
+                            <div class="col-md-6 mb-3" id="speaker-container">
+                                <!-- Heading -->
+                                <label class="form-label">
+                                    Speakers
+                                </label>
+                                
+                                <!-- Input Field -->
+                                <input type="text" 
+                                    class="form-control search-input" 
+                                    id="speaker-search" 
+                                    placeholder="Search speakers..."
+                                    autocomplete="off">
+                                
+                                <!-- Badges, showing selected items -->
+                                <div class="selected-items mt-2" id="selected-speakers"></div>
+                                
+                                <!-- Dropdown, to show selectable options -->
+                                <div class="dropdown-list border rounded mt-1" 
+                                    id="speaker-dropdown" 
+                                    style="display: none; max-height: 200px; overflow-y: auto; position: absolute; width: 100%;">
+                                </div>
+
+                                <!-- Hidden inputs to store selected items -->
+                                <div id="speaker-inputs"></div>
+                            </div>
+
+                            <!-- Characters -->
+                            <div class="col-md-6 mb-3" id="character-container">
+                                <label class="form-label">
+                                    Bible Characters
+                                </label>
+                                
+                                <input type="text" 
+                                    class="form-control search-input" 
+                                    id="character-search" 
+                                    placeholder="Search characters..."
+                                    autocomplete="off">
+                                
+                                <div class="selected-items mt-2" id="selected-characters"></div>
+                                <div class="dropdown-list border rounded mt-1" 
+                                    id="character-dropdown" 
+                                    style="display: none; max-height: 200px; overflow-y: auto; position: absolute; width: 100%;">
+                                </div>
+                                <div id="character-inputs"></div>
+                            </div>
+
+                            <!-- Locations -->
+                            <div class="col-md-6 mb-3" id="location-container">
+                                <label class="form-label">
+                                    Locations
+                                </label>
+                                <input type="text" 
+                                    class="form-control search-input" 
+                                    id="location-search" 
+                                    placeholder="Search locations..."
+                                    autocomplete="off">
+                                <div class="selected-items mt-2" id="selected-locations"></div>
+                                <div class="dropdown-list border rounded mt-1" 
+                                    id="location-dropdown" 
+                                    style="display: none; max-height: 200px; overflow-y: auto; position: absolute; width: 100%;">
+                                </div>
+                                <div id="location-inputs"></div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="col-md-6 mb-3" id="tag-container">
+                                <label class="form-label">
+                                    Tags
+                                </label>
+                                <input type="text" 
+                                    class="form-control search-input" 
+                                    id="tag-search" 
+                                    placeholder="Search tags..."
+                                    autocomplete="off">
+                                <div class="selected-items mt-2" id="selected-tags"></div>
+                                <div class="dropdown-list border rounded mt-1" 
+                                    id="tag-dropdown" 
+                                    style="display: none; max-height: 200px; overflow-y: auto; position: absolute; width: 100%;">
+                                </div>
+                                <div id="tag-inputs"></div>
+                            </div>
+                        </div>
+                        <hr>
+                        <br/>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" 
+                                            class="btn btn-outline-secondary d-flex align-items-center justify-content-center" 
+                                            id="clear-form">
+                                        Clear All
+                                    </button>                                    
+
+                                    <div>
+                                        <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center">
+                                            Search Videos
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results will be displayed here -->
+            <div id="search-results" class="mt-4" style="display: none;">
+                <!-- Results will be loaded here via AJAX or page refresh -->
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+
+
+<script type="application/json" id="multi-select-data">
+{
+    "speakers": {{ speakers | tojson }},
+    "characters": {{ characters | tojson }},
+    "locations": {{ locations | tojson }},
+    "tags": {{ tags | tojson }}
+}
+</script>
+
+<script>
+class MultiSelectManager {
+    constructor(containerId, inputId, dropdownId, selectedId, hiddenInputsId, dataKey) {
+        this.container = document.getElementById(containerId);
+        this.searchInput = document.getElementById(inputId);
+        this.dropdown = document.getElementById(dropdownId);
+        this.selectedContainer = document.getElementById(selectedId);
+        this.hiddenInputsContainer = document.getElementById(hiddenInputsId);
+        this.dataKey = dataKey;
+        this.data = [];
+        this.selectedItems = new Map();
+        
+        this.setupEventListeners();
+    }
+    
+    setData(data) {
+        this.data = data;
+        this.renderDropdown(data);
+    }
+    
+    setupEventListeners() {
+        this.searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = this.data.filter(item => 
+                item.name.toLowerCase().includes(query)
+            );
+            this.renderDropdown(filtered);
+            this.showDropdown();
+        });
+        
+        this.searchInput.addEventListener('focus', () => {
+            this.renderDropdown(this.data);
+            this.showDropdown();
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!this.container.contains(e.target)) {
+                this.hideDropdown();
+            }
+        });
+    }
+    
+    renderDropdown(items) {
+        this.dropdown.innerHTML = '';
+        items.slice(0, 50).forEach(item => { // Limit to 50 for performance
+            if (!this.selectedItems.has(item.id)) {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item p-2 cursor-pointer';
+                div.style.cursor = 'pointer';
+                div.textContent = item.name;
+                div.addEventListener('click', () => this.selectItem(item));
+                this.dropdown.appendChild(div);
+            }
+        });
+        
+        if (items.length === 0) {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item p-2 text-muted';
+            div.textContent = 'No items found';
+            this.dropdown.appendChild(div);
+        }
+    }
+    
+    selectItem(item) {
+        this.selectedItems.set(item.id, item);
+        this.renderSelected();
+        this.searchInput.value = '';
+        this.hideDropdown();
+    }
+    
+    removeItem(itemId) {
+        this.selectedItems.delete(itemId);
+        this.renderSelected();
+    }
+    
+    renderSelected() {
+        // Render selected badges
+        this.selectedContainer.innerHTML = '';
+        this.selectedItems.forEach(item => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-1 mb-1';
+            badge.innerHTML = `
+                ${item.name} 
+                <button type="button"
+                        class="btn-close btn-close-white ms-1" 
+                        style="font-size: 0.7em;" 
+                        data-item-id="${item.id}" 
+                        data-manager="${this.dataKey}">
+                </button>
+            `;
+            
+            // Add event listener to the close button
+            const closeButton = badge.querySelector('.btn-close');
+            closeButton.addEventListener('click', () => this.removeItem(item.id));
+            
+            this.selectedContainer.appendChild(badge);
+        });
+        
+        // Update hidden inputs
+        this.hiddenInputsContainer.innerHTML = '';
+        this.selectedItems.forEach(item => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `${this.dataKey}_ids`;
+            input.value = item.id;
+            this.hiddenInputsContainer.appendChild(input);
+        });
+    }
+    
+    showDropdown() {
+        this.dropdown.style.display = 'block';
+    }
+    
+    hideDropdown() {
+        this.dropdown.style.display = 'none';
+    }
+    
+    clear() {
+        this.selectedItems.clear();
+        this.renderSelected();
+        this.searchInput.value = '';
+    }
+}
+
+// Initialize managers
+let speakerManager, characterManager, locationManager, tagManager;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize multi-select managers
+    speakerManager = new MultiSelectManager(
+        'speaker-container', 'speaker-search', 'speaker-dropdown', 
+        'selected-speakers', 'speaker-inputs', 'speaker'
+    );
+    
+    characterManager = new MultiSelectManager(
+        'character-container', 'character-search', 'character-dropdown', 
+        'selected-characters', 'character-inputs', 'character'
+    );
+    
+    locationManager = new MultiSelectManager(
+        'location-container', 'location-search', 'location-dropdown', 
+        'selected-locations', 'location-inputs', 'location'
+    );
+    
+    tagManager = new MultiSelectManager(
+        'tag-container', 'tag-search', 'tag-dropdown', 
+        'selected-tags', 'tag-inputs', 'tag'
+    );
+    
+    // Load data from your dummy data or API
+    loadMultiSelectData();
+    
+    // Clear form handler
+    document.getElementById('clear-form').addEventListener('click', function() {
+        document.getElementById('advanced-search-form').reset();
+        speakerManager.clear();
+        characterManager.clear();
+        locationManager.clear();
+        tagManager.clear();
+    });
+    
+    // Form submission handler
+    document.getElementById('advanced-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performAdvancedSearch();
+    });
+});
+
+function loadMultiSelectData() {
+    try {
+        // Get data from the JSON script tag
+        const dataElement = document.getElementById('multi-select-data');
+        const data = JSON.parse(dataElement.textContent);
+        
+        speakerManager.setData(data.speakers);
+        characterManager.setData(data.characters);
+        locationManager.setData(data.locations);
+        tagManager.setData(data.tags);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        // Fallback to empty arrays
+        speakerManager.setData([]);
+        characterManager.setData([]);
+        locationManager.setData([]);
+        tagManager.setData([]);
+    }
+}
+
+async function performAdvancedSearch() {
+    const formData = new FormData(document.getElementById('advanced-search-form'));
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value.trim()) {
+            params.append(key, value);
+        }
+    }
+    
+    window.location.href = `/search/advanced/results?${params.toString()}`;
+}
+</script>
+
+{% endblock %}

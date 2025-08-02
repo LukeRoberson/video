@@ -674,3 +674,51 @@ def search_results() -> Response:
             message=message
         )
     )
+
+
+@dynamic_bp.route(
+    "/search/advanced",
+    methods=["GET"],
+)
+def advanced_search() -> Response:
+    """
+    Render the advanced search page.
+
+    Returns:
+        Response: A rendered HTML page.
+    """
+
+    # Sample data for now
+    speakers = [
+        {"id": 1, "name": "Speaker One"},
+        {"id": 2, "name": "Speaker Two"},
+        {"id": 3, "name": "Speaker Three"},
+    ]
+
+    characters = [
+        {"id": 1, "name": "Character One"},
+        {"id": 2, "name": "Character Two"},
+        {"id": 3, "name": "Character Three"},
+    ]
+
+    locations = [
+        {"id": 1, "name": "Location One"},
+        {"id": 2, "name": "Location Two"},
+        {"id": 3, "name": "Location Three"},
+    ]
+
+    tags = [
+        {"id": 1, "name": "Tag One"},
+        {"id": 2, "name": "Tag Two"},
+        {"id": 3, "name": "Tag Three"},
+    ]
+
+    return make_response(
+        render_template(
+            "advanced_search.html",
+            speakers=speakers,
+            characters=characters,
+            locations=locations,
+            tags=tags,
+        )
+    )

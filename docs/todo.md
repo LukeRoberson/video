@@ -44,6 +44,10 @@ Responsive issues (phone screen):
 
 ## Search and Filtering
 - [ ] Create an advanced search/filter page (speaker, category, duration, etc.)
+  - [ ] Design layout
+  - [ ] Make responsive for small screens
+  - [ ] Update page to display results
+  - [ ] Create API endpoint for searches
 
 </br></br>
 
@@ -154,6 +158,7 @@ Responsive issues (phone screen):
 - [ ] After a particular date
 - [ ] Search page: checkbox to show unwatched only
 - [ ] Class method: Find videos shorter or longer than a certain duration
+- [ ] Add scriptures to the search
 
 </br></br>
 
