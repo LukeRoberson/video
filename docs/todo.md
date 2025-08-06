@@ -52,6 +52,7 @@
 - [ ] Use consistent logging, not just print statements
 - [ ] Investigate accessibility for template files (e.g., 'alt' tags for images)
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
+- [ ] Log IP addresses that access the site
 
 </br></br>
 
@@ -142,6 +143,7 @@
   - [ ] Model to summarize content (for searching)
 - [ ] Stats page (fun stats globally and for the user)
 - [ ] Track bible reading progress
+- [ ] Bible Characters: Links to website articles that are useful
 
 </br></br>
 
