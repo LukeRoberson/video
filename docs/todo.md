@@ -67,6 +67,7 @@
   - [ ] Add video count to tag label
   - [ ] Sort alphabetically, or by video count
 - [ ] Scriptures page: Book can link to the book overview video
+- [ ] click out if 'theatre mode' (if in theatre mode, click out of the main player to return to normal size)
 
 </br></br>
 
