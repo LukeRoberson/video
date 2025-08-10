@@ -1,0 +1,8 @@
+-- database: ./videos.db
+
+SELECT v.*
+FROM videos v
+JOIN video_categories vc ON v.id = vc.video_id
+JOIN categories c ON vc.category_id = c.id
+WHERE c.name = 'Morning Worship'
+AND (v.url IS NULL OR v.url = '')

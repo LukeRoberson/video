@@ -94,6 +94,7 @@
 - [ ] DB entry for video type (talk, interview, dramatization, etc)
 - [ ] Search Method: Support searching based on duration
 - [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
+- [ ] Get dates for all bible characters
 
 </br></br>
 
