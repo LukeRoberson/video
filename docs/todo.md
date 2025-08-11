@@ -96,6 +96,7 @@
 - [ ] Search Method: Support searching based on duration
 - [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
 - [ ] Get dates for all bible characters
+- [ ] Fields for extra links, such as links to WT articles
 
 </br></br>
 
