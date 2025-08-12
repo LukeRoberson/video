@@ -12,6 +12,20 @@ See the **readme.md** file for details on how to get this up and running.
 </br></br>
 
 
+### Stable vs Development
+
+There are two container tags in use:
+* latest
+* devel
+
+As their names suggest, one is meant for 'production' and contains the latest stable updates.
+
+The other is meant for development only, and is not considered stable.
+
+Use the container with the _latest_ tag.
+</br></br>
+
+
 ## Docker Compose
 
 This is a more complex solution that you can use if you want to make the service accessible from outside your home network. This is an advanced option which will require you to have signigicant IT knowledge.
@@ -26,6 +40,38 @@ The components used in this solution are:
 </br></br>
 
 This page will focus on the container setup, and leave the domain, DNS, and port forwarding to you.
+</br></br>
+
+Sample compose file:
+
+```yaml
+services:
+  frontend:
+    image: "lukerobertson19/1320:latest"
+    volumes:
+      - c:\apps\local.db:/app/local.db
+    restart: unless-stopped
+
+  devel:
+    image: "lukerobertson19/1320:devel"
+    volumes:
+      - c:\apps\local-devel.db:/app/local.db
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - c:\apps\nginx.conf:/etc/nginx/nginx.conf
+      - c:\apps\nginx.key:/etc/ssl/certs/nginx.key
+      - c:\apps\nginx.crt:/etc/ssl/certs/nginx.crt
+      - c:\apps\dh-4096.pem:/etc/ssl/certs/dh-4096.pem
+      - c:\apps\logs:/var/log/nginx
+    restart: unless-stopped
+```
+
 </br></br>
 
 

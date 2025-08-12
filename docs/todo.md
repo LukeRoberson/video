@@ -1,8 +1,8 @@
 # Version 3
 
 ## Project
-- [ ] Create a new branch in github
-- [ ] Build a beta container for this version, add to stack
+- [x] Create a new branch in github
+- [x] Build a beta container for this version, add to stack
 - [ ] Simplify NGINX config
 - [ ] Add NGINX config to point some traffic to beta container
 - [ ] Add records in CloudFlare
