@@ -59,15 +59,10 @@
 
 ## UI
 - [ ] Nav bar: Button to hide watched videos
-- [ ] Watch history page (see videos watched in order, and when)
 - [ ] Video details pages:
   - [ ] Share Links
   - [ ] Organise scriptures by book first
-- [ ] Tags pages:
-  - [ ] Add video count to tag label
-  - [ ] Sort alphabetically, or by video count
 - [ ] Scriptures page: Book can link to the book overview video
-- [ ] click out if 'theatre mode' (if in theatre mode, click out of the main player to return to normal size)
 
 </br></br>
 
@@ -116,10 +111,6 @@
 - [ ] Code Improvement
   - [ ] Add a helper function to get similar videos
   - [ ] Add error handler pages for 500, 400, etc. (like 404)
-- [ ] Scraper
-  - [ ] Investigate JS options (try to avoid needing an interactive scraper)
-  - [ ] Scraper to get real categories of a video, not just 'latest'
-  - [ ] Scraper to add date automatically
 - [ ] Profiles
   - [ ] Watch history page for each profile
   - [ ] 'Watch later' feature
