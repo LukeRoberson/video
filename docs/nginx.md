@@ -13,7 +13,7 @@ events {}
 
 http {
 	# Rate Limiting
-	limit_req_zone $binary_remote_addr zone=general:10m rate=240r/m;	# 2 request per second
+	limit_req_zone $binary_remote_addr zone=general:10m rate=240r/m;
 	limit_req_zone $binary_remote_addr zone=strict:10m rate=40r/m;
 	limit_req_zone $binary_remote_addr zone=api:10m rate=240r/m;
 	limit_req_zone $binary_remote_addr zone=not_found:10m rate=60r/m;
@@ -38,7 +38,7 @@ http {
 		}
 	}
 	
-    # HTTPS Configuration
+    # Prod Container
 	server {
         # Block obvious bots first
         if ($is_bot) {
@@ -88,152 +88,80 @@ http {
 
         # Whitelist Known Routes
 		location = / {
+			proxy_pass http://frontend:5000;
             limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
+
+			proxy_set_header Host $host;
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Forwarded-Proto $scheme;
 		}
 
-		location ~ "^/4[0-9]{2}$" {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /about {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /select_profile {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /create_profile {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /characters {
-			proxy_pass http://frontend:5000;
-		}
-
-		location /character {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /speakers {
-			proxy_pass http://frontend:5000;
-		}
-
-		location /speaker {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /scriptures {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /scripture {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /tags {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /tag {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /broadcasting {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /children {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /teens {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /family {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /programs_events {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /our_activities {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /meetings_ministry {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /organization {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /bible {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /dramas {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /series {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /music {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /interviews {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /video {
-            limit_req zone=general burst=10 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-		location /admin {
-            limit_req zone=strict burst=5 nodelay;
-			proxy_pass http://frontend:5000;
-		}
-
-        location ^~ /api/ {
-            limit_req zone=api burst=10 nodelay;
-            proxy_pass http://frontend:5000;
-        }
-
-        # Default deny for any unmatched routes
-        location / {
+        # Handle 404s with strict rate limiting
+        error_page 404 = @not_found;
+        location @not_found {
+            limit_req zone=not_found burst=3 nodelay;
             return 404;
         }
+	}
+
+    # Dev Container
+	server {
+        # Block obvious bots first
+        if ($is_bot) {
+            return 429;
+        }
+        
+        # Strict limiting for suspicious patterns
+        location ~* \.(php|asp|aspx|jsp)$ {
+            return 444;
+        }
+        
+        # Block common bot paths
+        location ~* /(wp-admin|wp-login|phpmyadmin) {
+            return 444;
+        }
+
+		listen 443 ssl;
+		server_name devel.networkdirection.net;
+		
+		ssl_certificate /etc/ssl/certs/nginx.crt;
+		ssl_certificate_key /etc/ssl/certs/nginx.key;
+		ssl_dhparam /etc/ssl/certs/dh-4096.pem;
+		
+		ssl_protocols TLSv1.2 TLSv1.3;
+		ssl_prefer_server_ciphers on;
+		ssl_ciphers EECDH+AESGCM:EDH+AESGCM;
+		ssl_ecdh_curve secp384r1;
+		ssl_session_timeout 10m;
+		ssl_session_cache shared:SSL:10m;
+		ssl_session_tickets off;
+		
+		add_header X-Frame-Options DENY;
+		add_header X-Content-Type-Options nosniff;
+		add_header X-XSS-Protection "1; mode=block";
+			
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Static assets (adjust extensions as needed)
+        location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+            proxy_pass http://devel:5000;
+            expires 1d;
+            add_header Cache-Control "public, immutable";
+        }
+
+		location / {
+			proxy_pass http://devel:5000;
+            limit_req zone=general burst=10 nodelay;
+			
+			proxy_set_header Host $host;
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Forwarded-Proto $scheme;
+		}
 
         # Handle 404s with strict rate limiting
         error_page 404 = @not_found;

@@ -6,6 +6,8 @@ Define flask routes for the web application.
 Functions:
     inject_admin_status:
         Injects the admin status into the template context (for jinja).
+    inject_site_flags:
+        Injects site flags based on the hostname into the template context.
 
 Routes:
     - /admin: Render the admin dashboard.
@@ -51,6 +53,7 @@ from flask import (
     make_response,
     abort,
     session,
+    request,
 )
 import random
 import os
@@ -113,6 +116,32 @@ def inject_admin_status() -> Dict[str, Any]:
 
     return {
         'is_admin': session.get('profile_admin', False)
+    }
+
+
+@web_bp.app_context_processor
+def inject_site_flags() -> Dict[str, Any]:
+    """
+    Inject site flags based on the hostname.
+
+    If the hostname is 'devel.networkdirection.net',
+        it sets 'is_devel' to True and 'host_name' to the hostname.
+        Otherwise, it sets 'is_devel' to False and 'host_name' to the hostname.
+
+    Args:
+        None
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the site flags.
+    """
+
+    # Prefer X-Forwarded-Host when behind a proxy, fallback to Host
+    raw_host = request.headers.get('X-Forwarded-Host') or request.host or ''
+    host = raw_host.split(':')[0].lower()
+
+    return {
+        'is_devel': host == 'devel.networkdirection.net',
+        'host_name': host,
     }
 
 

@@ -3,10 +3,12 @@
 ## Project
 - [x] Create a new branch in github
 - [x] Build a beta container for this version, add to stack
-- [ ] Simplify NGINX config
-- [ ] Add NGINX config to point some traffic to beta container
-- [ ] Add records in CloudFlare
-- [ ] Find a method to backup local.db on Docker
+- [x] Simplify NGINX config
+- [x] Add NGINX config to point some traffic to beta container
+- [x] Add records in CloudFlare
+- [x] Change nav bar colour for devel
+- [x] Find a method to backup local.db on Docker
+- [ ] Setup Github actions to build the docker container and push to the hub
 
 </br></br>
 

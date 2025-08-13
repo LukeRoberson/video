@@ -46,7 +46,7 @@
     <!-- Body Block -->
     <body>
         <!-- Navigation bar -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
+        <nav class="navbar navbar-expand-lg navbar-dark {{ 'navbar-develop' if is_devel else '' }}">
             <div class="container-fluid position-relative">
                 <!-- Home Link -->
                 <a href="{{ url_for('web_pages.home') }}" class="navbar-brand">Home</a>
