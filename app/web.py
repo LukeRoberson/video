@@ -2,12 +2,19 @@
 Module: web.py
 
 Define flask routes for the web application.
+    These are the web pages that users will interact with.
+    Does not include API endpoints.
+    Does not include dynamic pages (tags, speakers, characters, scriptures).
 
 Functions:
+    ensure_profile_selected:
+        Ensures that a profile is selected before accessing any web pages.
     inject_admin_status:
         Injects the admin status into the template context (for jinja).
     inject_site_flags:
         Injects site flags based on the hostname into the template context.
+    admin_required:
+        Decorator to restrict access to admin-only routes.
 
 Routes:
     - /admin: Render the admin dashboard.
@@ -52,9 +59,12 @@ from flask import (
     render_template,
     make_response,
     abort,
+    redirect,
+    url_for,
     session,
     request,
 )
+
 import random
 import os
 from typing import List, Dict, Any
@@ -98,6 +108,57 @@ banner_dir = os.path.join(
     'img',
     'banner'
 )
+
+
+@web_bp.before_app_request
+def ensure_profile_selected() -> None | Response:
+    """
+    Ensure that a profile is selected before accessing any web pages.
+
+    This function checks if a profile is selected in the session.
+    If no profile is selected, redirects user to the profile selection page.
+
+    Args:
+        None
+
+    Returns:
+        None | Response: Returns None if the profile is selected,
+            otherwise returns a redirect response
+            to the profile selection page.
+    """
+
+    # Allow static and profile API routes
+    if request.endpoint in ('static',):
+        return
+    if request.blueprint == 'profile_api':
+        return
+
+    # Allow the profile selection/creation pages
+    if request.endpoint in (
+        'web_pages.select_profile',
+        'web_pages.create_profile',
+    ):
+        return
+
+    # Only redirect on normal page loads that expect HTML
+    if (
+        request.method in ('GET', 'HEAD') and
+        request.accept_mimetypes.accept_html
+    ):
+        # Get the active profile from the session
+        active = session.get('active_profile', None)
+
+        # If no profile yet, send them to selector
+        if active is None:
+            next_url = request.url or url_for('web_pages.home')
+            return make_response(
+                redirect(
+                    url_for(
+                        'web_pages.select_profile',
+                        next=next_url
+                    )
+                )
+            )
 
 
 @web_bp.app_context_processor

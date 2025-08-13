@@ -69,7 +69,7 @@ fetch('/api/profile/get_active')
 /**
  * Attaches click event listeners to each profile list item.
  * When a profile is clicked, it sends a POST request to set that profile as the active one.
- * On success, it redirects the user to the home page.
+ * On success, it redirects the user to the originally requested page.
  */
 document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
     item.addEventListener('click', function(e) {
@@ -91,9 +91,11 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
         })
         .then(res => res.json())
         .then(data => {
-            // If successful, redirect to the home page
+            // If successful, redirect to the originally requested page
             if (data.success) {
-                window.location.href = '/';
+                const params = new URLSearchParams(window.location.search);
+                const nextUrl = params.get('next') || '/';
+                window.location.href = nextUrl;
             }
         });
     });

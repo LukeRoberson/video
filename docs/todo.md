@@ -9,12 +9,13 @@
 - [x] Change nav bar colour for devel
 - [x] Find a method to backup local.db on Docker
 - [ ] Setup Github actions to build the docker container and push to the hub
+- [ ] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
 
 </br></br>
 
 
 ## Profiles
-- [ ] Profile selection screen when opening the app
+- [x] Profile selection screen when opening the app
 - [ ] Settings page
   - [ ] Edit profile name
   - [ ] Edit profile icon
