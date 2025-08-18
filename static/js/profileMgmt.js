@@ -100,3 +100,46 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
         });
     });
 });
+
+
+/**
+ * Handles editing a profile by redirecting to the edit profile page
+ * @param {string} profileId - The ID of the profile to edit
+ */
+function editProfile(profileId) {
+    console.log('Editing profile:', profileId);
+    // Redirect to edit profile page (you may need to adjust this URL based on your routing)
+    window.location.href = `/edit_profile/${profileId}`;
+}
+
+
+/**
+ * Handles deleting a profile after user confirmation
+ * @param {string} profileId - The ID of the profile to delete
+ */
+function deleteProfile(profileId) {
+    console.log('Deleting profile:', profileId);
+    
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
+        // Send DELETE request to server
+        fetch(`/api/profile/delete/${profileId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Profile deleted successfully');
+                // Reload the page to refresh the profile list
+                window.location.reload();
+            } else {
+                alert('Failed to delete profile: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting profile:', error);
+            alert('An error occurred while deleting the profile');
+        });
+    }
+}

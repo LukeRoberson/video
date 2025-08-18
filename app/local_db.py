@@ -8,8 +8,8 @@ Classes:
         A context manager for handling SQLite database connections.
     - ProfileManager:
         Manages CRUD operations for user profiles in the local database.
-    - ProfileManager:
-        Manages CRUD operations for user profiles in the local database.
+    - ProgressManager:
+        Manages CRUD operations for in progress videos in the local database.
 
 Dependencies:
     - sqlite3: For SQLite database operations.

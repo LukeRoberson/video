@@ -19,7 +19,7 @@
 - [ ] Settings page
   - [ ] Edit profile name
   - [ ] Edit profile icon
-  - [ ] Delete profile
+  - [x] Delete profile
   - [ ] Clear watch history
 
 </br></br>
@@ -141,6 +141,14 @@
 - [ ] Stats page (fun stats globally and for the user)
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
+- [ ] Improved scripture management
+  - [ ] Primary scriptures: Key scriptures that relate closely to the topic
+  - [ ] Secondary: Scriptures that were cited and add value, but not key
+- [ ] Audio descriptions
+  - [ ] Add secondary links to videos that have audio descriptions
+  - [ ] Add an icon to the thumbnail to show that video has this feature
+  - [ ] Click a slider to turn this on or off
+  - [ ] In reality, just plays a different video
 
 </br></br>
 

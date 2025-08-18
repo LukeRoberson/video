@@ -72,3 +72,23 @@
     outline: none;
     box-shadow: 0 0 0 2px #0d6efd33;
 }
+
+/* Profile action buttons styling */
+.profile-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.list-group-item:hover .profile-actions {
+    opacity: 1;
+}
+
+.profile-actions .btn {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}

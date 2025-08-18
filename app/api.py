@@ -1227,3 +1227,38 @@ def category_filter(
         ),
         200
     )
+
+
+@api_bp.route(
+    "/api/profile/delete/<int:profile_id>",
+    methods=["DELETE"],
+)
+def delete_profile(profile_id: int) -> Response:
+    """
+    Delete a user profile by ID.
+    """
+
+    logging.info(f"Deleting profile with ID: {profile_id}")
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Delete the profile (should return the deleted profile ID)
+        result = profile_mgr.delete(profile_id)
+        if result != profile_id:
+            logging.error(f"Failed to delete profile with ID {profile_id}.")
+            return api_error(
+                f"Failed to delete profile with ID {profile_id}",
+                500
+            )
+
+        logging.info(f"Successfully deleted profile with ID {profile_id}.")
+        return api_success(
+            message=f"Profile with ID {profile_id} deleted successfully."
+        )
