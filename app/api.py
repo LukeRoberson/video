@@ -293,7 +293,7 @@ def add_video_metadata() -> Response:
             field is None
             for field in [
                 description, url, tag_name, location_name, speaker_name,
-                character_name, scripture_name, date_added
+                character_name, scripture_name, date_added, category_name
             ]
         ):
             logging.error("No metadata fields provided for video.")
