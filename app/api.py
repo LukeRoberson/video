@@ -100,6 +100,10 @@ def seconds_to_hhmmss(
         str: Duration in HH:MM:SS or MM:SS format.
     """
 
+    # Handle None or non-positive values
+    if seconds is None or seconds <= 0:
+        seconds = 1
+
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
