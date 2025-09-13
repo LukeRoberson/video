@@ -38,9 +38,12 @@ Select Profile
                         <span>{{ profile.name }}</span>
                     </div>
                     <div class="profile-actions">
+                        <!-- Edit a profile; profileMgmt.js-->
                         <button class="btn btn-sm btn-outline-primary me-1" title="Edit Profile" onclick="event.preventDefault(); editProfile('{{ profile.id }}');">
                             <i class="bi bi-pencil"></i>
                         </button>
+
+                        <!-- Delete a profile; profileMgmt.js-->
                         <button class="btn btn-sm btn-outline-danger" title="Delete Profile" onclick="event.preventDefault(); deleteProfile('{{ profile.id }}');">
                             <i class="bi bi-trash"></i>
                         </button>

@@ -108,7 +108,7 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
  */
 function editProfile(profileId) {
     console.log('Editing profile:', profileId);
-    // Redirect to edit profile page (you may need to adjust this URL based on your routing)
+    // Redirect to edit profile page
     window.location.href = `/edit_profile/${profileId}`;
 }
 

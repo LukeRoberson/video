@@ -325,6 +325,92 @@ class ProfileManager:
 
         return profile_id
 
+    def read_watch_history(
+        self,
+        profile_id: int
+    ) -> list[dict] | None:
+        """
+        Retrieves the watch history for a specific profile.
+            These can be videos that are complete, or in-progress.
+
+        Args:
+            profile_id (int): The ID of the profile.
+
+        Returns:
+            list[dict] | None: A list of watched videos as dictionaries,
+                or None if no watch history is found.
+
+        Dictionary format:
+            {
+                "profile_id": int,
+                "video_id": int,
+                "current_time": int (in seconds, '0' if complete),
+                "timestamp": str
+            }
+        """
+
+        # Get videos in the watch history
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    SELECT * FROM watch_history
+                    WHERE profile_id = ?
+                    """,
+                    (profile_id,)
+                )
+                history = cursor.fetchall()
+                history_list = [dict(history) for history in history]
+
+        except Exception as e:
+            logging.error(
+                f"Error retrieving watch history for profile {profile_id}: {e}"
+            )
+            return None
+
+        # Get videos in progress
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    SELECT * FROM in_progress_videos
+                    WHERE profile_id = ?
+                    """,
+                    (profile_id,)
+                )
+                videos = cursor.fetchall()
+                video_list = [dict(videos) for videos in videos]
+                for video in video_list:
+                    if 'updated_at' in video:
+                        video['watched_at'] = video.pop('updated_at')
+
+        except Exception as e:
+            logging.error(
+                f"Error retrieving in-progress videos for profile "
+                f"{profile_id}: {e}"
+            )
+            return None
+
+        # Add the current_time field to the history list
+        for entry in history_list:
+            entry["current_time"] = 0
+
+        # Create a dictionary to track video_ids from video_list
+        video_ids_in_progress = {video['video_id'] for video in video_list}
+
+        # Filter out history entries with corresponding in-progress entries
+        filtered_history = [
+            entry for entry in history_list
+            if entry['video_id'] not in video_ids_in_progress
+        ]
+
+        # Combine filtered history with in-progress videos
+        merged_list = filtered_history + video_list
+
+        return merged_list
+
     def mark_watched(
         self,
         profile_id: int,

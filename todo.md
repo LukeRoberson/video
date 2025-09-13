@@ -8,7 +8,6 @@
 - [x] Add records in CloudFlare
 - [x] Change nav bar colour for devel
 - [x] Find a method to backup local.db on Docker
-- [ ] Setup Github actions to build the docker container and push to the hub
 - [ ] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
 
 </br></br>
@@ -16,11 +15,17 @@
 
 ## Profiles
 - [x] Profile selection screen when opening the app
+- [x] Delete profile from profile selection
+- [x] Edit profile from profile selection (go to settings page)
 - [ ] Settings page
   - [ ] Edit profile name
   - [ ] Edit profile icon
-  - [x] Delete profile
-  - [ ] Clear watch history
+  - [ ] Show watch history, newest first
+  - [ ] Clear all watch history
+  - [ ] Clear individual items from history
+  - [ ] Mark in progress videos as watched
+  - [ ] Delete profile
+  - [ ] Clean up CSS
 
 </br></br>
 
@@ -149,6 +154,9 @@
   - [ ] Add an icon to the thumbnail to show that video has this feature
   - [ ] Click a slider to turn this on or off
   - [ ] In reality, just plays a different video
+- [ ] Video2vec
+  - [ ] Similar to word2vec
+  - [ ] Build a vector database representing each video
 
 </br></br>
 

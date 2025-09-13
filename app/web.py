@@ -474,6 +474,75 @@ def create_profile() -> Response:
 
 
 @web_bp.route(
+    "/edit_profile/<int:profile_id>",
+    methods=["GET"]
+)
+def edit_profile(profile_id: int) -> Response:
+    """
+    Render the profile editing page.
+
+    Args:
+        profile_id (int): The ID of the profile to edit.
+
+    Returns:
+        Response: A rendered HTML page for editing the specified profile.
+    """
+
+    # Get the profile details from the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Get the user's profile
+        profile = profile_mgr.read(profile_id=profile_id)
+
+        if not profile:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Profile not found"
+                ),
+                404
+            )
+
+        profile = profile[0]
+
+        # Get watch history
+        history = profile_mgr.read_watch_history(profile_id=profile_id)
+
+        # Count items in history
+        history_count = len(history) if history else 0
+
+    # Get video name and thumbnail for each history item
+    if history:
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+
+            for item in history:
+                video_details = video_mgr.get(id=item['video_id'])
+                if video_details:
+                    item['video_name'] = video_details[0].get('name')
+                    item['video_thumbnail'] = video_details[0].get('thumbnail')
+                    item['duration'] = video_details[0].get('duration')
+
+                else:
+                    item['video_name'] = 'Unknown Video'
+                    item['video_thumbnail'] = 'default-thumbnail.jpg'
+                    item['duration'] = 0
+
+    else:
+        history = []
+
+    return make_response(
+        render_template(
+            'edit_profile.html',
+            profile=profile,
+            watch_history=history,
+            history_count=history_count,
+        )
+    )
+
+
+@web_bp.route(
     "/character",
     methods=["GET"]
 )
