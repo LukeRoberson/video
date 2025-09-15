@@ -3,6 +3,7 @@
  * 
  * Handles API calls to manage user profiles
  *  - Create a new profile
+ *  - Edit an existing profile
  *  - Get a list of profiles (for the profile selection page)
  *  - Set an active profile
  */

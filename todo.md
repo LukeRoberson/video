@@ -17,15 +17,15 @@
 - [x] Profile selection screen when opening the app
 - [x] Delete profile from profile selection
 - [x] Edit profile from profile selection (go to settings page)
-- [ ] Settings page
-  - [ ] Edit profile name
-  - [ ] Edit profile icon
-  - [ ] Show watch history, newest first
-  - [ ] Clear all watch history
-  - [ ] Clear individual items from history
-  - [ ] Mark in progress videos as watched
-  - [ ] Delete profile
-  - [ ] Clean up CSS
+- [x] Settings page
+  - [x] Edit profile name
+  - [x] Edit profile icon
+  - [x] Show watch history, newest first
+  - [x] Mark in progress videos as watched
+  - [x] Clear individual items from history
+  - [x] Clear all watch history
+  - [x] Delete profile
+  - [x] Clean up CSS and JS
 
 </br></br>
 

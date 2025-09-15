@@ -11,7 +11,10 @@ Edit Profile
 
 {% block content %}
 
-<div class="edit-profile">
+<div class="edit-profile"
+    data-profile-id="{{ profile.id }}" 
+    data-profile-image="{{ profile.image }}"
+>
     <div class="container">
         <div class="edit-profile-container">
             <h1 class="edit-profile-title">Edit Profile</h1>
@@ -76,7 +79,12 @@ Edit Profile
                                 <h4 class="history-title">{{ entry.video_name }}</h4>
                                 <p class="history-meta">{{ entry.watched_at }}</p>
                             </div>
-                            <button class="btn-remove-item" data-video-id={{ entry.video_id }}>×</button>
+                            <div class="history-actions">
+                                {% if progress_percent > 0 %}
+                                <button class="btn-mark-watched" data-video-id="{{ entry.video_id }}">Mark Watched</button>
+                                {% endif %}
+                                <button class="btn-remove-item" data-video-id={{ entry.video_id }}>×</button>
+                            </div>
                         </div>
                         {% endfor %}
 
@@ -87,7 +95,7 @@ Edit Profile
                 </div>
             </div>
 
-           
+            <!-- Action Buttons -->
             <div class="action-buttons">
                 <button type="submit" form="editProfileForm" class="btn-save">Save</button>
                 <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
@@ -95,367 +103,55 @@ Edit Profile
             </div>
         </div>
     </div>
+    
+    <!-- Profile Picture Selection Modal -->
+    <div class="modal fade" id="profilePicModal" tabindex="-1" aria-labelledby="profilePicModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="profilePicModalLabel">Select Profile Picture</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="carousel-profile-wrapper">
+                            <!-- Loading spinner -->
+                            <div id="modalLoading" class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+    
+                            <!-- Left button to go back one pic -->
+                            <button class="carousel-control-prev" type="button" data-bs-target="#modalProfilePicCarousel" data-bs-slide="prev" tabindex="-1" style="display: none;">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+    
+                            <!-- Profile picture carousel -->
+                            <div id="modalProfilePicCarousel" class="carousel slide" data-bs-interval="false" style="display: none;">
+                                <div class="carousel-inner">
+                                    <!-- Images will be loaded dynamically -->
+                                </div>
+                            </div>
+                            
+                            <!-- Right button to go to the next pic -->
+                            <button class="carousel-control-next" type="button" data-bs-target="#modalProfilePicCarousel" data-bs-slide="next" tabindex="-1" style="display: none;">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmPicSelection" disabled>Select Picture</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<style>
-.edit-profile {
-    background-color: #141414;
-    min-height: 100vh;
-    padding: 40px 0;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-}
-
-.edit-profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.edit-profile-title {
-    color: white;
-    font-size: 48px;
-    font-weight: 400;
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-.profile-content {
-    display: flex;
-    gap: 60px;
-    margin-bottom: 40px;
-    align-items: center;
-}
-
-.profile-avatar-section {
-    flex-shrink: 0;
-}
-
-.avatar-container {
-    position: relative;
-    cursor: pointer;
-}
-
-.profile-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 2px solid #333;
-    transition: all 0.3s ease;
-}
-
-.avatar-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.avatar-container:hover .avatar-overlay {
-    opacity: 1;
-}
-
-.edit-icon {
-    width: 32px;
-    height: 32px;
-    color: white;
-}
-
-.profile-form-section {
-    flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.profile-form {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    width: 100%;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.profile-name-input {
-    background: #333;
-    border: 1px solid #555;
-    border-radius: 4px;
-    color: white;
-    font-size: 18px;
-    padding: 12px 16px;
-    outline: none;
-    transition: border-color 0.3s ease;
-}
-
-.profile-name-input:focus {
-    border-color: #e50914;
-}
-
-.section-label {
-    color: #ccc;
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 8px;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    padding-top: 20px;
-    border-top: 1px solid #333;
-}
-
-.btn-save, .btn-cancel, .btn-delete {
-    padding: 12px 32px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 120px;
-}
-
-.btn-save {
-    background: #e50914;
-    color: white;
-}
-
-.btn-save:hover {
-    background: #f40612;
-}
-
-.btn-cancel {
-    background: transparent;
-    color: #ccc;
-    border: 1px solid #555;
-}
-
-.btn-cancel:hover {
-    background: #333;
-    color: white;
-}
-
-.btn-delete {
-    background: transparent;
-    color: #999;
-    border: 1px solid #333;
-}
-
-.btn-delete:hover {
-    background: #333;
-    color: #e50914;
-}
-
-.watch-history-section {
-    background: #222;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 10px;
-}
-
-.watch-history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #333;
-}
-
-.history-count {
-    color: #ccc;
-    font-size: 14px;
-}
-
-.btn-clear-all {
-    background: transparent;
-    color: #e50914;
-    border: 1px solid #e50914;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-clear-all:hover {
-    background: #e50914;
-    color: white;
-}
-
-.watch-history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.watch-history-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.watch-history-list::-webkit-scrollbar-track {
-    background: #333;
-    border-radius: 3px;
-}
-
-.watch-history-list::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 3px;
-}
-
-.watch-history-list::-webkit-scrollbar-thumb:hover {
-    background: #777;
-}
-
-.history-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px;
-    background: #2a2a2a;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.history-item:hover {
-    background: #333;
-}
-
-.history-thumbnail {
-    position: relative;
-    width: 80px;
-    height: 45px;
-    border-radius: 4px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.history-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.progress-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.progress-fill {
-    height: 100%;
-    background: #e50914;
-    transition: width 0.3s ease;
-}
-
-.history-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.history-title {
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-    margin: 0 0 4px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.history-meta {
-    color: #999;
-    font-size: 12px;
-    margin: 0;
-}
-
-.btn-remove-item {
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    color: #999;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.btn-remove-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.history-empty {
-    text-align: center;
-    color: #666;
-    padding: 40px 20px;
-    font-style: italic;
-}
-
-@media (max-width: 768px) {
-    .profile-content {
-        flex-direction: column;
-        gap: 30px;
-        align-items: center;
-    }
-    
-    .edit-profile-title {
-        font-size: 32px;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .watch-history-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    
-    .history-item {
-        gap: 10px;
-    }
-    
-    .history-thumbnail {
-        width: 60px;
-        height: 34px;
-    }
-    
-    .history-title {
-        font-size: 13px;
-    }
-    
-    .history-meta {
-        font-size: 11px;
-    }
-}
-</style>
+<script src="{{ url_for('static', filename='js/profileEdit.js') }}"></script>
 
 {% endblock %}

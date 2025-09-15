@@ -245,6 +245,7 @@ class ProfileManager:
         self,
         profile_id: int | None = None,
         name: str | None = None,
+        image: str | None = None,
     ) -> int | None:
         """
         Updates an existing profile in the database.
@@ -254,6 +255,7 @@ class ProfileManager:
         Args:
             profile_id (int | None): The ID of the profile to update.
             name (str | None): The new name for the profile.
+            image (str | None): The new image for the profile.
 
         Returns:
             int | None: The ID of the updated profile, or None if not found.
@@ -261,6 +263,12 @@ class ProfileManager:
 
         if profile_id is None:
             logging.error("Profile ID must be provided for update.")
+            return None
+
+        if name is None and image is None:
+            logging.error(
+                "At least one field (name or image) must be provided."
+            )
             return None
 
         try:
@@ -272,6 +280,10 @@ class ProfileManager:
                 if name is not None:
                     updates.append("name = ?")
                     params.append(name)
+
+                if image is not None:
+                    updates.append("image = ?")
+                    params.append(image)
 
                 if not updates:
                     logging.error("No fields to update.")
@@ -530,6 +542,71 @@ class ProfileManager:
                 f"Error checking if video {video_id} is watched for "
                 f"profile {profile_id}: {e}"
             )
+            return False
+
+    def remove_history(
+        self,
+        profile_id: int,
+        video_id: int | None = None,
+    ) -> bool:
+        """
+        Removes a video from watch history for a profile.
+            If video_id is None, removes all watch history for the profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int | None): The ID of the video to remove from history.
+                If None, removes all watch history for the profile.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+
+                # Remove all history if video_id is None
+                if video_id is None:
+                    cursor.execute(
+                        """
+                        DELETE FROM watch_history
+                        WHERE profile_id = ?
+                        """,
+                        (profile_id,)
+                    )
+                    cursor.execute(
+                        """
+                        DELETE FROM in_progress_videos
+                        WHERE profile_id = ?
+                        """,
+                        (profile_id,)
+                    )
+
+                # Remove specific video from history
+                else:
+                    cursor.execute(
+                        """
+                        DELETE FROM watch_history
+                        WHERE profile_id = ? AND video_id = ?
+                        """,
+                        (profile_id, video_id)
+                    )
+                    cursor.execute(
+                        """
+                        DELETE FROM in_progress_videos
+                        WHERE profile_id = ? AND video_id = ?
+                        """,
+                        (profile_id, video_id)
+                    )
+                self.db.conn.commit()
+                return True
+
+        except Exception as e:
+            logging.error(
+                f"Error removing watch history for profile {profile_id}: {e}"
+            )
+            self.db.conn.rollback()
             return False
 
 

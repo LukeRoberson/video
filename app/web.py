@@ -509,6 +509,15 @@ def edit_profile(profile_id: int) -> Response:
         # Get watch history
         history = profile_mgr.read_watch_history(profile_id=profile_id)
 
+        # Sort from newest to oldest, stripping fractional seconds
+        if history:
+            # Strip fractional seconds from all timestamps
+            for item in history:
+                item['watched_at'] = item['watched_at'].split('.')[0]
+
+            # Sort by cleaned timestamps
+            history.sort(key=lambda x: x['watched_at'], reverse=True)
+
         # Count items in history
         history_count = len(history) if history else 0
 
@@ -532,12 +541,22 @@ def edit_profile(profile_id: int) -> Response:
     else:
         history = []
 
+    # Get available profile pictures
+    profile_pics = []
+    profile_pics_path = os.path.join('static', 'img', 'profiles')
+    if os.path.exists(profile_pics_path):
+        profile_pics = [
+            f for f in os.listdir(profile_pics_path)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+        ]
+
     return make_response(
         render_template(
             'edit_profile.html',
             profile=profile,
             watch_history=history,
             history_count=history_count,
+            profile_pics=profile_pics,
         )
     )
 
