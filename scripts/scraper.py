@@ -573,9 +573,15 @@ class JwScraper:
 
         # Wait for the dropdown to be present
         wait = WebDriverWait(self.driver, 10)
-        dropdown = wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "jsDropdownMenu"))
-        )
+        try:
+            dropdown = wait.until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, "jsDropdownMenu")
+                )
+            )
+        except Exception as e:
+            print(f"Error locating dropdown menu: {e}")
+            return
 
         # Scroll the element into view
         self.driver.execute_script(
