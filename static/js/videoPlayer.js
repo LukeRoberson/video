@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 backward: 5
             },
             qualitySelector: true,
+            currentTimeDisplay: true,
             remainingTimeDisplay: {
                 displayNegative: false
             }

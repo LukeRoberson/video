@@ -15,6 +15,8 @@
 
 ## Bugs
 - [ ] Can't edit profile when running from a container (devel... is bad; localhost is fine)
+  - On localhost, works most of the time, but sometimes just redirects straight to home screen
+  - On devel container, always redirects straight to home screen
 - [ ] Check profile edit page on a phone
 
 </br></br>
@@ -40,8 +42,8 @@
 ## Video Player
 - [ ] Time range to play a specific part of a video
 - [ ] Share video link at a particular time
-- [ ] Hover over the bar to show the time index at that point
-- [ ] Video bar: Show time passed, not just remaining
+- [x] Hover over the bar to show the time index at that point
+- [x] Video bar: Show time passed, not just remaining
 
 </br></br>
 
