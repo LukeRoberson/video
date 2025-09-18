@@ -1,13 +1,30 @@
 /**
  * @file videoPlayer.js
- * @description Handles everything related to the video.js player
+ * @description Complete video player implementation with modular class-based architecture
  *
- * Initializes the video.js player
- * Sets up the resolution switcher with a default resolution
- * Ensures the control bar is visible
- * Tracks video playback progress
- * Marks a video as watched when 96% of it has been viewed
- * Handles the form submission for marking a video as watched
+ * This file provides a comprehensive video player solution built on video.js with
+ * the following functionality:
+ * - Core video player initialization and TV mode detection
+ * - Right-click context menu for timestamped URL sharing
+ * - Progress tracking and automatic watched status management
+ * - URL timestamp parameter handling (t=seconds)
+ * - Custom theatre mode button and keyboard controls
+ * - Form-based watched/unwatched status toggling
+ *
+ * @requires videojs
+ * 
+ * @example
+ * // HTML requirements:
+ * // <video id="player" data-video-id="123" data-profile-id="456" data-current-time="120">
+ * // <form id="markWatchedForm" data-api-url="/api/profile/mark_watched" data-video-id="123">
+ * 
+ * // Classes are automatically initialized on DOMContentLoaded
+ * 
+ * @see {@link VideoPlayerCore} - Core player initialization
+ * @see {@link VideoContextMenu} - Right-click context menu
+ * @see {@link ProgressTracker} - Progress and watched status tracking  
+ * @see {@link UrlTimeHandler} - URL timestamp handling
+ * @see {@link CustomControls} - Theatre mode and keyboard controls
  */
 
 
@@ -497,15 +514,15 @@ class ProgressTracker {
 
 
 /**
- * Handles URL 't' parameter for jumping to specific times.
+ * Handles URL 't' and 'end' parameters for video snippets.
  * 
  * Automatically detects timestamp parameters in the URL and
- * seeks the video to that position when initialized.
+ * creates video snippets by jumping to start time and pausing at end time.
  * 
  * @class UrlTimeHandler
  * @example
- * // URL: /video/123?t=120
- * new UrlTimeHandler(player); // Will jump to 2:00
+ * // URL: /video/123?t=60&end=120 - 1 minute snippet from 1:00 to 2:00
+ * new UrlTimeHandler(player);
  */
 class UrlTimeHandler {
     /**
@@ -517,22 +534,54 @@ class UrlTimeHandler {
     constructor(player) {
         /** @type {Object} The video.js player instance */
         this.player = player;
+        /** @type {number|null} End time for snippet in seconds */
+        this.endTime = null;
+        /** @type {boolean} Whether we're currently in snippet mode */
+        this.isSnippet = false;
+        /** @type {HTMLElement|null} Snippet indicator element */
+        this.snippetIndicator = null;
         this.init();
     }
 
     /**
-     * Initializes the URL time handler by checking for 't' parameter.
+     * Initializes the URL time handler by checking for 't' and 'end' parameters.
      * 
      * @private
      * @memberof UrlTimeHandler
      */
     init() {
         const urlParams = new URLSearchParams(window.location.search);
-        const jumpTo = urlParams.get('t');
+        const startTime = urlParams.get('t');
+        const endTime = urlParams.get('end');
         
-        if (jumpTo) {
-            this.jumpToTime(parseInt(jumpTo, 10));
+        if (startTime) {
+            const start = parseInt(startTime, 10);
+            const end = endTime ? parseInt(endTime, 10) : null;
+            
+            if (end && end > start) {
+                this.setupSnippet(start, end);
+            } else {
+                this.jumpToTime(start);
+            }
         }
+    }
+
+    /**
+     * Sets up a video snippet with start and end times.
+     * 
+     * @param {number} startTime - The start time in seconds
+     * @param {number} endTime - The end time in seconds
+     * @memberof UrlTimeHandler
+     */
+    setupSnippet(startTime, endTime) {
+        this.endTime = endTime;
+        this.isSnippet = true;
+        
+        this.player.ready(() => {
+            this.jumpToTime(startTime);
+            this.createSnippetIndicator(startTime, endTime);
+            this.setupSnippetControls();
+        });
     }
 
     /**
@@ -554,8 +603,143 @@ class UrlTimeHandler {
             });
         });
     }
-}
 
+    /**
+     * Creates visual indicator for snippet mode.
+     * 
+     * @private
+     * @param {number} startTime - Snippet start time
+     * @param {number} endTime - Snippet end time
+     * @memberof UrlTimeHandler
+     */
+    createSnippetIndicator(startTime, endTime) {
+        // Create snippet info overlay
+        this.snippetIndicator = document.createElement('div');
+        this.snippetIndicator.className = 'snippet-indicator';
+        this.snippetIndicator.innerHTML = `
+            <div class="snippet-info">
+                📎 Snippet: ${this.formatTime(startTime)} - ${this.formatTime(endTime)}
+                <button class="snippet-close" title="Exit snippet mode">×</button>
+            </div>
+        `;
+        
+        // Add to player
+        this.player.el().appendChild(this.snippetIndicator);
+        
+        // Close button handler
+        this.snippetIndicator.querySelector('.snippet-close').addEventListener('click', () => {
+            this.exitSnippetMode();
+        });
+        
+        // Highlight snippet range on progress bar
+        this.highlightSnippetRange(startTime, endTime);
+    }
+
+    /**
+     * Highlights the snippet range on the progress bar.
+     * 
+     * @private
+     * @param {number} startTime - Snippet start time
+     * @param {number} endTime - Snippet end time
+     * @memberof UrlTimeHandler
+     */
+    highlightSnippetRange(startTime, endTime) {
+        this.player.ready(() => {
+            const duration = this.player.duration();
+            if (duration > 0) {
+                const startPercent = (startTime / duration) * 100;
+                const endPercent = (endTime / duration) * 100;
+                
+                const progressControl = this.player.controlBar.progressControl.el();
+                const highlight = document.createElement('div');
+                highlight.className = 'snippet-highlight';
+                highlight.style.left = `${startPercent}%`;
+                highlight.style.width = `${endPercent - startPercent}%`;
+                
+                progressControl.appendChild(highlight);
+            }
+        });
+    }
+
+    /**
+     * Sets up snippet-specific controls and behavior.
+     * 
+     * @private
+     * @memberof UrlTimeHandler
+     */
+    setupSnippetControls() {
+        // Monitor playback to pause at end time
+        const checkEndTime = () => {
+            if (this.isSnippet && this.endTime && this.player.currentTime() >= this.endTime) {
+                this.player.pause();
+                this.player.currentTime(this.endTime);
+            }
+        };
+        
+        this.player.on('timeupdate', checkEndTime);
+        
+        // Prevent seeking beyond snippet bounds
+        this.player.on('seeking', () => {
+            if (!this.isSnippet) return;
+            
+            const currentTime = this.player.currentTime();
+            const urlParams = new URLSearchParams(window.location.search);
+            const startTime = parseInt(urlParams.get('t'), 10);
+            
+            if (currentTime < startTime) {
+                this.player.currentTime(startTime);
+            } else if (currentTime > this.endTime) {
+                this.player.currentTime(this.endTime);
+            }
+        });
+    }
+
+    /**
+     * Exits snippet mode and returns to normal video playback.
+     * 
+     * @memberof UrlTimeHandler
+     */
+    exitSnippetMode() {
+        this.isSnippet = false;
+        this.endTime = null;
+        
+        // Remove snippet indicator
+        if (this.snippetIndicator) {
+            this.snippetIndicator.remove();
+            this.snippetIndicator = null;
+        }
+        
+        // Remove snippet highlight
+        const highlight = this.player.el().querySelector('.snippet-highlight');
+        if (highlight) {
+            highlight.remove();
+        }
+        
+        // Update URL to remove end parameter
+        const url = new URL(window.location);
+        url.searchParams.delete('end');
+        window.history.replaceState({}, '', url);
+    }
+
+    /**
+     * Formats seconds into MM:SS or HH:MM:SS format.
+     * 
+     * @private
+     * @param {number} seconds - Time in seconds
+     * @returns {string} Formatted time string
+     * @memberof UrlTimeHandler
+     */
+    formatTime(seconds) {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        
+        if (hrs > 0) {
+            return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+}
 
 /**
  * Custom player controls and buttons.
@@ -630,7 +814,7 @@ class CustomControls {
         
         controlBar.addChild('TheatreButton', {}, insertIndex);
     }
-    
+
     /**
      * Sets up keyboard controls for TV devices.
      * Adds arrow key navigation for seeking and volume control,
