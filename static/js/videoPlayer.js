@@ -12,379 +12,705 @@
 
 
 /**
- * An event listener for the DOMContentLoaded event that initializes the video player,
- * sets up the resolution switcher, and tracks video playback progress.
+ * Core video player initialization and configuration.
+ * 
+ * Handles the main video.js player setup, TV mode detection,
+ * and responsive settings configuration.
+ * 
+ * @class VideoPlayerCore
+ * @example
+ * const playerCore = new VideoPlayerCore('my-player');
+ * const player = playerCore.initialize();
  */
-document.addEventListener('DOMContentLoaded', function () {
-    // Initialize the video.js player with custom options
-    const player = videojs('player', {
-        controlBar: {
-            skipButtons: {
-                forward: 10,
-                backward: 5
-            },
-            qualitySelector: true,
-            currentTimeDisplay: true,
-            remainingTimeDisplay: {
-                displayNegative: false
-            }
-        },
-        aspectRatio: '16:9',
-        fluid: true,
-        enableSmoothSeeking: true
-    });
-    
-    // Check if this device is a TV
-    let isTV = window.tvDetection.isTV();
-    
-    // Function to apply TV-specific settings
-    function applyTVSettings() {
-        if (isTV) {
-            // Larger control bar for TV
-            player.ready(function() {
-                const controlBar = player.controlBar.el();
-                controlBar.style.height = '60px';
-                controlBar.style.fontSize = '1.2em';
-                
-                // Auto-hide controls after longer delay on TV
-                player.off('userinactive');
-                player.on('userinactive', function() {
-                    setTimeout(() => {
-                        if (!player.paused()) {
-                            player.userActive(false);
-                        }
-                    }, 8000); // 8 seconds instead of default 3
-                });
-            });
-        }
+class VideoPlayerCore {
+    /**
+     * Creates an instance of VideoPlayerCore.
+     * 
+     * @param {string} [playerId='player'] - The ID of the video element
+     * @memberof VideoPlayerCore
+     */    
+    constructor(playerId = 'player') {
+        /** @type {string} The HTML element ID for the video player */
+        this.playerId = playerId;
+        /** @type {Object|null} The video.js player instance */
+        this.player = null;
+        /** @type {HTMLElement|null} The container element */
+        this.container = null;
+        /** @type {boolean} Whether the device is detected as a TV */
+        this.isTV = window.tvDetection?.isTV() || false;
     }
 
-    // Apply initial TV settings
-    applyTVSettings();
+    /**
+     * Initializes the video.js player with configuration options.
+     * 
+     * @returns {Object} The initialized video.js player instance
+     * @memberof VideoPlayerCore
+     */    
+    initialize() {
+        this.player = videojs(this.playerId, {
+            controlBar: {
+                skipButtons: { forward: 10, backward: 5 },
+                qualitySelector: true,
+                currentTimeDisplay: true,
+                remainingTimeDisplay: { displayNegative: false }
+            },
+            aspectRatio: '16:9',
+            fluid: true,
+            enableSmoothSeeking: true
+        });
 
-    // Listen for TV mode changes
-    window.addEventListener('tvModeChanged', (e) => {
-        isTV = e.detail.isTV;
-        applyTVSettings();
-    });
-    
-    // Get the parent of the video player (the div)
-    const container = document.getElementById('player').parentElement;
+        this.container = document.getElementById(this.playerId).parentElement;
+        this.applyTVSettings();
+        this.setupTVModeListener();
+        
+        return this.player;
+    }
 
-    // Customise the video player
-    player.ready(function() {
-        // Create context menu element (right click menu)
-        const contextMenu = document.createElement('div');
-        contextMenu.className = 'video-context-menu';
+    /**
+     * Applies TV-specific settings to the player interface.
+     * 
+     * @private
+     * @memberof VideoPlayerCore
+     */    
+    applyTVSettings() {
+        if (!this.isTV || !this.player) return;
+
+        this.player.ready(() => {
+            const controlBar = this.player.controlBar.el();
+            controlBar.style.height = '60px';
+            controlBar.style.fontSize = '1.2em';
+            
+            this.player.off('userinactive');
+            this.player.on('userinactive', () => {
+                setTimeout(() => {
+                    if (!this.player.paused()) {
+                        this.player.userActive(false);
+                    }
+                }, 8000);
+            });
+        });
+    }
+
+    /**
+     * Sets up event listener for TV mode changes.
+     * 
+     * @private
+     * @memberof VideoPlayerCore
+     */    
+    setupTVModeListener() {
+        window.addEventListener('tvModeChanged', (e) => {
+            this.isTV = e.detail.isTV;
+            this.applyTVSettings();
+        });
+    }
+}
+
+
+/**
+ * Right-click context menu functionality for the video player.
+ * 
+ * Provides a context menu when right-clicking on the video progress bar,
+ * allowing users to copy timestamped URLs for sharing specific moments.
+ * 
+ * @class VideoContextMenu
+ * @example
+ * new VideoContextMenu(player); // Adds right-click menu to progress bar
+ */
+class VideoContextMenu {
+    /**
+     * Creates an instance of VideoContextMenu.
+     * 
+     * @param {Object} player - The video.js player instance
+     * @memberof VideoContextMenu
+     */
+    constructor(player) {
+        /** @type {Object} The video.js player instance */
+        this.player = player;
+        /** @type {HTMLElement|null} The context menu DOM element */
+        this.contextMenu = null;
+        this.init();
+    }
+
+    /**
+     * Initializes the context menu by creating DOM elements and setting up events.
+     * 
+     * @private
+     * @memberof VideoContextMenu
+     */
+    init() {
+        this.createContextMenu();
+        this.setupEventListeners();
+    }
+
+    /**
+     * Creates the context menu DOM structure and appends it to the document body.
+     * 
+     * @private
+     * @memberof VideoContextMenu
+     */
+    createContextMenu() {
+        this.contextMenu = document.createElement('div');
+        this.contextMenu.className = 'video-context-menu';
         
         const menuItem = document.createElement('div');
         menuItem.textContent = 'Copy link at current time';
         menuItem.className = 'video-context-menu-item';
 
-        contextMenu.appendChild(menuItem);
-        document.body.appendChild(contextMenu);
+        this.contextMenu.appendChild(menuItem);
+        document.body.appendChild(this.contextMenu);
+    }
+
+    /**
+     * Sets up event listeners for right-click, menu interactions, and hiding the menu.
+     * 
+     * @private
+     * @memberof VideoContextMenu
+     */
+    setupEventListeners() {
+        const progressControl = this.player.controlBar.progressControl.el();
+        const menuItem = this.contextMenu.querySelector('.video-context-menu-item');
+
+        // Right-click handler
+        progressControl.addEventListener('contextmenu', (e) => this.showMenu(e));
         
-        // Function to generate timestamped URL
-        function getTimestampedUrl() {
-            const currentTime = Math.floor(player.currentTime());
-            const url = new URL(window.location.href);
-            url.searchParams.set('t', currentTime);
-            return url.toString();
-        }
-        
-        // Handle right-click on progress bar
-        const progressControl = player.controlBar.progressControl.el();
-        progressControl.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            
-            // Disable video player interactions while menu is open
-            player.el().style.pointerEvents = 'none';
-
-            // Position the context menu
-            contextMenu.style.left = e.pageX + 'px';
-            contextMenu.style.top = e.pageY + 'px';
-            contextMenu.style.display = 'block';
-            
-            // Adjust position if menu would go off screen
-            const rect = contextMenu.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                contextMenu.style.left = (e.pageX - rect.width) + 'px';
-            }
-            if (rect.bottom > window.innerHeight) {
-                contextMenu.style.top = (e.pageY - rect.height) + 'px';
-            }
-
-            return false;
-        });
-
-        // Prevent right-click from resuming a paused video
-        progressControl.addEventListener('mousedown', function(e) {
-            if (e.button === 2) { // Right mouse button
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        });
-        
-        progressControl.addEventListener('mouseup', function(e) {
-            if (e.button === 2) { // Right mouse button
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        });
-
-        // Handle menu item click
-        menuItem.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-           
-            const timestampedUrl = getTimestampedUrl();
-            
-            navigator.clipboard.writeText(timestampedUrl).then(function() {
-                showNotification('Link copied to clipboard!');
-            }).catch(function(err) {
-                console.error('Could not copy text: ', err);
-                showNotification('Could not copy text!');
-            });
-            
-            contextMenu.style.display = 'none';
-            
-            // Re-enable video player clicks
-            player.el().style.pointerEvents = '';
-        });
-        
-        // Hide context menu when clicking elsewhere - use capture phase
-        document.addEventListener('click', function(e) {
-            if (contextMenu.style.display === 'block') {
-                if (!contextMenu.contains(e.target)) {
-                    contextMenu.style.display = 'none';
-
-                    // Re-enable video player clicks
-                    player.el().style.pointerEvents = '';
-                    
-                    // Stop this click from doing anything else
+        // Prevent right-click issues
+        ['mousedown', 'mouseup'].forEach(event => {
+            progressControl.addEventListener(event, (e) => {
+                if (e.button === 2) {
                     e.preventDefault();
                     e.stopPropagation();
+                    return false;
                 }
-            }
-        }, true); // Capture phase
+            });
+        });
 
-        // Show notification function
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.className = 'video-notification';
-            
-            document.body.appendChild(notification);
-            
-            // Trigger animation
+        // Menu item click
+        menuItem.addEventListener('click', (e) => this.handleMenuClick(e));
+        
+        // Hide menu when clicking elsewhere
+        document.addEventListener('click', (e) => this.hideMenu(e), true);
+    }
+
+    /**
+     * Shows the context menu at the cursor position.
+     * 
+     * @param {MouseEvent} e - The right-click mouse event
+     * @returns {boolean} Always returns false to prevent default context menu
+     * @private
+     * @memberof VideoContextMenu
+     */
+    showMenu(e) {
+        e.preventDefault();
+        
+        this.player.el().style.pointerEvents = 'none';
+        
+        this.contextMenu.style.left = e.pageX + 'px';
+        this.contextMenu.style.top = e.pageY + 'px';
+        this.contextMenu.style.display = 'block';
+        
+        this.adjustMenuPosition(e);
+        return false;
+    }
+
+    /**
+     * Adjusts the menu position to ensure it stays within the viewport.
+     * 
+     * @param {MouseEvent} e - The original mouse event for position reference
+     * @private
+     * @memberof VideoContextMenu
+     */
+    adjustMenuPosition(e) {
+        const rect = this.contextMenu.getBoundingClientRect();
+        if (rect.right > window.innerWidth) {
+            this.contextMenu.style.left = (e.pageX - rect.width) + 'px';
+        }
+        if (rect.bottom > window.innerHeight) {
+            this.contextMenu.style.top = (e.pageY - rect.height) + 'px';
+        }
+    }
+
+    /**
+     * Handles menu item click by copying timestamped URL to clipboard.
+     * 
+     * @param {MouseEvent} e - The click event on the menu item
+     * @private
+     * @memberof VideoContextMenu
+     */
+    handleMenuClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+       
+        const timestampedUrl = this.getTimestampedUrl();
+        
+        navigator.clipboard.writeText(timestampedUrl)
+            .then(() => this.showNotification('Link copied to clipboard!'))
+            .catch(err => {
+                console.error('Could not copy text: ', err);
+                this.showNotification('Could not copy text!');
+            });
+        
+        this.hideMenuAndReEnablePlayer();
+    }
+
+    /**
+     * Hides the context menu when clicking outside of it.
+     * 
+     * @param {MouseEvent} e - The click event
+     * @private
+     * @memberof VideoContextMenu
+     */
+    hideMenu(e) {
+        if (this.contextMenu.style.display === 'block') {
+            if (!this.contextMenu.contains(e.target)) {
+                this.hideMenuAndReEnablePlayer();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }
+    }
+
+    /**
+     * Hides the context menu and re-enables player pointer events.
+     * 
+     * @private
+     * @memberof VideoContextMenu
+     */
+    hideMenuAndReEnablePlayer() {
+        this.contextMenu.style.display = 'none';
+        this.player.el().style.pointerEvents = '';
+    }
+
+    /**
+     * Generates a timestamped URL with the current video playback time.
+     * 
+     * @returns {string} The URL with 't' parameter set to current time in seconds
+     * @private
+     * @memberof VideoContextMenu
+     */
+    getTimestampedUrl() {
+        const currentTime = Math.floor(this.player.currentTime());
+        const url = new URL(window.location.href);
+        url.searchParams.set('t', currentTime);
+        return url.toString();
+    }
+
+    /**
+     * Shows a temporary notification message to the user.
+     * 
+     * @param {string} message - The message to display in the notification
+     * @private
+     * @memberof VideoContextMenu
+     */
+    showNotification(message) {
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.className = 'video-notification';
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
             setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+
+/**
+ * Video progress tracking and watched status management.
+ * 
+ * Tracks video playback progress, saves position for resume functionality,
+ * and automatically marks videos as watched when 96% complete.
+ * 
+ * @class ProgressTracker
+ * @example
+ * new ProgressTracker(player, 123, 456, 120); // Start at 2:00
+ */
+class ProgressTracker {
+    /**
+     * Creates an instance of ProgressTracker.
+     * 
+     * @param {Object} player - The video.js player instance
+     * @param {number} videoId - The video ID for tracking
+     * @param {number} profileId - The user profile ID
+     * @param {number} [initialTime=0] - Initial playback position in seconds
+     * @memberof ProgressTracker
+     */
+    constructor(player, videoId, profileId, initialTime = 0) {
+        this.player = player;
+        this.videoId = videoId;
+        this.profileId = profileId;
+        this.initialTime = initialTime;
+        /** @type {number} Timestamp of last progress update */
+        this.lastUpdateTime = 0;
+        /** @type {boolean} Whether video has been marked as watched */
+        this.hasMarkedWatched = false;
+        
+        this.init();
+    }
+
+    /**
+     * Initializes the progress tracker and validates required parameters.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    init() {
+        if (!this.profileId || !this.videoId) {
+            console.error('Missing profileId or videoId. Progress tracking will not work.');
+            return;
         }
 
-        // Add a custom button (for theatre mode)
+        this.setupEventListeners();
+    }
+
+    /**
+     * Sets up event listeners for video player events.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    setupEventListeners() {
+        this.player.on('loadedmetadata', () => this.setInitialPosition());
+        this.player.on('play', () => this.removeProgressOverlay());
+        this.player.on('timeupdate', () => this.trackProgress());
+        this.player.on('ended', () => this.handleVideoEnd());
+    }
+
+    /**
+     * Sets the initial playback position when video metadata is loaded.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    setInitialPosition() {
+        if (this.initialTime > 0) {
+            console.log('Setting playback position to:', this.initialTime);
+            this.player.currentTime(this.initialTime);
+        }
+    }
+
+    /**
+     * Removes the progress overlay element from the DOM when playback starts.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    removeProgressOverlay() {
+        const progressOverlay = document.querySelector('.progress-overlay');
+        if (progressOverlay) {
+            progressOverlay.remove();
+            console.log('Custom progress bar removed.');
+        }
+    }
+
+    /**
+     * Tracks video playback progress and automatically marks as watched.
+     * Updates progress every 2 seconds and marks as watched at 96% completion.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    trackProgress() {
+        const currentTime = Math.floor(this.player.currentTime());
+        const duration = Math.floor(this.player.duration());
+        const now = Date.now();
+
+        if (this.hasMarkedWatched) return;
+
+        // Update progress every 2 seconds
+        if (now - this.lastUpdateTime >= 2000 && currentTime > 5) {
+            this.lastUpdateTime = now;
+            this.updateProgress(currentTime);
+        }
+
+        // Mark as watched at 96%
+        if (currentTime >= duration * 0.96 && !this.hasMarkedWatched) {
+            this.markAsWatched();
+        }
+    }
+
+    /**
+     * Sends progress update to the server API.
+     * 
+     * @private
+     * @param {number} currentTime - The current playback time in seconds
+     * @memberof ProgressTracker
+     */
+    updateProgress(currentTime) {
+        fetch('/api/profile/in_progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                video_id: this.videoId,
+                current_time: currentTime
+            })
+        }).catch(err => console.error('Error updating progress:', err));
+    }
+
+    /**
+     * Marks the video as watched and removes it from in-progress list.
+     * Sends API requests to update watched status and clean up progress tracking.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    markAsWatched() {
+        this.hasMarkedWatched = true;
+
+        // Remove from in-progress
+        fetch('/api/profile/in_progress', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ video_id: this.videoId })
+        }).catch(err => console.error('Error removing from progress:', err));
+
+        // Mark as watched
+        fetch('/api/profile/mark_watched', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ video_id: this.videoId })
+        }).catch(err => console.error('Error marking video as watched:', err));
+    }
+
+    /**
+     * Handles video playback completion.
+     * Removes theatre mode class from container if active.
+     * 
+     * @private
+     * @memberof ProgressTracker
+     */
+    handleVideoEnd() {
+        console.log('Video playback completed.');
+        const container = this.player.el().parentElement;
+        if (container.classList.contains('theatre-mode')) {
+            container.classList.remove('theatre-mode');
+        }
+    }
+}
+
+
+/**
+ * Handles URL 't' parameter for jumping to specific times.
+ * 
+ * Automatically detects timestamp parameters in the URL and
+ * seeks the video to that position when initialized.
+ * 
+ * @class UrlTimeHandler
+ * @example
+ * // URL: /video/123?t=120
+ * new UrlTimeHandler(player); // Will jump to 2:00
+ */
+class UrlTimeHandler {
+    /**
+     * Creates an instance of UrlTimeHandler.
+     * 
+     * @param {Object} player - The video.js player instance
+     * @memberof UrlTimeHandler
+     */
+    constructor(player) {
+        /** @type {Object} The video.js player instance */
+        this.player = player;
+        this.init();
+    }
+
+    /**
+     * Initializes the URL time handler by checking for 't' parameter.
+     * 
+     * @private
+     * @memberof UrlTimeHandler
+     */
+    init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const jumpTo = urlParams.get('t');
+        
+        if (jumpTo) {
+            this.jumpToTime(parseInt(jumpTo, 10));
+        }
+    }
+
+    /**
+     * Jumps the video to a specific time and prepares for playback.
+     * 
+     * @param {number} time - The time in seconds to jump to
+     * @memberof UrlTimeHandler
+     */
+    jumpToTime(time) {
+        this.player.ready(() => {
+            this.player.currentTime(time);
+            this.player.pause();
+            this.player.bigPlayButton.hide();
+            
+            this.player.on('seeked', () => {
+                this.player.bigPlayButton.show();
+                this.player.posterImage.hide();
+                this.player.controlBar.show();
+            });
+        });
+    }
+}
+
+
+/**
+ * Custom player controls and buttons.
+ * 
+ * Adds custom functionality to the video player including theatre mode button
+ * and keyboard controls for TV devices. Enhances the default video.js controls
+ * with additional user interface elements.
+ * 
+ * @class CustomControls
+ * @example
+ * new CustomControls(player, container); // Adds theatre button and keyboard controls
+ */
+class CustomControls {
+    /**
+     * Creates an instance of CustomControls.
+     * 
+     * @param {Object} player - The video.js player instance
+     * @param {HTMLElement} container - The container element for the player
+     * @memberof CustomControls
+     */
+    constructor(player, container) {
+        /** @type {Object} The video.js player instance */
+        this.player = player;
+        /** @type {HTMLElement} The container element for the player */
+        this.container = container;
+        /** @type {boolean} Whether the device is detected as a TV */
+        this.isTV = window.tvDetection?.isTV() || false;
+        this.init();
+    }
+
+    /**
+     * Initializes custom controls by adding buttons and setting up keyboard controls.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    init() {
+        this.addTheatreButton();
+        this.setupKeyboardControls();
+    }
+
+    /**
+     * Adds a theatre mode button to the video player control bar.
+     * Creates a custom video.js button component that toggles theatre mode
+     * by adding/removing the 'theatre-mode' class from the container.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    addTheatreButton() {
         const Button = videojs.getComponent('Button');
+        const container = this.container; // Capture the container reference
+        
         class TheatreButton extends Button {
             constructor(player, options) {
                 super(player, options);
                 this.controlText("Theatre Mode");
                 this.addClass('vjs-theatre-button');
             }
+            
             handleClick() {
-                container.classList.toggle('theatre-mode');
+                container.classList.toggle('theatre-mode'); // Use the captured container
             }
         }
-
-        // Register the custom button with video.js
+    
         videojs.registerComponent('TheatreButton', TheatreButton);
         
-        // Find the index of the fullscreen button in the control bar    
-        const controlBar = player.getChild('controlBar');
-        const fullscreenIndex = controlBar.children().findIndex(child => child.name && child.name() === 'FullscreenToggle');
-
-        // Insert TheatreButton just before the fullscreen button (second from right)
+        const controlBar = this.player.getChild('controlBar');
+        const fullscreenIndex = controlBar.children()
+            .findIndex(child => child.name && child.name() === 'FullscreenToggle');
         const insertIndex = fullscreenIndex > 0 ? fullscreenIndex : controlBar.children().length - 1;
+        
         controlBar.addChild('TheatreButton', {}, insertIndex);
-    });
-
-    // Enhanced keyboard controls for TV remotes
-    // Only add these if the player has focus
-    document.addEventListener('keydown', function(e) {
-        // Only handle these keys if the video player area has focus
-        if (!document.activeElement || !document.activeElement.closest('.video-js')) {
-            return; // Let the main TV navigation handle it
-        }
-
-        // Only apply these controls in TV mode
-        if (!isTV) return;
-
-        switch(e.key) {
-            case "ArrowLeft": // Left arrow - rewind 10s
-                e.preventDefault();
-                player.currentTime(Math.max(0, player.currentTime() - 10));
-                break;
-            
-            case "ArrowRight": // Right arrow - fast forward 10s
-                e.preventDefault();
-                player.currentTime(player.currentTime() + 10);
-                break;
-            
-            case "ArrowUp": // Up arrow - volume up
-                e.preventDefault();
-                player.volume(Math.min(1, player.volume() + 0.1));
-                break;
-            
-            case "ArrowDown": // Down arrow - volume down
-                e.preventDefault();
-                player.volume(Math.max(0, player.volume() - 0.1));
-                break;
-            
-            case "Enter": // Enter - play/pause
-                e.preventDefault();
-                if (player.paused()) {
-                    player.play();
-                } else {
-                    player.pause();
-                }
-                break;
-        }
-    });
-
-
-    // Check if there is a 't' parameter in the URL to jump to a specific time
-    const urlParams = new URLSearchParams(window.location.search);
-    const jumpTo = urlParams.get('t');
-    if (jumpTo) {
-        player.ready(function() {
-            player.currentTime(parseInt(jumpTo, 10));
-            player.pause();
-            player.bigPlayButton.hide();
-            player.on('seeked', function() {
-                player.bigPlayButton.show();
-                player.posterImage.hide();
-                player.controlBar.show();
-            });
-        });
     }
     
-    // Get the video element and its data attributes
+    /**
+     * Sets up keyboard controls for TV devices.
+     * Adds arrow key navigation for seeking and volume control,
+     * plus Enter key for play/pause functionality.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    setupKeyboardControls() {
+        document.addEventListener('keydown', (e) => {
+            if (!document.activeElement?.closest('.video-js') || !this.isTV) return;
+
+            const actions = {
+                'ArrowLeft': () => this.player.currentTime(Math.max(0, this.player.currentTime() - 10)),
+                'ArrowRight': () => this.player.currentTime(this.player.currentTime() + 10),
+                'ArrowUp': () => this.player.volume(Math.min(1, this.player.volume() + 0.1)),
+                'ArrowDown': () => this.player.volume(Math.max(0, this.player.volume() - 0.1)),
+                'Enter': () => this.player.paused() ? this.player.play() : this.player.pause()
+            };
+
+            if (actions[e.key]) {
+                e.preventDefault();
+                actions[e.key]();
+            }
+        });
+    }
+}
+
+
+/**
+ * Main video player initialization event handler.
+ * 
+ * Coordinates the initialization of all video player modules when the DOM is ready.
+ * Creates the core player instance, retrieves video metadata from DOM attributes,
+ * and initializes all supporting modules (context menu, custom controls, URL handling, 
+ * and progress tracking) once the player is ready.
+ * 
+ * @function
+ * @name DOMContentLoaded
+ * @listens DOMContentLoaded
+ * @example
+ * // This runs automatically when the page loads
+ * // Requires HTML element: <video id="player" data-video-id="123" data-profile-id="456" data-current-time="120">
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize core player
+    const playerCore = new VideoPlayerCore('player');
+    const player = playerCore.initialize();
+    
+    // Get video data from DOM attributes
     const videoElement = document.getElementById('player');
     const profileId = videoElement.getAttribute('data-profile-id');
     const videoId = videoElement.getAttribute('data-video-id');
     const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
 
-    // Initialize variables for tracking playback progress
-    let lastUpdateTime = 0;
-    let hasMarkedWatched = false;
-
-    // Set the starting position when the player is ready
-    player.on('loadedmetadata', function () {
-        if (currentTime > 0) {
-            console.log('Setting playback position to:', currentTime);
-            player.currentTime(currentTime); // Set the playback position
-        }
-    });
-
-    // Remove the custom progress bar when the video starts playing
-    player.on('play', function () {
-        const progressOverlay = document.querySelector('.progress-overlay');
-        if (progressOverlay) {
-            progressOverlay.remove(); // Remove the progress bar overlay
-            console.log('Custom progress bar removed.');
-        }
-    });
-
-    // Ensure the control bar is visible
-    player.controlBar.show();
-
-    // Check if profileId and videoId are available
-    if (!profileId || !videoId) {
-       console.error('Missing profileId or videoId. Progress tracking will not work.');
-        return;
-    }
-
-    // Track playback progress
-    player.on('timeupdate', function () {
-        const currentTime = Math.floor(player.currentTime());
-        const duration = Math.floor(player.duration()); // Get the total duration of the video
-        const now = Date.now(); // Get the current timestamp in milliseconds
-
-        if (hasMarkedWatched) {
-            return; // If already marked as watched, skip further processing
-        }
-
-        // Only send progress if at least 2 seconds have passed since the last update
-        if (now - lastUpdateTime >= 2000 && currentTime > 5) {
-            lastUpdateTime = now; // Update the last update time
-
-            // Send the current time to the server
-            fetch('/api/profile/in_progress', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    video_id: videoId,
-                    current_time: currentTime
-                })
-            }).catch(err => console.error('Error updating progress:', err));
-        }
-
-        // Check if the video is considered "watched" (e.g., 96% watched)
-        if (currentTime >= duration * 0.96 && !hasMarkedWatched) {
-            hasMarkedWatched = true; // Ensure this is only sent once
-
-            // Remove video from in-progress list
-            fetch('/api/profile/in_progress', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    video_id: videoId
-                })
-            }).catch(err => console.error('Error marking video as watched:', err));
-
-            // Mark the video as watched
-            fetch('/api/profile/mark_watched', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    video_id: videoId,
-                })
-            }).catch(err => console.error('Error marking video as watched:', err));
-        }
-    });
-
-    // Check if the video is completely done
-    player.on('ended', function () {
-        console.log('Video playback completed.');
-        if (container.classList.contains('theatre-mode')) {
-            container.classList.remove('theatre-mode');
-        }
+    // Initialize all modules when player is ready
+    player.ready(() => {
+        new VideoContextMenu(player);
+        new CustomControls(player, playerCore.container);
+        new UrlTimeHandler(player);
+        new ProgressTracker(player, videoId, profileId, currentTime);
+        
+        // Ensure control bar is visible
+        player.controlBar.show();
     });
 });
 
 
-
 /**
- * Handles the form submission for marking a video as watched.
- * It prevents the default form submission, sends an AJAX request,
- * and updates the button text to indicate success.
+ * Form submission handler for marking videos as watched/unwatched.
+ * 
+ * Prevents default form submission and sends AJAX request to toggle
+ * the watched status of a video. Updates the button text and API URL
+ * based on the response to reflect the current state.
+ * 
+ * @function
+ * @name markWatchedFormSubmit
+ * @listens submit
+ * @example
+ * // Requires HTML form: <form id="markWatchedForm" data-api-url="/api/profile/mark_watched" data-video-id="123">
  */
 document.getElementById('markWatchedForm').addEventListener('submit', function(e) {
     e.preventDefault(); // Prevent the default form submission
@@ -413,6 +739,6 @@ document.getElementById('markWatchedForm').addEventListener('submit', function(e
             this.querySelector('button').textContent = 'Unwatched!';
             this.dataset.apiUrl = '/api/profile/mark_watched';
         }
-    });
+    })
+    .catch(err => console.error('Error updating watched status:', err));
 });
-
