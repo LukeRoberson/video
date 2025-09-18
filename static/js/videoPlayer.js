@@ -71,8 +71,129 @@ document.addEventListener('DOMContentLoaded', function () {
     // Get the parent of the video player (the div)
     const container = document.getElementById('player').parentElement;
 
-    // Add Theatre Mode button - This should happen regardless of TV mode
+    // Customise the video player
     player.ready(function() {
+        // Create context menu element (right click menu)
+        const contextMenu = document.createElement('div');
+        contextMenu.className = 'video-context-menu';
+        
+        const menuItem = document.createElement('div');
+        menuItem.textContent = 'Copy link at current time';
+        menuItem.className = 'video-context-menu-item';
+
+        contextMenu.appendChild(menuItem);
+        document.body.appendChild(contextMenu);
+        
+        // Function to generate timestamped URL
+        function getTimestampedUrl() {
+            const currentTime = Math.floor(player.currentTime());
+            const url = new URL(window.location.href);
+            url.searchParams.set('t', currentTime);
+            return url.toString();
+        }
+        
+        // Handle right-click on progress bar
+        const progressControl = player.controlBar.progressControl.el();
+        progressControl.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            
+            // Disable video player interactions while menu is open
+            player.el().style.pointerEvents = 'none';
+
+            // Position the context menu
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+            contextMenu.style.display = 'block';
+            
+            // Adjust position if menu would go off screen
+            const rect = contextMenu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                contextMenu.style.left = (e.pageX - rect.width) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                contextMenu.style.top = (e.pageY - rect.height) + 'px';
+            }
+
+            return false;
+        });
+
+        // Prevent right-click from resuming a paused video
+        progressControl.addEventListener('mousedown', function(e) {
+            if (e.button === 2) { // Right mouse button
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        
+        progressControl.addEventListener('mouseup', function(e) {
+            if (e.button === 2) { // Right mouse button
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
+        // Handle menu item click
+        menuItem.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+           
+            const timestampedUrl = getTimestampedUrl();
+            
+            navigator.clipboard.writeText(timestampedUrl).then(function() {
+                showNotification('Link copied to clipboard!');
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                showNotification('Could not copy text!');
+            });
+            
+            contextMenu.style.display = 'none';
+            
+            // Re-enable video player clicks
+            player.el().style.pointerEvents = '';
+        });
+        
+        // Hide context menu when clicking elsewhere - use capture phase
+        document.addEventListener('click', function(e) {
+            if (contextMenu.style.display === 'block') {
+                if (!contextMenu.contains(e.target)) {
+                    contextMenu.style.display = 'none';
+
+                    // Re-enable video player clicks
+                    player.el().style.pointerEvents = '';
+                    
+                    // Stop this click from doing anything else
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        }, true); // Capture phase
+
+        // Show notification function
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'video-notification';
+            
+            document.body.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         // Add a custom button (for theatre mode)
         const Button = videojs.getComponent('Button');
         class TheatreButton extends Button {

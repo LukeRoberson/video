@@ -72,6 +72,58 @@
 
 
 /* ===========================
+   Copy URL at time
+   ---------------------------
+   When right-clicking the video
+   =========================== */
+
+.video-context-menu {
+    position: fixed;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 8px 0;
+    z-index: 9999;
+    display: none;
+    min-width: 180px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.video-context-menu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.video-context-menu-item:hover {
+    background-color: #555;
+}
+
+.video-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.video-notification.show {
+    opacity: 1;
+}
+
+
+/* ===========================
    In-Progress Overlay
    ---------------------------
    Progress bar at bottom of video

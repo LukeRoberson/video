@@ -41,7 +41,7 @@
 
 ## Video Player
 - [ ] Time range to play a specific part of a video
-- [ ] Share video link at a particular time
+- [x] Share video link at a particular time
 - [x] Hover over the bar to show the time index at that point
 - [x] Video bar: Show time passed, not just remaining
 
