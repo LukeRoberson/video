@@ -4,19 +4,29 @@ version = "0.1.0"
 description = "Video streaming for videos on jw.org"
 readme = "README.md"
 requires-python = ">=3.10"
-packages = ["app"]
+dependencies = [
+    "Flask==3.1.2",
+    "pandas==2.3.2", 
+    "requests==2.32.5",
+    "PyYAML==6.0.2",
+    "antiorm==1.2.1",
+    "db==0.1.1",
+    "db-sqlite3==0.0.1"
+]
 
-[project.dependencies]
-antiorm = "==1.2.1"
-beautifulsoup4 = "==4.13.4"
-blinker = "==1.9.0"
-db-sqlite3 = "==0.0.1"
-Flask = "==3.1.1"
-numpy = "==2.3.0"
-pandas = "==2.3.0"
-requests = "==2.32.4"
-selenium = "==4.33.0"
+# Optional dependencies for development
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.1",
+    "selenium==4.34.2", 
+    "tqdm==4.67.1",
+    "beautifulsoup4==4.13.4"
+]
 
 [tool.flake8]
 max-line-length = 88
 exclude = ["__pycache__", "static", "templates"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

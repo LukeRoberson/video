@@ -8,7 +8,14 @@
 - [x] Add records in CloudFlare
 - [x] Change nav bar colour for devel
 - [x] Find a method to backup local.db on Docker
-- [ ] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
+- [x] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
+
+</br></br>
+
+
+## Bugs
+- [ ] Can't edit profile when running from a container (devel... is bad; localhost is fine)
+- [ ] Check profile edit page on a phone
 
 </br></br>
 

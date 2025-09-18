@@ -1,8 +1,8 @@
 # Use the official Alpine Python image from the Docker Hub
 # Using Python 3.13 to match the development
 
-FROM python:3.13.5-alpine
-LABEL org.opencontainers.image.base.name="python:3.13-alpine"
+FROM python:3.13.7-alpine
+LABEL org.opencontainers.image.base.name="python:3.13.7-alpine"
 
 # Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -31,8 +31,8 @@ RUN apk update && \
 USER appuser
 
 # Copy the requirements file and install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY pyproject.toml .
+RUN pip install --upgrade pip && pip install .
 
 # Copy files (not all at once to minimize layer size)
 COPY robots.txt .
