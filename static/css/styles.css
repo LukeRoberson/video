@@ -22,11 +22,6 @@ body {
     margin: 0 auto;
 }
 
-.navbar.navbar-develop {
-    background: #5b21b6 !important; /* Distinct dev color */
-    border-bottom: 2px solid #a78bfa;
-}
-
 .character-card {
     width: 80%;
 }

@@ -107,10 +107,29 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
  * Handles editing a profile by redirecting to the edit profile page
  * @param {string} profileId - The ID of the profile to edit
  */
-function editProfile(profileId) {
-    console.log('Editing profile:', profileId);
+function editProfile(profileId, event) {
+    // Prevent the event from bubbling up to parent elements
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    console.log('Editing profile - Raw value:', profileId);
+    console.log('Editing profile - Type:', typeof profileId);
+    console.log('Editing profile - Is null/undefined?', profileId == null);
+    
+    // Add a safety check
+    if (!profileId || profileId === 'undefined' || profileId === 'null') {
+        console.error('Invalid profileId provided to editProfile function');
+        alert('Error: Invalid profile ID');
+        return;
+    }
+    
+    const editUrl = `/edit_profile/${profileId}`;
+    console.log('Redirecting to:', editUrl);
+    
     // Redirect to edit profile page
-    window.location.href = `/edit_profile/${profileId}`;
+    window.location.href = editUrl;
 }
 
 

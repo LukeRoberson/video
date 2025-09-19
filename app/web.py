@@ -181,32 +181,6 @@ def inject_admin_status() -> Dict[str, Any]:
     }
 
 
-@web_bp.app_context_processor
-def inject_site_flags() -> Dict[str, Any]:
-    """
-    Inject site flags based on the hostname.
-
-    If the hostname is 'devel.networkdirection.net',
-        it sets 'is_devel' to True and 'host_name' to the hostname.
-        Otherwise, it sets 'is_devel' to False and 'host_name' to the hostname.
-
-    Args:
-        None
-
-    Returns:
-        Dict[str, Any]: A dictionary containing the site flags.
-    """
-
-    # Prefer X-Forwarded-Host when behind a proxy, fallback to Host
-    raw_host = request.headers.get('X-Forwarded-Host') or request.host or ''
-    host = raw_host.split(':')[0].lower()
-
-    return {
-        'is_devel': host == 'devel.networkdirection.net',
-        'host_name': host,
-    }
-
-
 def admin_required(
     f: Callable[..., Response]
 ) -> Callable[..., Response]:

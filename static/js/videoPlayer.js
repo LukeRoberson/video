@@ -558,15 +558,21 @@ class UrlTimeHandler {
      * @memberof UrlTimeHandler
      */
     init() {
+        console.log('UrlTimeHandler init() called');
+        
         // Check URL parameters first (takes priority)
         const urlParams = new URLSearchParams(window.location.search);
         const urlStartTime = urlParams.get('t');
         const urlEndTime = urlParams.get('end');
         
+        console.log('URL params - t:', urlStartTime, 'end:', urlEndTime);
+        
         if (urlStartTime) {
             const start = parseInt(urlStartTime, 10);
             const end = urlEndTime ? parseInt(urlEndTime, 10) : null;
             this.snippetSource = 'url';
+            
+            console.log('Setting up URL snippet - start:', start, 'end:', end);
             
             if (end && end > start) {
                 this.setupSnippet(start, end);
@@ -575,16 +581,20 @@ class UrlTimeHandler {
             }
             return;
         }
-
+    
         // Check for theme-based snippet data attributes
         const videoElement = this.player.el();
         const themeStartTime = videoElement.getAttribute('data-snippet-start');
         const themeEndTime = videoElement.getAttribute('data-snippet-end');
         
+        console.log('Theme data attributes - start:', themeStartTime, 'end:', themeEndTime);
+        
         if (themeStartTime && themeEndTime) {
             const start = parseInt(themeStartTime, 10);
             const end = parseInt(themeEndTime, 10);
             this.snippetSource = 'theme';
+            
+            console.log('Setting up theme snippet - start:', start, 'end:', end);
             
             if (end > start) {
                 this.setupSnippet(start, end);
@@ -595,8 +605,11 @@ class UrlTimeHandler {
             // Just start time, no end time
             const start = parseInt(themeStartTime, 10);
             this.snippetSource = 'theme';
+            console.log('Setting up theme start time only:', start);
             this.jumpToTime(start);
         }
+        
+        console.log('No snippet parameters found');
     }
 
     /**
@@ -646,10 +659,12 @@ class UrlTimeHandler {
      * @memberof UrlTimeHandler
      */
     createSnippetIndicator(startTime, endTime) {
+        console.log('Creating snippet indicator - start:', startTime, 'end:', endTime, 'source:', this.snippetSource);
+        
         // Create snippet info overlay
         this.snippetIndicator = document.createElement('div');
         this.snippetIndicator.className = 'snippet-indicator';
-
+    
         // Different close button behavior based on snippet source
         const closeButton = this.snippetSource === 'url' ? 
             '<button class="snippet-close" title="Exit snippet mode">×</button>' : 
@@ -662,20 +677,22 @@ class UrlTimeHandler {
             </div>
         `;
         
+        console.log('Snippet indicator HTML:', this.snippetIndicator.innerHTML);
+        
         // Add to player
         this.player.el().appendChild(this.snippetIndicator);
         
-        // Close button handler (only for URL-based snippets)
+        console.log('Snippet indicator added to player');
+        
+        // Add close button event listener for URL-based snippets
         if (this.snippetSource === 'url') {
             const closeBtn = this.snippetIndicator.querySelector('.snippet-close');
             if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    this.exitSnippetMode();
-                });
+                closeBtn.addEventListener('click', () => this.exitSnippetMode());
             }
         }
         
-        // Highlight snippet range on progress bar
+        // Add snippet range highlight
         this.highlightSnippetRange(startTime, endTime);
     }
 
@@ -688,23 +705,46 @@ class UrlTimeHandler {
      * @memberof UrlTimeHandler
      */
     highlightSnippetRange(startTime, endTime) {
-        this.player.ready(() => {
+        console.log('highlightSnippetRange called - start:', startTime, 'end:', endTime);
+        
+        const createHighlight = () => {
             const duration = this.player.duration();
+            console.log('Player duration:', duration);
+            
             if (duration > 0) {
                 const startPercent = (startTime / duration) * 100;
                 const endPercent = (endTime / duration) * 100;
                 
+                console.log('Percentages - start:', startPercent, 'end:', endPercent);
+                
                 const progressControl = this.player.controlBar.progressControl.el();
+                console.log('Progress control element:', progressControl);
+                
                 const highlight = document.createElement('div');
                 highlight.className = 'snippet-highlight';
                 highlight.style.left = `${startPercent}%`;
                 highlight.style.width = `${endPercent - startPercent}%`;
                 
+                console.log('Highlight element created:', highlight);
+                console.log('Highlight styles:', highlight.style.cssText);
+                
                 progressControl.appendChild(highlight);
+                console.log('Highlight appended to progress control');
+            } else {
+                console.log('Duration is still 0, retrying...');
             }
-        });
+        };
+        
+        // If duration is available now, create highlight immediately
+        if (this.player.duration() > 0) {
+            createHighlight();
+        } else {
+            // Otherwise, wait for loadedmetadata event
+            console.log('Waiting for video metadata to load...');
+            this.player.one('loadedmetadata', createHighlight);
+        }
     }
-
+    
     /**
      * Sets up snippet-specific controls and behavior.
      * 

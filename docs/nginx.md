@@ -12,12 +12,6 @@ A configuration file (nginx.conf) is passed to NGINX at runtime.
 events {}
 
 http {
-	# Rate Limiting
-	limit_req_zone $binary_remote_addr zone=general:10m rate=240r/m;
-	limit_req_zone $binary_remote_addr zone=strict:10m rate=40r/m;
-	limit_req_zone $binary_remote_addr zone=api:10m rate=240r/m;
-	limit_req_zone $binary_remote_addr zone=not_found:10m rate=60r/m;
-
 	# Bot detection
 	map $http_user_agent $is_bot {
 		default 0;
@@ -86,21 +80,18 @@ http {
             add_header Cache-Control "public, immutable";
         }
 
-        # Whitelist Known Routes
-		location = / {
+		location / {
 			proxy_pass http://frontend:5000;
-            limit_req zone=general burst=10 nodelay;
-
 			proxy_set_header Host $host;
 			proxy_set_header X-Real-IP $remote_addr;
 			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 			proxy_set_header X-Forwarded-Proto $scheme;
+			proxy_set_header X-Forwarded-Host $host;
 		}
 
-        # Handle 404s with strict rate limiting
+        # Handle 404s
         error_page 404 = @not_found;
         location @not_found {
-            limit_req zone=not_found burst=3 nodelay;
             return 404;
         }
 	}
@@ -145,28 +136,20 @@ http {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-
-        # Static assets (adjust extensions as needed)
-        location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
-            proxy_pass http://devel:5000;
-            expires 1d;
-            add_header Cache-Control "public, immutable";
-        }
+		proxy_set_header X-Forwarded-Host $host;
 
 		location / {
 			proxy_pass http://devel:5000;
-            limit_req zone=general burst=10 nodelay;
-			
 			proxy_set_header Host $host;
 			proxy_set_header X-Real-IP $remote_addr;
 			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 			proxy_set_header X-Forwarded-Proto $scheme;
+			proxy_set_header X-Forwarded-Host $host;
 		}
 
-        # Handle 404s with strict rate limiting
+        # Handle 404s
         error_page 404 = @not_found;
         location @not_found {
-            limit_req zone=not_found burst=3 nodelay;
             return 404;
         }
 	}
