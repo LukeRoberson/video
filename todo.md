@@ -13,17 +13,6 @@
 </br></br>
 
 
-## Bugs
-- [ ] Can't edit profile when running from a container (devel... is bad; localhost is fine)
-  - On localhost, works most of the time, but sometimes just redirects straight to home screen
-  - On devel container, always redirects straight to home screen
-- [ ] Check profile edit page on a phone
-- [ ] Check snippets on a phone
-- [ ] Check Themes on a phone
-
-</br></br>
-
-
 ## Profiles
 - [x] Profile selection screen when opening the app
 - [x] Delete profile from profile selection
@@ -58,6 +47,20 @@
 - [x] Clicking a banner loads a page on that theme
 
 </br></br>
+
+
+## Refinements
+- [x] Can't edit profile when running from a container (devel... is bad; localhost is fine)
+  - On localhost, works most of the time, but sometimes just redirects straight to home screen
+  - On devel container, always redirects straight to home screen
+- [ ] Phone: Hide theatre mode and picture in picture
+- [ ] Phone: playing a video automatically goes full screen
+- [ ] Phone: display edit and delete buttons on profile selection (not hover over)
+- [ ] Phone: Display theme somewhere near banner
+- [x] Prevent two videos from playing on one page
+
+</br></br>
+
 
 
 
@@ -142,6 +145,8 @@
   - [ ] Marks on the progress bar to show chapters
   - [ ] Show chapters to the side (on larger screens); Like on Youtube
   - [ ] Tiny icon on thumbnails to show that a video has chapters
+- [ ] Tags
+  - [ ] Aliases, so different tags can mean the same thing
 
 </br></br>
 

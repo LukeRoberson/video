@@ -29,6 +29,91 @@
 
 
 /**
+ * Global video player management for preventing multiple simultaneous playback.
+ * 
+ * Manages all video player instances and ensures only one video plays at a time
+ * by automatically pausing other players when a new one starts playing.
+ * 
+ * @class GlobalPlayerManager
+ * @example
+ * // Automatically initialized - no direct instantiation needed
+ * // Registers players automatically when VideoPlayerCore instances are created
+ */
+class GlobalPlayerManager {
+    /**
+     * Creates the singleton instance of GlobalPlayerManager.
+     * 
+     * @memberof GlobalPlayerManager
+     */
+    constructor() {
+        /** @type {Array<Object>} Array of all registered video.js player instances */
+        this.players = [];
+    }
+
+    /**
+     * Gets the singleton instance of GlobalPlayerManager.
+     * 
+     * @static
+     * @returns {GlobalPlayerManager} The singleton instance
+     * @memberof GlobalPlayerManager
+     */
+    static getInstance() {
+        if (!GlobalPlayerManager.instance) {
+            GlobalPlayerManager.instance = new GlobalPlayerManager();
+        }
+        return GlobalPlayerManager.instance;
+    }
+
+    /**
+     * Registers a player instance and sets up play event monitoring.
+     * 
+     * @param {Object} player - The video.js player instance to register
+     * @memberof GlobalPlayerManager
+     */
+    registerPlayer(player) {
+        this.players.push(player);
+        
+        // Listen for play event and pause other players
+        player.on('play', () => {
+            this.pauseOtherPlayers(player);
+        });
+        
+        // Clean up when player is disposed
+        player.on('dispose', () => {
+            this.unregisterPlayer(player);
+        });
+    }
+
+    /**
+     * Unregisters a player instance from management.
+     * 
+     * @param {Object} player - The video.js player instance to unregister
+     * @memberof GlobalPlayerManager
+     */
+    unregisterPlayer(player) {
+        const index = this.players.indexOf(player);
+        if (index > -1) {
+            this.players.splice(index, 1);
+        }
+    }
+
+    /**
+     * Pauses all players except the currently playing one.
+     * 
+     * @param {Object} currentPlayer - The player that should continue playing
+     * @memberof GlobalPlayerManager
+     */
+    pauseOtherPlayers(currentPlayer) {
+        this.players.forEach(player => {
+            if (player && player !== currentPlayer && !player.paused()) {
+                player.pause();
+            }
+        });
+    }
+}
+
+
+/**
  * Core video player initialization and configuration.
  * 
  * Handles the main video.js player setup, TV mode detection,
@@ -55,6 +140,22 @@ class VideoPlayerCore {
         this.container = null;
         /** @type {boolean} Whether the device is detected as a TV */
         this.isTV = window.tvDetection?.isTV() || false;
+        /** @type {boolean} Whether the device is a mobile device */
+        this.isMobile = this.detectMobile();
+        /** @type {GlobalPlayerManager} Reference to the global player manager */
+        this.globalManager = GlobalPlayerManager.getInstance();
+    }
+
+    /**
+     * Detects if the device is a mobile device.
+     * 
+     * @returns {boolean} True if mobile device detected
+     * @private
+     * @memberof VideoPlayerCore
+     */
+    detectMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
     }
 
     /**
@@ -74,14 +175,57 @@ class VideoPlayerCore {
             aspectRatio: '16:9',
             fluid: false,
             responsive: true,
-            enableSmoothSeeking: true
+            enableSmoothSeeking: true,
+            // Enable fullscreen on mobile devices
+            ...(this.isMobile && {
+                fluid: true,
+                fill: false
+            })
         });
 
         this.container = document.getElementById(this.playerId).parentElement;
         this.applyTVSettings();
         this.setupTVModeListener();
+        this.setupMobileFullscreen();        
+        
+        // Register with global manager for multi-player coordination
+        this.globalManager.registerPlayer(this.player);
         
         return this.player;
+    }
+
+    /**
+     * Sets up automatic fullscreen behavior for mobile devices.
+     * 
+     * @private
+     * @memberof VideoPlayerCore
+     */
+    setupMobileFullscreen() {
+        if (!this.isMobile) return;
+
+        this.player.ready(() => {
+            // Enter fullscreen when play is triggered on mobile
+            this.player.on('play', () => {
+                if (!this.player.isFullscreen()) {
+                    // Small delay to ensure video is actually playing
+                    setTimeout(() => {
+                        if (!this.player.paused()) {
+                            this.player.requestFullscreen();
+                        }
+                    }, 100);
+                }
+            });
+
+            // Optional: Exit fullscreen when video is paused
+            // Uncomment if you want this behavior
+            /*
+            this.player.on('pause', () => {
+                if (this.player.isFullscreen()) {
+                    this.player.exitFullscreen();
+                }
+            });
+            */
+        });
     }
 
     /**
@@ -122,6 +266,8 @@ class VideoPlayerCore {
         });
     }
 }
+
+// ...existing code for other classes...
 
 
 /**
