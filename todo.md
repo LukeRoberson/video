@@ -18,6 +18,8 @@
   - On localhost, works most of the time, but sometimes just redirects straight to home screen
   - On devel container, always redirects straight to home screen
 - [ ] Check profile edit page on a phone
+- [ ] Check snippets on a phone
+- [ ] Check Themes on a phone
 
 </br></br>
 
