@@ -35,7 +35,7 @@
                     <!-- Paragraph -->
                     {% elif item.paragraph %}
                         <div class="card-body">
-                            <p>{{ item.paragraph }}</p>
+                            <p>{{ item.paragraph | replace('\n', '<br>') | safe }}</p>
                         </div>
 
                     <!-- Video -->
@@ -51,7 +51,7 @@
                         ] %}
                         <div class="video-player mb-4 position-relative">
                             <video
-                                id="player"
+                                id="player-{{ video.id }}"
                                 class="video-js"
                                 controls
                                 preload="auto"

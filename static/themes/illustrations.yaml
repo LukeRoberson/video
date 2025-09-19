@@ -1,0 +1,32 @@
+# Illustrations
+# Videos with illustrations that help explain concepts
+
+---
+# Main file data
+title: Illustrations
+heading: Illustrations
+
+---
+section:
+- heading: Evolution vs Creation
+
+# James Mantz: “You Created All Things” (Rev. 4:11)
+- paragraph: |
+    James Mantz uses the example of a missionary in Cambodia.
+    He used a picture motorbike parts, and asked if the parts could come together by chance to make a motorbike.
+- video:
+    id: 322
+    start: 358
+    end: 402
+
+---
+section:
+- heading: Showing Respect to Older People
+
+# Samuel F. Herd: Jehovah Does Not Forget Your Love (Ps. 71:18)
+- video:
+    id: 335
+    start: 132
+    end: 196
+
+...

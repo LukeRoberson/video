@@ -914,25 +914,31 @@ class CustomControls {
  * // Requires HTML element: <video id="player" data-video-id="123" data-profile-id="456" data-current-time="120">
  */
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize core player
-    const playerCore = new VideoPlayerCore('player');
-    const player = playerCore.initialize();
+    // Find all video elements with the video-js class
+    const videoElements = document.querySelectorAll('video.video-js');
     
-    // Get video data from DOM attributes
-    const videoElement = document.getElementById('player');
-    const profileId = videoElement.getAttribute('data-profile-id');
-    const videoId = videoElement.getAttribute('data-video-id');
-    const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
-
-    // Initialize all modules when player is ready
-    player.ready(() => {
-        new VideoContextMenu(player);
-        new CustomControls(player, playerCore.container);
-        new UrlTimeHandler(player);
-        new ProgressTracker(player, videoId, profileId, currentTime);
+    videoElements.forEach(videoElement => {
+        const playerId = videoElement.id;
         
-        // Ensure control bar is visible
-        player.controlBar.show();
+        // Initialize core player for each video
+        const playerCore = new VideoPlayerCore(playerId);
+        const player = playerCore.initialize();
+        
+        // Get video data from DOM attributes
+        const profileId = videoElement.getAttribute('data-profile-id');
+        const videoId = videoElement.getAttribute('data-video-id');
+        const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
+
+        // Initialize all modules when player is ready
+        player.ready(() => {
+            new VideoContextMenu(player);
+            new CustomControls(player, playerCore.container);
+            new UrlTimeHandler(player);
+            new ProgressTracker(player, videoId, profileId, currentTime);
+            
+            // Ensure control bar is visible
+            player.controlBar.show();
+        });
     });
 });
 
