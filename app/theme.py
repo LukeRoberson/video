@@ -99,6 +99,19 @@ class ThemeManager:
                                 }
                             }
                         },
+                        # List
+                        {
+                            'schema': {
+                                'list': {
+                                    'type': 'list',
+                                    'required': True,
+                                    'schema': {
+                                        'type': 'string',
+                                        'empty': False,
+                                    }
+                                }
+                            }
+                        },
                         # Video snippet
                         {
                             'schema': {

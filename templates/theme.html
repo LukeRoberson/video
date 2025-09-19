@@ -38,6 +38,16 @@
                             <p>{{ item.paragraph | replace('\n', '<br>') | safe }}</p>
                         </div>
 
+                    <!-- List -->
+                    {% elif item.list %}
+                        <div class="card-body">
+                            <ul>
+                                {% for list_item in item.list %}
+                                    <li>{{ list_item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
                     <!-- Video -->
                     {% elif item.video %}
                         <!-- Generate the video URLs based on resolution -->
