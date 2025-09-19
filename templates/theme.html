@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <!-- CSS styling for the player -->
+    <link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/videojs.css')}}" />
+{% endblock %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+<!-- The card with the main content-->
+<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
+    <div class="card shadow-lg bg-dark text-white character-card" style="border-radius: 18px;">
+        <div class="card-body p-4">
+            <h1>{{ main_heading }}</h1>
+        </div>
+
+        <!-- Loop through sections -->
+        {% for section in sections %}
+            <div class="card-body p-4">
+                
+                <!-- Loop through items in each section -->
+                {% for item in section['section'] %}
+                    <!-- Heading -->
+                    {% if item.heading %}
+                        <div class="card-body">
+                            <h3>{{ item.heading }}</h3>
+                        </div>
+                    
+                    <!-- Paragraph -->
+                    {% elif item.paragraph %}
+                        <div class="card-body">
+                            <p>{{ item.paragraph }}</p>
+                        </div>
+
+                    <!-- Video -->
+                    {% elif item.video %}
+                        <!-- Generate the video URLs based on resolution -->
+                        {% set video = item.video %}
+                        {% set resolutions = [
+                            ('1080', video.url_1080),
+                            ('720', video.url_720),
+                            ('480', video.url_480),
+                            ('360', video.url_360),
+                            ('240', video.url_240)
+                        ] %}
+                        <div class="video-player mb-4 position-relative">
+                            <video
+                                id="player"
+                                class="video-js"
+                                controls
+                                preload="auto"
+                                poster="{{ video.thumbnail or '' }}"
+                                data-profile-id="{{ session.get('active_profile', 'guest') }}"
+                                data-video-id="{{ video.id }}"
+                                data-snippet-start="{{ video.start }}"
+                                data-snippet-end="{{ video.end }}"
+                            >
+                                <!-- Set up the available resolutions -->
+                                {% for res, url in resolutions %}
+                                    {% if url %}
+                                        <source src="{{ url }}" type="video/mp4" label="{{ res }}p" res="{{ res|replace('p', '') }}">
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- fallback content for browsers that do not support HTML5 video -->
+                                <p class="vjs-no-js">
+                                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                                </p>
+                            </video>
+                        </div>
+
+                    <!-- Quote -->
+                    {% elif item.quote %}
+                        <div class="card-body">
+                            <q class="blockquote">{{ item.quote }}</q>
+
+                    <!-- Link -->
+                    {% elif item.link %}
+                        <div class="card-body">
+                            <a href="{{ item.link.url }}" target="_blank">{{ item.link.text }}</a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+        {% endfor %}
+
+
+    </div>
+</div>
+
+<!-- Video.js and Quality Selector scripts -->
+<script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
+<script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+
+<!-- Custom script for video player -->
+<script src="{{ url_for('static', filename='js/videoPlayer.js') }}"></script>
+
+{% endblock %}

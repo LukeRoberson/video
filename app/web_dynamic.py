@@ -29,10 +29,24 @@ Dependancies:
     logging: For logging debug information.
 
 Custom Dependencies:
-    DatabaseContext: Context manager for database operations.
-    CategoryManager: Manages category-related database operations.
-    LocalDbContext: Context manager for local database operations.
-    ProfileManager: Manages user profile-related database operations.
+    app.sql_db:
+        DatabaseContext: Context manager for database operations.
+        VideoManager: Manages videos.
+        CategoryManager: Manages categories.
+        TagManager: Manages tags.
+        LocationManager: Manages locations.
+        SpeakerManager: Manages speakers.
+        CharacterManager: Manages Bible characters.
+        ScriptureManager: Manages scriptures.
+        SimilarityManager: Manages video similarity.
+
+    app.local_db:
+        LocalDbContext: Context manager for local database operations.
+        ProfileManager: Manages user profiles.
+        ProgressManager: Manages video progress.
+
+    app.theme:
+        ThemeManager: Manages theme-related operations.
 """
 
 # Standard library imports
@@ -48,6 +62,7 @@ from typing import Union
 import random
 import os
 from flask import current_app
+import logging
 
 # Custom imports
 from app.sql_db import (
@@ -66,6 +81,7 @@ from app.local_db import (
     ProfileManager,
     ProgressManager,
 )
+from app.theme import ThemeManager
 
 
 # Setup type variables for manager types
@@ -338,6 +354,52 @@ def video_details(
                 if has_chapters
                 else None
             ),
+        )
+    )
+
+
+@dynamic_bp.route(
+    "/theme/<string:theme_name>",
+    methods=["GET"],
+)
+def theme(
+    theme_name: str,
+) -> Response:
+    """
+    Render a theme page based on the theme name.
+
+    Args:
+        theme_name (str): The name of the theme to display.
+            This represents a YAML file in the themes directory.
+
+    Returns:
+        Response: A rendered HTML page with the specified theme.
+    """
+
+    # The path to the theme file
+    themes_folder = os.path.join(str(current_app.static_folder), 'themes')
+    theme_file = os.path.join(themes_folder, f"{theme_name}.yaml")
+
+    theme = ThemeManager()
+    result = theme.load_theme(theme_file)
+
+    # Check for errors loading the theme
+    if result[0] is False:
+        logging.error(f"Error loading theme: {result[1]}")
+        return make_response(
+            render_template(
+                "errors/500.html",
+                message=result[1]
+            ),
+            500
+        )
+
+    return make_response(
+        render_template(
+            "theme.html",
+            title=theme.main['title'],
+            main_heading=theme.main['heading'],
+            sections=theme.sections,
         )
     )
 

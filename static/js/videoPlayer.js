@@ -514,14 +514,16 @@ class ProgressTracker {
 
 
 /**
- * Handles URL 't' and 'end' parameters for video snippets.
+ * Handles URL 't' and 'end' parameters for video snippets, and theme-based snippets.
  * 
- * Automatically detects timestamp parameters in the URL and
+ * Automatically detects timestamp parameters in the URL or data attributes and
  * creates video snippets by jumping to start time and pausing at end time.
+ * Supports both URL parameters (?t=60&end=120) and theme data attributes.
  * 
  * @class UrlTimeHandler
  * @example
  * // URL: /video/123?t=60&end=120 - 1 minute snippet from 1:00 to 2:00
+ * // OR: <video data-snippet-start="60" data-snippet-end="120">
  * new UrlTimeHandler(player);
  */
 class UrlTimeHandler {
@@ -540,29 +542,59 @@ class UrlTimeHandler {
         this.isSnippet = false;
         /** @type {HTMLElement|null} Snippet indicator element */
         this.snippetIndicator = null;
+        /** @type {string} Source of snippet ('url' or 'theme') */
+        this.snippetSource = null;
         this.init();
     }
 
     /**
-     * Initializes the URL time handler by checking for 't' and 'end' parameters.
+     * Initializes the URL time handler by checking for 't' and 'end' parameters or data attributes.
+     *  't' and 'end' are URL parameters
+     *  'data-snippet-start' and 'data-snippet-end' are data attributes on the video element
+     *  If both are present, URL parameters take priority.
      * 
      * @private
      * @memberof UrlTimeHandler
      */
     init() {
+        // Check URL parameters first (takes priority)
         const urlParams = new URLSearchParams(window.location.search);
-        const startTime = urlParams.get('t');
-        const endTime = urlParams.get('end');
+        const urlStartTime = urlParams.get('t');
+        const urlEndTime = urlParams.get('end');
         
-        if (startTime) {
-            const start = parseInt(startTime, 10);
-            const end = endTime ? parseInt(endTime, 10) : null;
+        if (urlStartTime) {
+            const start = parseInt(urlStartTime, 10);
+            const end = urlEndTime ? parseInt(urlEndTime, 10) : null;
+            this.snippetSource = 'url';
             
             if (end && end > start) {
                 this.setupSnippet(start, end);
             } else {
                 this.jumpToTime(start);
             }
+            return;
+        }
+
+        // Check for theme-based snippet data attributes
+        const videoElement = this.player.el();
+        const themeStartTime = videoElement.getAttribute('data-snippet-start');
+        const themeEndTime = videoElement.getAttribute('data-snippet-end');
+        
+        if (themeStartTime && themeEndTime) {
+            const start = parseInt(themeStartTime, 10);
+            const end = parseInt(themeEndTime, 10);
+            this.snippetSource = 'theme';
+            
+            if (end > start) {
+                this.setupSnippet(start, end);
+            } else {
+                this.jumpToTime(start);
+            }
+        } else if (themeStartTime) {
+            // Just start time, no end time
+            const start = parseInt(themeStartTime, 10);
+            this.snippetSource = 'theme';
+            this.jumpToTime(start);
         }
     }
 
@@ -616,20 +648,31 @@ class UrlTimeHandler {
         // Create snippet info overlay
         this.snippetIndicator = document.createElement('div');
         this.snippetIndicator.className = 'snippet-indicator';
+
+        // Different close button behavior based on snippet source
+        const closeButton = this.snippetSource === 'url' ? 
+            '<button class="snippet-close" title="Exit snippet mode">×</button>' : 
+            ''; // Theme-based snippets don't show close button
+        
         this.snippetIndicator.innerHTML = `
             <div class="snippet-info">
                 📎 Snippet: ${this.formatTime(startTime)} - ${this.formatTime(endTime)}
-                <button class="snippet-close" title="Exit snippet mode">×</button>
+                ${closeButton}
             </div>
         `;
         
         // Add to player
         this.player.el().appendChild(this.snippetIndicator);
         
-        // Close button handler
-        this.snippetIndicator.querySelector('.snippet-close').addEventListener('click', () => {
-            this.exitSnippetMode();
-        });
+        // Close button handler (only for URL-based snippets)
+        if (this.snippetSource === 'url') {
+            const closeBtn = this.snippetIndicator.querySelector('.snippet-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.exitSnippetMode();
+                });
+            }
+        }
         
         // Highlight snippet range on progress bar
         this.highlightSnippetRange(startTime, endTime);
@@ -683,8 +726,15 @@ class UrlTimeHandler {
             if (!this.isSnippet) return;
             
             const currentTime = this.player.currentTime();
-            const urlParams = new URLSearchParams(window.location.search);
-            const startTime = parseInt(urlParams.get('t'), 10);
+            let startTime;
+
+            if (this.snippetSource === 'url') {
+                const urlParams = new URLSearchParams(window.location.search);
+                startTime = parseInt(urlParams.get('t'), 10);
+            } else if (this.snippetSource === 'theme') {
+                const videoElement = this.player.el();
+                startTime = parseInt(videoElement.getAttribute('data-snippet-start'), 10);
+            }
             
             if (currentTime < startTime) {
                 this.player.currentTime(startTime);
@@ -696,10 +746,14 @@ class UrlTimeHandler {
 
     /**
      * Exits snippet mode and returns to normal video playback.
+     * Only works for URL-based snippets, not theme-based ones.
      * 
      * @memberof UrlTimeHandler
      */
     exitSnippetMode() {
+        // Only allow exiting URL-based snippets
+        if (this.snippetSource !== 'url') return;
+
         this.isSnippet = false;
         this.endTime = null;
         
@@ -896,33 +950,36 @@ document.addEventListener('DOMContentLoaded', function () {
  * @example
  * // Requires HTML form: <form id="markWatchedForm" data-api-url="/api/profile/mark_watched" data-video-id="123">
  */
-document.getElementById('markWatchedForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Prevent the default form submission
+const markWatchedForm = document.getElementById('markWatchedForm');
+if (markWatchedForm) {
+    document.getElementById('markWatchedForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
 
-    // Get the API URL and video ID from data attributes
-    const apiUrl = this.dataset.apiUrl;
-    const videoId = this.dataset.videoId;
+        // Get the API URL and video ID from data attributes
+        const apiUrl = this.dataset.apiUrl;
+        const videoId = this.dataset.videoId;
 
-    // Send a POST request to the server to mark the video as watched
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ video_id: videoId })
-    })
-    .then(response => response.json()) // Parse the JSON response
-    .then(data => {
-        // If the server responds with success, update the button
-        if (data.success && this.dataset.apiUrl === '/api/profile/mark_watched') {
-            this.querySelector('button').textContent = 'Watched!';
-            this.dataset.apiUrl = '/api/profile/mark_unwatched';
-        }
-        else if (data.success && this.dataset.apiUrl === '/api/profile/mark_unwatched') {
-            this.querySelector('button').textContent = 'Unwatched!';
-            this.dataset.apiUrl = '/api/profile/mark_watched';
-        }
-    })
-    .catch(err => console.error('Error updating watched status:', err));
-});
+        // Send a POST request to the server to mark the video as watched
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ video_id: videoId })
+        })
+        .then(response => response.json()) // Parse the JSON response
+        .then(data => {
+            // If the server responds with success, update the button
+            if (data.success && this.dataset.apiUrl === '/api/profile/mark_watched') {
+                this.querySelector('button').textContent = 'Watched!';
+                this.dataset.apiUrl = '/api/profile/mark_unwatched';
+            }
+            else if (data.success && this.dataset.apiUrl === '/api/profile/mark_unwatched') {
+                this.querySelector('button').textContent = 'Unwatched!';
+                this.dataset.apiUrl = '/api/profile/mark_watched';
+            }
+        })
+        .catch(err => console.error('Error updating watched status:', err));
+    });
+}
