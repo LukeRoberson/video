@@ -49,11 +49,11 @@
 
 
 ## Themes / Banners
-- [ ] Create YAML files (or similar) to contain information on a topic
-  - [ ] Contains some basic information on the topic
-  - [ ] Includes videos (or parts of videos) about that topic
-- [ ] Load these (or a selection of them) as banners on the home page
-- [ ] Clicking a banner loads a page on that theme
+- [x] Create YAML files (or similar) to contain information on a topic
+  - [x] Contains some basic information on the topic
+  - [x] Includes videos (or parts of videos) about that topic
+- [x] Load these (or a selection of them) as banners on the home page
+- [x] Clicking a banner loads a page on that theme
 
 </br></br>
 

@@ -23,9 +23,10 @@ homeThumbs.js:
     data-bs-ride="carousel"
     data-bs-interval="7000"
     style="width: 100%; margin: 0 auto; margin-top: 0;">
+
     <!-- Carousel indicators (shows the number of images and the active one) -->
     <div class="carousel-indicators">
-        {% for pic in banner_pics %}
+        {% for pic in banners %}
         <button type="button"
                 data-bs-target="#bannerCarousel"
                 data-bs-slide-to="{{ loop.index0 }}"
@@ -38,20 +39,23 @@ homeThumbs.js:
 
     <!-- The big carousel itself -->
     <div class="carousel-inner">
-        {% for pic in banner_pics %}
+        {% for pic in banners %}
         <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <div style="position: relative; width: 100%; padding-top: 33.33%;">
-                <!-- The image -->
-                <img src="/static/img/banner/{{ pic.filename }}" 
-                    class="d-block w-100"
-                    alt="Banner {{ pic.description }}"
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                
-                <! -- Overlay title on the image -->
-                <div class="carousel-caption d-none d-md-block">
-                    <h1>{{ pic.description }}</h1>
+            <a href="{{ url_for('dynamic_pages.theme', theme_name=pic.path) }}" class="text-decoration-none">
+                <div style="position: relative; width: 100%; padding-top: 33.33%;">
+
+                    <!-- The image -->
+                    <img src="{{ pic.image }}"
+                        class="d-block w-100"
+                        alt="Banner {{ pic.title }}"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    
+                    <! -- Overlay title on the image -->
+                    <div class="carousel-caption d-none d-md-block">
+                        <h1>{{ pic.title }}</h1>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
         {% endfor %}
     </div>

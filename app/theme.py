@@ -69,6 +69,13 @@ class ThemeManager:
                 'type': 'string',
                 'required': True,
                 'empty': False,
+            },
+            # Banner image (URL)
+            'banner': {
+                'type': 'string',
+                'required': True,
+                'empty': False,
+                'regex': r'^https?://.+'
             }
         }
 

@@ -71,6 +71,7 @@ from typing import List, Dict, Any
 from collections import defaultdict
 from functools import wraps
 from typing import Callable
+import yaml
 
 # Custom imports
 from app.sql_db import (
@@ -260,28 +261,33 @@ def home() -> Response:
         Response: A rendered HTML 'welcome' page
     """
 
-    banner_pics = [
-        {
-            "filename": "banner_1.jpg",
-            "description": "Sermon on the Mount",
-        },
-        {
-            "filename": "banner_2.jpg",
-            "description": "Prayer",
-        },
-        {
-            "filename": "banner_3.jpg",
-            "description": "People of all Nations",
-        },
-        {
-            "filename": "banner_4.jpg",
-            "description": "Guidance",
-        },
-        {
-            "filename": "banner_5.jpg",
-            "description": "Prophets of Old",
-        },
-    ]
+    # Get a list of files in the themes directory
+    themes_dir = os.path.join('static', 'themes')
+    themes = []
+    if os.path.exists(themes_dir):
+        themes = [
+            f for f in os.listdir(themes_dir)
+            if (
+                os.path.isfile(os.path.join(themes_dir, f)) and
+                f.lower() != 'sample.yaml'
+            )
+        ]
+
+    # Get banners and titles from each theme file
+    banners = []
+    for theme in themes:
+        with open(os.path.join(themes_dir, theme), 'r', encoding='utf-8') as f:
+            try:
+                theme_data = list(yaml.safe_load_all(f))
+                banner = {
+                    'image': theme_data[0].get('banner', None),
+                    'title': theme_data[0].get('title', 'No Title'),
+                    'path': theme[:-5],  # Remove .yaml extension
+                }
+                banners.append(banner)
+            except yaml.YAMLError as e:
+                print(f"Error loading theme file {theme}: {e}")
+                themes.remove(theme)
 
     # Get the session profile ID from the request context
     in_progress_videos = []
@@ -370,7 +376,7 @@ def home() -> Response:
     return make_response(
         render_template(
             "home.html",
-            banner_pics=banner_pics,
+            banners=banners,
             in_progress_videos=in_progress_videos,
             latest_monthly=latest_monthly,
             latest_news=latest_news,
@@ -798,3 +804,11 @@ def scriptures() -> Response:
             scriptures_by_book=sorted_scriptures_by_book,
         )
     )
+
+
+@web_bp.route('/.well-known/appspecific/com.chrome.devtools.json')
+def devtools_discovery():
+    """
+    Suppress 404 errors for Chrome DevTools discovery requests.
+    """
+    return []

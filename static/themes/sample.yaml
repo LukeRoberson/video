@@ -11,12 +11,18 @@
 title: A test theme page
 heading: Test Theme
 
+# A link to a banner image
+banner: https://cms-imgp.jw-cdn.org/img/p/202021167/univ/art/202021167_univ_lsr_lg.jpg
+
 ---
 # A section of content
 section:
 - heading: Section 1.
 - paragraph: This is paragraph 1. It would typically be in a `<p>` tag.
 - paragraph: !!str This is paragraph 2. We're using tags to force this to be a string.
+- list:
+    - Point one
+    - Point two
 
 # A video snippet, containting the ID, start time and end time (in seconds)
 - video:
