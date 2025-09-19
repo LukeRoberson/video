@@ -72,7 +72,8 @@ class VideoPlayerCore {
                 remainingTimeDisplay: { displayNegative: false }
             },
             aspectRatio: '16:9',
-            fluid: true,
+            fluid: false,
+            responsive: true,
             enableSmoothSeeking: true
         });
 

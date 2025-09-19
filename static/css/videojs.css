@@ -9,6 +9,15 @@
 
 .video-player {
     position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.video-js {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9; /* Modern browsers */
 }
 
 
@@ -18,22 +27,26 @@
    Adds theatre mode button
    =========================== */
 
+/* Controls the outer div */
 .theatre-mode {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 82vw !important;
+    width: 90vw !important;
+    min-width: 80vw !important;
     height: auto !important;
     z-index: 2000;
     background: rgba(17, 17, 17, 0.98);
     padding: 10px !important;
     border-radius: 10px;
+    margin: 0 !important;
 }
 
+/* Controls the actual video player inside the div */
 .theatre-mode .video-js {
-    width: 80vw !important;
-    max-width: 80vw !important;
+    width: 100% !important;
+    max-width: 100% !important;
     aspect-ratio: 16 / 9;
     height: auto !important;
     max-height: 90vh !important;
