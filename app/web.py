@@ -11,10 +11,10 @@ Functions:
         Ensures that a profile is selected before accessing any web pages.
     inject_admin_status:
         Injects the admin status into the template context (for jinja).
-    inject_site_flags:
-        Injects site flags based on the hostname into the template context.
     admin_required:
         Decorator to restrict access to admin-only routes.
+    inject_app_version:
+        Inject the application version into all templates.
 
 Routes:
     - /admin: Render the admin dashboard.
