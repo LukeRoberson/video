@@ -50,9 +50,10 @@ homeThumbs.js:
                         alt="Banner {{ pic.title }}"
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                     
-                    <! -- Overlay title on the image -->
-                    <div class="carousel-caption d-none d-md-block">
-                        <h1>{{ pic.title }}</h1>
+                    <!-- Overlay title on the image -->
+                    <div class="carousel-caption d-block py-2 py-md-3" style="bottom: 60px;">
+                        <h1 class="d-none d-md-block mb-0">{{ pic.title }}</h1>
+                        <h4 class="d-block d-md-none mb-0">{{ pic.title }}</h4>
                     </div>
                 </div>
             </a>

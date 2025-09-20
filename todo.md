@@ -56,7 +56,7 @@
 - [x] Phone: Hide theatre mode and picture in picture
 - [x] Phone: playing a video automatically goes full screen
 - [x] Phone: display edit and delete buttons on profile selection (not hover over)
-- [ ] Phone: Display theme somewhere near banner
+- [x] Phone: Display theme somewhere near banner
 - [x] Prevent two videos from playing on one page
 
 </br></br>
