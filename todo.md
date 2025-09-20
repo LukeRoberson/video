@@ -53,8 +53,8 @@
 - [x] Can't edit profile when running from a container (devel... is bad; localhost is fine)
   - On localhost, works most of the time, but sometimes just redirects straight to home screen
   - On devel container, always redirects straight to home screen
-- [ ] Phone: Hide theatre mode and picture in picture
-- [ ] Phone: playing a video automatically goes full screen
+- [x] Phone: Hide theatre mode and picture in picture
+- [x] Phone: playing a video automatically goes full screen
 - [ ] Phone: display edit and delete buttons on profile selection (not hover over)
 - [ ] Phone: Display theme somewhere near banner
 - [x] Prevent two videos from playing on one page

@@ -170,7 +170,9 @@ class VideoPlayerCore {
                 skipButtons: { forward: 10, backward: 5 },
                 qualitySelector: true,
                 currentTimeDisplay: true,
-                remainingTimeDisplay: { displayNegative: false }
+                remainingTimeDisplay: { displayNegative: false },
+                // Disable PiP button on mobile
+                pictureInPictureToggle: !this.isMobile
             },
             aspectRatio: '16:9',
             fluid: false,
@@ -215,16 +217,6 @@ class VideoPlayerCore {
                     }, 100);
                 }
             });
-
-            // Optional: Exit fullscreen when video is paused
-            // Uncomment if you want this behavior
-            /*
-            this.player.on('pause', () => {
-                if (this.player.isFullscreen()) {
-                    this.player.exitFullscreen();
-                }
-            });
-            */
         });
     }
 
@@ -1008,7 +1000,21 @@ class CustomControls {
         this.container = container;
         /** @type {boolean} Whether the device is detected as a TV */
         this.isTV = window.tvDetection?.isTV() || false;
+        /** @type {boolean} Whether the device is a mobile device */
+        this.isMobile = this.detectMobile();
         this.init();
+    }
+
+    /**
+     * Detects if the device is a mobile device.
+     * 
+     * @returns {boolean} True if mobile device detected
+     * @private
+     * @memberof CustomControls
+     */
+    detectMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
     }
 
     /**
@@ -1018,8 +1024,39 @@ class CustomControls {
      * @memberof CustomControls
      */
     init() {
-        this.addTheatreButton();
+        // Only add theatre button if not on mobile
+        if (!this.isMobile) {
+            this.addTheatreButton();
+        }
+        
         this.setupKeyboardControls();
+        
+        // Additional safety check to hide any buttons that might have been created
+        if (this.isMobile) {
+            this.player.ready(() => {
+                this.hideMobileButtonsFallback();
+            });
+        }
+    }
+
+    /**
+     * Fallback method to hide buttons on mobile (safety net).
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    hideMobileButtonsFallback() {
+        // Hide picture-in-picture button on mobile (fallback)
+        const pipButton = this.player.controlBar.getChild('PictureInPictureToggle');
+        if (pipButton) {
+            pipButton.el().style.display = 'none';
+        }
+        
+        // Hide theatre button on mobile (fallback)
+        const theatreButton = this.player.controlBar.getChild('TheatreButton');
+        if (theatreButton) {
+            theatreButton.el().style.display = 'none';
+        }
     }
 
     /**
