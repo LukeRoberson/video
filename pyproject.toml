@@ -1,6 +1,6 @@
 [project]
 name = "1320"
-version = "0.1.0"
+version = "1.0.0"
 description = "Video streaming for videos on jw.org"
 readme = "README.md"
 requires-python = ">=3.10"
