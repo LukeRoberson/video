@@ -91,14 +91,14 @@
     transition: opacity 0.2s ease-in-out;
 }
 
-/* Show edit/delete buttons on hover for larger screens */
+/* Show on hover for larger screens - updated selector */
 @media (min-width: 768px) {
-    .profile-item:hover .profile-actions {
+    .list-group-item:hover .profile-actions {
         opacity: 1;
     }
 }
 
-/* Always show edit/delete on mobile/small screens */
+/* Always show on mobile/small screens */
 @media (max-width: 767px) {
     .profile-actions {
         opacity: 1;
