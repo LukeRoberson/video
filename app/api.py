@@ -100,6 +100,10 @@ def seconds_to_hhmmss(
         str: Duration in HH:MM:SS or MM:SS format.
     """
 
+    # Handle None or non-positive values
+    if seconds is None or seconds <= 0:
+        seconds = 1
+
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
@@ -293,7 +297,7 @@ def add_video_metadata() -> Response:
             field is None
             for field in [
                 description, url, tag_name, location_name, speaker_name,
-                character_name, scripture_name, date_added
+                character_name, scripture_name, date_added, category_name
             ]
         ):
             logging.error("No metadata fields provided for video.")

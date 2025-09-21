@@ -155,7 +155,35 @@ class CategoryScraper:
         if self.suppress_warnings:
             options.add_argument("--log-level=3")
 
-        self.driver = webdriver.Chrome(options=options)
+        try:
+            self.driver = webdriver.Chrome(options=options)
+
+        except Exception as e:
+            if (
+                "This version of ChromeDriver only supports Chrome version"
+                in str(e)
+            ):
+                print(
+                    f"{Fore.RED}ChromeDriver version mismatch detected!\n"
+                    f"{Fore.YELLOW}Please update ChromeDriver to match your "
+                    f"Chrome browser version.\n"
+                    f"You can download the correct version from:\n"
+                    f"https://googlechromelabs.github.io/chrome-for-testing/",
+                    Style.RESET_ALL,
+                    f"\n\nError details: {str(e)}"
+                )
+            else:
+                print(
+                    Fore.RED,
+                    f"Failed to initialize Chrome WebDriver: {str(e)}",
+                    Style.RESET_ALL
+                )
+
+            # Exit the script gracefully
+            sys.exit(1)
+
+            # Exit the script gracefully
+            sys.exit(1)
 
         return self
 
@@ -452,8 +480,33 @@ class JwScraper:
         """
 
         # Setup the Chrome WebDriver
-        self.service = Service(self.driver_path)
-        self.driver = webdriver.Chrome(service=self.service)
+        try:
+            self.service = Service(self.driver_path)
+            self.driver = webdriver.Chrome(service=self.service)
+
+        except Exception as e:
+            if (
+                "This version of ChromeDriver only supports Chrome version"
+                in str(e)
+            ):
+                print(
+                    f"{Fore.RED}ChromeDriver version mismatch detected!\n"
+                    f"{Fore.YELLOW}Please update ChromeDriver to match your "
+                    f"Chrome browser version.\n"
+                    f"You can download the correct version from:\n"
+                    f"https://googlechromelabs.github.io/chrome-for-testing/",
+                    Style.RESET_ALL,
+                    f"\n\nError details: {str(e)}"
+                )
+            else:
+                print(
+                    Fore.RED,
+                    f"Failed to initialize Chrome WebDriver: {str(e)}",
+                    Style.RESET_ALL
+                )
+
+            # Exit the script gracefully
+            sys.exit(1)
 
         return self
 
@@ -520,9 +573,15 @@ class JwScraper:
 
         # Wait for the dropdown to be present
         wait = WebDriverWait(self.driver, 10)
-        dropdown = wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, "jsDropdownMenu"))
-        )
+        try:
+            dropdown = wait.until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, "jsDropdownMenu")
+                )
+            )
+        except Exception as e:
+            print(f"Error locating dropdown menu: {e}")
+            return
 
         # Scroll the element into view
         self.driver.execute_script(
@@ -827,16 +886,15 @@ class BuildDb:
                 ignore_index=True
             )
 
-            print(filename, type(filename))
             video_path = os.path.join(csv_folder, filename)
-            self.videos.to_csv(
+            videos.to_csv(
                 video_path,
                 index=False,
                 encoding='utf-8'
             )
             print(
                 Fore.GREEN,
-                f"Saving {len(self.videos)} videos to {video_path}...",
+                f"Saving {len(videos)} videos to {video_path}...",
                 Style.RESET_ALL
             )
 
@@ -955,10 +1013,60 @@ class BuildDb:
             None
         """
 
+        print(
+            Fore.YELLOW,
+            "Checking for missing categories and videos...",
+            Style.RESET_ALL
+        )
+
+        # Validate videos in DB
+        with DatabaseContext() as db:
+            video_manager = VideoManager(db)
+            update = False
+
+            for idx, row in self.videos.iterrows():
+                if not row['exist']:
+                    exists = video_manager.name_to_id(row['video_name'])
+                    if exists:
+                        update = True
+                        self.videos.at[idx, 'exist'] = True
+                        print(
+                            Fore.GREEN,
+                            f"Video found in DB: {row['video_name']}",
+                            Style.RESET_ALL)
+
+                    else:
+                        print(
+                            Fore.RED,
+                            f"Missing video: {row['video_name']}",
+                            Style.RESET_ALL
+                        )
+
+            # Save the videos DataFrame to CSV after updating 'exist' status
+        if update:
+            video_path = os.path.join(csv_folder, "videos.csv")
+            self.videos.to_csv(
+                video_path,
+                index=False,
+                encoding='utf-8'
+            )
+            print(
+                Fore.GREEN,
+                f"Updated videos saved to: {video_path}",
+                Style.RESET_ALL
+            )
+
         # Collate information about missing items into DataFrames
         missing_major = self.major_categories[~self.major_categories['exist']]
         missing_sub = self.sub_categories[~self.sub_categories['exist']]
         missing_videos = self.videos[~self.videos['exist']]
+
+        print("Total videos:", len(self.videos))
+        print(
+            "Videos with exist=True:",
+            len(self.videos[self.videos['exist']])
+        )
+        print("Videos with exist=False:", len(missing_videos))
 
         # Remove videos in IGNORE_VIDEOS from missing_videos
         missing_videos = missing_videos[
