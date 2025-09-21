@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css')}}" />
+{% endblock %}
+
+{% block title %}
+Edit Profile
+{% endblock %}
+
+
+{% block content %}
+
+<div class="edit-profile"
+    data-profile-id="{{ profile.id }}" 
+    data-profile-image="{{ profile.image }}"
+>
+    <div class="container">
+        <div class="edit-profile-container">
+            <h1 class="edit-profile-title">Edit Profile</h1>
+            
+            <!-- Profile Area -->
+            <div class="profile-content">
+                <!-- User's icon -->
+                <div class="profile-avatar-section">
+                    <div class="avatar-container">
+                        <img src="{{ url_for('static', filename='img/profiles/' ~ profile.image) }}" 
+                             alt="Profile Avatar" 
+                             class="profile-avatar" 
+                             id="profileAvatar">
+                        <div class="avatar-overlay">
+                            <svg class="edit-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User's name -->
+                <div class="profile-form-section">
+                    <form class="profile-form" id="editProfileForm">
+                        <div class="form-group">
+                            <input type="text" 
+                                   class="profile-name-input" 
+                                   name="profile_name" 
+                                   value="{{ profile.name }}" 
+                                   placeholder="Profile Name"
+                                   maxlength="20"
+                                   required>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Viewing Activity Section -->
+            <div class="form-group">
+                <label class="section-label">Viewing Activity:</label>
+                <div class="watch-history-section">
+                    <div class="watch-history-header">
+                        <span class="history-count">{{ history_count }} videos watched recently</span>
+                        <button type="button" class="btn-clear-all" id="clearAllHistory">Clear All</button>
+                    </div>
+
+                    <!-- List of watched videos -->
+                    <div class="watch-history-list" id="watchHistoryList">
+
+                        {% for entry in watch_history %}
+                        {% set progress_percent = (entry.current_time / entry.duration * 100) if entry.duration > 0 else 0 %}
+                        <div class="history-item" data-video-id={{ entry.video_id }}>
+                            <div class="history-thumbnail">
+                                <img src="{{ entry.video_thumbnail }}" alt="{{ entry.video_name }}">
+                                {% if progress_percent > 0 %}
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ progress_percent }}%"></div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="history-details">
+                                <h4 class="history-title">{{ entry.video_name }}</h4>
+                                <p class="history-meta">{{ entry.watched_at }}</p>
+                            </div>
+                            <div class="history-actions">
+                                {% if progress_percent > 0 %}
+                                <button class="btn-mark-watched" data-video-id="{{ entry.video_id }}">Mark Watched</button>
+                                {% endif %}
+                                <button class="btn-remove-item" data-video-id={{ entry.video_id }}>×</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                    <div class="history-empty" id="historyEmpty" style="display: none;">
+                        <p>No viewing activity to show.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="submit" form="editProfileForm" class="btn-save">Save</button>
+                <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
+                <button type="button" class="btn-delete">Delete Profile</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Picture Selection Modal -->
+    <div class="modal fade" id="profilePicModal" tabindex="-1" aria-labelledby="profilePicModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="profilePicModalLabel">Select Profile Picture</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="carousel-profile-wrapper">
+                            <!-- Loading spinner -->
+                            <div id="modalLoading" class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+    
+                            <!-- Left button to go back one pic -->
+                            <button class="carousel-control-prev" type="button" data-bs-target="#modalProfilePicCarousel" data-bs-slide="prev" tabindex="-1" style="display: none;">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+    
+                            <!-- Profile picture carousel -->
+                            <div id="modalProfilePicCarousel" class="carousel slide" data-bs-interval="false" style="display: none;">
+                                <div class="carousel-inner">
+                                    <!-- Images will be loaded dynamically -->
+                                </div>
+                            </div>
+                            
+                            <!-- Right button to go to the next pic -->
+                            <button class="carousel-control-next" type="button" data-bs-target="#modalProfilePicCarousel" data-bs-slide="next" tabindex="-1" style="display: none;">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmPicSelection" disabled>Select Picture</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/profileEdit.js') }}"></script>
+
+{% endblock %}

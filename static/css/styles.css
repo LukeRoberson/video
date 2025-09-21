@@ -22,7 +22,6 @@ body {
     margin: 0 auto;
 }
 
-
 .character-card {
     width: 80%;
 }
@@ -91,128 +90,6 @@ body {
 .category-title {
     font-size: 1.2em;
     margin-bottom: 0.5em;
-}
-
-
-/* ===========================
-   VideoJS Custom Styles
-   ---------------------
-   Adds theatre mode button
-   Adds a progress bar overlay
-   =========================== */
-
-.theatre-mode {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 82vw !important;
-    height: auto !important;
-    z-index: 2000;
-    background: rgba(17, 17, 17, 0.98);
-    padding: 10px !important;
-    border-radius: 10px;
-}
-
-.theatre-mode .video-js {
-    width: 80vw !important;
-    max-width: 80vw !important;
-    aspect-ratio: 16 / 9;
-    height: auto !important;
-    max-height: 90vh !important;
-    margin: 0 auto;
-    display: block;
-    background: #111;
-}
-
-/* Hide the progress overlay in theatre mode */
-.theatre-mode .progress-overlay {
-    display: none;
-}
-
-.vjs-theatre-button .vjs-icon-placeholder:before {
-    content: "🖵"; /* Or use any emoji/icon you like */
-    font-size: 1.8em;
-}
-
-
-.video-player {
-    position: relative;
-}
-
-.progress-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 0 0 12px 12px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background-color: #28a745; /* Green color for progress */
-    transition: width 0.3s ease;
-}
-
-
-/* Make the chapters menu wider */
-/* Make the chapters menu wider and responsive */
-.video-js .vjs-chapters-button .vjs-menu,
-.video-js .vjs-menu[aria-labelledby*="chapters"] {
-    width: 400px !important;
-    max-width: 90vw !important;  /* Don't exceed 90% of viewport width */
-    min-height: 30vh !important;
-    height: auto !important;
-    max-height: 70vh !important;
-    white-space: normal;
-    word-break: break-word;
-    overflow-y: auto !important;
-    right: 0 !important;  /* Align to right edge of button */
-    left: auto !important;  /* Override default left positioning */
-}
-
-/* For smaller screens, adjust positioning and size */
-@media (max-width: 768px) {
-    .video-js .vjs-chapters-button .vjs-menu,
-    .video-js .vjs-menu[aria-labelledby*="chapters"] {
-        width: 90vw !important;
-        max-width: 90vw !important;
-        right: -20px !important;  /* Slight offset from right edge */
-        transform: translateX(-80%) !important;  /* Center it better */
-    }
-}
-
-@media (max-width: 480px) {
-    .video-js .vjs-chapters-button .vjs-menu,
-    .video-js .vjs-menu[aria-labelledby*="chapters"] {
-        width: 95vw !important;
-        max-width: 95vw !important;
-        transform: translateX(-85%) !important;
-    }
-}
-/* Alternative: Target the menu content wrapper */
-.video-js .vjs-chapters-button .vjs-menu-content {
-    max-height: 30vh !important;
-    overflow-y: auto !important;
-}
-
-/* Add padding and spacing to menu items */
-.video-js .vjs-menu-item {
-    padding: 10px 16px;
-    font-size: 1rem;
-    line-height: 1.3;
-    white-space: normal;
-    word-break: break-word;
-}
-
-/* Optional: Style hovered/selected chapter */
-.video-js .vjs-menu-item:hover,
-.video-js .vjs-menu-item.vjs-selected {
-    background: #222;
-    color: #fff;
 }
 
 

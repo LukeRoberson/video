@@ -1,0 +1,55 @@
+# A sample theme file in YAML format
+# Contains multiple documents separated by '---'
+# The first document contains main metadata
+# Subsequent documents contain sections of content
+#
+# Look at https://spacelift.io/blog/yaml for more details on YAML syntax
+# Go to https://www.yamllint.com/ to validate your YAML syntax
+
+---
+# Main file data
+title: A test theme page
+heading: Test Theme
+
+# A link to a banner image
+banner: https://cms-imgp.jw-cdn.org/img/p/202021167/univ/art/202021167_univ_lsr_lg.jpg
+
+---
+# A section of content
+section:
+- heading: Section 1.
+- paragraph: This is paragraph 1. It would typically be in a `<p>` tag.
+- paragraph: !!str This is paragraph 2. We're using tags to force this to be a string.
+- list:
+    - Point one
+    - Point two
+
+# A video snippet, containting the ID, start time and end time (in seconds)
+- video:
+    id: 1682
+    start: 30
+    end: 60
+
+# A quote, similar to how scriptures are formatted
+- quote: This is a quote, and is formattted differently.
+
+# A link, containing the URL and the text to display
+- link:
+    url: https://example.com
+    text: This is a link
+
+---
+# Another section of content
+section:
+- heading: Section 2.
+- paragraph: >
+    This is a longer paragraph.
+    Notice that it contains multiple sentences. This is known as a 'folding' string.
+    This is because of the '>' character at the end of the first line.
+    However, this will still be rendered as a single paragraph in HTML.
+- paragraph: |
+    This is also a longer paragraph of information.
+    This also contains multiple sentences. This is different to the 'folding' string above.
+    This is known as a 'block' string. This is because of the '|' character at the end of the first line.
+    New lines in this block string will be preserved in the rendered HTML.
+...

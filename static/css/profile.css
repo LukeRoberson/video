@@ -4,9 +4,13 @@
     Styles used when creating or editing a user profile.
 */
 
+/* ==================
+    1. Profile Modals
+   ================== */
+
 /* Center the viewport vertically and horizontally */
 .center-viewport {
-    min-height: calc(100vh - 150px); /* Adjust if your navbar is taller */
+    min-height: calc(100vh - 150px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,7 +35,7 @@
     max-height: 140px;
     object-fit: contain;
     border: 3px solid transparent;
-    border-radius: 50%; /* Makes image circular */
+    border-radius: 50%;
     transition: border-color 0.2s;
     cursor: pointer;
     background: #f8f9fa;
@@ -67,8 +71,471 @@
     opacity: 1;
 }
 
+.carousel-control-prev {
+    left: -50px;
+}
+
+.carousel-control-next {
+    right: -50px;
+}
+
 /* Focus style for carousel arrow buttons for accessibility */
 .carousel-control-prev:focus, .carousel-control-next:focus {
     outline: none;
     box-shadow: 0 0 0 2px #0d6efd33;
+}
+
+/* Profile action buttons (edit, delete) styling */
+.profile-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Show on hover for larger screens - updated selector */
+@media (min-width: 768px) {
+    .list-group-item:hover .profile-actions {
+        opacity: 1;
+    }
+}
+
+/* Always show on mobile/small screens */
+@media (max-width: 767px) {
+    .profile-actions {
+        opacity: 1;
+    }
+}
+
+.profile-actions .btn {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.profile-pic-option {
+    max-height: 140px;
+    object-fit: contain;
+    border: 3px solid transparent;
+    border-radius: 50%; /* Makes image circular */
+    transition: border-color 0.2s;
+    cursor: pointer;
+    background: #f8f9fa;
+    padding: 8px;
+}
+
+.modal-content {
+    background-color: #222 !important;
+    border: 1px solid #444;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: #444 !important;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+
+/* =====================
+    2. Profile Edit Page
+   ===================== */
+
+.edit-profile {
+    background-color: #141414;
+    min-height: 100vh;
+    padding: 40px 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.edit-profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.edit-profile-title {
+    color: white;
+    font-size: 48px;
+    font-weight: 400;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.profile-content {
+    display: flex;
+    gap: 60px;
+    margin-bottom: 40px;
+    align-items: center;
+}
+
+.profile-avatar-section {
+    flex-shrink: 0;
+}
+
+.avatar-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #333;
+    transition: all 0.3s ease;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatar-container:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.edit-icon {
+    width: 32px;
+    height: 32px;
+    color: white;
+}
+
+.profile-form-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-name-input {
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-size: 18px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.profile-name-input:focus {
+    border-color: #e50914;
+}
+
+.section-label {
+    color: #ccc;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.btn-save, .btn-cancel, .btn-delete {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.btn-save {
+    background: #e50914;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #f40612;
+}
+
+.btn-cancel {
+    background: transparent;
+    color: #ccc;
+    border: 1px solid #555;
+}
+
+.btn-cancel:hover {
+    background: #333;
+    color: white;
+}
+
+.btn-delete {
+    background: transparent;
+    color: #999;
+    border: 1px solid #333;
+}
+
+.btn-delete:hover {
+    background: #333;
+    color: #e50914;
+}
+
+
+@media (max-width: 768px) {
+    .profile-content {
+        flex-direction: column;
+        gap: 30px;
+        align-items: center;
+    }
+    
+    .edit-profile-title {
+        font-size: 32px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+
+/* =====================
+    3. Watch History
+   ===================== */
+
+.history-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-mark-watched {
+    background: transparent;
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-mark-watched:hover {
+    background: #4CAF50;
+    color: white;
+}
+
+.watch-history-section {
+    background: #222;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.watch-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.history-count {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.btn-clear-all {
+    background: transparent;
+    color: #e50914;
+    border: 1px solid #e50914;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-clear-all:hover {
+    background: #e50914;
+    color: white;
+}
+
+.watch-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.watch-history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.watch-history-list::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 3px;
+}
+
+.watch-history-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+.watch-history-list::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: #333;
+}
+
+.history-thumbnail {
+    position: relative;
+    width: 80px;
+    height: 45px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.history-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.progress-fill {
+    height: 100%;
+    background: #e50914;
+    transition: width 0.3s ease;
+}
+
+.history-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-title {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-meta {
+    color: #999;
+    font-size: 12px;
+    margin: 0;
+}
+
+.btn-remove-item {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #999;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.btn-remove-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.history-empty {
+    text-align: center;
+    color: #666;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+
+@media (max-width: 768px) {
+    .watch-history-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .history-item {
+        gap: 10px;
+    }
+    
+    .history-thumbnail {
+        width: 60px;
+        height: 34px;
+    }
+    
+    .history-title {
+        font-size: 13px;
+    }
+    
+    .history-meta {
+        font-size: 11px;
+    }
 }

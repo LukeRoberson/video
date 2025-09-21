@@ -2,10 +2,19 @@
 Module: web.py
 
 Define flask routes for the web application.
+    These are the web pages that users will interact with.
+    Does not include API endpoints.
+    Does not include dynamic pages (tags, speakers, characters, scriptures).
 
 Functions:
+    ensure_profile_selected:
+        Ensures that a profile is selected before accessing any web pages.
     inject_admin_status:
         Injects the admin status into the template context (for jinja).
+    admin_required:
+        Decorator to restrict access to admin-only routes.
+    inject_app_version:
+        Inject the application version into all templates.
 
 Routes:
     - /admin: Render the admin dashboard.
@@ -50,14 +59,19 @@ from flask import (
     render_template,
     make_response,
     abort,
+    redirect,
+    url_for,
     session,
+    request,
 )
+
 import random
 import os
 from typing import List, Dict, Any
 from collections import defaultdict
 from functools import wraps
 from typing import Callable
+import yaml
 
 # Custom imports
 from app.sql_db import (
@@ -95,6 +109,57 @@ banner_dir = os.path.join(
     'img',
     'banner'
 )
+
+
+@web_bp.before_app_request
+def ensure_profile_selected() -> None | Response:
+    """
+    Ensure that a profile is selected before accessing any web pages.
+
+    This function checks if a profile is selected in the session.
+    If no profile is selected, redirects user to the profile selection page.
+
+    Args:
+        None
+
+    Returns:
+        None | Response: Returns None if the profile is selected,
+            otherwise returns a redirect response
+            to the profile selection page.
+    """
+
+    # Allow static and profile API routes
+    if request.endpoint in ('static',):
+        return
+    if request.blueprint == 'profile_api':
+        return
+
+    # Allow the profile selection/creation pages
+    if request.endpoint in (
+        'web_pages.select_profile',
+        'web_pages.create_profile',
+    ):
+        return
+
+    # Only redirect on normal page loads that expect HTML
+    if (
+        request.method in ('GET', 'HEAD') and
+        request.accept_mimetypes.accept_html
+    ):
+        # Get the active profile from the session
+        active = session.get('active_profile', None)
+
+        # If no profile yet, send them to selector
+        if active is None:
+            next_url = request.url or url_for('web_pages.home')
+            return make_response(
+                redirect(
+                    url_for(
+                        'web_pages.select_profile',
+                        next=next_url
+                    )
+                )
+            )
 
 
 @web_bp.app_context_processor
@@ -170,28 +235,33 @@ def home() -> Response:
         Response: A rendered HTML 'welcome' page
     """
 
-    banner_pics = [
-        {
-            "filename": "banner_1.jpg",
-            "description": "Sermon on the Mount",
-        },
-        {
-            "filename": "banner_2.jpg",
-            "description": "Prayer",
-        },
-        {
-            "filename": "banner_3.jpg",
-            "description": "People of all Nations",
-        },
-        {
-            "filename": "banner_4.jpg",
-            "description": "Guidance",
-        },
-        {
-            "filename": "banner_5.jpg",
-            "description": "Prophets of Old",
-        },
-    ]
+    # Get a list of files in the themes directory
+    themes_dir = os.path.join('static', 'themes')
+    themes = []
+    if os.path.exists(themes_dir):
+        themes = [
+            f for f in os.listdir(themes_dir)
+            if (
+                os.path.isfile(os.path.join(themes_dir, f)) and
+                f.lower() != 'sample.yaml'
+            )
+        ]
+
+    # Get banners and titles from each theme file
+    banners = []
+    for theme in themes:
+        with open(os.path.join(themes_dir, theme), 'r', encoding='utf-8') as f:
+            try:
+                theme_data = list(yaml.safe_load_all(f))
+                banner = {
+                    'image': theme_data[0].get('banner', None),
+                    'title': theme_data[0].get('title', 'No Title'),
+                    'path': theme[:-5],  # Remove .yaml extension
+                }
+                banners.append(banner)
+            except yaml.YAMLError as e:
+                print(f"Error loading theme file {theme}: {e}")
+                themes.remove(theme)
 
     # Get the session profile ID from the request context
     in_progress_videos = []
@@ -280,7 +350,7 @@ def home() -> Response:
     return make_response(
         render_template(
             "home.html",
-            banner_pics=banner_pics,
+            banners=banners,
             in_progress_videos=in_progress_videos,
             latest_monthly=latest_monthly,
             latest_news=latest_news,
@@ -379,6 +449,94 @@ def create_profile() -> Response:
         render_template(
             'create_profile.html',
             profile_pics=profile_pics
+        )
+    )
+
+
+@web_bp.route(
+    "/edit_profile/<int:profile_id>",
+    methods=["GET"]
+)
+def edit_profile(profile_id: int) -> Response:
+    """
+    Render the profile editing page.
+
+    Args:
+        profile_id (int): The ID of the profile to edit.
+
+    Returns:
+        Response: A rendered HTML page for editing the specified profile.
+    """
+
+    # Get the profile details from the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Get the user's profile
+        profile = profile_mgr.read(profile_id=profile_id)
+
+        if not profile:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Profile not found"
+                ),
+                404
+            )
+
+        profile = profile[0]
+
+        # Get watch history
+        history = profile_mgr.read_watch_history(profile_id=profile_id)
+
+        # Sort from newest to oldest, stripping fractional seconds
+        if history:
+            # Strip fractional seconds from all timestamps
+            for item in history:
+                item['watched_at'] = item['watched_at'].split('.')[0]
+
+            # Sort by cleaned timestamps
+            history.sort(key=lambda x: x['watched_at'], reverse=True)
+
+        # Count items in history
+        history_count = len(history) if history else 0
+
+    # Get video name and thumbnail for each history item
+    if history:
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+
+            for item in history:
+                video_details = video_mgr.get(id=item['video_id'])
+                if video_details:
+                    item['video_name'] = video_details[0].get('name')
+                    item['video_thumbnail'] = video_details[0].get('thumbnail')
+                    item['duration'] = video_details[0].get('duration')
+
+                else:
+                    item['video_name'] = 'Unknown Video'
+                    item['video_thumbnail'] = 'default-thumbnail.jpg'
+                    item['duration'] = 0
+
+    else:
+        history = []
+
+    # Get available profile pictures
+    profile_pics = []
+    profile_pics_path = os.path.join('static', 'img', 'profiles')
+    if os.path.exists(profile_pics_path):
+        profile_pics = [
+            f for f in os.listdir(profile_pics_path)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))
+        ]
+
+    return make_response(
+        render_template(
+            'edit_profile.html',
+            profile=profile,
+            watch_history=history,
+            history_count=history_count,
+            profile_pics=profile_pics,
         )
     )
 
@@ -620,3 +778,11 @@ def scriptures() -> Response:
             scriptures_by_book=sorted_scriptures_by_book,
         )
     )
+
+
+@web_bp.route('/.well-known/appspecific/com.chrome.devtools.json')
+def devtools_discovery():
+    """
+    Suppress 404 errors for Chrome DevTools discovery requests.
+    """
+    return []

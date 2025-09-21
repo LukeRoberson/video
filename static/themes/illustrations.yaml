@@ -1,0 +1,37 @@
+# Illustrations
+# Videos with illustrations that help explain concepts
+
+---
+# Main file data
+title: Illustrations
+heading: Illustrations
+# https://www.jw.org/en/library/jw-meeting-workbook/may-june-2021-mwb/Life-and-Ministry-Meeting-Schedule-for-May-17-23-2021/Illustrate-Key-Points/
+banner: https://cms-imgp.jw-cdn.org/img/p/202021167/univ/art/202021167_univ_lsr_lg.jpg
+
+---
+section:
+- heading: Evolution vs Creation
+
+# James Mantz: “You Created All Things” (Rev. 4:11)
+- paragraph: |
+    James Mantz uses the example of a missionary in Cambodia.
+    He used a picture motorbike parts, and asked if the parts could come together by chance to make a motorbike.
+- video:
+    id: 322
+    start: 358
+    end: 402
+
+---
+section:
+- heading: Showing Respect to Older People
+
+# Samuel F. Herd: Jehovah Does Not Forget Your Love (Ps. 71:18)
+- paragraph: |
+    An experience from Samuel Herds childhood on the farm.
+    Using the two mules, Jim and Old Jack, His father taught him to show respect for older ones.
+- video:
+    id: 335
+    start: 132
+    end: 196
+
+...
