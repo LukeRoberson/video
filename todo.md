@@ -1,66 +1,58 @@
-# Version 3
+# Version 1.2.0
 
-## Project
-- [x] Create a new branch in github
-- [x] Build a beta container for this version, add to stack
-- [x] Simplify NGINX config
-- [x] Add NGINX config to point some traffic to beta container
-- [x] Add records in CloudFlare
-- [x] Change nav bar colour for devel
-- [x] Find a method to backup local.db on Docker
-- [x] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
+# Bugs
 
-</br></br>
-
-
-## Profiles
-- [x] Profile selection screen when opening the app
-- [x] Delete profile from profile selection
-- [x] Edit profile from profile selection (go to settings page)
-- [x] Settings page
-  - [x] Edit profile name
-  - [x] Edit profile icon
-  - [x] Show watch history, newest first
-  - [x] Mark in progress videos as watched
-  - [x] Clear individual items from history
-  - [x] Clear all watch history
-  - [x] Delete profile
-  - [x] Clean up CSS and JS
+- [ ] Profile edit not working
+  * broken in live, working in devel (containers)
+- [ ] Snippets not working
+  * broken in live, working in devel (containers)
+- [ ] Issue #4
+  - [ ] Video categories missing
+    * Good news according to Jesus
+  - [ ] Progress bar is wrong on some video categories
+    * Children/Dramas has two videos, progress bar says 70
+- [ ] Admin page can't add categories to videos
 
 </br></br>
 
 
-## Video Player
-- [x] Time range to play a specific part of a video
-- [x] Share video link at a particular time
-- [x] Hover over the bar to show the time index at that point
-- [x] Video bar: Show time passed, not just remaining
+# Scraper
+
+- [ ] Issue #8
+  - [ ] Get real categories (not just 'latest')
+  - [ ] Add date to new videos
 
 </br></br>
 
 
-## Themes / Banners
-- [x] Create YAML files (or similar) to contain information on a topic
-  - [x] Contains some basic information on the topic
-  - [x] Includes videos (or parts of videos) about that topic
-- [x] Load these (or a selection of them) as banners on the home page
-- [x] Clicking a banner loads a page on that theme
+# Video Player
+
+- [ ] Issue #7
+  - [ ] When in theatre mode, click outside of the player to close theatre mode
+- [ ] Touch Screen; Tap the video to pause/play
+  * Currently this does nothing, need to use play/pause buttons
 
 </br></br>
 
 
-## Refinements
-- [x] Can't edit profile when running from a container (devel... is bad; localhost is fine)
-  - On localhost, works most of the time, but sometimes just redirects straight to home screen
-  - On devel container, always redirects straight to home screen
-- [x] Phone: Hide theatre mode and picture in picture
-- [x] Phone: playing a video automatically goes full screen
-- [x] Phone: display edit and delete buttons on profile selection (not hover over)
-- [x] Phone: Display theme somewhere near banner
-- [x] Prevent two videos from playing on one page
+# UI
+
+- [ ] Issue #6
+  - [ ] Add badge to tags to show how many times they are used
+  - [ ] Sort tags (on tag page) alphabetically or by count
+- [ ] Nav bar: slider to hide watched videos
+- [ ] Stats page
+  - [ ] Total videos watched / total videos
+  - [ ] Video watch time / total watch time
 
 </br></br>
 
+
+# Other
+
+- [ ] Refactor to use TypeScript
+
+</br></br>
 
 
 
@@ -74,17 +66,17 @@
 - [ ] Use consistent logging, not just print statements
 - [ ] Investigate accessibility for template files (e.g., 'alt' tags for images)
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
-- [ ] Log IP addresses that access the site
 
 </br></br>
 
 
 ## UI
-- [ ] Nav bar: Button to hide watched videos
 - [ ] Video details pages:
   - [ ] Share Links
   - [ ] Organise scriptures by book first
 - [ ] Scriptures page: Book can link to the book overview video
+- [ ] Homepage:
+  - [ ] Random (unwatched) morning worship for the day
 
 </br></br>
 
@@ -96,23 +88,10 @@
 </br></br>
 
 
-## Theme Based on Scripture
-- [ ] See on the main page as banners
-- [ ] A theme like 'Sermon on the mount'
-- [ ] Include videos related to the theme
-- [ ] Lay out nicely, not just videos based on a category
-- [ ] Suggested categories on the main page (topics for the main carousel)
-
-</br></br>
-
-
 ## Database
-- [ ] Add DB entries for illustrations
-- [ ] Add DB entries for ministry ideas (group topics)
 - [ ] DB entry for video type (talk, interview, dramatization, etc)
 - [ ] Search Method: Support searching based on duration
 - [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
-- [ ] Get dates for all bible characters
 - [ ] Fields for extra links, such as links to WT articles
 
 </br></br>
@@ -132,11 +111,8 @@
 ## General Improvements
 - [ ] Code Improvement
   - [ ] Add a helper function to get similar videos
-  - [ ] Add error handler pages for 500, 400, etc. (like 404)
 - [ ] Profiles
-  - [ ] Watch history page for each profile
   - [ ] 'Watch later' feature
-  - [ ] Goal watch time per week (like LinkedIn Learning)
   - [ ] Options for a PIN on profiles
   - [ ] Include profile's watch history in recommended video calculation
   - [ ] Simplified mode (slider) to hide some details
@@ -159,7 +135,6 @@
 - [ ] AI
   - [ ] Model to transcribe to captions
   - [ ] Model to summarize content (for searching)
-- [ ] Stats page (fun stats globally and for the user)
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
 - [ ] Improved scripture management
@@ -173,6 +148,7 @@
 - [ ] Video2vec
   - [ ] Similar to word2vec
   - [ ] Build a vector database representing each video
+- [ ] Investigate React
 
 </br></br>
 
