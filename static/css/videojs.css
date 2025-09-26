@@ -1,68 +1,170 @@
-/* 
-    videojs.css
-    Style sheet for VideoJS player customizations.
-*/
+/**
+ * Video.js Player Customizations
+ * ==============================
+ * 
+ * @file videojs.css
+ * @description Custom styles for Video.js player including theatre mode,
+ *              progress controls, context menus, and chapter navigation
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @dependencies
+ *   - Video.js 8.x core player
+ *   - Custom theatre mode plugin
+ *   - Chapter navigation plugin
+ *   - Progress overlay system
+ * 
+ * @components
+ *   - .video-player: Main player container
+ *   - .theatre-mode: Full-screen theatre viewing
+ *   - .progress-overlay: In-progress video indicators
+ *   - .video-context-menu: Right-click context menu
+ *   - .snippet-indicator: Video snippet mode display
+ * 
+ * @features
+ *   - Responsive 16:9 aspect ratio
+ *   - Theatre mode with backdrop
+ *   - Custom context menu with URL copying
+ *   - Chapter menu with responsive sizing
+ *   - Video progress overlays
+ *   - Snippet mode indicators
+ */
 
-/* ===========================
-   Global Video Player Styles
-   =========================== */
+/* ==========================================================================
+   1. CORE VIDEO PLAYER STYLES
+   ========================================================================== */
+
+/**
+ * Main video player container
+ * Responsive wrapper with centered layout
+ * 
+ * @component video-player
+ */
 
 .video-player {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    position: relative;              /* For overlay positioning */
+    width: 100%;                     /* Responsive width */
+    max-width: 800px;               /* Reasonable maximum size */
+    margin: 0 auto;                 /* Center alignment */
+    border-radius: 12px;            /* Rounded corners */
+    overflow: hidden;               /* Clean edges */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Elevation shadow */
 }
 
+/**
+ * Video.js player responsive sizing
+ * Maintains 16:9 aspect ratio across all screen sizes
+ */
 .video-js {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9; /* Modern browsers */
+    width: 100% !important;         /* Force full width */
+    height: auto !important;        /* Auto height for aspect ratio */
+    aspect-ratio: 16 / 9;           /* Modern aspect ratio property */
+    background: #000;               /* Black background during loading */
+    
+    /* Fallback for browsers without aspect-ratio support */
+    position: relative;
+}
+
+/**
+ * Fallback aspect ratio for older browsers
+ * Uses padding-bottom technique when aspect-ratio unavailable
+ */
+@supports not (aspect-ratio: 16 / 9) {
+    .video-js {
+        height: 0;
+        padding-bottom: 56.25%;     /* 16:9 aspect ratio (9/16 = 0.5625) */
+    }
+    
+    .video-js > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 }
 
 
-/* ===========================
-   Theatre Mode
-   ---------------------
-   Adds theatre mode button
-   =========================== */
+/* ==========================================================================
+   2. THEATRE MODE COMPONENT
+   ========================================================================== */
 
-/* Controls the outer div */
+/**
+ * Theatre mode full-screen overlay
+ * Centers video player with backdrop for immersive viewing
+ * 
+ * @component theatre-mode
+ * @state Applied when theatre mode is activated
+ */
 .theatre-mode {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: 90vw !important;
-    min-width: 80vw !important;
-    height: auto !important;
-    z-index: 2000;
-    background: rgba(17, 17, 17, 0.98);
-    padding: 10px !important;
-    border-radius: 10px;
-    margin: 0 !important;
+    position: fixed !important;      /* Fixed positioning for overlay */
+    top: 50% !important;            /* Center vertically */
+    left: 50% !important;           /* Center horizontally */
+    transform: translate(-50%, -50%) !important; /* Perfect centering */
+    width: 90vw !important;         /* 90% of viewport width */
+    min-width: 80vw !important;     /* Minimum width constraint */
+    height: auto !important;        /* Auto height for aspect ratio */
+    z-index: 2000;                  /* Above all other content */
+    background: rgba(17, 17, 17, 0.98); /* Dark backdrop */
+    padding: 10px !important;       /* Small padding around video */
+    border-radius: 10px;            /* Rounded overlay */
+    margin: 0 !important;           /* Remove any margins */
+    
+    /* Backdrop blur for modern browsers */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    /* Smooth entry animation */
+    animation: theatre-enter 0.3s ease-out;
 }
 
-/* Controls the actual video player inside the div */
+/**
+ * Theatre mode entry animation
+ * Smooth scale and fade-in effect
+ */
+@keyframes theatre-enter {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/**
+ * Video player within theatre mode
+ * Optimized sizing for full-screen viewing
+ */
 .theatre-mode .video-js {
-    width: 100% !important;
-    max-width: 100% !important;
-    aspect-ratio: 16 / 9;
-    height: auto !important;
-    max-height: 90vh !important;
-    margin: 0 auto;
-    display: block;
-    background: #111;
+    width: 100% !important;         /* Full width of container */
+    max-width: 100% !important;     /* Override max-width constraint */
+    aspect-ratio: 16 / 9;           /* Maintain aspect ratio */
+    height: auto !important;        /* Auto height calculation */
+    max-height: 90vh !important;    /* Prevent overflow on short screens */
+    margin: 0 auto;                 /* Center alignment */
+    display: block;                 /* Block display for centering */
+    background: #111;               /* Dark background */
+    border-radius: 8px;             /* Slightly rounded corners */
 }
 
-/* Hide the progress overlay in theatre mode */
+/**
+ * Hide progress overlay in theatre mode
+ * Clean viewing experience without distractions
+ */
 .theatre-mode .progress-overlay {
-    display: none;
+    display: none;                  /* Hidden in theatre mode */
 }
 
+/**
+ * Custom theatre mode button icon
+ * Uses emoji for universal recognition
+ */
 .vjs-theatre-button .vjs-icon-placeholder:before {
-    content: "🖵";
-    font-size: 1.8em;
+    content: "🖵";                  /* Monitor/screen emoji */
+    font-size: 1.8em;              /* Large size for visibility */
 }
 
 

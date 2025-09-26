@@ -1,112 +1,281 @@
-/* 
-    styles.css
-    Main stylesheet for Flask video template.
-    Styles layout, navigation bar, category rows, and video thumbnails.
-*/
+/**
+ * Main Application Styles
+ * =======================
+ * 
+ * @file styles.css
+ * @description Core styles for the video application including layout, navigation,
+ *              typography, components, and responsive design
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @theme Dark Theme
+ *   - Primary background: #181818
+ *   - Text color: #f0f0f0
+ *   - Accent colors: Bootstrap variants
+ * 
+ * @components
+ *   - .app-layout: Main application layout container
+ *   - .navbar: Navigation bar component
+ *   - .category-row: Video category sections
+ *   - .character-card: Character profile cards
+ *   - .search-input: Advanced search components
+ * 
+ * @responsive
+ *   - Mobile: < 576px
+ *   - Tablet: 576px - 768px
+ *   - Desktop: > 768px
+ *   - TV/Large: > 1200px
+ */
 
+/* ==========================================================================
+   1. GLOBAL STYLES & LAYOUT
+   ========================================================================== */
 
-/* ===========================
-   General Page Styles
-   =========================== */
+/**
+ * Base body styling
+ * Dark theme with consistent typography
+ */
 body {
-    background-color: #181818;
-    color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+    background-color: #181818;          /* Dark charcoal background */
+    color: #f0f0f0;                     /* Light gray text for contrast */
+    font-family: Arial, sans-serif;     /* System font stack */
+    margin: 0;                          /* Reset default margins */
+    padding: 0;                         /* Reset default padding */
+    line-height: 1.6;                   /* Improved readability */
+    
+    /* Smooth font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.body-content {
-    padding: 0;
-    width: 100%;
-    margin: 0 auto;
+/**
+ * Main content container
+ * Full-width layout without constraints
+ */
+.app-layout {
+    padding: 0;                         /* No padding for full-width design */
+    width: 100%;                        /* Full viewport width */
+    margin: 0 auto;                     /* Center alignment */
+    min-height: 100vh;                  /* Full viewport height */
 }
 
+/**
+ * Character card component
+ * Responsive card layout for character profiles
+ * 
+ * @component character-card
+ * @responsive Mobile-first approach
+ */
 .character-card {
-    width: 80%;
+    width: 80%;                         /* Default width for larger screens */
+    margin: 0 auto;                     /* Center alignment */
+    background: rgba(40, 40, 40, 0.8);  /* Semi-transparent background */
+    border-radius: 8px;                 /* Rounded corners */
+    padding: 1.5rem;                    /* Internal spacing */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Hover effects */
 }
 
+/**
+ * Character card hover state
+ * Subtle lift effect for interactivity
+ */
+.character-card:hover {
+    transform: translateY(-2px);        /* Slight lift */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+}
 
+/* --------------------------------------------------------------------------
+   RESPONSIVE: Mobile Optimizations
+   -------------------------------------------------------------------------- */
+
+/**
+ * Mobile-specific character card adjustments
+ * Increased width and adjusted layout for touch interfaces
+ */
 @media (max-width: 576px) {
     .character-card {
-        width: 95%;
+        width: 95%;                     /* Nearly full width on mobile */
+        padding: 1rem;                  /* Reduced padding */
     }
+    
+    /**
+     * Mobile layout adjustments for character details
+     * Stack elements vertically and adjust text alignment
+     */
     .character-details .text-end {
-        text-align: left !important;
-        margin-top: 1em;
+        text-align: left !important;    /* Left-align text on mobile */
+        margin-top: 1em;                /* Additional spacing */
     }
 }
 
-
+/**
+ * Landscape mobile and small tablet optimizations
+ * Handle horizontal orientation constraints
+ */
 @media (max-width: 768px) and (orientation: landscape) {
     .container {
-        max-width: 98vw;
-        padding-left: 0;
+        max-width: 98vw;               /* Use almost full viewport width */
+        padding-left: 0;               /* Remove horizontal padding */
         padding-right: 0;
     }
+    
     .card {
-        width: 98vw !important;
+        width: 98vw !important;        /* Force full width for cards */
     }
 }
 
+/* ==========================================================================
+   2. NAVIGATION COMPONENT
+   ========================================================================== */
 
-/* ===========================
-   Navigation Bar
-   =========================== */
+/**
+ * Main navigation bar
+ * Dark theme with horizontal layout and spacing
+ * 
+ * @component navbar
+ * @note Should work with Bootstrap navbar classes
+ */
 .navbar {
-    background: #232323;
-    padding: 1em;
-    display: flex;
-    gap: 1em;
+    background: #232323;               /* Darker than body background */
+    padding: 1rem;                    /* Generous padding for touch targets */
+    display: flex;                    /* Flexbox layout */
+    gap: 1rem;                        /* Consistent spacing between items */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle depth */
+    position: sticky;                 /* Stick to top on scroll */
+    top: 0;
+    z-index: 1000;                   /* Above other content */
 }
 
+/**
+ * Navigation links styling
+ * Clean, accessible link design
+ */
 .navbar a {
-    color: #f0f0f0;
-    text-decoration: none;
-    font-weight: bold;
+    color: #f0f0f0;                   /* Light text */
+    text-decoration: none;              /* Remove underlines */
+    font-weight: bold;                  /* Emphasis for navigation */
+    padding: 0.5rem 1rem;               /* Touch-friendly padding */
+    border-radius: 4px;                 /* Subtle rounding */
+    transition: background-color 0.2s ease, color 0.2s ease; /* Smooth hovers */
 }
 
-.custom-dropdown-menu {
-    background-color: #343a40; /* Dark background */
-    color: #fff; /* White text */
+/**
+ * Navigation link hover states
+ * Improved user feedback
+ */
+.navbar a:hover,
+.navbar a:focus {
+    background-color: rgba(255, 255, 255, 0.1); /* Light overlay */
+    color: #fff;                      /* Pure white on hover */
 }
 
-.custom-dropdown-menu .dropdown-item {
-    color: #fff; /* White text for dropdown items */
+/**
+ * Custom dropdown menu styling
+ * Consistent with dark theme
+ * 
+ * @component navbar dropdown
+ * @note Uses Bootstrap's .dropdown-menu class
+ */
+.navbar .dropdown-menu {
+    background-color: #343a40;        /* Dark background */
+    color: #fff;                      /* White text */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+    border-radius: 4px;               /* Match navbar links */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Strong shadow */
 }
 
-.custom-dropdown-menu .dropdown-item:hover {
-    background-color: #495057; /* Slightly lighter background on hover */
+/**
+ * Navbar dropdown menu items
+ * Scoped to navbar to avoid affecting search dropdowns
+ */
+.navbar .dropdown-item {
+    color: #fff !important;           /* White text for dropdown items */
+    padding: 0.5rem 1rem;            /* Consistent padding */
+    transition: background-color 0.2s ease; /* Smooth hover */
+    background-color: transparent;    /* Transparent background */
 }
 
+/**
+ * Navbar dropdown item hover state
+ * Enhanced styling for navigation dropdown items
+ */
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+    background-color: #495057 !important; /* Lighter background on hover */
+    color: #fff !important;           /* Maintain white text */
+}
 
-/* ===========================
-   Category Rows
-   =========================== */
+/* ==========================================================================
+   3. CONTENT ORGANIZATION
+   ========================================================================== */
+
+/**
+ * Category row component
+ * Organizes video content into themed sections
+ * 
+ * @component category-row
+ * @note Used for video groupings on homepage and category pages
+ */
 .category-row {
-    margin-bottom: 2em;
+    margin-bottom: 2rem;               /* Consistent spacing between sections */
+    padding: 0 1rem;                  /* Horizontal padding for content */
 }
 
-.category-title {
-    font-size: 1.2em;
-    margin-bottom: 0.5em;
+/**
+ * Category section titles
+ * Emphasizes section headers
+ */
+.category-row__title {
+    font-size: 1.2em;                 /* Slightly larger than body text */
+    margin-bottom: 0.5rem;            /* Space below title */
+    font-weight: 600;                 /* Semi-bold emphasis */
+    color: #fff;                      /* Pure white for headers */
+    border-left: 4px solid #007bff;   /* Blue accent bar */
+    padding-left: 1rem;               /* Space after accent */
 }
 
+/* ==========================================================================
+   4. UI COMPONENTS
+   ========================================================================== */
 
-/* ===========================
-   Badges (tags)
-   =========================== */
-.badge-dark-grey {
-    background-color: #343a40; /* Dark grey */
-    color: #fff; /* White text */
-    border-radius: 0.25rem; /* Optional: Adjust border radius */
-    padding: 0.5em 0.75em; /* Optional: Adjust padding */
+/**
+ * Badge component for tags and categories
+ * Dark theme badge with hover effects
+ * 
+ * @component badge
+ * @modifier .badge--interactive - Clickable badges with hover
+ */
+.badge {
+    background-color: #343a40;        /* Dark gray background */
+    color: #fff;                      /* White text for contrast */
+    border-radius: 0.25rem;           /* Slightly rounded corners */
+    padding: 0.5em 0.75em;           /* Comfortable padding */
+    font-size: 0.875em;              /* Slightly smaller than body */
+    font-weight: 500;                 /* Medium weight */
+    display: inline-block;            /* Inline with block characteristics */
+    margin: 0.25rem;                  /* Small margin around badges */
+    transition: all 0.2s ease;       /* Smooth transitions */
 }
 
+/**
+ * Interactive badge hover state
+ * For clickable/linkable badges
+ */
+.badge--interactive:hover {
+    background-color: #495057;        /* Lighter background */
+    transform: translateY(-1px);     /* Subtle lift effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Small shadow */
+    cursor: pointer;                  /* Pointer cursor */
+}
 
-/* ===========================
-   Character Details Page
-   =========================== */
+/**
+ * Character details layout
+ * Flexible layout for character profile pages
+ * 
+ * @component character-details
+ * @responsive Wraps on smaller screens
+ */
 .character-details {
     display: flex;
     flex-wrap: wrap; /* Allow wrapping when content overflows */

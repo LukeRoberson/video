@@ -1,54 +1,123 @@
-/* ===========================
-   Theme Page Styles
-   =========================== */
+/**
+ * Theme Page Component Styles
+ * ===========================
+ * 
+ * @file theme.css
+ * @description Styles for individual theme pages with modern card layouts,
+ *              gradient backgrounds, and interactive content sections
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @components
+ *   - .theme-container: Main theme page wrapper with gradient background
+ *   - .theme-card: Central content card with glass-morphism effect
+ *   - .theme-header: Page header with title and accent decoration
+ *   - .theme-section: Content sections with various content types
+ *   - .content-item: Individual content blocks (text, lists, quotes, links)
+ * 
+ * @features
+ *   - Glass-morphism design with backdrop blur
+ *   - Responsive grid layout
+ *   - Interactive hover effects
+ *   - Modern typography with gradient accents
+ *   - Smooth transitions and animations
+ */
 
-.theme-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    padding: 2rem 0;
+/* ==========================================================================
+   1. THEME PAGE LAYOUT
+   ========================================================================== */
+
+/**
+ * Main theme page container
+ * Full-height layout with gradient background
+ * 
+ * @component theme-container
+ */
+
+.theme-page {
+    min-height: 100vh;                 /* Full viewport height */
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); /* Dark gradient */
+    padding: 2rem 0;                  /* Vertical breathing room */
+    display: flex;                    /* Flexbox for centering */
+    align-items: flex-start;          /* Top alignment */
+    justify-content: center;          /* Horizontal centering */
 }
 
+/**
+ * Main theme content card
+ * Glass-morphism design with modern styling
+ * 
+ * @component theme-card
+ * @note Uses backdrop-filter for modern browsers
+ */
 .theme-card {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: rgba(23, 23, 23, 0.95);
-    border-radius: 20px;
+    max-width: 1200px;                /* Reasonable max width */
+    width: 90%;                       /* Responsive width */
+    margin: 0 auto;                  /* Center alignment */
+    background: rgba(23, 23, 23, 0.95); /* Semi-transparent dark */
+    border-radius: 20px;             /* Large rounded corners */
+    overflow: hidden;                /* Hide overflow for clean edges */
+    
+    /* Glass-morphism effects */
+    backdrop-filter: blur(10px);      /* Background blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    
+    /* Layered shadow effects */
     box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    overflow: hidden;
+        0 20px 60px rgba(0, 0, 0, 0.3),  /* Large depth shadow */
+        0 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle border */
+    
+    /* Smooth transitions */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ===========================
-   Header Styles
-   =========================== */
+/* ==========================================================================
+   2. THEME PAGE HEADER
+   ========================================================================== */
 
+/**
+ * Theme page header section
+ * Gradient background with centered title and accent decoration
+ * 
+ * @component theme-header
+ */
 .theme-header {
-    background: linear-gradient(135deg, #3a3a3a 0%, #1e1e1e 100%);
-    padding: 3rem 2rem 2rem;
-    text-align: center;
-    position: relative;
+    background: linear-gradient(135deg, #3a3a3a 0%, #1e1e1e 100%); /* Header gradient */
+    padding: 3rem 2rem 2rem;         /* Generous padding */
+    text-align: center;              /* Center-aligned content */
+    position: relative;              /* For pseudo-element positioning */
 }
 
+/**
+ * Decorative accent line below header
+ * Blue gradient line for visual emphasis
+ */
 .theme-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 3px;
-    background: linear-gradient(90deg, #007bff, #0056b3);
-    border-radius: 2px;
+    content: '';                     /* Empty pseudo-element */
+    position: absolute;              /* Absolute positioning */
+    bottom: 0;                       /* Align to bottom */
+    left: 50%;                       /* Center horizontally */
+    transform: translateX(-50%);     /* Perfect centering */
+    width: 100px;                    /* Fixed width accent */
+    height: 3px;                     /* Thin accent line */
+    background: linear-gradient(90deg, #007bff, #0056b3); /* Blue gradient */
+    border-radius: 2px;              /* Slightly rounded */
 }
 
+/**
+ * Main theme page title
+ * Large, light typography for modern appearance
+ * @deprecated .theme-title - Legacy class, use .theme-header__title
+ */
+.theme-header__title,
 .theme-title {
-    color: #ffffff;
-    font-size: 2.5rem;
-    font-weight: 300;
-    margin: 0;
-    letter-spacing: 1px;
+    color: #ffffff;                  /* Pure white text */
+    font-size: 2.5rem;              /* Large title size */
+    font-weight: 300;               /* Light weight for elegance */
+    margin: 0;                       /* Remove default margins */
+    letter-spacing: 1px;             /* Subtle letter spacing */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle depth */
 }
 
 /* ===========================
@@ -234,51 +303,98 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* ===========================
-   Responsive Design
-   =========================== */
+/* ==========================================================================
+   5. RESPONSIVE DESIGN
+   ========================================================================== */
 
+/**
+ * Tablet optimizations
+ * Adjusted spacing and sizing for medium screens
+ */
 @media (max-width: 768px) {
-    .theme-container {
-        padding: 1rem;
+    .theme-page {
+        padding: 1rem;              /* Reduced padding */
     }
     
     .theme-card {
-        margin: 0 1rem;
-        border-radius: 15px;
+        margin: 0 1rem;             /* Side margins */
+        border-radius: 15px;        /* Smaller border radius */
+        width: calc(100% - 2rem);   /* Account for margins */
     }
     
     .theme-header {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.5rem;      /* Reduced header padding */
     }
     
-    .theme-title {
-        font-size: 2rem;
+    .theme-header__title {
+        font-size: 2rem;           /* Smaller title */
     }
     
     .content-item {
-        padding: 1rem 1.5rem;
+        padding: 1rem 1.5rem;      /* Reduced content padding */
     }
     
     .section-heading {
-        padding: 2rem 1.5rem 1rem;
+        padding: 2rem 1.5rem 1rem; /* Adjusted section padding */
     }
     
     .video-item {
-        padding: 1.5rem;
+        padding: 1.5rem;           /* Reduced video padding */
+    }
+    
+    /* Adjust interactive elements for touch */
+    .styled-link {
+        padding: 1rem 1.25rem;     /* Larger touch targets */
+        font-size: 1rem;           /* Readable text size */
     }
 }
 
+/**
+ * Mobile optimizations
+ * Compact layout for small screens
+ */
 @media (max-width: 480px) {
-    .theme-title {
-        font-size: 1.5rem;
+    .theme-page {
+        padding: 0.5rem;           /* Minimal page padding */
+    }
+    
+    .theme-card {
+        margin: 0.5rem;            /* Minimal margins */
+        border-radius: 12px;       /* Smaller radius */
+        width: calc(100% - 1rem);  /* Account for margins */
+    }
+    
+    .theme-header {
+        padding: 1.5rem 1rem;      /* Compact header */
+    }
+    
+    .theme-header__title {
+        font-size: 1.5rem;         /* Mobile-appropriate title */
+        letter-spacing: 0.5px;     /* Reduced letter spacing */
     }
     
     .section-heading h2 {
-        font-size: 1.5rem;
+        font-size: 1.5rem;         /* Smaller section headings */
     }
     
     .content-item {
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 1rem;     /* Compact content padding */
+        font-size: 1rem;           /* Standard text size */
+    }
+    
+    .styled-list li {
+        font-size: 1rem;           /* Consistent list text */
+        padding: 0.4rem 0 0.4rem 1.5rem; /* Compact list items */
+    }
+    
+    .quote-item {
+        margin: 0.75rem 0;         /* Reduced quote margins */
+        padding: 1rem;             /* Compact quote padding */
+    }
+    
+    .styled-link {
+        display: block;             /* Full-width on mobile */
+        text-align: center;        /* Center text */
+        margin: 1rem 0;           /* Vertical spacing */
     }
 }

@@ -1,35 +1,99 @@
-/* 
-    errors.css
-    Stylesheet for Error Pages.
-*/
+/**
+ * Error Page Styles
+ * =================
+ * 
+ * @file errors.css
+ * @description Styles for HTTP error pages (404, 500, etc.)
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @components
+ *   - .error-page: Main error page container
+ *   - .error-code: Large error code display
+ *   - .error-message: Error description text
+ *   - .error-action: Action buttons and links
+ */
 
+/* ==========================================================================
+   ERROR PAGE LAYOUT
+   ========================================================================== */
+
+/**
+ * Error page body layout
+ * Centered content with full viewport height
+ */
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif; /* Modern system font */
+    display: flex;                    /* Flexbox for centering */
+    flex-direction: column;           /* Stack elements vertically */
+    align-items: center;              /* Horizontal centering */
+    justify-content: center;          /* Vertical centering */
+    height: 100vh;                    /* Full viewport height */
+    margin: 0;                        /* Remove default margins */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Subtle gradient */
 }
 
-.container {
-    text-align: center;
+/**
+ * Main error container
+ * Centers all error content
+ */
+.error-page {
+    text-align: center;               /* Center align text */
+    max-width: 600px;                /* Reasonable max width */
+    padding: 2rem;                   /* Breathing room */
+    background: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+    border-radius: 12px;             /* Rounded corners */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Elevation shadow */
 }
 
-h1 {
-    font-size: 4rem;
-    margin-bottom: 0.5rem;
-    color: #e63946;
+/**
+ * Large error code display
+ * Prominent styling for error identification
+ */
+.error-page__code {
+    font-size: 4rem;                 /* Large, attention-grabbing */
+    font-weight: 700;                /* Bold weight */
+    margin-bottom: 0.5rem;           /* Space below code */
+    color: #e63946;                  /* Red error color */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle depth */
 }
 
-p {
-    font-size: 1.25rem;
-    margin-bottom: 2rem;
+/**
+ * Error description text
+ * Clear, readable error message
+ */
+.error-page__message {
+    font-size: 1.25rem;             /* Larger than body text */
+    margin-bottom: 2rem;            /* Space before actions */
+    color: #333;                    /* Dark text for readability */
+    line-height: 1.5;               /* Improved line spacing */
 }
 
-a {
-    font-size: 1.25rem;
-    color: #457b9d;
-    text-decoration: none;
-    font-weight: 500;
+/**
+ * Action link styling
+ * Clear call-to-action for navigation
+ */
+.error-page__action {
+    font-size: 1.25rem;             /* Match message size */
+    color: #457b9d;                 /* Blue action color */
+    text-decoration: none;          /* Remove underline */
+    font-weight: 500;               /* Medium emphasis */
+    padding: 0.75rem 1.5rem;       /* Button-like padding */
+    border: 2px solid #457b9d;     /* Matching border */
+    border-radius: 6px;             /* Rounded button */
+    transition: all 0.3s ease;     /* Smooth hover transition */
+    display: inline-block;          /* Block characteristics */
+}
+
+/**
+ * Action link hover state
+ * Enhanced visual feedback
+ */
+.error-page__action:hover,
+.error-page__action:focus {
+    background-color: #457b9d;      /* Filled background */
+    color: #fff;                    /* White text */
+    transform: translateY(-2px);   /* Subtle lift effect */
+    box-shadow: 0 4px 12px rgba(69, 123, 157, 0.3); /* Blue shadow */
 }

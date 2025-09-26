@@ -1,114 +1,157 @@
-/* 
-    tv.css
-    Stylesheet for large screens (TV's).
-    Enhances the experience for the larger screen, as well as remote control for input.
-    
-    This is controlled by JavaScript, so it takes precedence over media queries.
-    Includes a desktop override, so we can use desktop styles on a TV.
-*/
+/**
+ * TV Mode Styles
+ * ==============
+ * 
+ * @file tv.css
+ * @description Large screen optimizations for TV and living room viewing
+ *              with remote control navigation and focus management
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @scope TV Mode (.tv-mode class applied via JavaScript)
+ * @scope Desktop Override (.desktop-mode for standard experience on TV)
+ * 
+ * @features
+ *   - Remote control navigation with focus indicators
+ *   - Large touch targets and typography
+ *   - Carousel optimizations for 10-foot interface
+ *   - Hidden cursor and keyboard-friendly interactions
+ *   - Visual indicators for navigation context
+ * 
+ * @responsive
+ *   - Designed for screens 40"+ at 6-10 foot viewing distance
+ *   - Overrides standard responsive breakpoints
+ *   - JavaScript-controlled, not media query dependent
+ */
 
+/* ==========================================================================
+   1. TV MODE BASE STYLES
+   ========================================================================== */
 
-/* ===========================
-   1. TV Mode Styles
-   =========================== */
+/**
+ * TV mode body modifications
+ * Enhanced typography and hidden cursor for remote control use
+ * 
+ * @state .tv-mode Applied via JavaScript for TV interface
+ */
 
 body.tv-mode {
-    font-size: 1.2em;
-    cursor: none;
+    font-size: 1.2em;                /* Larger text for distance viewing */
+    cursor: none;                    /* Hide cursor for remote control use */
+    
+    /* Improved font rendering for large screens */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-body.tv-mode .tv-focused {
-    transform: scale(1.05) !important;
-    box-shadow: 0 0 20px rgba(0, 123, 255, 0.5) !important;
-    z-index: 100 !important;
-    position: relative !important;
-    border: 3px solid #007bff !important;
+/**
+ * Universal focus indicator for TV navigation
+ * Applied to any focused element via JavaScript
+ * 
+ * @state .tv-focused Applied to currently focused element
+ */
+.tv-mode .tv-focused {
+    transform: scale(1.05) !important; /* Subtle scale for attention */
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.5) !important; /* Blue glow */
+    z-index: 100 !important;         /* Ensure visibility above other content */
+    position: relative !important;   /* Required for z-index */
+    border: 3px solid #007bff !important; /* Strong blue border */
+    border-radius: 8px;              /* Rounded focus indicator */
 }
 
-body.tv-mode * {
-    transition: border 0.2s ease, transform 0.2s ease;
+/**
+ * Global transition effects for TV mode
+ * Smooth animations for focus changes and interactions
+ */
+.tv-mode * {
+    transition: border 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-body.tv-mode .btn {
-    padding: 0.8rem 1.5rem;
-    font-size: 1.1em;
+/**
+ * Enhanced button styling for TV mode
+ * Larger touch targets and typography
+ */
+.tv-mode .btn {
+    padding: 0.8rem 1.5rem;         /* Larger padding for easier targeting */
+    font-size: 1.1em;               /* Increased font size */
+    min-height: 44px;               /* Minimum touch target size */
 }
 
-body.tv-mode .category-row {
-    margin-bottom: 4em;
-}
-
-
-
-
-/* ===========================
-   1a. Thumbnails and carousel
-   =========================== */
-
-/* General thumbnail styles */
-body.tv-mode .thumbnail {
-    border-radius: 8px !important;
-    overflow: hidden !important;
-}
-
-body.tv-mode .thumbnail:hover {
-    transform: none !important;
-}
-
-/* For non-carousel thumbnails (like in grid layouts) */
-body.tv-mode .thumbnails .thumbnail,
-body.tv-mode .row .thumbnail:not(.carousel *) {
-    width: 280px !important;
-    height: 220px !important;
-    margin: 15px !important;
-}
-
-body.tv-mode .thumbnails .thumbnail-title,
-body.tv-mode .row .thumbnail:not(.carousel *) .thumbnail-title {
-    font-size: 1.1em !important;
-    padding: 0.8em !important;
+/**
+ * Category row spacing for TV layout
+ * Increased spacing for better visual separation
+ */
+.tv-mode .category-row {
+    margin-bottom: 4em;             /* Large spacing between sections */
 }
 
 
-/* CAROUSEL SPECIFIC STYLES */
-/* Make carousel containers properly sized */
-body.tv-mode .carousel {
-    width: 100% !important;
-    min-height: 300px !important;
-    overflow: hidden !important;
-    margin-bottom: 2em !important;
-    padding: 0 !important;
+
+
+/* ==========================================================================
+   2. TV MODE CAROUSEL OPTIMIZATION
+   ========================================================================== */
+
+/**
+ * Carousel container optimizations for TV viewing
+ * Fixed dimensions and proper overflow handling
+ * 
+ * @component tv-carousel
+ * @note Optimized for 3 items per slide at 10-foot viewing distance
+ */
+.tv-mode .carousel {
+    width: 100% !important;         /* Full width utilization */
+    min-height: 300px !important;   /* Minimum height for content */
+    overflow: hidden !important;     /* Hide overflow content */
+    margin-bottom: 2em !important;  /* Spacing between carousels */
+    padding: 0 !important;          /* Remove default padding */
+    border-radius: 12px;            /* Rounded carousel container */
 }
 
-body.tv-mode .carousel-inner {
-    width: 100% !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+/**
+ * Carousel inner wrapper
+ * Contains all carousel items with proper layout
+ */
+.tv-mode .carousel-inner {
+    width: 100% !important;         /* Full width of parent */
+    padding: 0 !important;          /* No internal padding */
+    overflow: hidden !important;     /* Clean overflow handling */
 }
 
-body.tv-mode .carousel-item {
-    width: 100% !important;
-    display: flex !important;
-    gap: 30px !important;
-    padding: 20px 40px !important;
-    align-items: flex-start !important;
-    overflow: hidden !important;
-    justify-content: center !important; /* Changed from flex-start to center */
-    flex-wrap: nowrap !important;
+/**
+ * Individual carousel slide layout
+ * Flexbox layout optimized for TV viewing
+ */
+.tv-mode .carousel-item {
+    width: 100% !important;         /* Full slide width */
+    display: flex !important;       /* Flexbox for item layout */
+    gap: 30px !important;           /* Spacing between thumbnails */
+    padding: 20px 40px !important;  /* Comfortable padding */
+    align-items: flex-start !important; /* Top alignment */
+    overflow: hidden !important;     /* Hide overflow content */
+    justify-content: center !important; /* Center alignment */
+    flex-wrap: nowrap !important;   /* Prevent wrapping */
 }
 
-/* Ensure only active carousel item is visible */
-body.tv-mode .carousel-item:not(.active) {
-    display: none !important;
+/**
+ * Hide inactive carousel slides
+ * Only show the currently active slide
+ */
+.tv-mode .carousel-item:not(.active) {
+    display: none !important;       /* Hide inactive slides */
 }
 
-body.tv-mode .carousel-item.active {
-    display: flex !important;
+.tv-mode .carousel-item.active {
+    display: flex !important;       /* Show active slide */
 }
 
-/* Force carousel to only show 3 items per slide */
-body.tv-mode .carousel-item .thumbnail:nth-child(n+4) {
-    display: none !important;
+/**
+ * Limit visible thumbnails per slide
+ * Force 3-item limit for optimal TV viewing
+ */
+.tv-mode .carousel-item .thumbnail:nth-child(n+4) {
+    display: none !important;       /* Hide 4th+ thumbnails */
 }
 
 /* Carousel thumbnails - make them properly sized */

@@ -1,3 +1,4 @@
+{# -*- mode: jinja2 -*- #}
 <!--
     ==========================================================================
     Categories Page Template
@@ -53,16 +54,17 @@ Home
                         
                     <!-- The progress bar (full width of the parent) -->
                     {% if active_profile != 'guest' %}
-                    <div class="progress" style="height: 24px; margin-bottom: 8px; position: relative;">
-                        
-                        <!-- Get the percentage watched -->
-                        {% set percent = (sub_cat.watched / sub_cat.count * 100) if sub_cat.count > 0 else 0 %}
+                    
+                    <!-- Get the percentage watched -->
+                    {% set percent = (sub_cat.watched / sub_cat.count * 100) if sub_cat.count > 0 else 0 %}
+                    
+                    <div class="progress" style="height: 24px; margin-bottom: 8px; position: relative; --progress-width: {{ percent }}%;">
                         
                         <!-- The progress bar overlay -->
                         <div  
                             class="progress-bar"
                             role="progressbar"
-                            style="width: {{ percent }}%;"
+                            style="width: var(--progress-width);"
                             aria-valuenow="{{ percent|round(0) }}"
                             aria-valuemin="0"
                             aria-valuemax="100">  
@@ -70,7 +72,7 @@ Home
 
                         <!-- Add the percentage label over the top -->
                         <span class="progress-label {% if percent < 10 %}progress-label-outside{% endif %}"
-                            {% if percent < 5 %}style="left: {{ percent }}%;"{% endif %}>
+                            {% if percent < 5 %}style="left: var(--progress-width);"{% endif %}>
                             {{ sub_cat.watched }}/{{ sub_cat.count }} ({{ percent|round(1) }}%)
                         </span>
                     </div>

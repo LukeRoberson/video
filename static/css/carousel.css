@@ -1,198 +1,367 @@
-/* 
-    carousel.css
-    Stylesheet for video carousels
-    Used in category pages and home page
-*/
+/**
+ * Carousel Component Styles
+ * =========================
+ * 
+ * @file carousel.css
+ * @description Styles for video carousel components including scroll arrows,
+ *              custom scrollbars, carousel controls, captions, and progress bars
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @dependencies
+ *   - Bootstrap 5.x (carousel components)
+ *   - Base styles from styles.css
+ * 
+ * @components
+ *   - .carousel-scroll-arrow: Navigation arrows for carousel scrolling
+ *   - .carousel-scrollbar: Custom scrollbar styling
+ *   - .carousel-controls: Carousel navigation controls
+ *   - .carousel-caption: Overlay captions for carousel items
+ *   - .carousel-progress: Progress indicators
+ * 
+ * @responsive
+ *   - Mobile: < 768px (arrows hidden, simplified controls)
+ *   - Tablet: 768px - 1024px (standard layout)
+ *   - Desktop: > 1024px (full features)
+ */
 
-/* ==============================
-   1. Scroll Arrows for Carousels
-   ============================== */
+/* ==========================================================================
+   1. CAROUSEL SCROLL ARROWS
+   ========================================================================== */
+
+/**
+ * Main scroll arrow component for carousel navigation
+ * 
+ * @component carousel-scroll-arrow
+ * @modifier .carousel-scroll-arrow--left - Left navigation arrow
+ * @modifier .carousel-scroll-arrow--right - Right navigation arrow
+ * @state :hover - Increased opacity on hover
+ * @deprecated .scroll-arrow - Legacy class, use .carousel-scroll-arrow
+ */
+.carousel-scroll-arrow,
 .scroll-arrow {
     position: absolute;
-    top: 50%;                           /* Position the arrow at the vertical center */
-    transform: translateY(-50%);        /* Adjust for the arrow's height */
-    z-index: 2;
-    background: rgba(40, 40, 40, 0.8);  /* Semi-transparent dark background */
+    top: 50%;                           /* Center vertically */
+    transform: translateY(-50%);        /* Compensate for element height */
+    z-index: 2;                         /* Above carousel content */
+    background: rgba(40, 40, 40, 0.8);  /* Semi-transparent overlay */
     border: none;
     color: #fff;
-    width: 40px;
-    height: 50%;
+    width: 40px;                        /* Minimum touch target 40px */
+    height: 50%;                        /* Cover half of carousel height */
     cursor: pointer;
-    display: flex;                      /* Initially hidden */
+    display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    border-radius: 0;
-    font-size: 0;
+    opacity: 0.7;                       /* Subtle appearance by default */
+    transition: opacity 0.2s ease-in-out; /* Smooth hover transition */
+    border-radius: 0;                   /* Sharp edges for edge positioning */
+    font-size: 0;                       /* Hide any text content */
+    
+    /* Accessibility improvements */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
+/**
+ * Left arrow indicator using CSS triangles
+ * Creates a right-pointing triangle using borders
+ */
+.carousel-scroll-arrow--left::before,
 .scroll-arrow.left::before {
     content: '';
     display: block;
     width: 0;
     height: 0;
-    border-top: 24px solid transparent;
-    border-bottom: 24px solid transparent;
-    border-right: 24px solid #fff;
+    border-top: 24px solid transparent;    /* Triangle top edge */
+    border-bottom: 24px solid transparent; /* Triangle bottom edge */
+    border-right: 24px solid #fff;         /* Triangle face (pointing left) */
 }
 
+/**
+ * Right arrow indicator using CSS triangles
+ * Creates a left-pointing triangle using borders
+ */
+.carousel-scroll-arrow--right::before,
 .scroll-arrow.right::before {
     content: '';
     display: block;
     width: 0;
     height: 0;
-    border-top: 24px solid transparent;
-    border-bottom: 24px solid transparent;
-    border-left: 24px solid #fff;
+    border-top: 24px solid transparent;    /* Triangle top edge */
+    border-bottom: 24px solid transparent; /* Triangle bottom edge */
+    border-left: 24px solid #fff;          /* Triangle face (pointing right) */
 }
 
+/**
+ * Hover state for improved user feedback
+ */
+.carousel-scroll-arrow:hover,
 .scroll-arrow:hover {
-    opacity: 1;
+    opacity: 1;                         /* Full opacity on hover */
 }
 
+/**
+ * Left arrow positioning and styling
+ * Positioned at the left edge with rounded right corners
+ */
+.carousel-scroll-arrow--left,
 .scroll-arrow.left {
     left: 0;
-    border-radius: 0px 8px 8px 0px;
+    border-radius: 0 8px 8px 0;         /* Rounded right edge only */
 }
 
+/**
+ * Right arrow positioning and styling
+ * Positioned at the right edge with rounded left corners
+ */
+.carousel-scroll-arrow--right,
 .scroll-arrow.right {
     right: 0;
-    border-radius: 8px 0px 0px 8px;
+    border-radius: 8px 0 0 8px;         /* Rounded left edge only */
 }
 
-/* Hide scroll arrows on screens smaller than 768px */
+/* --------------------------------------------------------------------------
+   RESPONSIVE: Mobile Optimization
+   -------------------------------------------------------------------------- */
+
+/**
+ * Hide scroll arrows on mobile devices
+ * Touch scrolling is preferred over click navigation
+ * 
+ * @media Mobile and small tablets
+ */
 @media (max-width: 768px) {
+    .carousel-scroll-arrow,
     .scroll-arrow {
-        display: none !important;
+        display: none !important;       /* Force hide on mobile */
     }
 }
 
 
-/* ===========================
-   2. Custom Scrollbar Styling
-   =========================== */
-.thumbnails::-webkit-scrollbar {
-    height: 10px;
-    background: #232323;
-    border-radius: 8px;
+/* ==========================================================================
+   2. CUSTOM SCROLLBAR STYLING
+   ========================================================================== */
+
+/**
+ * Custom webkit scrollbar for carousel thumbnails
+ * Provides a consistent dark theme scrollbar
+ * 
+ * @note Webkit-only (Chrome, Safari, Edge)
+ * @fallback Default browser scrollbar for Firefox
+ */
+.carousel-thumbnails::-webkit-scrollbar {
+    height: 10px;                       /* Horizontal scrollbar height */
+    background: #232323;               /* Dark background matching theme */
+    border-radius: 8px;                /* Rounded scrollbar track */
 }
 
-.thumbnails::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: 8px;
-    border: 2px solid #232323;
+/**
+ * Scrollbar thumb (draggable part)
+ * Styled to match the dark theme with hover states
+ */
+.carousel-thumbnails::-webkit-scrollbar-thumb {
+    background: #444;                   /* Medium gray thumb */
+    border-radius: 8px;                /* Rounded thumb */
+    border: 2px solid #232323;         /* Border creates padding effect */
+    
+    /* Smooth transitions */
+    transition: background-color 0.2s ease;
 }
 
-.thumbnails::-webkit-scrollbar-thumb:hover {
-    background: #666;
+/**
+ * Scrollbar thumb hover state
+ * Lighter color for better user feedback
+ */
+.carousel-thumbnails::-webkit-scrollbar-thumb:hover {
+    background: #666;                   /* Lighter gray on hover */
 }
 
-/* ===========================
-   3. Carousel Controls
-   =========================== */
+/* ==========================================================================
+   3. BOOTSTRAP CAROUSEL CONTROLS
+   ========================================================================== */
+
+/**
+ * Custom styling for Bootstrap banner carousel controls
+ * Reduces opacity by default, full opacity on hover
+ * 
+ * @component #bannerCarousel
+ * @state :hover - Reveals controls with full opacity
+ */
 #bannerCarousel .carousel-control-prev,
 #bannerCarousel .carousel-control-next {
-    opacity: 0.2;
-    transition: opacity 0.2s;
+    opacity: 0.2;                       /* Subtle by default */
+    transition: opacity 0.2s ease-in-out; /* Smooth reveal */
 }
 
+/**
+ * Show controls on carousel hover
+ * Improves user experience by revealing controls when needed
+ */
 #bannerCarousel:hover .carousel-control-prev,
 #bannerCarousel:hover .carousel-control-next {
-    opacity: 1;
+    opacity: 1;                         /* Full visibility on hover */
 }
 
+/**
+ * Custom styling for carousel control icons
+ * Semi-transparent background with hover effects
+ */
 #bannerCarousel .carousel-control-prev-icon,
 #bannerCarousel .carousel-control-next-icon {
     background-color: rgba(9, 3, 34, 0.35); /* Semi-transparent blue */
-    border-radius: 8px;
-    padding: 36px 18px;
-    box-shadow: 0 2px 8px rgba(3, 26, 48, 0.15);
-    transition: background-color 0.2s, box-shadow 0.2s;
+    border-radius: 8px;                /* Rounded corners */
+    padding: 36px 18px;               /* Generous touch target */
+    box-shadow: 0 2px 8px rgba(3, 26, 48, 0.15); /* Subtle shadow */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
 }
 
+/**
+ * Enhanced styling for carousel control icons on hover
+ * Darker background and stronger shadow for better visibility
+ */
 #bannerCarousel:hover .carousel-control-prev-icon,
 #bannerCarousel:hover .carousel-control-next-icon {
-    background-color: rgba(16, 54, 90, 0.7);
-    box-shadow: 0 4px 16px rgba(6, 30, 54, 0.25);
+    background-color: rgba(16, 54, 90, 0.7); /* Darker blue on hover */
+    box-shadow: 0 4px 16px rgba(6, 30, 54, 0.25); /* Enhanced shadow */
 }
 
-/* ===========================
-   4. Carousel Captions
-   =========================== */
+/* ==========================================================================
+   4. CAROUSEL CAPTIONS
+   ========================================================================== */
+
+/**
+ * Overlay captions for carousel items
+ * Semi-transparent background with full-width coverage
+ * 
+ * @component carousel-caption
+ * @note Extends Bootstrap's default carousel caption
+ */
 .carousel-caption {
-    background: rgba(0, 0, 0, 0.55); /* Semi-transparent black */
-    border-radius: 0px;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-    left: 0;
+    background: rgba(0, 0, 0, 0.55);   /* Semi-transparent black overlay */
+    border-radius: 0;                  /* Sharp edges for full coverage */
+    padding: 1.5rem 2rem;             /* Generous padding for readability */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); /* Subtle depth shadow */
+    left: 0;                          /* Full width coverage */
     right: 0;
-    bottom: 0;
+    bottom: 0;                        /* Anchored to bottom */
 }
 
+/**
+ * Typography styling for carousel caption content
+ * White text with shadow for readability over images
+ */
 .carousel-caption h1, 
 .carousel-caption h5, 
 .carousel-caption p {
-    color: #fff;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    color: #fff;                      /* Pure white text */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7); /* Strong text shadow */
+    margin-bottom: 0.5rem;            /* Consistent spacing */
 }
 
-/* ===========================
-   5. Progress Bars
-   =========================== */
+/* ==========================================================================
+   5. PROGRESS INDICATORS
+   ========================================================================== */
+
+/**
+ * Custom progress bars for video/content progress
+ * Dark theme with green progress indication
+ * 
+ * @component carousel-progress
+ * @modifier .progress-bar - The actual progress fill
+ * @modifier .progress-label - Text label overlay
+ * @modifier .progress-label-outside - Label positioned outside bar
+ */
+.carousel-progress,
 .progress {
-    background-color: #343a40;          /* Dark grey background */
-    border-radius: 0.25rem;             /* Rounded corners */
+    background-color: #343a40;          /* Dark gray background */
+    border-radius: 0.25rem;             /* Slightly rounded corners */
     overflow: hidden;                   /* Prevent inner bar overflow */
-    height: 24px;                       /* Height of the progress bar */
-    margin-bottom: 8px;                 /* Space below the progress bar */
+    height: 24px;                       /* Standard progress bar height */
+    margin-bottom: 8px;                 /* Spacing below progress bar */
+    position: relative;                 /* For label positioning */
 }
 
+/**
+ * Progress bar fill indicator
+ * Green fill with smooth animation
+ * 
+ * @note Supports both new BEM classes and legacy Bootstrap classes
+ */
+.carousel-progress__bar,
 .progress-bar {
-    background-color: #28a745;          /* Green */
-    transition: width 0.4s ease;        /* Smooth transition for width changes */
+    background-color: #28a745 !important; /* Bootstrap success green - force override */
+    height: 100%;                       /* Full height of container */
+    transition: width 0.4s ease-in-out; /* Smooth progress animation */
+    border-radius: inherit;             /* Match container radius */
 }
 
+/**
+ * Progress label text overlay
+ * Positioned inside the progress bar with proper contrast
+ * 
+ * @note Supports both new BEM classes and legacy classes
+ */
+.carousel-progress__label,
 .progress-label {
     position: absolute;
-    left: 12px;
+    left: 12px;                         /* Left padding */
     top: 0;
-    height: 100%;
+    height: 100%;                       /* Full height alignment */
     display: flex;
-    align-items: center;
-    color: #fff;
-    font-weight: bold;
-    white-space: nowrap;
-    transition: color 0.2s, left 0.2s;
-    z-index: 2;
+    align-items: center;                /* Vertical centering */
+    color: #fff;                        /* White text for contrast */
+    font-weight: bold;                  /* Emphasis for readability */
+    white-space: nowrap;                /* Prevent text wrapping */
+    transition: color 0.2s ease, left 0.2s ease; /* Smooth transitions */
+    z-index: 2;                         /* Above progress bar */
 }
 
+/**
+ * Label positioned outside progress bar
+ * Used when label would be unreadable inside
+ */
+.carousel-progress__label--outside,
 .progress-label-outside {
-    transform: translateX(0.5em);
-    color: #fff;                        /* Or #222 for dark text */
-    text-shadow: 0 1px 4px #232323;
+    transform: translateX(0.5em);       /* Slight offset from bar */
+    color: #fff;                        /* Maintain white color */
+    text-shadow: 0 1px 4px #232323;    /* Shadow for readability */
 }
 
+/* --------------------------------------------------------------------------
+   RESPONSIVE: Progress Bar Adaptations
+   -------------------------------------------------------------------------- */
 
-/* Medium screens */
+/**
+ * Medium screen optimizations
+ * Smaller progress bars and adjusted typography
+ */
 @media (max-width: 768px) {
-    .progress {
-        height: 16px;
+    .carousel-progress {
+        height: 16px;                   /* Reduced height for mobile */
     }
-    .progress-label {
-        font-weight: normal;
-        font-size: 0.8em;
+    
+    .carousel-progress__label {
+        font-weight: normal;            /* Less bold on smaller screens */
+        font-size: 0.8em;              /* Smaller text */
     }
 }
 
-/* Small screens */
+/**
+ * Small screen optimizations
+ * Minimal progress bars, hidden labels
+ */
 @media (max-width: 414px) {
-    .progress {
-        height: 8px;
+    .carousel-progress {
+        height: 8px;                    /* Minimal height */
     }
-    .progress-label {
+    
+    .carousel-progress__label {
         font-weight: normal;
-        font-size: 0;
+        font-size: 0;                   /* Hide text labels entirely */
     }
 }
 

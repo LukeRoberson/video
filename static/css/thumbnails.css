@@ -1,53 +1,228 @@
-/* 
-    thumbnails.css
-    Stylesheet for video thumbnails
-    Used in carousels, video grids (tags, speakers, etc), and search results
-*/
+/**
+ * Video Thumbnail Styles
+ * ======================
+ * 
+ * @file thumbnails.css
+ * @description Styles for video thumbnail displays across carousels, grids,
+ *              and search results with responsive layout support
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @components
+ *   - .video-thumbnail: Individual video thumbnail card
+ *   - .thumbnail-grid: Grid layout for thumbnails
+ *   - .thumbnail-carousel: Horizontal scrolling thumbnail container
+ *   - .thumbnail-overlay: Hover and metadata overlays
+ * 
+ * @responsive
+ *   - Mobile: < 576px (single column, reduced padding)
+ *   - Tablet: 576px - 768px (2-3 columns)
+ *   - Desktop: > 768px (4+ columns, full features)
+ */
 
+/* ==========================================================================
+   1. THUMBNAIL CONTAINERS & LAYOUT
+   ========================================================================== */
 
-/* ===========================
-   1. Thumbnails Container
-   =========================== */
+/**
+ * Video card container
+ * Main wrapper for video thumbnail sections with responsive padding
+ * 
+ * @component video-card
+ * @responsive Padding reduces on smaller screens
+ */
 
 .video-card {
-    padding-left: 3em;
-    padding-right: 3em;
-    padding-top: 3em;
-    padding-bottom: 3em;
+    padding: 3rem;                    /* Generous padding for desktop */
+    background: transparent;          /* No background by default */
 }
 
+/**
+ * Vertical spacing between content sections
+ * Consistent gap between video card sections
+ * @deprecated .vertical-gap - Legacy class, use .video-card__spacer
+ */
+.video-card__spacer,
 .vertical-gap {
-    margin-bottom: 4rem;
+    margin-bottom: 4rem;             /* Large spacing for desktop */
 }
 
+/* --------------------------------------------------------------------------
+   RESPONSIVE: Thumbnail Container Adaptations
+   -------------------------------------------------------------------------- */
+
+/**
+ * Tablet optimization
+ * Reduced padding for medium screens
+ */
 @media (max-width: 768px) {
     .video-card {
-        padding-left: 2em;
-        padding-right: 2em;
+        padding: 2rem;               /* Reduced padding */
     }
-    .vertical-gap {
-        margin-bottom: 3rem;
+    
+    .video-card__spacer {
+        margin-bottom: 3rem;         /* Reduced spacing */
     }
 }
 
+/**
+ * Mobile optimization
+ * Minimal padding for small screens
+ */
 @media (max-width: 576px) {
     .video-card {
-        padding-left: 1em;
-        padding-right: 1em;
+        padding: 1rem;               /* Minimal padding */
     }
-    .vertical-gap {
-        margin-bottom: 2rem;
+    
+    .video-card__spacer {
+        margin-bottom: 2rem;         /* Compact spacing */
     }
 }
 
-/* The wrapper for the thumbnails, used in carousels.
-   Contains thumbnails and left/right arrows */
+/**
+ * Thumbnail wrapper component
+ * Container for horizontal scrolling thumbnail rows with navigation
+ * 
+ * @component thumbnail-wrapper
+ * @note Contains both thumbnails and scroll arrows
+ * @deprecated .thumbnails-wrapper - Legacy class, use .thumbnail-wrapper
+ */
+.thumbnail-wrapper,
 .thumbnails-wrapper {
-    position: relative;
-    overflow: hidden;
+    position: relative;              /* For absolutely positioned arrows */
+    overflow: hidden;                /* Hide scrollbar and overflow content */
+    border-radius: 8px;             /* Rounded container */
 }
 
-/* A row of thumbnails, within the wrapper */
+/**
+ * Thumbnail row container
+ * Horizontal scrolling container for thumbnail items
+ * 
+ * @component thumbnail-row
+ * @note Supports smooth scrolling behavior
+ */
+.thumbnail-row {
+    display: flex;                   /* Horizontal flexbox layout */
+    gap: 1rem;                      /* Spacing between thumbnails */
+    overflow-x: auto;               /* Horizontal scrolling */
+    scroll-behavior: smooth;        /* Smooth scrolling animation */
+    padding: 1rem 0;               /* Vertical padding */
+    
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;          /* Firefox: thin scrollbar */
+    scrollbar-color: #444 #232323; /* Firefox: thumb and track colors */
+}
+
+/**
+ * Webkit scrollbar customization
+ * Consistent dark theme scrollbars for Chromium browsers
+ */
+.thumbnail-row::-webkit-scrollbar {
+    height: 8px;                    /* Horizontal scrollbar height */
+    background: #232323;            /* Track color */
+}
+
+.thumbnail-row::-webkit-scrollbar-thumb {
+    background: #444;               /* Thumb color */
+    border-radius: 4px;             /* Rounded thumb */
+    border: 1px solid #232323;     /* Border for separation */
+}
+
+.thumbnail-row::-webkit-scrollbar-thumb:hover {
+    background: #666;               /* Lighter on hover */
+}
+
+/* ==========================================================================
+   2. INDIVIDUAL THUMBNAIL COMPONENTS
+   ========================================================================== */
+
+/**
+ * Individual video thumbnail component
+ * Card-based design with image, title, and metadata
+ * 
+ * @component video-thumbnail
+ * @modifier .video-thumbnail--featured - Larger size for featured content
+ * @modifier .video-thumbnail--compact - Smaller size for dense layouts
+ */
+.video-thumbnail {
+    flex: 0 0 auto;                 /* Don't grow/shrink, maintain size */
+    width: 280px;                   /* Standard thumbnail width */
+    background: rgba(40, 40, 40, 0.8); /* Semi-transparent background */
+    border-radius: 12px;            /* Rounded corners */
+    overflow: hidden;               /* Hide overflow content */
+    transition: all 0.3s ease;     /* Smooth hover transitions */
+    cursor: pointer;                /* Indicate clickability */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle elevation */
+    position: relative;             /* For absolute positioning of overlays */
+}
+
+/**
+ * Thumbnail hover effects
+ * Enhanced styling and subtle animation
+ */
+.video-thumbnail:hover {
+    transform: translateY(-4px);    /* Lift effect */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+    background: rgba(50, 50, 50, 0.9); /* Slightly lighter background */
+}
+
+/**
+ * Thumbnail image container
+ * Maintains aspect ratio and proper sizing
+ */
+.video-thumbnail__image {
+    width: 100%;                    /* Full width of container */
+    height: 158px;                  /* 16:9 aspect ratio (280 * 9/16 ≈ 158) */
+    object-fit: cover;              /* Cover entire area, crop if needed */
+    display: block;                 /* Remove inline spacing */
+    background: #000;               /* Black background during load */
+}
+
+/**
+ * Thumbnail title and metadata section
+ * Contains title, duration, and other info
+ */
+.video-thumbnail__content {
+    padding: 1rem;                  /* Internal spacing */
+    background: inherit;            /* Inherit container background */
+}
+
+/**
+ * Video title styling
+ * Truncated text with proper line height
+ */
+.video-thumbnail__title {
+    color: #fff;                    /* White text for contrast */
+    font-size: 0.95rem;            /* Slightly smaller than body */
+    font-weight: 500;               /* Medium weight */
+    line-height: 1.3;               /* Compact line spacing */
+    margin: 0 0 0.5rem 0;          /* Bottom margin only */
+    
+    /* Text truncation for long titles */
+    display: -webkit-box;           /* Webkit flexbox */
+    -webkit-box-orient: vertical;   /* Vertical orientation */
+    -webkit-line-clamp: 2;          /* Limit to 2 lines (webkit) */
+    line-clamp: 2;                  /* Standard property for compatibility */
+    overflow: hidden;               /* Hide overflow text */
+    text-overflow: ellipsis;        /* Add ellipsis */
+}
+
+/**
+ * Video duration badge
+ * Positioned overlay on thumbnail image
+ */
+.video-thumbnail__duration {
+    position: absolute;             /* Overlay positioning */
+    bottom: 0.5rem;                /* From bottom of image */
+    right: 0.5rem;                 /* From right of image */
+    background: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+    color: #fff;                    /* White text */
+    padding: 0.25rem 0.5rem;       /* Compact padding */
+    border-radius: 4px;             /* Small rounded corners */
+    font-size: 0.75rem;            /* Small text */
+    font-weight: 500;               /* Medium weight */
+}
 .thumbnails {
     display: flex;
     overflow-x: auto;

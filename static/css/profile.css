@@ -1,54 +1,145 @@
-/* 
-    profile.css
-    ----------------------------------------------------
-    Styles used when creating or editing a user profile.
-*/
+/**
+ * Profile Management Styles
+ * =========================
+ * 
+ * @file profile.css
+ * @description Styles for user profile creation, editing, and management interfaces
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @components
+ *   - .profile-modal: Modal dialogs for profile operations
+ *   - .profile-carousel: Image selection carousel
+ *   - .profile-form: Profile editing forms
+ *   - .profile-grid: Profile selection grid
+ * 
+ * @features
+ *   - Responsive design for mobile and desktop
+ *   - Accessibility-focused interactions
+ *   - Modern card-based layouts
+ *   - Smooth animations and transitions
+ */
 
-/* ==================
-    1. Profile Modals
-   ================== */
+/* ==========================================================================
+   1. PROFILE MODALS & CONTAINERS
+   ========================================================================== */
 
-/* Center the viewport vertically and horizontally */
+/**
+ * Main viewport centering container
+ * Centers profile modals vertically and horizontally
+ * 
+ * @component profile-viewport
+ * @note Accounts for navigation bar height (150px)
+ * @deprecated .center-viewport - Legacy class, use .profile-viewport
+ */
+.profile-viewport,
 .center-viewport {
-    min-height: calc(100vh - 150px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: calc(100vh - 150px);   /* Full height minus navigation */
+    display: flex;                     /* Flexbox for centering */
+    align-items: center;               /* Vertical centering */
+    justify-content: center;           /* Horizontal centering */
+    padding: 2rem 1rem;               /* Breathing room */
 }
 
-/* Wrapper for the profile image carousel, centers content and adds spacing */
-.carousel-profile-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
+/* ==========================================================================
+   2. PROFILE IMAGE CAROUSEL
+   ========================================================================== */
+
+/**
+ * Profile image carousel container
+ * Centers carousel and adds proper spacing
+ * 
+ * @component profile-carousel
+ * @note Fixed width for consistent layout
+ */
+.profile-carousel {
+    display: flex;                     /* Flexbox layout */
+    align-items: center;               /* Vertical alignment */
+    justify-content: center;           /* Horizontal centering */
+    gap: 0.5rem;                      /* Space between elements */
+    width: 100%;                      /* Full container width */
+    max-width: 400px;                 /* Reasonable maximum width */
+    margin: 0 auto;                   /* Center the carousel */
 }
 
-/* Set a fixed width for the carousel itself */
-.carousel-profile-wrapper .carousel {
-    width: 180px;
+/**
+ * Carousel component wrapper
+ * Fixed width for consistent image display
+ */
+.profile-carousel__container {
+    width: 180px;                     /* Fixed carousel width */
+    border-radius: 8px;               /* Rounded container */
+    overflow: hidden;                 /* Hide overflow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle depth */
 }
 
-/* Style for carousel images: size, border, shape, and hover effect */
-.carousel-item img {
-    max-height: 140px;
-    object-fit: contain;
-    border: 3px solid transparent;
-    border-radius: 50%;
-    transition: border-color 0.2s;
-    cursor: pointer;
-    background: #f8f9fa;
-    padding: 8px;
+/**
+ * Profile carousel image styling
+ * Circular images with hover effects and accessibility
+ * 
+ * @state :hover - Border highlight for selection feedback
+ * @state :focus - Focus ring for keyboard navigation
+ */
+.profile-carousel__image {
+    max-height: 140px;                /* Consistent image height */
+    width: 100%;                      /* Full width of container */
+    object-fit: contain;              /* Maintain aspect ratio */
+    border: 3px solid transparent;    /* Invisible border for hover effect */
+    border-radius: 50%;               /* Circular images */
+    background: #f8f9fa;              /* Light background for contrast */
+    padding: 8px;                     /* Internal spacing */
+    cursor: pointer;                  /* Indicates interactivity */
+    transition: all 0.2s ease-in-out; /* Smooth transitions */
+    
+    /* Accessibility improvements */
+    outline: none;                    /* Remove default focus outline */
 }
 
-/* Style carousel navigation arrows: size and remove default background */
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    background: none;
-    width: 2rem;
+/**
+ * Image hover and focus states
+ * Visual feedback for user interactions
+ */
+.profile-carousel__image:hover,
+.profile-carousel__image:focus {
+    border-color: #007bff;            /* Blue border on interaction */
+    transform: scale(1.02);           /* Slight scale increase */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Focus ring */
+}
+
+/**
+ * Selected image state
+ * Indicates currently selected profile image
+ */
+.profile-carousel__image--selected {
+    border-color: #28a745;            /* Green border for selection */
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25); /* Green focus ring */
+}
+
+/**
+ * Carousel navigation controls
+ * Reduced size for better proportions
+ */
+.profile-carousel__control {
+    background: none;                 /* Remove default background */
+    width: 2rem;                     /* Smaller control size */
     height: 2rem;
+    opacity: 0.7;                    /* Subtle by default */
+    transition: opacity 0.2s ease;  /* Smooth opacity change */
 }
+
+.profile-carousel__control:hover {
+    opacity: 1;                      /* Full opacity on hover */
+}
+
+/* ==========================================================================
+   3. CAROUSEL CONTROL ICONS
+   ========================================================================== */
+
+/**
+ * Custom SVG icons for carousel navigation
+ * Dark icons for visibility against light backgrounds
+ */
 
 /* Custom SVG for previous arrow, filled black for visibility */
 .carousel-control-prev-icon {

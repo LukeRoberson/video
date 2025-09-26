@@ -44,14 +44,19 @@
 - [ ] Stats page
   - [ ] Total videos watched / total videos
   - [ ] Video watch time / total watch time
+- [ ] Use Jinja to convert newline to HTML breaks for descriptions
+  - [ ] Character profiles
+  - [ ] Scriptures
 
 </br></br>
 
 
 # Other
 
-- [ ] Refactor JS to use classes
-- [ ] Add JSDoc to all JS files
+- [x] Refactor JS to use classes
+- [x] Add JSDoc to all JS files
+- [ ] Refactor CSS to use BEM format
+- [ ] Refactor HTML to match CSS BEM
 - [ ] Refactor to use TypeScript
 
 </br></br>
