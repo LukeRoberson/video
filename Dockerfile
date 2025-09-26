@@ -31,8 +31,8 @@ RUN apk update && \
 USER appuser
 
 # Copy the requirements file and install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY pyproject.toml .
+RUN pip install --upgrade pip && pip install .
 
 # Copy files (not all at once to minimize layer size)
 COPY robots.txt .
@@ -42,6 +42,7 @@ COPY static/css/ ./static/css/
 COPY static/js/ ./static/js/
 COPY templates/ ./templates/
 COPY static/vtt/ ./static/vtt/
+COPY static/themes/ ./static/themes/
 COPY app/ ./app/
 COPY videos.db .
 

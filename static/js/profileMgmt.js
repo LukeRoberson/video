@@ -3,6 +3,7 @@
  * 
  * Handles API calls to manage user profiles
  *  - Create a new profile
+ *  - Edit an existing profile
  *  - Get a list of profiles (for the profile selection page)
  *  - Set an active profile
  */
@@ -69,7 +70,7 @@ fetch('/api/profile/get_active')
 /**
  * Attaches click event listeners to each profile list item.
  * When a profile is clicked, it sends a POST request to set that profile as the active one.
- * On success, it redirects the user to the home page.
+ * On success, it redirects the user to the originally requested page.
  */
 document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
     item.addEventListener('click', function(e) {
@@ -91,10 +92,74 @@ document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(
         })
         .then(res => res.json())
         .then(data => {
-            // If successful, redirect to the home page
+            // If successful, redirect to the originally requested page
             if (data.success) {
-                window.location.href = '/';
+                const params = new URLSearchParams(window.location.search);
+                const nextUrl = params.get('next') || '/';
+                window.location.href = nextUrl;
             }
         });
     });
 });
+
+
+/**
+ * Handles editing a profile by redirecting to the edit profile page
+ * @param {string} profileId - The ID of the profile to edit
+ */
+function editProfile(profileId, event) {
+    // Prevent the event from bubbling up to parent elements
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    
+    console.log('Editing profile - Raw value:', profileId);
+    console.log('Editing profile - Type:', typeof profileId);
+    console.log('Editing profile - Is null/undefined?', profileId == null);
+    
+    // Add a safety check
+    if (!profileId || profileId === 'undefined' || profileId === 'null') {
+        console.error('Invalid profileId provided to editProfile function');
+        alert('Error: Invalid profile ID');
+        return;
+    }
+    
+    const editUrl = `/edit_profile/${profileId}`;
+    console.log('Redirecting to:', editUrl);
+    
+    // Redirect to edit profile page
+    window.location.href = editUrl;
+}
+
+
+/**
+ * Handles deleting a profile after user confirmation
+ * @param {string} profileId - The ID of the profile to delete
+ */
+function deleteProfile(profileId) {
+    console.log('Deleting profile:', profileId);
+    
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
+        // Send DELETE request to server
+        fetch(`/api/profile/delete/${profileId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Profile deleted successfully');
+                // Reload the page to refresh the profile list
+                window.location.reload();
+            } else {
+                alert('Failed to delete profile: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting profile:', error);
+            alert('An error occurred while deleting the profile');
+        });
+    }
+}

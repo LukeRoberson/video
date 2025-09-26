@@ -17,6 +17,10 @@ Routes:
         - mark_unwatched: Marks a video as unwatched for the profile.
     - /api/profile/in_progress
         - in_progress_videos: Manages in-progress videos for the profile.
+    - /api/profile/delete/<int:profile_id>
+        - delete_profile: Deletes a user profile by ID.
+    - /api/profile/update/<int:profile_id>
+        - update_profile: Updates a user profile by ID.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -34,8 +38,11 @@ from flask import (
     Response,
     request,
     session,
+    current_app,
+    jsonify,
 )
 import logging
+import os
 
 # Custom imports
 from app.api import (
@@ -459,3 +466,206 @@ def in_progress_videos() -> Response:
             f"Method {method_used} not allowed for this endpoint",
             405
         )
+
+
+@profile_api_bp.route(
+    "/api/profile/delete/<int:profile_id>",
+    methods=["DELETE"],
+)
+def delete_profile(profile_id: int) -> Response:
+    """
+    Delete a user profile by ID.
+
+    Args:
+        profile_id (int): The ID of the profile to delete.
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    logging.info(f"Deleting profile with ID: {profile_id}")
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Delete the profile (should return the deleted profile ID)
+        result = profile_mgr.delete(profile_id)
+        if result != profile_id:
+            logging.error(f"Failed to delete profile with ID {profile_id}.")
+            return api_error(
+                f"Failed to delete profile with ID {profile_id}",
+                500
+            )
+
+        logging.info(f"Successfully deleted profile with ID {profile_id}.")
+        return api_success(
+            message=f"Profile with ID {profile_id} deleted successfully."
+        )
+
+
+@profile_api_bp.route(
+    "/api/profile/update/<int:profile_id>",
+    methods=["POST"],
+)
+def update_profile(profile_id: int) -> Response:
+    """
+    Update a user profile by ID.
+
+    Expects JSON:
+        {
+            "name": "<new profile name>",
+            "icon": "<new profile icon>"
+        }
+
+    Args:
+        profile_id (int): The ID of the profile to update.
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for updating profile.")
+        return api_error("No data provided", 400)
+
+    name = data.get("name", None)
+    icon = data.get("icon", None)
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Update the profile (should return the profile ID)
+        result = profile_mgr.update(
+            profile_id=profile_id,
+            name=name,
+            image=icon,
+        )
+        if result != profile_id:
+            logging.error(f"Failed to update profile with ID {profile_id}.")
+            return api_error(
+                f"Failed to update profile with ID {profile_id}",
+                500
+            )
+
+    logging.info(f"Successfully updated profile with ID {profile_id}.")
+
+    return api_success(
+        message=f"Profile with ID {profile_id} updated successfully."
+    )
+
+
+@profile_api_bp.route(
+    "/api/profile/clear_history/<int:profile_id>",
+    methods=["POST"],
+)
+def clear_watch_history(profile_id: int) -> Response:
+    """
+    Clear the watch history for a user profile by ID.
+        If there's a JSON body, clear only the specified video ID.
+        Otherwise, clear the entire watch history.
+
+    Expected JSON Body:
+        {
+            "video_id": <int>
+        }
+
+    Args:
+        profile_id (int):
+            The ID of the profile whose watch history is to be cleared.
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    logging.info(f"Clearing watch history for profile with ID: {profile_id}")
+
+    data = request.get_json(silent=True) if request.is_json else None
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Clear an individual video from the watch history
+        if data and "video_id" in data:
+            result = profile_mgr.remove_history(
+                profile_id=profile_id,
+                video_id=data["video_id"],
+            )
+            if not result:
+                logging.error(
+                    f"Failed to clear watch history for profile {profile_id}."
+                )
+                return api_error(
+                    f"Failed to clear watch history for profile {profile_id}",
+                    500
+                )
+
+            logging.info(
+                f"Cleared video {data["video_id"]} "
+                f"from watch history of profile {profile_id}."
+            )
+            return api_success(
+                message=f"Cleared video {data["video_id"]} "
+                f"from watch history of profile {profile_id}."
+            )
+
+        # Clear the entire watch history
+        else:
+            result = profile_mgr.remove_history(
+                profile_id=profile_id,
+            )
+            if not result:
+                logging.error(
+                    f"Failed to clear watch history for profile {profile_id}."
+                )
+                return api_error(
+                    f"Failed to clear watch history for profile {profile_id}",
+                    500
+                )
+
+        logging.info(f"Cleared watch history for profile {profile_id}.")
+        return api_success(
+            message=f"Cleared watch history for profile {profile_id}."
+        )
+
+
+@profile_api_bp.route('/api/profile/pictures')
+def get_profile_pictures():
+    """Get list of available profile pictures"""
+    try:
+        # Get list of profile picture files from your static directory
+        static_folder = current_app.static_folder
+        if not static_folder:
+            return jsonify({'error': 'Static folder not configured'}), 500
+
+        profile_pics_dir = os.path.join(static_folder, 'img', 'profiles')
+        profile_pics = []
+
+        if os.path.exists(profile_pics_dir):
+            for filename in os.listdir(profile_pics_dir):
+                if filename.lower().endswith((
+                    '.png', '.jpg', '.jpeg', '.gif', '.webp'
+                )):
+                    profile_pics.append(filename)
+
+        return jsonify({'profile_pics': sorted(profile_pics)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

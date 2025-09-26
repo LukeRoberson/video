@@ -8,8 +8,8 @@ Classes:
         A context manager for handling SQLite database connections.
     - ProfileManager:
         Manages CRUD operations for user profiles in the local database.
-    - ProfileManager:
-        Manages CRUD operations for user profiles in the local database.
+    - ProgressManager:
+        Manages CRUD operations for in progress videos in the local database.
 
 Dependencies:
     - sqlite3: For SQLite database operations.
@@ -245,6 +245,7 @@ class ProfileManager:
         self,
         profile_id: int | None = None,
         name: str | None = None,
+        image: str | None = None,
     ) -> int | None:
         """
         Updates an existing profile in the database.
@@ -254,6 +255,7 @@ class ProfileManager:
         Args:
             profile_id (int | None): The ID of the profile to update.
             name (str | None): The new name for the profile.
+            image (str | None): The new image for the profile.
 
         Returns:
             int | None: The ID of the updated profile, or None if not found.
@@ -261,6 +263,12 @@ class ProfileManager:
 
         if profile_id is None:
             logging.error("Profile ID must be provided for update.")
+            return None
+
+        if name is None and image is None:
+            logging.error(
+                "At least one field (name or image) must be provided."
+            )
             return None
 
         try:
@@ -272,6 +280,10 @@ class ProfileManager:
                 if name is not None:
                     updates.append("name = ?")
                     params.append(name)
+
+                if image is not None:
+                    updates.append("image = ?")
+                    params.append(image)
 
                 if not updates:
                     logging.error("No fields to update.")
@@ -324,6 +336,92 @@ class ProfileManager:
             return None
 
         return profile_id
+
+    def read_watch_history(
+        self,
+        profile_id: int
+    ) -> list[dict] | None:
+        """
+        Retrieves the watch history for a specific profile.
+            These can be videos that are complete, or in-progress.
+
+        Args:
+            profile_id (int): The ID of the profile.
+
+        Returns:
+            list[dict] | None: A list of watched videos as dictionaries,
+                or None if no watch history is found.
+
+        Dictionary format:
+            {
+                "profile_id": int,
+                "video_id": int,
+                "current_time": int (in seconds, '0' if complete),
+                "timestamp": str
+            }
+        """
+
+        # Get videos in the watch history
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    SELECT * FROM watch_history
+                    WHERE profile_id = ?
+                    """,
+                    (profile_id,)
+                )
+                history = cursor.fetchall()
+                history_list = [dict(history) for history in history]
+
+        except Exception as e:
+            logging.error(
+                f"Error retrieving watch history for profile {profile_id}: {e}"
+            )
+            return None
+
+        # Get videos in progress
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+                cursor.execute(
+                    """
+                    SELECT * FROM in_progress_videos
+                    WHERE profile_id = ?
+                    """,
+                    (profile_id,)
+                )
+                videos = cursor.fetchall()
+                video_list = [dict(videos) for videos in videos]
+                for video in video_list:
+                    if 'updated_at' in video:
+                        video['watched_at'] = video.pop('updated_at')
+
+        except Exception as e:
+            logging.error(
+                f"Error retrieving in-progress videos for profile "
+                f"{profile_id}: {e}"
+            )
+            return None
+
+        # Add the current_time field to the history list
+        for entry in history_list:
+            entry["current_time"] = 0
+
+        # Create a dictionary to track video_ids from video_list
+        video_ids_in_progress = {video['video_id'] for video in video_list}
+
+        # Filter out history entries with corresponding in-progress entries
+        filtered_history = [
+            entry for entry in history_list
+            if entry['video_id'] not in video_ids_in_progress
+        ]
+
+        # Combine filtered history with in-progress videos
+        merged_list = filtered_history + video_list
+
+        return merged_list
 
     def mark_watched(
         self,
@@ -444,6 +542,71 @@ class ProfileManager:
                 f"Error checking if video {video_id} is watched for "
                 f"profile {profile_id}: {e}"
             )
+            return False
+
+    def remove_history(
+        self,
+        profile_id: int,
+        video_id: int | None = None,
+    ) -> bool:
+        """
+        Removes a video from watch history for a profile.
+            If video_id is None, removes all watch history for the profile.
+
+        Args:
+            profile_id (int): The ID of the profile.
+            video_id (int | None): The ID of the video to remove from history.
+                If None, removes all watch history for the profile.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+
+        try:
+            with self.db.conn:
+                cursor = self.db.cursor
+
+                # Remove all history if video_id is None
+                if video_id is None:
+                    cursor.execute(
+                        """
+                        DELETE FROM watch_history
+                        WHERE profile_id = ?
+                        """,
+                        (profile_id,)
+                    )
+                    cursor.execute(
+                        """
+                        DELETE FROM in_progress_videos
+                        WHERE profile_id = ?
+                        """,
+                        (profile_id,)
+                    )
+
+                # Remove specific video from history
+                else:
+                    cursor.execute(
+                        """
+                        DELETE FROM watch_history
+                        WHERE profile_id = ? AND video_id = ?
+                        """,
+                        (profile_id, video_id)
+                    )
+                    cursor.execute(
+                        """
+                        DELETE FROM in_progress_videos
+                        WHERE profile_id = ? AND video_id = ?
+                        """,
+                        (profile_id, video_id)
+                    )
+                self.db.conn.commit()
+                return True
+
+        except Exception as e:
+            logging.error(
+                f"Error removing watch history for profile {profile_id}: {e}"
+            )
+            self.db.conn.rollback()
             return False
 
 

@@ -35,7 +35,8 @@ def forbidden(
         Response: A rendered HTML page for 403 errors.
     """
 
-    logging.error(f"Forbidden access: {e}")
+    from flask import request
+    logging.error(f"Forbidden access: {request.url} - {e}")
 
     return make_response(
         render_template("errors/403.html"),
@@ -57,7 +58,8 @@ def not_found(
         Response: A rendered HTML page for 404 errors.
     """
 
-    logging.error(f"Page not found: {e}")
+    from flask import request
+    logging.error(f"Page not found: {request.url} - {e}")
 
     return make_response(
         render_template("errors/404.html"),

@@ -1,44 +1,66 @@
 # Version 3
 
 ## Project
-- [ ] Create a new branch in github
-- [ ] Build a beta container for this version, add to stack
-- [ ] Simplify NGINX config
-- [ ] Add NGINX config to point some traffic to beta container
-- [ ] Add records in CloudFlare
-- [ ] Find a method to backup local.db on Docker
+- [x] Create a new branch in github
+- [x] Build a beta container for this version, add to stack
+- [x] Simplify NGINX config
+- [x] Add NGINX config to point some traffic to beta container
+- [x] Add records in CloudFlare
+- [x] Change nav bar colour for devel
+- [x] Find a method to backup local.db on Docker
+- [x] See if we can minimize the python packages installed when creating a image (some are only needed for scripts, not used in a container)
 
 </br></br>
 
 
 ## Profiles
-- [ ] Profile selection screen when opening the app
-- [ ] Settings page
-  - [ ] Edit profile name
-  - [ ] Edit profile icon
-  - [ ] Delete profile
-  - [ ] Clear watch history
+- [x] Profile selection screen when opening the app
+- [x] Delete profile from profile selection
+- [x] Edit profile from profile selection (go to settings page)
+- [x] Settings page
+  - [x] Edit profile name
+  - [x] Edit profile icon
+  - [x] Show watch history, newest first
+  - [x] Mark in progress videos as watched
+  - [x] Clear individual items from history
+  - [x] Clear all watch history
+  - [x] Delete profile
+  - [x] Clean up CSS and JS
 
 </br></br>
 
 
 ## Video Player
-- [ ] Time range to play a specific part of a video
-- [ ] Share video link at a particular time
-- [ ] Hover over the bar to show the time index at that point
-- [ ] Video bar: Show time passed, not just remaining
+- [x] Time range to play a specific part of a video
+- [x] Share video link at a particular time
+- [x] Hover over the bar to show the time index at that point
+- [x] Video bar: Show time passed, not just remaining
 
 </br></br>
 
 
 ## Themes / Banners
-- [ ] Create YAML files (or similar) to contain information on a topic
-  - [ ] Contains some basic information on the topic
-  - [ ] Includes videos (or parts of videos) about that topic
-- [ ] Load these (or a selection of them) as banners on the home page
-- [ ] Clicking a banner loads a page on that theme
+- [x] Create YAML files (or similar) to contain information on a topic
+  - [x] Contains some basic information on the topic
+  - [x] Includes videos (or parts of videos) about that topic
+- [x] Load these (or a selection of them) as banners on the home page
+- [x] Clicking a banner loads a page on that theme
 
 </br></br>
+
+
+## Refinements
+- [x] Can't edit profile when running from a container (devel... is bad; localhost is fine)
+  - On localhost, works most of the time, but sometimes just redirects straight to home screen
+  - On devel container, always redirects straight to home screen
+- [x] Phone: Hide theatre mode and picture in picture
+- [x] Phone: playing a video automatically goes full screen
+- [x] Phone: display edit and delete buttons on profile selection (not hover over)
+- [x] Phone: Display theme somewhere near banner
+- [x] Prevent two videos from playing on one page
+
+</br></br>
+
 
 
 
@@ -123,6 +145,8 @@
   - [ ] Marks on the progress bar to show chapters
   - [ ] Show chapters to the side (on larger screens); Like on Youtube
   - [ ] Tiny icon on thumbnails to show that a video has chapters
+- [ ] Tags
+  - [ ] Aliases, so different tags can mean the same thing
 
 </br></br>
 
@@ -138,6 +162,17 @@
 - [ ] Stats page (fun stats globally and for the user)
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
+- [ ] Improved scripture management
+  - [ ] Primary scriptures: Key scriptures that relate closely to the topic
+  - [ ] Secondary: Scriptures that were cited and add value, but not key
+- [ ] Audio descriptions
+  - [ ] Add secondary links to videos that have audio descriptions
+  - [ ] Add an icon to the thumbnail to show that video has this feature
+  - [ ] Click a slider to turn this on or off
+  - [ ] In reality, just plays a different video
+- [ ] Video2vec
+  - [ ] Similar to word2vec
+  - [ ] Build a vector database representing each video
 
 </br></br>
 

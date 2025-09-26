@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <!-- CSS styling for the player -->
+    <link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/videojs.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/theme.css')}}" />
+{% endblock %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+<!-- The main content container -->
+<div class="theme-container">
+    <div class="theme-card">
+        <!-- Header section -->
+        <div class="theme-header">
+            <h1 class="theme-title">{{ main_heading }}</h1>
+        </div>
+
+        <!-- Content sections -->
+        <div class="theme-content">
+            {% for section in sections %}
+                <div class="theme-section mb-5">
+                    {% for item in section['section'] %}
+                        <!-- Section Heading -->
+                        {% if item.heading %}
+                            <div class="section-heading">
+                                <h2>{{ item.heading }}</h2>
+                                <div class="heading-divider"></div>
+                            </div>
+                        
+                        <!-- Paragraph -->
+                        {% elif item.paragraph %}
+                            <div class="content-item paragraph-item">
+                                <p>{{ item.paragraph | replace('\n', '<br>') | safe }}</p>
+                            </div>
+
+                        <!-- List -->
+                        {% elif item.list %}
+                            <div class="content-item list-item">
+                                <ul class="styled-list">
+                                    {% for list_item in item.list %}
+                                        <li>{{ list_item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                        <!-- Video -->
+                        {% elif item.video %}
+                            {% set video = item.video %}
+                            {% set resolutions = [
+                                ('1080', video.url_1080),
+                                ('720', video.url_720),
+                                ('480', video.url_480),
+                                ('360', video.url_360),
+                                ('240', video.url_240)
+                            ] %}
+                            <div class="content-item video-item">
+                                <div class="video-wrapper">
+                                    <div class="video-player mb-4 position-relative">
+                                        <video
+                                            id="player-{{ video.id }}"
+                                            class="video-js"
+                                            controls
+                                            preload="auto"
+                                            poster="{{ video.thumbnail or '' }}"
+                                            data-profile-id="{{ session.get('active_profile', 'guest') }}"
+                                            data-video-id="{{ video.id }}"
+                                            data-snippet-start="{{ video.start }}"
+                                            data-snippet-end="{{ video.end }}"
+                                        >
+                                            <!-- Set up the available resolutions -->
+                                            {% for res, url in resolutions %}
+                                                {% if url %}
+                                                    <source src="{{ url }}" type="video/mp4" label="{{ res }}p" res="{{ res|replace('p', '') }}">
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            <!-- fallback content -->
+                                            <p class="vjs-no-js">
+                                                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                                            </p>
+                                        </video>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <!-- Quote -->
+                        {% elif item.quote %}
+                            <div class="content-item quote-item">
+                                <blockquote class="styled-quote">
+                                    <i class="quote-icon">"</i>
+                                    <p>{{ item.quote }}</p>
+                                </blockquote>
+                            </div>
+
+                        <!-- Link -->
+                        {% elif item.link %}
+                            <div class="content-item link-item">
+                                <a href="{{ item.link.url }}" class="styled-link" target="_blank">
+                                    <span class="link-text">{{ item.link.text }}</span>
+                                    <span class="link-arrow">→</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Video.js and Quality Selector scripts -->
+<script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
+<script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+
+<!-- Custom script for video player -->
+<script src="{{ url_for('static', filename='js/videoPlayer.js') }}"></script>
+
+{% endblock %}
