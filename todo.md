@@ -2,9 +2,9 @@
 
 # Bugs
 
-- [ ] Profile edit not working
+- [x] Profile edit not working
   * broken in live, working in devel (containers)
-- [ ] Snippets not working
+- [x] Snippets not working
   * broken in live, working in devel (containers)
 - [ ] Issue #4
   - [ ] Video categories missing
