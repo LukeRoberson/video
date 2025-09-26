@@ -6,12 +6,14 @@
   * broken in live, working in devel (containers)
 - [x] Snippets not working
   * broken in live, working in devel (containers)
-- [ ] Issue #4
-  - [ ] Video categories missing
-    * Good news according to Jesus
-  - [ ] Progress bar is wrong on some video categories
-    * Children/Dramas has two videos, progress bar says 70
-- [ ] Admin page can't add categories to videos
+- [x] Issue #4
+  - [x] Video categories missing
+    * Good news according to Jesus (ep, 2 & 3)
+  - [x] Progress bar is wrong on some video categories
+    * Children>Dramas has two videos, progress bar says 70
+    * Series > The Bible Changes Lives: 14 videos shown, progress bar says 16
+    * Series > Viewpoints on the Origin of Life: Videos (10), bar (11)
+- [x] Admin page can't add categories to videos
 
 </br></br>
 

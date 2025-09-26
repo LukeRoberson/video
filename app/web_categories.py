@@ -139,6 +139,9 @@ def render_category_page(
                 entry['count'] = (
                     len(video_list) if video_list else 0
                 )
+                logging.debug(
+                    f"Subcategory '{sub_cat}' (Videos: {video_list}) "
+                )
 
                 with LocalDbContext() as local_db:
                     profile_mgr = ProfileManager(local_db)
@@ -164,6 +167,9 @@ def render_category_page(
                         entry['watched'] = 0
 
                 watch_status.append(entry)
+
+    logging.debug(f"Main category ID: {main_cat_id}")
+    logging.debug(f"Watch status: {watch_status}")
 
     return make_response(
         render_template(
@@ -212,7 +218,7 @@ def children():
         [
             "Video Lessons",
             "Songs",
-            "Dramas"
+            "Animated"
         ]
     )
 

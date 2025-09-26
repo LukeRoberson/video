@@ -689,39 +689,40 @@ def add_video_metadata() -> Response:
                         return api_error("Failed to add video scriptures", 500)
 
             # Add category if provided
-            if isinstance(category_name, str):
+            if category_name is not None:
                 cat_mgr = CategoryManager(db)
 
                 # Get the category ID from the database
-                category_id = cat_mgr.name_to_id(
-                    name=category_name,
-                )
-
-                # If the category does not exist, return an error
-                if category_id is None:
-                    logging.error(f"Category {category_name} does not exist")
-                    return api_error(
-                        f"Category {category_name} does not exist",
-                        500
+                for category in category_name:
+                    category_id = cat_mgr.name_to_id(
+                        name=category,
                     )
 
-                # Add the category to the video
-                logging.info(
-                    f"Adding category '{category_name}' with ID "
-                    f"{category_id} to video ID: {video_id}"
-                )
+                    # If the category does not exist, return an error
+                    if category_id is None:
+                        logging.error(f"Category {category} does not exist")
+                        return api_error(
+                            f"Category {category} does not exist",
+                            500
+                        )
 
-                result = cat_mgr.add_to_video(
-                    video_id=video_id,
-                    category_id=category_id,
-                )
-
-                if not result:
-                    logging.error(
-                        f"Failed to add category {category_name} for "
-                        f"video ID: {video_id}"
+                    # Add the category to the video
+                    logging.info(
+                        f"Adding category '{category}' with ID "
+                        f"{category_id} to video ID: {video_id}"
                     )
-                    return api_error("Failed to add video categories", 500)
+
+                    result = cat_mgr.add_to_video(
+                        video_id=video_id,
+                        category_id=category_id,
+                    )
+
+                    if not result:
+                        logging.error(
+                            f"Failed to add category {category} for "
+                            f"video ID: {video_id}"
+                        )
+                        return api_error("Failed to add video categories", 500)
 
             if date_added is not None:
                 # Update the video's date added
