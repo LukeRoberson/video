@@ -1,6 +1,6 @@
 /**
- * Profile Management Styles
- * =========================
+ * Profile Management
+ * ==============
  * 
  * @file profile.css
  * @description Styles for user profile creation, editing, and management interfaces
@@ -26,15 +26,13 @@
    ========================================================================== */
 
 /**
- * Main viewport centering container
+ * Profile viewport container
  * Centers profile modals vertically and horizontally
  * 
  * @component profile-viewport
  * @note Accounts for navigation bar height (150px)
- * @deprecated .center-viewport - Legacy class, use .profile-viewport
  */
-.profile-viewport,
-.center-viewport {
+.profile-viewport {
     min-height: calc(100vh - 150px);   /* Full height minus navigation */
     display: flex;                     /* Flexbox for centering */
     align-items: center;               /* Vertical centering */

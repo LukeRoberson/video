@@ -37,10 +37,8 @@
  * @modifier .carousel-scroll-arrow--left - Left navigation arrow
  * @modifier .carousel-scroll-arrow--right - Right navigation arrow
  * @state :hover - Increased opacity on hover
- * @deprecated .scroll-arrow - Legacy class, use .carousel-scroll-arrow
  */
-.carousel-scroll-arrow,
-.scroll-arrow {
+.carousel-scroll-arrow {
     position: absolute;
     top: 50%;                           /* Center vertically */
     transform: translateY(-50%);        /* Compensate for element height */
@@ -70,8 +68,7 @@
  * Left arrow indicator using CSS triangles
  * Creates a right-pointing triangle using borders
  */
-.carousel-scroll-arrow--left::before,
-.scroll-arrow.left::before {
+.carousel-scroll-arrow--left::before {
     content: '';
     display: block;
     width: 0;
@@ -85,8 +82,7 @@
  * Right arrow indicator using CSS triangles
  * Creates a left-pointing triangle using borders
  */
-.carousel-scroll-arrow--right::before,
-.scroll-arrow.right::before {
+.carousel-scroll-arrow--right::before {
     content: '';
     display: block;
     width: 0;
@@ -99,8 +95,7 @@
 /**
  * Hover state for improved user feedback
  */
-.carousel-scroll-arrow:hover,
-.scroll-arrow:hover {
+.carousel-scroll-arrow:hover {
     opacity: 1;                         /* Full opacity on hover */
 }
 
@@ -108,8 +103,7 @@
  * Left arrow positioning and styling
  * Positioned at the left edge with rounded right corners
  */
-.carousel-scroll-arrow--left,
-.scroll-arrow.left {
+.carousel-scroll-arrow--left {
     left: 0;
     border-radius: 0 8px 8px 0;         /* Rounded right edge only */
 }
@@ -118,8 +112,7 @@
  * Right arrow positioning and styling
  * Positioned at the right edge with rounded left corners
  */
-.carousel-scroll-arrow--right,
-.scroll-arrow.right {
+.carousel-scroll-arrow--right {
     right: 0;
     border-radius: 8px 0 0 8px;         /* Rounded left edge only */
 }
@@ -135,8 +128,7 @@
  * @media Mobile and small tablets
  */
 @media (max-width: 768px) {
-    .carousel-scroll-arrow,
-    .scroll-arrow {
+    .carousel-scroll-arrow {
         display: none !important;       /* Force hide on mobile */
     }
 }
@@ -271,9 +263,9 @@
  * Dark theme with green progress indication
  * 
  * @component carousel-progress
- * @modifier .progress-bar - The actual progress fill
- * @modifier .progress-label - Text label overlay
- * @modifier .progress-label-outside - Label positioned outside bar
+ * @modifier .carousel-progress__bar - The actual progress fill
+ * @modifier .carousel-progress__label - Text label overlay
+ * @modifier .carousel-progress__label--outside - Label positioned outside bar
  */
 .carousel-progress,
 .progress {
@@ -288,11 +280,8 @@
 /**
  * Progress bar fill indicator
  * Green fill with smooth animation
- * 
- * @note Supports both new BEM classes and legacy Bootstrap classes
  */
-.carousel-progress__bar,
-.progress-bar {
+.carousel-progress__bar {
     background-color: #28a745 !important; /* Bootstrap success green - force override */
     height: 100%;                       /* Full height of container */
     transition: width 0.4s ease-in-out; /* Smooth progress animation */
@@ -302,11 +291,8 @@
 /**
  * Progress label text overlay
  * Positioned inside the progress bar with proper contrast
- * 
- * @note Supports both new BEM classes and legacy classes
  */
-.carousel-progress__label,
-.progress-label {
+.carousel-progress__label {
     position: absolute;
     left: 12px;                         /* Left padding */
     top: 0;
@@ -324,8 +310,7 @@
  * Label positioned outside progress bar
  * Used when label would be unreadable inside
  */
-.carousel-progress__label--outside,
-.progress-label-outside {
+.carousel-progress__label--outside {
     transform: translateX(0.5em);       /* Slight offset from bar */
     color: #fff;                        /* Maintain white color */
     text-shadow: 0 1px 4px #232323;    /* Shadow for readability */

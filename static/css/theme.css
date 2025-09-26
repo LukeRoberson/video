@@ -10,7 +10,7 @@
  * @created 2025-09-26
  * 
  * @components
- *   - .theme-container: Main theme page wrapper with gradient background
+ *   - .theme-page: Main theme page wrapper with gradient background
  *   - .theme-card: Central content card with glass-morphism effect
  *   - .theme-header: Page header with title and accent decoration
  *   - .theme-section: Content sections with various content types
@@ -32,7 +32,7 @@
  * Main theme page container
  * Full-height layout with gradient background
  * 
- * @component theme-container
+ * @component theme-page
  */
 
 .theme-page {
@@ -108,10 +108,8 @@
 /**
  * Main theme page title
  * Large, light typography for modern appearance
- * @deprecated .theme-title - Legacy class, use .theme-header__title
  */
-.theme-header__title,
-.theme-title {
+.theme-header__title {
     color: #ffffff;                  /* Pure white text */
     font-size: 2.5rem;              /* Large title size */
     font-weight: 300;               /* Light weight for elegance */

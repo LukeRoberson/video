@@ -55,8 +55,8 @@
 
 - [x] Refactor JS to use classes
 - [x] Add JSDoc to all JS files
-- [ ] Refactor CSS to use BEM format
-- [ ] Refactor HTML to match CSS BEM
+- [x] Refactor CSS to use BEM format
+- [x] Refactor HTML to match CSS BEM
 - [ ] Refactor to use TypeScript
 
 </br></br>

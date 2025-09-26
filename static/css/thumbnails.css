@@ -41,10 +41,8 @@
 /**
  * Vertical spacing between content sections
  * Consistent gap between video card sections
- * @deprecated .vertical-gap - Legacy class, use .video-card__spacer
  */
-.video-card__spacer,
-.vertical-gap {
+.video-card__spacer {
     margin-bottom: 4rem;             /* Large spacing for desktop */
 }
 
@@ -86,10 +84,8 @@
  * 
  * @component thumbnail-wrapper
  * @note Contains both thumbnails and scroll arrows
- * @deprecated .thumbnails-wrapper - Legacy class, use .thumbnail-wrapper
  */
-.thumbnail-wrapper,
-.thumbnails-wrapper {
+.thumbnail-wrapper {
     position: relative;              /* For absolutely positioned arrows */
     overflow: hidden;                /* Hide scrollbar and overflow content */
     border-radius: 8px;             /* Rounded container */

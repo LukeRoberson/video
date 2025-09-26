@@ -25,7 +25,7 @@ This document outlines the CSS architecture, naming conventions, and documentati
  * 
  * @file filename.css
  * @description Brief description of file purpose
- * @author Video Development Team
+ * @author Network Direction
  * @version 1.0.0
  * @created 2025-09-26
  * 
@@ -166,19 +166,6 @@ We follow the Block Element Modifier (BEM) naming convention:
 ### Touch Targets
 - Minimum 44px × 44px for touch interfaces
 - Adequate spacing between interactive elements
-
-## Browser Support
-
-### Target Browsers
-- Chrome (latest 2 versions)
-- Firefox (latest 2 versions)
-- Safari (latest 2 versions)
-- Edge (latest 2 versions)
-
-### Progressive Enhancement
-- Core functionality works without CSS
-- Enhanced experience with modern CSS features
-- Graceful fallbacks for older browsers
 
 ## Maintenance Guidelines
 

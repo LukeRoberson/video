@@ -45,7 +45,7 @@ Home
             {% for sub_cat in watch_status %}
                 
                 <!-- A full row, containing category name, progress bar, and thumbnails -->
-                <div class="category-row vertical-gap" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
+                <div class="category-row video-card__spacer" id="category-{{ sub_cat.id }}" data-category-id="{{ category.id }}" data-subcategory-id="{{ sub_cat.id }}">
                     
                     <!-- Category title -->
                     <div class="category-title">
@@ -62,7 +62,7 @@ Home
                         
                         <!-- The progress bar overlay -->
                         <div  
-                            class="progress-bar"
+                            class="carousel-progress__bar"
                             role="progressbar"
                             style="width: var(--progress-width);"
                             aria-valuenow="{{ percent|round(0) }}"
@@ -71,7 +71,7 @@ Home
                         </div>
 
                         <!-- Add the percentage label over the top -->
-                        <span class="progress-label {% if percent < 10 %}progress-label-outside{% endif %}"
+                        <span class="carousel-progress__label {% if percent < 10 %}carousel-progress__label--outside{% endif %}"
                             {% if percent < 5 %}style="left: var(--progress-width);"{% endif %}>
                             {{ sub_cat.watched }}/{{ sub_cat.count }} ({{ percent|round(1) }}%)
                         </span>
@@ -79,10 +79,10 @@ Home
                     {% endif %}
 
                     <!-- Thumbnails wrapper with scroll arrows -->
-                    <div class="thumbnails-wrapper" id="wrapper-{{ sub_cat.id }}">
+                    <div class="thumbnail-wrapper" id="wrapper-{{ sub_cat.id }}">
                         
                         <!-- Left Arrow -->
-                        <button class="scroll-arrow left" onclick="scrollThumbnails('wrapper-{{ sub_cat.id }}', -1)"></button>
+                        <button class="carousel-scroll-arrow carousel-scroll-arrow--left" onclick="scrollThumbnails('wrapper-{{ sub_cat.id }}', -1)"></button>
                         
                         <!-- Thumbnails container -->
                         <div class="thumbnails">
@@ -90,7 +90,7 @@ Home
                         </div>
                         
                         <!-- Right Arrow -->
-                        <button class="scroll-arrow right" onclick="scrollThumbnails('wrapper-{{ sub_cat.id }}', 1)"></button>
+                        <button class="carousel-scroll-arrow carousel-scroll-arrow--right" onclick="scrollThumbnails('wrapper-{{ sub_cat.id }}', 1)"></button>
                     </div>
                 </div>
             {% endfor %}
