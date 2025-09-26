@@ -50,6 +50,8 @@
 
 # Other
 
+- [ ] Refactor JS to use classes
+- [ ] Add JSDoc to all JS files
 - [ ] Refactor to use TypeScript
 
 </br></br>

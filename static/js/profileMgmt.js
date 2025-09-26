@@ -1,165 +1,523 @@
 /**
- * profileMgmt.js
- * 
- * Handles API calls to manage user profiles
- *  - Create a new profile
- *  - Edit an existing profile
- *  - Get a list of profiles (for the profile selection page)
- *  - Set an active profile
+ * @fileoverview Profile management functionality for user profiles.
+ * Handles creating new profiles, editing existing profiles, getting profile lists,
+ * setting active profiles, and managing profile operations.
  */
-
 
 /**
- * An event listener to create a new profile when the form is submitted.
- * This prevents the default form submission and sends a POST request to the server.
- * On success, it redirects the user to the profile selection page.
+ * Configuration constants for profile management
+ * @readonly
+ * @enum {string}
  */
-// Only attach to the profile creation form
-const profileForm = document.getElementById('profile-create-form');
+const ProfileMgmtConfig = {
+    /** API endpoint for creating profiles */
+    CREATE_PROFILE_ENDPOINT: '/api/profile/create',
+    /** API endpoint for getting active profile */
+    GET_ACTIVE_ENDPOINT: '/api/profile/get_active',
+    /** API endpoint for setting active profile */
+    SET_ACTIVE_ENDPOINT: '/api/profile/set_active',
+    /** API endpoint pattern for deleting profiles */
+    DELETE_PROFILE_ENDPOINT: '/api/profile/delete/{id}',
+    /** API endpoint pattern for editing profiles */
+    EDIT_PROFILE_ENDPOINT: '/edit_profile/{id}',
+    /** Content type for JSON requests */
+    JSON_CONTENT_TYPE: 'application/json',
+    /** Profile pictures directory path */
+    PROFILE_PICS_PATH: '/static/img/profiles/',
+    /** Default profile image */
+    DEFAULT_PROFILE_IMAGE: 'guest.png',
+    /** Default profile name */
+    DEFAULT_PROFILE_NAME: 'Guest'
+};
 
-// Continue if this is right
-if (profileForm) {
-    profileForm.addEventListener('submit', function(e) {
-        console.log('Profile creation form submitted');
-        e.preventDefault(); // Prevent default form submission
-
-        const name = document.getElementById('name').value;
-        const image = document.getElementById('profile_pic').value;
-
-        fetch('/api/profile/create', {
+/**
+ * Handles API calls for profile operations
+ * @class ProfileApiService
+ */
+class ProfileApiService {
+    /**
+     * Create a new profile
+     * @static
+     * @async
+     * @param {Object} profileData - Profile data
+     * @param {string} profileData.name - Profile name
+     * @param {string} profileData.image - Profile image filename
+     * @returns {Promise<Object>} API response data
+     * @memberof ProfileApiService
+     */
+    static async createProfile(profileData) {
+        const response = await fetch(ProfileMgmtConfig.CREATE_PROFILE_ENDPOINT, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-                { 
-                    name: name,
-                    image: image 
-                }
-            )
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
-            window.location.href = '/select_profile';   // Redirect
+            headers: { 
+                'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE 
+            },
+            body: JSON.stringify(profileData)
         });
-    });
-}
 
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-/**
- * Fetches the list of profiles from the server and populates the profile selection list.
- * Each profile is displayed as a list item with a link.
- * The list items have a data attribute `data-profile-id` to identify the profile.
- * Clicking on a profile sets it as the active profile and redirects to the home page.
-*/
-fetch('/api/profile/get_active')
-    .then(res => res.json())
-    .then(profile => {
-        console.log('Active profile:', profile.data.active_profile.name);
+        return await response.json();
+    }
 
-        // Update the profile name in the DOM, defaulting to 'Guest' if not set
-        document.getElementById('profile-name').textContent = profile.data.active_profile.name || 'Guest';
-        
-        // Update the profile image in the DOM, defaulting to 'guest.png' if not set
-        document.getElementById('profile-img').src = '/static/img/profiles/' + (profile.data.active_profile.image || 'guest.png');
-        document.getElementById('profile-img').alt = profile.data.active_profile.name || 'Guest';       
-    });
+    /**
+     * Get the currently active profile
+     * @static
+     * @async
+     * @returns {Promise<Object>} Active profile data
+     * @memberof ProfileApiService
+     */
+    static async getActiveProfile() {
+        const response = await fetch(ProfileMgmtConfig.GET_ACTIVE_ENDPOINT);
 
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
+        return await response.json();
+    }
 
-
-/**
- * Attaches click event listeners to each profile list item.
- * When a profile is clicked, it sends a POST request to set that profile as the active one.
- * On success, it redirects the user to the originally requested page.
- */
-document.querySelectorAll('.list-group-item[data-profile-id]').forEach(function(item) {
-    item.addEventListener('click', function(e) {
-        e.preventDefault(); // Prevent default link behavior
-        const profileId = this.getAttribute('data-profile-id');
-        const profileAdmin = this.getAttribute('data-profile-admin');
-        console.log('Setting admin status:', profileAdmin);
-
-        // Send a POST request to set the selected profile as active
-        fetch('/api/profile/set_active', {
+    /**
+     * Set a profile as active
+     * @static
+     * @async
+     * @param {Object} profileData - Profile data
+     * @param {string} profileData.profile_id - Profile ID
+     * @param {string} profileData.profile_admin - Profile admin status
+     * @returns {Promise<Object>} API response data
+     * @memberof ProfileApiService
+     */
+    static async setActiveProfile(profileData) {
+        const response = await fetch(ProfileMgmtConfig.SET_ACTIVE_ENDPOINT, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-                {
-                    profile_id: profileId,
-                    profile_admin: profileAdmin
-                }
-        )
-        })
-        .then(res => res.json())
-        .then(data => {
-            // If successful, redirect to the originally requested page
-            if (data.success) {
-                const params = new URLSearchParams(window.location.search);
-                const nextUrl = params.get('next') || '/';
-                window.location.href = nextUrl;
+            headers: { 
+                'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE 
+            },
+            body: JSON.stringify(profileData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return await response.json();
+    }
+
+    /**
+     * Delete a profile
+     * @static
+     * @async
+     * @param {string} profileId - Profile ID to delete
+     * @returns {Promise<Object>} API response data
+     * @memberof ProfileApiService
+     */
+    static async deleteProfile(profileId) {
+        const endpoint = ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId);
+        
+        const response = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE 
             }
         });
-    });
-});
 
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-/**
- * Handles editing a profile by redirecting to the edit profile page
- * @param {string} profileId - The ID of the profile to edit
- */
-function editProfile(profileId, event) {
-    // Prevent the event from bubbling up to parent elements
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
+        return await response.json();
     }
-    
-    console.log('Editing profile - Raw value:', profileId);
-    console.log('Editing profile - Type:', typeof profileId);
-    console.log('Editing profile - Is null/undefined?', profileId == null);
-    
-    // Add a safety check
-    if (!profileId || profileId === 'undefined' || profileId === 'null') {
-        console.error('Invalid profileId provided to editProfile function');
-        alert('Error: Invalid profile ID');
-        return;
-    }
-    
-    const editUrl = `/edit_profile/${profileId}`;
-    console.log('Redirecting to:', editUrl);
-    
-    // Redirect to edit profile page
-    window.location.href = editUrl;
 }
 
+/**
+ * Handles profile creation form functionality
+ * @class ProfileCreationHandler
+ */
+class ProfileCreationHandler {
+    /**
+     * Create a ProfileCreationHandler instance
+     * @param {string} formId - ID of the profile creation form
+     * @memberof ProfileCreationHandler
+     */
+    constructor(formId = 'profile-create-form') {
+        /**
+         * Profile creation form element
+         * @type {HTMLFormElement}
+         */
+        this.form = document.getElementById(formId);
+        
+        if (this.form) {
+            this.setupEventListeners();
+        }
+    }
+
+    /**
+     * Set up form event listeners
+     * @private
+     * @memberof ProfileCreationHandler
+     */
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    }
+
+    /**
+     * Handle form submission
+     * @async
+     * @param {Event} e - Form submit event
+     * @private
+     * @memberof ProfileCreationHandler
+     */
+    async handleSubmit(e) {
+        console.log('Profile creation form submitted');
+        e.preventDefault();
+
+        try {
+            const formData = this.extractFormData();
+            const response = await ProfileApiService.createProfile(formData);
+            
+            console.log('Profile created:', response);
+            this.redirectToProfileSelection();
+            
+        } catch (error) {
+            console.error('Error creating profile:', error);
+            alert('Failed to create profile: ' + error.message);
+        }
+    }
+
+    /**
+     * Extract form data
+     * @returns {Object} Form data object
+     * @private
+     * @memberof ProfileCreationHandler
+     */
+    extractFormData() {
+        return {
+            name: document.getElementById('name').value,
+            image: document.getElementById('profile_pic').value
+        };
+    }
+
+    /**
+     * Redirect to profile selection page
+     * @private
+     * @memberof ProfileCreationHandler
+     */
+    redirectToProfileSelection() {
+        window.location.href = '/select_profile';
+    }
+}
 
 /**
- * Handles deleting a profile after user confirmation
- * @param {string} profileId - The ID of the profile to delete
+ * Manages active profile display in the UI
+ * @class ActiveProfileManager
  */
-function deleteProfile(profileId) {
-    console.log('Deleting profile:', profileId);
-    
-    // Show confirmation dialog
-    if (confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
-        // Send DELETE request to server
-        fetch(`/api/profile/delete/${profileId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
+class ActiveProfileManager {
+    /**
+     * Create an ActiveProfileManager instance
+     * @memberof ActiveProfileManager
+     */
+    constructor() {
+        /**
+         * Profile name display element
+         * @type {HTMLElement}
+         */
+        this.profileNameElement = document.getElementById('profile-name');
+        
+        /**
+         * Profile image display element
+         * @type {HTMLImageElement}
+         */
+        this.profileImageElement = document.getElementById('profile-img');
+        
+        this.loadActiveProfile();
+    }
+
+    /**
+     * Load and display active profile information
+     * @async
+     * @memberof ActiveProfileManager
+     */
+    async loadActiveProfile() {
+        try {
+            const response = await ProfileApiService.getActiveProfile();
+            const activeProfile = response.data.active_profile;
+            
+            console.log('Active profile:', activeProfile.name);
+            this.updateProfileDisplay(activeProfile);
+            
+        } catch (error) {
+            console.error('Error loading active profile:', error);
+            this.updateProfileDisplay({}); // Use defaults
+        }
+    }
+
+    /**
+     * Update profile display elements
+     * @param {Object} profile - Profile data
+     * @param {string} [profile.name] - Profile name
+     * @param {string} [profile.image] - Profile image filename
+     * @private
+     * @memberof ActiveProfileManager
+     */
+    updateProfileDisplay(profile) {
+        if (this.profileNameElement) {
+            this.profileNameElement.textContent = profile.name || ProfileMgmtConfig.DEFAULT_PROFILE_NAME;
+        }
+
+        if (this.profileImageElement) {
+            const imageName = profile.image || ProfileMgmtConfig.DEFAULT_PROFILE_IMAGE;
+            this.profileImageElement.src = ProfileMgmtConfig.PROFILE_PICS_PATH + imageName;
+            this.profileImageElement.alt = profile.name || ProfileMgmtConfig.DEFAULT_PROFILE_NAME;
+        }
+    }
+}
+
+/**
+ * Manages profile selection functionality
+ * @class ProfileSelectionManager
+ */
+class ProfileSelectionManager {
+    /**
+     * Create a ProfileSelectionManager instance
+     * @memberof ProfileSelectionManager
+     */
+    constructor() {
+        /**
+         * Profile list items
+         * @type {NodeList}
+         */
+        this.profileItems = document.querySelectorAll('.list-group-item[data-profile-id]');
+        
+        this.setupEventListeners();
+    }
+
+    /**
+     * Set up event listeners for profile selection
+     * @private
+     * @memberof ProfileSelectionManager
+     */
+    setupEventListeners() {
+        this.profileItems.forEach(item => {
+            item.addEventListener('click', (e) => this.handleProfileSelection(e, item));
+        });
+    }
+
+    /**
+     * Handle profile selection click
+     * @async
+     * @param {Event} e - Click event
+     * @param {HTMLElement} item - Profile list item element
+     * @private
+     * @memberof ProfileSelectionManager
+     */
+    async handleProfileSelection(e, item) {
+        e.preventDefault();
+
+        try {
+            const profileData = this.extractProfileData(item);
+            const response = await ProfileApiService.setActiveProfile(profileData);
+            
+            if (response.success) {
+                this.redirectToNextPage();
+            } else {
+                throw new Error('Failed to set active profile');
+            }
+            
+        } catch (error) {
+            console.error('Error setting active profile:', error);
+            alert('Failed to select profile: ' + error.message);
+        }
+    }
+
+    /**
+     * Extract profile data from list item
+     * @param {HTMLElement} item - Profile list item element
+     * @returns {Object} Profile data
+     * @private
+     * @memberof ProfileSelectionManager
+     */
+    extractProfileData(item) {
+        const profileId = item.getAttribute('data-profile-id');
+        const profileAdmin = item.getAttribute('data-profile-admin');
+        
+        console.log('Setting admin status:', profileAdmin);
+        
+        return {
+            profile_id: profileId,
+            profile_admin: profileAdmin
+        };
+    }
+
+    /**
+     * Redirect to next page or home
+     * @private
+     * @memberof ProfileSelectionManager
+     */
+    redirectToNextPage() {
+        const params = new URLSearchParams(window.location.search);
+        const nextUrl = params.get('next') || '/';
+        window.location.href = nextUrl;
+    }
+}
+
+/**
+ * Handles profile operations like edit and delete
+ * @class ProfileOperationsHandler
+ */
+class ProfileOperationsHandler {
+    /**
+     * Edit a profile by redirecting to edit page
+     * @param {string} profileId - Profile ID to edit
+     * @param {Event} [event] - Click event to prevent bubbling
+     * @memberof ProfileOperationsHandler
+     */
+    editProfile(profileId, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        console.log('Editing profile - Raw value:', profileId);
+        console.log('Editing profile - Type:', typeof profileId);
+        console.log('Editing profile - Is null/undefined?', profileId == null);
+        
+        if (!this.validateProfileId(profileId)) {
+            console.error('Invalid profileId provided to editProfile function');
+            alert('Error: Invalid profile ID');
+            return;
+        }
+        
+        const editUrl = ProfileMgmtConfig.EDIT_PROFILE_ENDPOINT.replace('{id}', profileId);
+        console.log('Redirecting to:', editUrl);
+        
+        window.location.href = editUrl;
+    }
+
+    /**
+     * Delete a profile with confirmation
+     * @async
+     * @param {string} profileId - Profile ID to delete
+     * @memberof ProfileOperationsHandler
+     */
+    async deleteProfile(profileId) {
+        console.log('Deleting profile:', profileId);
+        
+        if (!this.validateProfileId(profileId)) {
+            alert('Error: Invalid profile ID');
+            return;
+        }
+
+        if (!this.confirmDeletion()) {
+            return;
+        }
+
+        try {
+            const response = await ProfileApiService.deleteProfile(profileId);
+            
+            if (response.success) {
                 console.log('Profile deleted successfully');
-                // Reload the page to refresh the profile list
                 window.location.reload();
             } else {
-                alert('Failed to delete profile: ' + (data.message || 'Unknown error'));
+                throw new Error(response.message || 'Unknown error');
             }
-        })
-        .catch(error => {
+            
+        } catch (error) {
             console.error('Error deleting profile:', error);
-            alert('An error occurred while deleting the profile');
-        });
+            alert('An error occurred while deleting the profile: ' + error.message);
+        }
+    }
+
+    /**
+     * Validate profile ID
+     * @param {string} profileId - Profile ID to validate
+     * @returns {boolean} True if valid
+     * @private
+     * @memberof ProfileOperationsHandler
+     */
+    validateProfileId(profileId) {
+        return profileId && profileId !== 'undefined' && profileId !== 'null' && profileId.trim() !== '';
+    }
+
+    /**
+     * Show confirmation dialog for profile deletion
+     * @returns {boolean} True if user confirmed
+     * @private
+     * @memberof ProfileOperationsHandler
+     */
+    confirmDeletion() {
+        return confirm('Are you sure you want to delete this profile? This action cannot be undone.');
     }
 }
+
+/**
+ * Main controller for profile management functionality
+ * @class ProfileMgmtController
+ */
+class ProfileMgmtController {
+    /**
+     * Create a ProfileMgmtController instance
+     * @memberof ProfileMgmtController
+     */
+    constructor() {
+        /**
+         * Profile creation handler
+         * @type {ProfileCreationHandler}
+         */
+        this.creationHandler = new ProfileCreationHandler();
+        
+        /**
+         * Active profile manager
+         * @type {ActiveProfileManager}
+         */
+        this.activeProfileManager = new ActiveProfileManager();
+        
+        /**
+         * Profile selection manager
+         * @type {ProfileSelectionManager}
+         */
+        this.selectionManager = new ProfileSelectionManager();
+        
+        /**
+         * Profile operations handler
+         * @type {ProfileOperationsHandler}
+         */
+        this.operationsHandler = new ProfileOperationsHandler();
+        
+        this.exposeGlobalFunctions();
+    }
+
+    /**
+     * Expose functions globally for template usage
+     * @private
+     * @memberof ProfileMgmtController
+     */
+    exposeGlobalFunctions() {
+        window.editProfile = (profileId, event) => {
+            this.operationsHandler.editProfile(profileId, event);
+        };
+        
+        window.deleteProfile = (profileId) => {
+            this.operationsHandler.deleteProfile(profileId);
+        };
+    }
+
+    /**
+     * Get the operations handler instance
+     * @returns {ProfileOperationsHandler} Operations handler
+     * @memberof ProfileMgmtController
+     */
+    getOperationsHandler() {
+        return this.operationsHandler;
+    }
+}
+
+// Global controller instance
+let profileMgmtController;
+
+/**
+ * Initialize profile management functionality when DOM is ready
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    profileMgmtController = new ProfileMgmtController();
+});

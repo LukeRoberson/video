@@ -1,397 +1,1246 @@
 /**
- * TV Remote Navigation Enhancement
- * Provides native app-like navigation using arrow keys/remote control
+ * @fileoverview TV Remote Navigation Enhancement
+ * Provides native app-like navigation using arrow keys/remote control for Smart TVs.
+ * Supports Samsung Tizen, Fire TV, LG WebOS, and other TV platforms.
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    let isTV = false;
-    let currentFocusIndex = 0;
-    let focusableElements = [];
-    let navigationActive = false;
-    
-    // Detect TV browsers:
-    function updateTVStatus() {
-        if (window.tvDetection && typeof window.tvDetection.isTV === 'function') {
-            isTV = window.tvDetection.isTV();
-        } else {
-            // Enhanced TV detection based on user agent
-            const userAgent = navigator.userAgent.toLowerCase();
-            const isSamsungTV = userAgent.includes('tizen') || userAgent.includes('samsung');
-            const isFireTV = userAgent.includes('silk') || userAgent.includes('afts');
-            const isLGTV = userAgent.includes('webos') || userAgent.includes('netcast');
+/**
+ * Configuration constants for TV navigation
+ * @readonly
+ * @enum {string|number}
+ */
+const TVNavigationConfig = {
+    /** Delay before starting TV navigation */
+    STARTUP_DELAY: 1000,
+    /** Delay for slide navigation */
+    SLIDE_NAVIGATION_DELAY: 300,
+    /** Element update debounce delay */
+    UPDATE_DEBOUNCE_DELAY: 100,
+    /** Debug mode keyboard shortcut delay */
+    DEBUG_DELAY: 500,
+    /** Vertical threshold for same row detection */
+    SAME_ROW_THRESHOLD: 50,
+    /** Small horizontal movement threshold */
+    SMALL_HORIZONTAL_THRESHOLD: 10,
+    /** Vertical element spacing threshold */
+    VERTICAL_SPACING_THRESHOLD: 30
+};
 
-            isTV = isSamsungTV || isFireTV || isLGTV ||
-                userAgent.includes('smart-tv') ||
-                userAgent.includes('smarttv') ||
-                userAgent.includes('roku') ||
-                userAgent.includes('googletv') ||
-                userAgent.includes('operatv') ||
-                (window.navigator.maxTouchPoints === 0 && window.screen.width >= 1920);
+/**
+ * TV remote control key mappings for different platforms
+ * @readonly
+ * @enum {Object}
+ */
+const TVKeyMappings = {
+    /** Standard keyboard codes */
+    STANDARD: {
+        37: 'ArrowLeft', 38: 'ArrowUp', 39: 'ArrowRight', 40: 'ArrowDown',
+        13: 'Enter', 27: 'Escape', 32: ' '
+    },
+    /** Samsung TV (Tizen) remote codes */
+    SAMSUNG: {
+        4: 'Escape', 10009: 'Escape', 10252: ' ', 415: ' ', 10182: 'Enter'
+    },
+    /** Fire TV / Amazon remote codes */
+    FIRE_TV: {
+        21: 'ArrowLeft', 19: 'ArrowUp', 22: 'ArrowRight', 20: 'ArrowDown', 23: 'Enter'
+    },
+    /** WebOS (LG TV) remote codes */
+    WEBOS: {
+        461: 'Escape', 13: 'Enter'
+    },
+    /** Additional TV remote codes */
+    ADDITIONAL: {
+        166: 'Escape', 8: 'Escape'
+    }
+};
+
+/**
+ * Handles TV device detection and status management
+ * @class TVDetectionManager
+ */
+class TVDetectionManager {
+    /**
+     * Create a TVDetectionManager instance
+     * @memberof TVDetectionManager
+     */
+    constructor() {
+        /**
+         * Current TV detection status
+         * @type {boolean}
+         */
+        this.isTV = false;
+    }
+
+    /**
+     * Update TV detection status using multiple detection methods
+     * @returns {boolean} True if device is detected as TV
+     * @memberof TVDetectionManager
+     */
+    updateTVStatus() {
+        if (window.tvDetection && typeof window.tvDetection.isTV === 'function') {
+            this.isTV = window.tvDetection.isTV();
+        } else {
+            this.isTV = this.performEnhancedDetection();
         }
 
         console.log('Enhanced TV Detection:', {
-            isTV: isTV,
+            isTV: this.isTV,
             userAgent: navigator.userAgent,
             isSamsung: navigator.userAgent.toLowerCase().includes('tizen'),
             isFireTV: navigator.userAgent.toLowerCase().includes('silk'),
             isLG: navigator.userAgent.toLowerCase().includes('webos')
         });
-        
-        // Force start TV navigation if detected
-        if (isTV) {
-            setTimeout(() => {
-                startTVNavigation();
-            }, 1000);
-        }
 
-        return isTV;
-    }    
-    // Initial TV status check
-    updateTVStatus();
-    
-    // Remove any existing listeners first
-    document.removeEventListener('keydown', handleKeydown);
-
-    // Add multiple event types for better TV compatibility
-    document.addEventListener('keydown', handleKeydown, true);
-    document.addEventListener('keyup', handleKeydown, true);
-    document.addEventListener('keypress', handleKeydown, true);
+        return this.isTV;
+    }
 
     /**
-     * Updates the list of focusable elements on the page
+     * Perform enhanced TV detection based on user agent
+     * @returns {boolean} True if TV is detected
+     * @private
+     * @memberof TVDetectionManager
      */
-    function updateFocusableElements() {
-        // Get all potential focusable elements - REMOVED carousel controls
+    performEnhancedDetection() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isSamsungTV = userAgent.includes('tizen') || userAgent.includes('samsung');
+        const isFireTV = userAgent.includes('silk') || userAgent.includes('afts');
+        const isLGTV = userAgent.includes('webos') || userAgent.includes('netcast');
+
+        return isSamsungTV || isFireTV || isLGTV ||
+            userAgent.includes('smart-tv') ||
+            userAgent.includes('smarttv') ||
+            userAgent.includes('roku') ||
+            userAgent.includes('googletv') ||
+            userAgent.includes('operatv') ||
+            (window.navigator.maxTouchPoints === 0 && window.screen.width >= 1920);
+    }
+
+    /**
+     * Get current TV status
+     * @returns {boolean} Current TV detection status
+     * @memberof TVDetectionManager
+     */
+    getTVStatus() {
+        return this.isTV;
+    }
+}
+
+/**
+ * Handles remote control key input and normalization
+ * @class TVKeyHandler
+ */
+class TVKeyHandler {
+    /**
+     * Normalize key input from various TV remote controls
+     * @param {KeyboardEvent} event - Keyboard event from remote
+     * @returns {string|null} Normalized key name or null if not recognized
+     * @memberof TVKeyHandler
+     */
+    normalizeKey(event) {
+        console.log('Raw key event:', {
+            type: event.type,
+            key: event.key,
+            keyCode: event.keyCode,
+            which: event.which,
+            code: event.code,
+            userAgent: navigator.userAgent.substring(0, 100)
+        });
+
+        // Check all key mapping categories
+        const allMappings = [
+            TVKeyMappings.STANDARD,
+            TVKeyMappings.SAMSUNG,
+            TVKeyMappings.FIRE_TV,
+            TVKeyMappings.WEBOS,
+            TVKeyMappings.ADDITIONAL
+        ];
+
+        for (const mappings of allMappings) {
+            if (mappings[event.keyCode]) {
+                return mappings[event.keyCode];
+            }
+        }
+
+        // Standard key/code mapping
+        if (event.code && event.code.startsWith('Arrow')) {
+            return event.key;
+        }
+
+        console.log('Unrecognized key:', event.keyCode);
+        return null;
+    }
+}
+
+/**
+ * Manages focusable elements and their organization
+ * @class FocusableElementManager
+ */
+class FocusableElementManager {
+    /**
+     * Create a FocusableElementManager instance
+     * @memberof FocusableElementManager
+     */
+    constructor() {
+        /**
+         * Array of currently focusable elements
+         * @type {Array<HTMLElement>}
+         */
+        this.focusableElements = [];
+    }
+
+    /**
+     * Update the list of focusable elements on the page
+     * @memberof FocusableElementManager
+     */
+    updateFocusableElements() {
         const allElements = Array.from(document.querySelectorAll(
             'a[href], button:not([disabled]), .thumbnail, .thumbnail-home, .video-js, input:not([disabled]), [tabindex]:not([tabindex="-1"])'
         ));
-        
-        // Filter out elements that are not actually focusable or are nested
-        focusableElements = allElements.filter(el => {
-            const rect = el.getBoundingClientRect();
-            const style = window.getComputedStyle(el);
-            
-            // Basic visibility checks
-            if (rect.width <= 0 || rect.height <= 0 || 
-                style.visibility === 'hidden' || 
-                style.display === 'none' ||
-                el.hasAttribute('disabled')) {
-                return false;
-            }
-            
-            // Exclude carousel controls completely
-            if (el.classList.contains('carousel-control-prev') || 
-                el.classList.contains('carousel-control-next')) {
-                return false;
-            }
-            
-            // Prevent nested thumbnail elements (only keep the outermost one)
-            if (el.classList.contains('thumbnail') || el.classList.contains('thumbnail-home')) {
-                // Check if this element has a parent that's also a thumbnail
-                const parentThumbnail = el.parentElement?.closest('.thumbnail, .thumbnail-home');
-                if (parentThumbnail && parentThumbnail !== el) {
-                    return false; // Skip nested thumbnail
-                }
-                
-                // Also check if this element contains other thumbnails (keep the container)
-                const childThumbnails = el.querySelectorAll('.thumbnail, .thumbnail-home');
-                if (childThumbnails.length > 0) {
-                    return false; // Skip containers, we'll get the actual thumbnails
-                }
-            }
-            
-            return true;
-        });
-        
-        // Custom sorting that handles navbar, carousels, and profile correctly
-        focusableElements.sort((a, b) => {
+
+        this.focusableElements = allElements.filter(el => this.isElementFocusable(el));
+        this.sortElementsByPosition();
+        this.prepareElementsForNavigation();
+    }
+
+    /**
+     * Check if an element is actually focusable
+     * @param {HTMLElement} element - Element to check
+     * @returns {boolean} True if element is focusable
+     * @private
+     * @memberof FocusableElementManager
+     */
+    isElementFocusable(element) {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+
+        // Basic visibility checks
+        if (rect.width <= 0 || rect.height <= 0 ||
+            style.visibility === 'hidden' ||
+            style.display === 'none' ||
+            element.hasAttribute('disabled')) {
+            return false;
+        }
+
+        // Exclude carousel controls completely
+        if (element.classList.contains('carousel-control-prev') ||
+            element.classList.contains('carousel-control-next')) {
+            return false;
+        }
+
+        // Prevent nested thumbnail elements
+        if (element.classList.contains('thumbnail') || element.classList.contains('thumbnail-home')) {
+            return this.isValidThumbnailElement(element);
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if thumbnail element is valid (not nested)
+     * @param {HTMLElement} element - Thumbnail element to check
+     * @returns {boolean} True if valid thumbnail
+     * @private
+     * @memberof FocusableElementManager
+     */
+    isValidThumbnailElement(element) {
+        // Check if this element has a parent that's also a thumbnail
+        const parentThumbnail = element.parentElement?.closest('.thumbnail, .thumbnail-home');
+        if (parentThumbnail && parentThumbnail !== element) {
+            return false; // Skip nested thumbnail
+        }
+
+        // Also check if this element contains other thumbnails (keep the container)
+        const childThumbnails = element.querySelectorAll('.thumbnail, .thumbnail-home');
+        if (childThumbnails.length > 0) {
+            return false; // Skip containers, we'll get the actual thumbnails
+        }
+
+        return true;
+    }
+
+    /**
+     * Sort elements by position with section awareness
+     * @private
+     * @memberof FocusableElementManager
+     */
+    sortElementsByPosition() {
+        this.focusableElements.sort((a, b) => {
             const rectA = a.getBoundingClientRect();
             const rectB = b.getBoundingClientRect();
-            
-            // Define sections with priorities
-            const getSectionPriority = (el) => {
-                if (el.closest('.navbar')) return 1;
-                if (el.closest('[id*="profile"]') || el.getAttribute('href')?.includes('profile')) return 2;
-                if (el.closest('.carousel')) return 3;
-                return 4; // Other elements (including non-carousel sections)
-            };
-            
-            const priorityA = getSectionPriority(a);
-            const priorityB = getSectionPriority(b);
-            
+
+            const priorityA = this.getSectionPriority(a);
+            const priorityB = this.getSectionPriority(b);
+
             // Sort by section priority first
             if (priorityA !== priorityB) {
                 return priorityA - priorityB;
             }
-            
+
             // Within same section, sort by position
             const verticalDiff = rectA.top - rectB.top;
-            if (Math.abs(verticalDiff) > 50) { // 50px threshold for "same row"
+            if (Math.abs(verticalDiff) > TVNavigationConfig.SAME_ROW_THRESHOLD) {
                 return verticalDiff;
             }
-            
+
             // If roughly same row, sort by horizontal position
             return rectA.left - rectB.left;
         });
-        
-        // Debug: Log elements to see what we found
-        focusableElements.forEach((el, index) => {
-            const rect = el.getBoundingClientRect();
-            const section = el.closest('.navbar') ? 'navbar' : 
-                           el.closest('.carousel') ? 'carousel' : 
-                           el.closest('[id*="profile"]') ? 'profile' : 'other';
-        });
-        
-        // Add visual focus indicators and make everything tabbable
-        focusableElements.forEach((el, index) => {
+    }
+
+    /**
+     * Get section priority for sorting
+     * @param {HTMLElement} element - Element to get priority for
+     * @returns {number} Priority number (lower = higher priority)
+     * @private
+     * @memberof FocusableElementManager
+     */
+    getSectionPriority(element) {
+        if (element.closest('.navbar')) return 1;
+        if (element.closest('[id*="profile"]') || element.getAttribute('href')?.includes('profile')) return 2;
+        if (element.closest('.carousel')) return 3;
+        return 4; // Other elements
+    }
+
+    /**
+     * Prepare elements for TV navigation
+     * @private
+     * @memberof FocusableElementManager
+     */
+    prepareElementsForNavigation() {
+        this.focusableElements.forEach((el, index) => {
             el.setAttribute('data-tv-index', index);
             el.setAttribute('tabindex', '0');
             el.style.outline = 'none';
         });
     }
 
+    /**
+     * Get all focusable elements
+     * @returns {Array<HTMLElement>} Array of focusable elements
+     * @memberof FocusableElementManager
+     */
+    getFocusableElements() {
+        return this.focusableElements;
+    }
 
     /**
-     * Sets focus on a specific element by index
+     * Get element by index
+     * @param {number} index - Element index
+     * @returns {HTMLElement|null} Element at index or null
+     * @memberof FocusableElementManager
      */
-    function setFocus(index) {
-        if (!isTV || !navigationActive) return;
+    getElementByIndex(index) {
+        return this.focusableElements[index] || null;
+    }
+
+    /**
+     * Get element index
+     * @param {HTMLElement} element - Element to find index for
+     * @returns {number} Element index or -1 if not found
+     * @memberof FocusableElementManager
+     */
+    getElementIndex(element) {
+        return this.focusableElements.indexOf(element);
+    }
+}
+
+/**
+ * Manages focus state and visual indicators
+ * @class FocusManager
+ */
+class FocusManager {
+    /**
+     * Create a FocusManager instance
+     * @param {FocusableElementManager} elementManager - Element manager instance
+     * @memberof FocusManager
+     */
+    constructor(elementManager) {
+        /**
+         * Element manager reference
+         * @type {FocusableElementManager}
+         */
+        this.elementManager = elementManager;
+        
+        /**
+         * Current focus index
+         * @type {number}
+         */
+        this.currentFocusIndex = 0;
+    }
+
+    /**
+     * Set focus on a specific element by index
+     * @param {number} index - Index of element to focus
+     * @memberof FocusManager
+     */
+    setFocus(index) {
+        const focusableElements = this.elementManager.getFocusableElements();
         
         // Remove previous focus
-        focusableElements.forEach(el => {
-            el.classList.remove('tv-focused');
-            el.style.border = '';
-            el.style.boxShadow = '';
-        });
-        
+        this.clearAllFocus(focusableElements);
+
         // Set new focus
         if (focusableElements[index]) {
             const element = focusableElements[index];
-            currentFocusIndex = index;
-            
-            // Add strong visual focus
-            element.classList.add('tv-focused');
-            element.style.border = '4px solid #ff6b35';
-            element.style.boxShadow = '0 0 20px rgba(255, 107, 53, 0.8)';
-            element.style.transition = 'all 0.2s ease';
-            element.style.zIndex = '1000';
-            
-            // Scroll into view
-            element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center',
-                inline: 'center'
-            });
-            
-            // Give it actual focus for screen readers
+            this.currentFocusIndex = index;
+
+            this.applyFocusStyles(element);
+            this.scrollIntoView(element);
             element.focus();
-            
-            // Update carousel indicators
-            updateCarouselIndicators();
         }
     }
 
+    /**
+     * Clear focus from all elements
+     * @param {Array<HTMLElement>} elements - Elements to clear focus from
+     * @private
+     * @memberof FocusManager
+     */
+    clearAllFocus(elements) {
+        elements.forEach(el => {
+            el.classList.remove('tv-focused');
+            el.style.border = '';
+            el.style.boxShadow = '';
+            el.style.zIndex = '';
+        });
+    }
 
     /**
-     * Find the next focusable element in a direction with section awareness
+     * Apply focus styles to element
+     * @param {HTMLElement} element - Element to apply styles to
+     * @private
+     * @memberof FocusManager
      */
-    function findNextInDirection(direction) {
-        if (focusableElements.length === 0) return -1;
+    applyFocusStyles(element) {
+        element.classList.add('tv-focused');
+        element.style.border = '4px solid #ff6b35';
+        element.style.boxShadow = '0 0 20px rgba(255, 107, 53, 0.8)';
+        element.style.transition = 'all 0.2s ease';
+        element.style.zIndex = '1000';
+    }
+
+    /**
+     * Scroll element into view
+     * @param {HTMLElement} element - Element to scroll into view
+     * @private
+     * @memberof FocusManager
+     */
+    scrollIntoView(element) {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+        });
+    }
+
+    /**
+     * Get current focus index
+     * @returns {number} Current focus index
+     * @memberof FocusManager
+     */
+    getCurrentFocusIndex() {
+        return this.currentFocusIndex;
+    }
+
+    /**
+     * Get currently focused element
+     * @returns {HTMLElement|null} Currently focused element
+     * @memberof FocusManager
+     */
+    getCurrentElement() {
+        return this.elementManager.getElementByIndex(this.currentFocusIndex);
+    }
+}
+
+/**
+ * Handles directional navigation logic
+ * @class DirectionalNavigator
+ */
+class DirectionalNavigator {
+    /**
+     * Create a DirectionalNavigator instance
+     * @param {FocusableElementManager} elementManager - Element manager instance
+     * @param {FocusManager} focusManager - Focus manager instance
+     * @memberof DirectionalNavigator
+     */
+    constructor(elementManager, focusManager) {
+        /**
+         * Element manager reference
+         * @type {FocusableElementManager}
+         */
+        this.elementManager = elementManager;
         
+        /**
+         * Focus manager reference
+         * @type {FocusManager}
+         */
+        this.focusManager = focusManager;
+    }
+
+    /**
+     * Find the next focusable element in a direction
+     * @param {string} direction - Direction to navigate ('up', 'down', 'left', 'right')
+     * @returns {number} Index of next element or -1 if not found
+     * @memberof DirectionalNavigator
+     */
+    findNextInDirection(direction) {
+        const focusableElements = this.elementManager.getFocusableElements();
+        const currentFocusIndex = this.focusManager.getCurrentFocusIndex();
+        
+        if (focusableElements.length === 0) return -1;
+
         const current = focusableElements[currentFocusIndex];
         if (!current) return 0;
-        
+
         const currentRect = current.getBoundingClientRect();
         const currentY = currentRect.top + currentRect.height / 2;
         const currentX = currentRect.left + currentRect.width / 2;
-        
-        // Improved section detection
-        function getElementSection(el) {
-            if (el.closest('.navbar')) return 'navbar';
-            if (el.closest('[id*="profile"]') || el.getAttribute('href')?.includes('profile')) return 'profile';
-            if (el.closest('.carousel')) return 'carousel';
-            
-            // Check for specific content sections
-            if (el.closest('[class*="news"]') || el.closest('[id*="news"]')) return 'news';
-            if (el.closest('[class*="program"]') || el.closest('[id*="program"]')) return 'program';
-            if (el.closest('.container') || el.closest('.row') || el.closest('.col')) return 'content';
-            
-            return 'other';
-        }
-        
-        const currentSection = getElementSection(current);
+
+        const currentSection = this.getElementSection(current);
         const currentCarousel = current.closest('.carousel');
-        
+
         let bestMatch = -1;
         let bestDistance = Infinity;
-        
+
         focusableElements.forEach((el, index) => {
             if (index === currentFocusIndex) return;
-            
+
             const rect = el.getBoundingClientRect();
             const elY = rect.top + rect.height / 2;
             const elX = rect.left + rect.width / 2;
-            
-            const elSection = getElementSection(el);
+
+            const elSection = this.getElementSection(el);
             const elCarousel = el.closest('.carousel');
-            
-            let isInDirection = false;
-            let distance = 0;
-            
-            switch(direction) {
-                case 'down':
-                    // Down should move to next section or next row in same section
-                    isInDirection = elY > currentY + 30;
-                    distance = Math.abs(elY - currentY) + Math.abs(elX - currentX) * 0.2;
-                    
-                    // Prefer moving to different sections when going down
-                    if (currentSection === 'navbar' && elSection !== 'navbar') {
-                        distance *= 0.3; // Strong preference for leaving navbar
-                    } else if (currentSection === elSection && currentCarousel && elCarousel && currentCarousel === elCarousel) {
-                        distance *= 2; // Discourage staying in same carousel
-                    }
-                    break;
-                    
-                case 'up':
-                    // Up should move to previous section or previous row in same section
-                    isInDirection = elY < currentY - 30;
-                    distance = Math.abs(elY - currentY) + Math.abs(elX - currentX) * 0.2;
-                    
-                    // Improved section preference logic for upward navigation
-                    if (currentSection === 'content' || currentSection === 'news' || currentSection === 'program') {
-                        // From content areas, prefer moving to other content first, then navbar
-                        if (elSection === currentSection) {
-                            distance *= 0.8; // Prefer same content section
-                        } else if (elSection === 'carousel') {
-                            distance *= 0.9; // Then prefer carousels
-                        } else if (elSection === 'navbar') {
-                            distance *= 1.5; // Navbar is lower priority unless nothing else works
-                        }
-                    } else if (currentSection === 'carousel') {
-                        // From carousel, prefer moving to content areas above, not directly to navbar
-                        if (elSection === 'content' || elSection === 'news' || elSection === 'program') {
-                            distance *= 0.7; // Strong preference for content areas
-                        } else if (elSection === 'carousel') {
-                            // If we're in same carousel, prefer elements that are actually above
-                            if (currentCarousel === elCarousel) {
-                                distance *= 1; // Normal preference for same carousel
-                            } else {
-                                distance *= 2; // Discourage different carousel unless closer
-                            }
-                        } else if (elSection === 'navbar') {
-                            distance *= 3; // Discourage jumping directly to navbar from carousel
-                        }
-                    } else if (currentSection === 'navbar') {
-                        // From navbar, stay in navbar if possible
-                        if (elSection === 'navbar') {
-                            distance *= 0.5; // Strong preference for staying in navbar
-                        }
-                    }
-                    
-                    // Special handling to avoid jumping to specific buttons unless they're the best option
-                    if (el.textContent?.toLowerCase().includes('tv mode') || 
-                        el.textContent?.toLowerCase().includes('toggle') ||
-                        el.classList.contains('btn-outline-secondary')) {
-                        distance *= 5; // Make these buttons much less preferred unless nothing else
-                    }
-                    break;
 
-                case 'right':
-                    // Right should ONLY move within the same logical section/carousel
-                    if (currentSection === 'navbar' && elSection !== 'navbar') {
-                        return; // Don't leave navbar on horizontal movement
-                    }
-                    
-                    if (currentSection === 'carousel') {
-                        // For carousel, must be EXACT same carousel instance
-                        if (elSection !== 'carousel' || currentCarousel !== elCarousel) {
-                            return; // Don't leave current carousel on horizontal movement
-                        }
-                        
-                        // Additional check: must be roughly same horizontal row within carousel
-                        if (Math.abs(elY - currentY) > 30) {
-                            return; // Don't jump to different rows within same carousel
-                        }
-                    }
-                    
-                    // For other content areas, be very strict about staying in same row
-                    if (currentSection === 'content' || currentSection === 'news' || currentSection === 'program') {
-                        // Must be same section AND roughly same vertical position
-                        if (elSection !== currentSection || Math.abs(elY - currentY) > 50) {
-                            return; // Don't jump to different sections or rows horizontally
-                        }
-                    }
-                    
-                    isInDirection = elX > currentX + 10;
-                    distance = Math.abs(elX - currentX) + Math.abs(elY - currentY) * 0.1;
-                    break;
+            const navigationResult = this.calculateNavigationDistance(
+                direction, currentY, currentX, elY, elX,
+                currentSection, elSection, currentCarousel, elCarousel, el
+            );
 
-                case 'left':
-                    // Left should ONLY move within the same logical section/carousel
-                    if (currentSection === 'navbar' && elSection !== 'navbar') {
-                        return; // Don't leave navbar on horizontal movement
-                    }
-                    
-                    if (currentSection === 'carousel') {
-                        // For carousel, must be EXACT same carousel instance
-                        if (elSection !== 'carousel' || currentCarousel !== elCarousel) {
-                            return; // Don't leave current carousel on horizontal movement
-                        }
-                        
-                        // Additional check: must be roughly same horizontal row within carousel
-                        if (Math.abs(elY - currentY) > 30) {
-                            return; // Don't jump to different rows within same carousel
-                        }
-                    }
-                
-                    // For other content areas, be very strict about staying in same row
-                    if (currentSection === 'content' || currentSection === 'news' || currentSection === 'program') {
-                        // Must be same section AND roughly same vertical position
-                        if (elSection !== currentSection || Math.abs(elY - currentY) > 50) {
-                            return; // Don't jump to different sections or rows horizontally
-                        }
-                    }
-                    
-                    isInDirection = elX < currentX - 10;
-                    distance = Math.abs(elX - currentX) + Math.abs(elY - currentY) * 0.1;
-                    break;
-            }
-            
-            if (isInDirection && distance < bestDistance) {
-                bestDistance = distance;
+            if (navigationResult.isValid && navigationResult.distance < bestDistance) {
+                bestDistance = navigationResult.distance;
                 bestMatch = index;
             }
         });
-        
+
         return bestMatch;
     }
 
     /**
-     * Start TV navigation
+     * Get element section identifier
+     * @param {HTMLElement} element - Element to get section for
+     * @returns {string} Section identifier
+     * @private
+     * @memberof DirectionalNavigator
      */
-    function startTVNavigation() {
-        if (!isTV) return;
-        
-        navigationActive = true;
-        document.body.style.cursor = 'none';
-        
-        updateFocusableElements();
-        if (focusableElements.length > 0) {
-            setFocus(0);
-        }
-            
-        // Initialize carousel indicators
-        updateCarouselIndicators();
+    getElementSection(element) {
+        if (element.closest('.navbar')) return 'navbar';
+        if (element.closest('[id*="profile"]') || element.getAttribute('href')?.includes('profile')) return 'profile';
+        if (element.closest('.carousel')) return 'carousel';
+        if (element.closest('[class*="news"]') || element.closest('[id*="news"]')) return 'news';
+        if (element.closest('[class*="program"]') || element.closest('[id*="program"]')) return 'program';
+        if (element.closest('.container') || element.closest('.row') || element.closest('.col')) return 'content';
+        return 'other';
     }
-    
+
     /**
-     * Stop TV navigation
+     * Calculate navigation distance and validity for direction
+     * @param {string} direction - Navigation direction
+     * @param {number} currentY - Current element Y position
+     * @param {number} currentX - Current element X position
+     * @param {number} elY - Target element Y position
+     * @param {number} elX - Target element X position
+     * @param {string} currentSection - Current element section
+     * @param {string} elSection - Target element section
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @param {HTMLElement} elCarousel - Target carousel element
+     * @param {HTMLElement} el - Target element
+     * @returns {Object} Navigation result with isValid and distance properties
+     * @private
+     * @memberof DirectionalNavigator
      */
-    function stopTVNavigation() {
-        navigationActive = false;
-        document.body.style.cursor = 'auto';
+    calculateNavigationDistance(direction, currentY, currentX, elY, elX, currentSection, elSection, currentCarousel, elCarousel, el) {
+        let isValid = false;
+        let distance = 0;
+
+        switch (direction) {
+            case 'down':
+                isValid = elY > currentY + TVNavigationConfig.VERTICAL_SPACING_THRESHOLD;
+                distance = Math.abs(elY - currentY) + Math.abs(elX - currentX) * 0.2;
+                distance = this.applyDownNavigationPreferences(distance, currentSection, elSection, currentCarousel, elCarousel);
+                break;
+
+            case 'up':
+                isValid = elY < currentY - TVNavigationConfig.VERTICAL_SPACING_THRESHOLD;
+                distance = Math.abs(elY - currentY) + Math.abs(elX - currentX) * 0.2;
+                distance = this.applyUpNavigationPreferences(distance, currentSection, elSection, currentCarousel, elCarousel, el);
+                break;
+
+            case 'right':
+                const rightResult = this.calculateHorizontalNavigation('right', currentX, elX, currentY, elY, currentSection, elSection, currentCarousel, elCarousel);
+                isValid = rightResult.isValid;
+                distance = rightResult.distance;
+                break;
+
+            case 'left':
+                const leftResult = this.calculateHorizontalNavigation('left', currentX, elX, currentY, elY, currentSection, elSection, currentCarousel, elCarousel);
+                isValid = leftResult.isValid;
+                distance = leftResult.distance;
+                break;
+        }
+
+        return { isValid, distance };
+    }
+
+    /**
+     * Apply preferences for downward navigation
+     * @param {number} distance - Base distance
+     * @param {string} currentSection - Current section
+     * @param {string} elSection - Target section
+     * @param {HTMLElement} currentCarousel - Current carousel
+     * @param {HTMLElement} elCarousel - Target carousel
+     * @returns {number} Modified distance
+     * @private
+     * @memberof DirectionalNavigator
+     */
+    applyDownNavigationPreferences(distance, currentSection, elSection, currentCarousel, elCarousel) {
+        // Prefer moving to different sections when going down
+        if (currentSection === 'navbar' && elSection !== 'navbar') {
+            distance *= 0.3; // Strong preference for leaving navbar
+        } else if (currentSection === elSection && currentCarousel && elCarousel && currentCarousel === elCarousel) {
+            distance *= 2; // Discourage staying in same carousel
+        }
+        return distance;
+    }
+
+    /**
+     * Apply preferences for upward navigation
+     * @param {number} distance - Base distance
+     * @param {string} currentSection - Current section
+     * @param {string} elSection - Target section
+     * @param {HTMLElement} currentCarousel - Current carousel
+     * @param {HTMLElement} elCarousel - Target carousel
+     * @param {HTMLElement} el - Target element
+     * @returns {number} Modified distance
+     * @private
+     * @memberof DirectionalNavigator
+     */
+    applyUpNavigationPreferences(distance, currentSection, elSection, currentCarousel, elCarousel, el) {
+        // Complex upward navigation preferences
+        if (currentSection === 'content' || currentSection === 'news' || currentSection === 'program') {
+            if (elSection === currentSection) {
+                distance *= 0.8;
+            } else if (elSection === 'carousel') {
+                distance *= 0.9;
+            } else if (elSection === 'navbar') {
+                distance *= 1.5;
+            }
+        } else if (currentSection === 'carousel') {
+            if (elSection === 'content' || elSection === 'news' || elSection === 'program') {
+                distance *= 0.7;
+            } else if (elSection === 'carousel') {
+                distance *= currentCarousel === elCarousel ? 1 : 2;
+            } else if (elSection === 'navbar') {
+                distance *= 3;
+            }
+        } else if (currentSection === 'navbar' && elSection === 'navbar') {
+            distance *= 0.5;
+        }
+
+        // Avoid specific buttons unless they're the best option
+        if (el.textContent?.toLowerCase().includes('tv mode') ||
+            el.textContent?.toLowerCase().includes('toggle') ||
+            el.classList.contains('btn-outline-secondary')) {
+            distance *= 5;
+        }
+
+        return distance;
+    }
+
+    /**
+     * Calculate horizontal navigation result
+     * @param {string} direction - 'left' or 'right'
+     * @param {number} currentX - Current X position
+     * @param {number} elX - Target X position
+     * @param {number} currentY - Current Y position
+     * @param {number} elY - Target Y position
+     * @param {string} currentSection - Current section
+     * @param {string} elSection - Target section
+     * @param {HTMLElement} currentCarousel - Current carousel
+     * @param {HTMLElement} elCarousel - Target carousel
+     * @returns {Object} Result with isValid and distance properties
+     * @private
+     * @memberof DirectionalNavigator
+     */
+    calculateHorizontalNavigation(direction, currentX, elX, currentY, elY, currentSection, elSection, currentCarousel, elCarousel) {
+        // Strict horizontal navigation rules
+        if (currentSection === 'navbar' && elSection !== 'navbar') {
+            return { isValid: false, distance: Infinity };
+        }
+
+        if (currentSection === 'carousel') {
+            if (elSection !== 'carousel' || currentCarousel !== elCarousel) {
+                return { isValid: false, distance: Infinity };
+            }
+            if (Math.abs(elY - currentY) > TVNavigationConfig.VERTICAL_SPACING_THRESHOLD) {
+                return { isValid: false, distance: Infinity };
+            }
+        }
+
+        if (currentSection === 'content' || currentSection === 'news' || currentSection === 'program') {
+            if (elSection !== currentSection || Math.abs(elY - currentY) > TVNavigationConfig.SAME_ROW_THRESHOLD) {
+                return { isValid: false, distance: Infinity };
+            }
+        }
+
+        const isInDirection = direction === 'right' ?
+            elX > currentX + TVNavigationConfig.SMALL_HORIZONTAL_THRESHOLD :
+            elX < currentX - TVNavigationConfig.SMALL_HORIZONTAL_THRESHOLD;
+
+        if (!isInDirection) {
+            return { isValid: false, distance: Infinity };
+        }
+
+        const distance = Math.abs(elX - currentX) + Math.abs(elY - currentY) * 0.1;
+        return { isValid: true, distance };
+    }
+}
+
+/**
+ * Handles carousel-specific navigation logic
+ * @class CarouselNavigator
+ */
+class CarouselNavigator {
+    /**
+     * Create a CarouselNavigator instance
+     * @param {FocusableElementManager} elementManager - Element manager instance
+     * @param {FocusManager} focusManager - Focus manager instance
+     * @memberof CarouselNavigator
+     */
+    constructor(elementManager, focusManager) {
+        /**
+         * Element manager reference
+         * @type {FocusableElementManager}
+         */
+        this.elementManager = elementManager;
         
+        /**
+         * Focus manager reference
+         * @type {FocusManager}
+         */
+        this.focusManager = focusManager;
+    }
+
+    /**
+     * Navigate to next/previous carousel slide when reaching the edge
+     * @param {string} direction - 'right' or 'left'
+     * @returns {boolean} True if slide navigation occurred
+     * @memberof CarouselNavigator
+     */
+    navigateCarouselSlide(direction) {
+        const currentElement = this.focusManager.getCurrentElement();
+        const currentCarousel = currentElement?.closest('.carousel');
+
+        if (!currentCarousel) {
+            console.log('navigateCarouselSlide: Not in carousel');
+            return false;
+        }
+
+        console.log('navigateCarouselSlide: Direction =', direction, 'from element:', currentElement);
+
+        const carouselInstance = bootstrap.Carousel.getInstance(currentCarousel) || new bootstrap.Carousel(currentCarousel);
+        const currentSlide = currentCarousel.querySelector('.carousel-item.active');
+        const visibleThumbnails = Array.from(currentSlide.querySelectorAll('.thumbnail, .thumbnail-home'));
+        const currentIndex = visibleThumbnails.indexOf(currentElement);
+
+        console.log('navigateCarouselSlide: Found', visibleThumbnails.length, 'thumbnails, current at index:', currentIndex);
+
+        return this.handleSlideNavigation(direction, currentIndex, visibleThumbnails, carouselInstance, currentCarousel);
+    }
+
+    /**
+     * Handle slide navigation logic
+     * @param {string} direction - Navigation direction
+     * @param {number} currentIndex - Current thumbnail index
+     * @param {Array<HTMLElement>} visibleThumbnails - Visible thumbnails in current slide
+     * @param {Object} carouselInstance - Bootstrap carousel instance
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @returns {boolean} True if navigation occurred
+     * @private
+     * @memberof CarouselNavigator
+     */
+    handleSlideNavigation(direction, currentIndex, visibleThumbnails, carouselInstance, currentCarousel) {
+        const slides = currentCarousel.querySelectorAll('.carousel-item');
+        const activeSlide = currentCarousel.querySelector('.carousel-item.active');
+        const activeIndex = Array.from(slides).indexOf(activeSlide);
+
+        if (direction === 'right' && currentIndex === visibleThumbnails.length - 1) {
+            return this.moveToNextSlide(activeIndex, slides.length, carouselInstance, currentCarousel);
+        } else if (direction === 'left' && currentIndex === 0) {
+            return this.moveToPreviousSlide(activeIndex, carouselInstance, currentCarousel);
+        }
+
+        console.log('navigateCarouselSlide: Not at edge, normal navigation should handle');
+        return false;
+    }
+
+    /**
+     * Move to next carousel slide
+     * @param {number} activeIndex - Current active slide index
+     * @param {number} totalSlides - Total number of slides
+     * @param {Object} carouselInstance - Bootstrap carousel instance
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @returns {boolean} True if moved to next slide
+     * @private
+     * @memberof CarouselNavigator
+     */
+    moveToNextSlide(activeIndex, totalSlides, carouselInstance, currentCarousel) {
+        console.log('navigateCarouselSlide: At last item. Slide', activeIndex + 1, 'of', totalSlides);
+
+        if (activeIndex < totalSlides - 1) {
+            console.log('navigateCarouselSlide: Moving to next slide');
+            carouselInstance.next();
+
+            setTimeout(() => {
+                this.focusFirstThumbnailInNewSlide(currentCarousel);
+            }, TVNavigationConfig.SLIDE_NAVIGATION_DELAY);
+            return true;
+        } else {
+            console.log('navigateCarouselSlide: No more slides, staying put');
+            return true;
+        }
+    }
+
+    /**
+     * Move to previous carousel slide
+     * @param {number} activeIndex - Current active slide index
+     * @param {Object} carouselInstance - Bootstrap carousel instance
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @returns {boolean} True if moved to previous slide
+     * @private
+     * @memberof CarouselNavigator
+     */
+    moveToPreviousSlide(activeIndex, carouselInstance, currentCarousel) {
+        console.log('navigateCarouselSlide: At first item. Slide', activeIndex + 1);
+
+        if (activeIndex > 0) {
+            console.log('navigateCarouselSlide: Moving to previous slide');
+            carouselInstance.prev();
+
+            setTimeout(() => {
+                this.focusLastThumbnailInNewSlide(currentCarousel);
+            }, TVNavigationConfig.SLIDE_NAVIGATION_DELAY);
+            return true;
+        } else {
+            console.log('navigateCarouselSlide: No previous slides, staying put');
+            return true;
+        }
+    }
+
+    /**
+     * Focus first thumbnail in new slide
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @private
+     * @memberof CarouselNavigator
+     */
+    focusFirstThumbnailInNewSlide(currentCarousel) {
+        this.elementManager.updateFocusableElements();
+        const newSlide = currentCarousel.querySelector('.carousel-item.active');
+        const firstThumbnail = newSlide.querySelector('.thumbnail, .thumbnail-home');
+        
+        if (firstThumbnail) {
+            const newIndex = this.elementManager.getElementIndex(firstThumbnail);
+            if (newIndex !== -1) {
+                this.focusManager.setFocus(newIndex);
+            }
+        }
+    }
+
+    /**
+     * Focus last thumbnail in new slide
+     * @param {HTMLElement} currentCarousel - Current carousel element
+     * @private
+     * @memberof CarouselNavigator
+     */
+    focusLastThumbnailInNewSlide(currentCarousel) {
+        this.elementManager.updateFocusableElements();
+        const newSlide = currentCarousel.querySelector('.carousel-item.active');
+        const thumbnails = Array.from(newSlide.querySelectorAll('.thumbnail, .thumbnail-home'));
+        const lastThumbnail = thumbnails[thumbnails.length - 1];
+        
+        if (lastThumbnail) {
+            const newIndex = this.elementManager.getElementIndex(lastThumbnail);
+            if (newIndex !== -1) {
+                this.focusManager.setFocus(newIndex);
+            }
+        }
+    }
+
+    /**
+     * Update carousel visual indicators
+     * @memberof CarouselNavigator
+     */
+    updateCarouselIndicators() {
+        const currentElement = this.focusManager.getCurrentElement();
+        
+        document.querySelectorAll('.carousel').forEach(carousel => {
+            const slides = carousel.querySelectorAll('.carousel-item');
+            const activeSlide = carousel.querySelector('.carousel-item.active');
+            const activeIndex = Array.from(slides).indexOf(activeSlide);
+
+            const hasPrev = activeIndex > 0;
+            const hasNext = activeIndex < slides.length - 1;
+
+            carousel.setAttribute('data-has-prev', hasPrev);
+            carousel.setAttribute('data-has-next', hasNext);
+
+            if (currentElement && currentElement.closest('.carousel') === carousel) {
+                const visibleThumbnails = Array.from(activeSlide.querySelectorAll('.thumbnail:not([style*="display: none"])'));
+                const currentIndex = visibleThumbnails.indexOf(currentElement);
+
+                carousel.setAttribute('data-at-start', currentIndex === 0 && hasPrev);
+                carousel.setAttribute('data-at-end', currentIndex === visibleThumbnails.length - 1 && hasNext);
+            } else {
+                carousel.setAttribute('data-at-start', false);
+                carousel.setAttribute('data-at-end', false);
+            }
+        });
+    }
+}
+
+/**
+ * Handles dropdown menu interactions in TV mode
+ * @class DropdownManager
+ */
+class DropdownManager {
+    /**
+     * Create a DropdownManager instance
+     * @param {FocusableElementManager} elementManager - Element manager instance
+     * @memberof DropdownManager
+     */
+    constructor(elementManager) {
+        /**
+         * Element manager reference
+         * @type {FocusableElementManager}
+         */
+        this.elementManager = elementManager;
+    }
+
+    /**
+     * Check if element is a dropdown toggle
+     * @param {HTMLElement} element - Element to check
+     * @returns {boolean} True if element is dropdown toggle
+     * @memberof DropdownManager
+     */
+    isDropdownToggle(element) {
+        return element && (
+            (element.hasAttribute('data-bs-toggle') && element.getAttribute('data-bs-toggle') === 'dropdown') ||
+            element.classList.contains('dropdown-toggle') ||
+            (element.getAttribute('role') === 'button' && element.getAttribute('aria-haspopup') === 'true')
+        );
+    }
+
+    /**
+     * Check if dropdown is currently open
+     * @param {HTMLElement} toggleElement - Dropdown toggle element
+     * @returns {boolean} True if dropdown is open
+     * @memberof DropdownManager
+     */
+    isDropdownOpen(toggleElement) {
+        return toggleElement?.nextElementSibling?.classList.contains('tv-dropdown-open');
+    }
+
+    /**
+     * Handle dropdown toggle interaction
+     * @param {HTMLElement} toggleElement - Dropdown toggle element
+     * @memberof DropdownManager
+     */
+    toggleDropdown(toggleElement) {
+        const dropdownMenu = toggleElement.nextElementSibling;
+        if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+            if (dropdownMenu.classList.contains('tv-dropdown-open')) {
+                this.closeDropdown(dropdownMenu);
+            } else {
+                this.openDropdown(dropdownMenu);
+            }
+        }
+    }
+
+    /**
+     * Open dropdown menu
+     * @param {HTMLElement} dropdownMenu - Dropdown menu element
+     * @private
+     * @memberof DropdownManager
+     */
+    openDropdown(dropdownMenu) {
+        // Close any other open dropdowns first
+        document.querySelectorAll('.dropdown-menu.tv-dropdown-open').forEach(menu => {
+            this.closeDropdown(menu);
+        });
+
+        dropdownMenu.classList.add('tv-dropdown-open', 'show');
+    }
+
+    /**
+     * Close dropdown menu
+     * @param {HTMLElement} dropdownMenu - Dropdown menu element
+     * @private
+     * @memberof DropdownManager
+     */
+    closeDropdown(dropdownMenu) {
+        dropdownMenu.classList.remove('tv-dropdown-open', 'show');
+
+        // Remove dropdown items from focusable elements
+        const dropdownItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item, a[href]'));
+        const focusableElements = this.elementManager.getFocusableElements();
+        
+        dropdownItems.forEach(item => {
+            const index = focusableElements.indexOf(item);
+            if (index !== -1) {
+                focusableElements.splice(index, 1);
+            }
+        });
+    }
+
+    /**
+     * Close all open dropdowns
+     * @memberof DropdownManager
+     */
+    closeAllDropdowns() {
+        const openDropdowns = document.querySelectorAll('.dropdown-menu.tv-dropdown-open');
+        openDropdowns.forEach(dropdown => this.closeDropdown(dropdown));
+    }
+}
+
+/**
+ * Main TV Navigation controller class
+ * @class TVNavigationController
+ */
+class TVNavigationController {
+    /**
+     * Create a TVNavigationController instance
+     * @memberof TVNavigationController
+     */
+    constructor() {
+        /**
+         * TV detection manager
+         * @type {TVDetectionManager}
+         */
+        this.tvDetection = new TVDetectionManager();
+        
+        /**
+         * Key handler for remote input
+         * @type {TVKeyHandler}
+         */
+        this.keyHandler = new TVKeyHandler();
+        
+        /**
+         * Focusable element manager
+         * @type {FocusableElementManager}
+         */
+        this.elementManager = new FocusableElementManager();
+        
+        /**
+         * Focus state manager
+         * @type {FocusManager}
+         */
+        this.focusManager = new FocusManager(this.elementManager);
+        
+        /**
+         * Directional navigation handler
+         * @type {DirectionalNavigator}
+         */
+        this.directionalNav = new DirectionalNavigator(this.elementManager, this.focusManager);
+        
+        /**
+         * Carousel navigation handler
+         * @type {CarouselNavigator}
+         */
+        this.carouselNav = new CarouselNavigator(this.elementManager, this.focusManager);
+        
+        /**
+         * Dropdown interaction manager
+         * @type {DropdownManager}
+         */
+        this.dropdownManager = new DropdownManager(this.elementManager);
+        
+        /**
+         * Whether TV navigation is currently active
+         * @type {boolean}
+         */
+        this.navigationActive = false;
+        
+        /**
+         * Mutation observer for DOM changes
+         * @type {MutationObserver}
+         */
+        this.observer = null;
+
+        this.init();
+    }
+
+    /**
+     * Initialize TV navigation system
+     * @memberof TVNavigationController
+     */
+    init() {
+        this.setupEventListeners();
+        this.setupMutationObserver();
+        
+        // Initial TV status check
+        this.tvDetection.updateTVStatus();
+        
+        if (this.tvDetection.getTVStatus()) {
+            setTimeout(() => {
+                this.startTVNavigation();
+            }, TVNavigationConfig.STARTUP_DELAY);
+        }
+    }
+
+    /**
+     * Set up event listeners
+     * @private
+     * @memberof TVNavigationController
+     */
+    setupEventListeners() {
+        // Remove any existing listeners first
+        document.removeEventListener('keydown', this.handleKeydown.bind(this));
+
+        // Add event listeners for TV remote input
+        document.addEventListener('keydown', this.handleKeydown.bind(this), true);
+        document.addEventListener('keyup', this.handleKeydown.bind(this), true);
+        document.addEventListener('keypress', this.handleKeydown.bind(this), true);
+
+        // Listen for TV mode changes
+        window.addEventListener('tvModeChanged', (e) => {
+            if (e.detail.isTV) {
+                this.startTVNavigation();
+            } else {
+                this.stopTVNavigation();
+            }
+        });
+
+        // Listen for when tvDetection becomes available
+        window.addEventListener('tvDetectionReady', () => {
+            this.tvDetection.updateTVStatus();
+            if (this.tvDetection.getTVStatus()) {
+                this.startTVNavigation();
+            }
+        });
+
+        // Override Bootstrap dropdown behavior in TV mode
+        this.setupDropdownOverrides();
+    }
+
+    /**
+     * Set up dropdown behavior overrides
+     * @private
+     * @memberof TVNavigationController
+     */
+    setupDropdownOverrides() {
+        // Override Bootstrap dropdown click behavior
+        document.addEventListener('click', (e) => {
+            if (!this.tvDetection.getTVStatus() || !this.navigationActive) return;
+
+            const dropdownToggle = e.target.closest('.dropdown-toggle');
+            if (dropdownToggle) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+
+        // Prevent Bootstrap dropdown keyboard behavior
+        document.addEventListener('keydown', (e) => {
+            if (!this.tvDetection.getTVStatus() || !this.navigationActive) return;
+
+            const dropdownToggle = e.target.closest('.dropdown-toggle');
+            if (dropdownToggle && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+    }
+
+    /**
+     * Set up mutation observer for DOM changes
+     * @private
+     * @memberof TVNavigationController
+     */
+    setupMutationObserver() {
+        this.observer = new MutationObserver((mutations) => {
+            if (!this.tvDetection.getTVStatus() || !this.navigationActive) return;
+
+            mutations.forEach((mutation) => {
+                // Handle content changes
+                if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                    clearTimeout(this.observer.updateTimeout);
+                    this.observer.updateTimeout = setTimeout(() => {
+                        this.elementManager.updateFocusableElements();
+                        const currentIndex = this.focusManager.getCurrentFocusIndex();
+                        const focusableElements = this.elementManager.getFocusableElements();
+                        
+                        if (currentIndex < focusableElements.length) {
+                            this.focusManager.setFocus(currentIndex);
+                        } else if (focusableElements.length > 0) {
+                            this.focusManager.setFocus(0);
+                        }
+                    }, TVNavigationConfig.UPDATE_DEBOUNCE_DELAY);
+                }
+
+                // Handle Bootstrap dropdown prevention
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.classList?.contains('dropdown-menu') && node.classList?.contains('show')) {
+                        if (!node.classList.contains('tv-dropdown-open')) {
+                            node.classList.remove('show');
+                        }
+                    }
+                });
+            });
+        });
+
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    }
+
+    /**
+     * Start TV navigation mode
+     * @memberof TVNavigationController
+     */
+    startTVNavigation() {
+        if (!this.tvDetection.getTVStatus()) return;
+
+        this.navigationActive = true;
+        document.body.style.cursor = 'none';
+
+        this.elementManager.updateFocusableElements();
+        const focusableElements = this.elementManager.getFocusableElements();
+        
+        if (focusableElements.length > 0) {
+            this.focusManager.setFocus(0);
+        }
+
+        this.carouselNav.updateCarouselIndicators();
+    }
+
+    /**
+     * Stop TV navigation mode
+     * @memberof TVNavigationController
+     */
+    stopTVNavigation() {
+        this.navigationActive = false;
+        document.body.style.cursor = 'auto';
+
         // Remove all focus indicators
+        const focusableElements = this.elementManager.getFocusableElements();
         focusableElements.forEach(el => {
             el.classList.remove('tv-focused');
             el.style.border = '';
@@ -399,693 +1248,290 @@ document.addEventListener('DOMContentLoaded', function() {
             el.style.zIndex = '';
         });
     }
-    
 
     /**
-     * Keyboard event handler
+     * Handle keyboard input from TV remote
+     * @param {KeyboardEvent} event - Keyboard event
+     * @memberof TVNavigationController
      */
-    function handleKeydown(e) {
+    handleKeydown(event) {
         // Only handle navigation if we're in TV mode and navigation is active
-        if (!isTV || !navigationActive) return;
-        
-        // Don't interfere with video player controls when it has focus
+        if (!this.tvDetection.getTVStatus() || !this.navigationActive) return;
+
+        // Don't interfere with video player controls
         if (document.activeElement && document.activeElement.closest('.video-js')) {
             return;
         }
 
-        // For TV remotes, we want to handle keydown events, but prevent default behavior
-        if (e.type !== 'keydown') return;
+        // Only handle keydown events
+        if (event.type !== 'keydown') return;
 
-        let nextIndex = -1;
-        const currentElement = focusableElements[currentFocusIndex];
-
-        // Enhanced key mapping for TV remotes
-        let normalizedKey = null;
-
-        console.log('Raw key event:', {
-            type: e.type,
-            key: e.key,
-            keyCode: e.keyCode,
-            which: e.which,
-            code: e.code,
-            userAgent: navigator.userAgent.substring(0, 100)
-        });
-
-        // Standard keyboard codes
-        if (e.keyCode === 37 || e.code === 'ArrowLeft' || e.key === 'ArrowLeft') normalizedKey = 'ArrowLeft';
-        if (e.keyCode === 38 || e.code === 'ArrowUp' || e.key === 'ArrowUp') normalizedKey = 'ArrowUp';
-        if (e.keyCode === 39 || e.code === 'ArrowRight' || e.key === 'ArrowRight') normalizedKey = 'ArrowRight';
-        if (e.keyCode === 40 || e.code === 'ArrowDown' || e.key === 'ArrowDown') normalizedKey = 'ArrowDown';
-        if (e.keyCode === 13 || e.code === 'Enter' || e.key === 'Enter') normalizedKey = 'Enter';
-        if (e.keyCode === 27 || e.code === 'Escape' || e.key === 'Escape') normalizedKey = 'Escape';
-        if (e.keyCode === 32 || e.code === 'Space' || e.key === ' ') normalizedKey = ' ';
-        
-        // Samsung TV remote key mappings (Tizen)
-        if (e.keyCode === 4 || e.keyCode === 10009) normalizedKey = 'Escape';     // Back/Return
-        if (e.keyCode === 10252 || e.keyCode === 415) normalizedKey = ' ';        // Play/Pause
-        if (e.keyCode === 10182) normalizedKey = 'Enter';                         // OK/Select
-        
-        // Fire TV / Amazon remote key mappings
-        if (e.keyCode === 21) normalizedKey = 'ArrowLeft';    // DPAD_LEFT
-        if (e.keyCode === 19) normalizedKey = 'ArrowUp';      // DPAD_UP  
-        if (e.keyCode === 22) normalizedKey = 'ArrowRight';   // DPAD_RIGHT
-        if (e.keyCode === 20) normalizedKey = 'ArrowDown';    // DPAD_DOWN
-        if (e.keyCode === 23) normalizedKey = 'Enter';        // DPAD_CENTER
-        
-        // WebOS (LG TV) key mappings
-        if (e.keyCode === 461) normalizedKey = 'Escape';      // BACK
-        if (e.keyCode === 13) normalizedKey = 'Enter';        // OK
-        
-        // Additional TV remote codes from various manufacturers
-        if (e.keyCode === 166) normalizedKey = 'Escape';      // Back (some TVs)
-        if (e.keyCode === 8) normalizedKey = 'Escape';        // Backspace (sometimes used as back)
-        
-        console.log('Normalized key:', normalizedKey);
-
-        // If we don't recognize the key, ignore it
+        const normalizedKey = this.keyHandler.normalizeKey(event);
         if (!normalizedKey) return;
 
-        // Always prevent default for recognized TV remote keys
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        // Prevent default for recognized TV remote keys
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
 
-        // Check if current element is a dropdown toggle
-        const isDropdownToggle = currentElement && (
-            currentElement.hasAttribute('data-bs-toggle') && currentElement.getAttribute('data-bs-toggle') === 'dropdown' ||
-            currentElement.classList.contains('dropdown-toggle') ||
-            currentElement.getAttribute('role') === 'button' && currentElement.getAttribute('aria-haspopup') === 'true'
-        );
+        this.processNavigationCommand(normalizedKey);
+    }
+
+    /**
+     * Process navigation command based on normalized key
+     * @param {string} key - Normalized key command
+     * @private
+     * @memberof TVNavigationController
+     */
+    processNavigationCommand(key) {
+        const currentElement = this.focusManager.getCurrentElement();
         
-        // Check if a dropdown is currently open
-        const openDropdown = currentElement?.nextElementSibling?.classList.contains('tv-dropdown-open');
-        
-        switch(e.key) {
+        switch (key) {
             case 'ArrowDown':
-                // Only prevent dropdown expansion if dropdown is CLOSED
-                if (isDropdownToggle && !openDropdown) {
-                    // e.preventDefault();
-                    // e.stopPropagation();
-                    // e.stopImmediatePropagation();
-                    
-                    // Force close any dropdown that might be opening
-                    const dropdownMenu = currentElement.nextElementSibling;
-                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-                        dropdownMenu.classList.remove('show', 'tv-dropdown-open');
-                    }
-                    
-                    // Navigate normally instead of opening dropdown
-                    nextIndex = findNextInDirection('down');
-                    
-                    // If no directional match, try next element that's in a different section
-                    if (nextIndex === -1) {
-                        for (let i = currentFocusIndex + 1; i < focusableElements.length; i++) {
-                            const candidate = focusableElements[i];
-                            const candidateSection = candidate.closest('.navbar') ? 'navbar' : 
-                                                   candidate.closest('.carousel') ? 'carousel' : 
-                                                   candidate.closest('[id*="profile"]') ? 'profile' : 'other';
-                            const currentSection = currentElement?.closest('.navbar') ? 'navbar' : 
-                                                 currentElement?.closest('.carousel') ? 'carousel' : 
-                                                 currentElement?.closest('[id*="profile"]') ? 'profile' : 'other';
-                            
-                            if (candidateSection !== currentSection) {
-                                nextIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-                
-                // If dropdown is open, navigate to first dropdown item
-                if (isDropdownToggle && openDropdown) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const dropdownMenu = currentElement.nextElementSibling;
-                    if (dropdownMenu) {
-                        const firstDropdownItem = dropdownMenu.querySelector('.dropdown-item, a[href]');
-                        if (firstDropdownItem) {
-                            // Add the dropdown item to focusable elements temporarily
-                            const dropdownItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item, a[href]'));
-                            dropdownItems.forEach(item => {
-                                if (!focusableElements.includes(item)) {
-                                    // Insert dropdown items right after the toggle
-                                    const toggleIndex = focusableElements.indexOf(currentElement);
-                                    focusableElements.splice(toggleIndex + 1, 0, item);
-                                    item.setAttribute('data-tv-index', toggleIndex + 1);
-                                    item.setAttribute('tabindex', '0');
-                                    item.style.outline = 'none';
-                                }
-                            });
-                            
-                            // Focus the first dropdown item
-                            const firstItemIndex = focusableElements.indexOf(firstDropdownItem);
-                            if (firstItemIndex !== -1) {
-                                nextIndex = firstItemIndex;
-                            }
-                        }
-                    }
-                    break;
-                }
-                
-                // Normal down navigation
-                e.preventDefault();
-                e.stopPropagation();
-                
-                nextIndex = findNextInDirection('down');
-                
-                // If no directional match, try next element that's in a different section
-                if (nextIndex === -1) {
-                    for (let i = currentFocusIndex + 1; i < focusableElements.length; i++) {
-                        const candidate = focusableElements[i];
-                        const candidateSection = candidate.closest('.navbar') ? 'navbar' : 
-                                               candidate.closest('.carousel') ? 'carousel' : 
-                                               candidate.closest('[id*="profile"]') ? 'profile' : 'other';
-                        const currentSection = currentElement?.closest('.navbar') ? 'navbar' : 
-                                             currentElement?.closest('.carousel') ? 'carousel' : 
-                                             currentElement?.closest('[id*="profile"]') ? 'profile' : 'other';
-                        
-                        if (candidateSection !== currentSection) {
-                            nextIndex = i;
-                            break;
-                        }
-                    }
-                }
+                this.handleDownNavigation(currentElement);
                 break;
-                
             case 'ArrowUp':
-                // If we're on a dropdown item, allow moving up within dropdown or back to toggle
-                if (currentElement?.closest('.dropdown-menu')) {
-                    // e.preventDefault();
-                    // e.stopPropagation();
-                    
-                    // Find previous dropdown item or go back to toggle
-                    nextIndex = findNextInDirection('up');
-                    
-                    // If no previous dropdown item, go back to the dropdown toggle
-                    if (nextIndex === -1) {
-                        const dropdownMenu = currentElement.closest('.dropdown-menu');
-                        const dropdownToggle = dropdownMenu?.previousElementSibling;
-                        if (dropdownToggle && focusableElements.includes(dropdownToggle)) {
-                            nextIndex = focusableElements.indexOf(dropdownToggle);
-                        }
-                    }
-                    break;
-                }
-                
-                // Only prevent dropdown expansion if dropdown is CLOSED
-                if (isDropdownToggle && !openDropdown) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    
-                    // Force close any dropdown that might be opening
-                    const dropdownMenu = currentElement.nextElementSibling;
-                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-                        dropdownMenu.classList.remove('show', 'tv-dropdown-open');
-                    }
-                    
-                    // Navigate normally
-                    nextIndex = findNextInDirection('up');
-                    
-                    // If no directional match, try previous element that's in a different section
-                    if (nextIndex === -1) {
-                        for (let i = currentFocusIndex - 1; i >= 0; i--) {
-                            const candidate = focusableElements[i];
-                            const candidateSection = candidate.closest('.navbar') ? 'navbar' : 
-                                                   candidate.closest('.carousel') ? 'carousel' : 
-                                                   candidate.closest('[id*="profile"]') ? 'profile' : 'other';
-                            const currentSection = currentElement?.closest('.navbar') ? 'navbar' : 
-                                                 currentElement?.closest('.carousel') ? 'carousel' : 
-                                                 currentElement?.closest('[id*="profile"]') ? 'profile' : 'other';
-                            
-                            if (candidateSection !== currentSection) {
-                                nextIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-                
-                // Normal up navigation
-                e.preventDefault();
-                e.stopPropagation();
-                
-                nextIndex = findNextInDirection('up');
-                
-                // If no directional match, try previous element that's in a different section
-                if (nextIndex === -1) {
-                    for (let i = currentFocusIndex - 1; i >= 0; i--) {
-                        const candidate = focusableElements[i];
-                        const candidateSection = candidate.closest('.navbar') ? 'navbar' : 
-                                               candidate.closest('.carousel') ? 'carousel' : 
-                                               candidate.closest('[id*="profile"]') ? 'profile' : 'other';
-                        const currentSection = currentElement?.closest('.navbar') ? 'navbar' : 
-                                             currentElement?.closest('.carousel') ? 'carousel' : 
-                                             currentElement?.closest('[id*="profile"]') ? 'profile' : 'other';
-                        
-                        if (candidateSection !== currentSection) {
-                            nextIndex = i;
-                            break;
-                        }
-                    }
-                }
+                this.handleUpNavigation(currentElement);
                 break;
-                
             case 'ArrowRight':
             case 'ArrowLeft':
-                // Close dropdown if moving horizontally
-                if (isDropdownToggle && openDropdown) {
-                    const dropdownMenu = currentElement.nextElementSibling;
-                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-                        dropdownMenu.classList.remove('tv-dropdown-open', 'show');
-                        
-                        // Remove dropdown items from focusable elements
-                        const dropdownItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item, a[href]'));
-                        dropdownItems.forEach(item => {
-                            const index = focusableElements.indexOf(item);
-                            if (index !== -1) {
-                                focusableElements.splice(index, 1);
-                            }
-                        });
-                    }
-                }
-                
-                // Normal horizontal navigation
-                // e.preventDefault();
-                // e.stopPropagation();
-                
-                const direction = e.key === 'ArrowRight' ? 'right' : 'left';
-                console.log('Horizontal navigation:', direction);
-                
-                // FIRST: Try normal directional navigation within current slide/section
-                nextIndex = findNextInDirection(direction);
-                console.log('Normal navigation result:', nextIndex);
-                
-                // ONLY if normal navigation fails AND we're in a carousel, try slide navigation
-                if (nextIndex === -1 && currentElement?.closest('.carousel')) {
-                    console.log('Normal navigation failed, trying slide navigation');
-                    const slideChanged = navigateCarouselSlide(direction);
-                    console.log('Slide changed:', slideChanged);
-                    if (slideChanged) {
-                        // Carousel handled it (either moved slide or stayed at edge)
-                        console.log('Carousel handled, exiting');
-                        return; // Exit completely, don't try any other navigation
-                    }
-                }
-                
-                // If normal navigation found something, use it
-                // If it didn't find anything and we're not in a carousel, nextIndex stays -1
+                this.handleHorizontalNavigation(key, currentElement);
                 break;
-
             case 'Enter':
             case ' ':
-                // e.preventDefault();
-                // e.stopPropagation();
-                if (currentElement) {
-                    // For dropdown toggles, manually control dropdown
-                    if (isDropdownToggle) {
-                        const dropdownMenu = currentElement.nextElementSibling;
-                        if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-                            // Toggle our custom TV dropdown class
-                            if (dropdownMenu.classList.contains('tv-dropdown-open')) {
-                                dropdownMenu.classList.remove('tv-dropdown-open', 'show');
-                                
-                                // Remove dropdown items from focusable elements
-                                const dropdownItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item, a[href]'));
-                                dropdownItems.forEach(item => {
-                                    const index = focusableElements.indexOf(item);
-                                    if (index !== -1) {
-                                        focusableElements.splice(index, 1);
-                                    }
-                                });
-                            } else {
-                                // Close any other open dropdowns first
-                                document.querySelectorAll('.dropdown-menu.tv-dropdown-open').forEach(menu => {
-                                    menu.classList.remove('tv-dropdown-open', 'show');
-                                });
-                                
-                                // Open this dropdown
-                                dropdownMenu.classList.add('tv-dropdown-open', 'show');
-                            }
-                        }
-                    } else {
-                        // Enhanced click handling for carousel items
-                        console.log('Enter pressed on element:', currentElement);
-                        
-                        // Check if this is a carousel thumbnail
-                        if (currentElement.classList.contains('thumbnail') || 
-                            currentElement.classList.contains('thumbnail-home')) {
-                            
-                            // Try to find a link within the thumbnail
-                            let linkElement = currentElement.querySelector('a[href]');
-                            
-                            // If no link inside, check if the thumbnail itself is a link
-                            if (!linkElement && currentElement.tagName === 'A') {
-                                linkElement = currentElement;
-                            }
-                            
-                            // If no direct link, check if parent is a link
-                            if (!linkElement) {
-                                linkElement = currentElement.closest('a[href]');
-                            }
-                            
-                            // If still no link, try to find any clickable element inside
-                            if (!linkElement) {
-                                linkElement = currentElement.querySelector('[onclick], [data-bs-toggle], button');
-                            }
-                            
-                            console.log('Found link element:', linkElement);
-                            
-                            if (linkElement) {
-                                // If it's a link, navigate to it
-                                if (linkElement.href) {
-                                    console.log('Navigating to:', linkElement.href);
-                                    window.location.href = linkElement.href;
-                                } else {
-                                    // If it's a button or has onclick, click it
-                                    console.log('Clicking element:', linkElement);
-                                    linkElement.click();
-                                }
-                            } else {
-                                // Fallback: try clicking the thumbnail itself
-                                console.log('No link found, clicking thumbnail directly');
-                                currentElement.click();
-                            }
-                        } else {
-                            // For non-carousel items, use normal click
-                            console.log('Normal click on:', currentElement);
-                            currentElement.click();
-                        }
-                    }
-                }
+                this.handleActivation(currentElement);
                 break;
-
             case 'Escape':
-                // e.preventDefault();
-                // e.stopPropagation();
-                
-                // Close any open TV dropdowns first
-                const openTVDropdowns = document.querySelectorAll('.dropdown-menu.tv-dropdown-open');
-                if (openTVDropdowns.length > 0) {
-                    openTVDropdowns.forEach(dropdown => {
-                        dropdown.classList.remove('tv-dropdown-open', 'show');
-                        
-                        // Remove dropdown items from focusable elements
-                        const dropdownItems = Array.from(dropdown.querySelectorAll('.dropdown-item, a[href]'));
-                        dropdownItems.forEach(item => {
-                            const index = focusableElements.indexOf(item);
-                            if (index !== -1) {
-                                focusableElements.splice(index, 1);
-                            }
-                        });
-                    });
-                    
-                    // Focus back to the dropdown toggle
-                    const dropdownToggle = document.querySelector('.dropdown-toggle.tv-focused');
-                    if (dropdownToggle) {
-                        const toggleIndex = focusableElements.indexOf(dropdownToggle);
-                        if (toggleIndex !== -1) {
-                            setFocus(toggleIndex);
-                        }
-                    }
-                } else {
-                    window.history.back();
-                }
+                this.handleEscape();
                 break;
         }
-        
-        if (nextIndex !== -1) {
-            setFocus(nextIndex);
-        }
     }
-
 
     /**
-     * Navigate to next/previous carousel slide when reaching the edge
-     * @param {string} direction - 'right' or 'left'
+     * Handle downward navigation
+     * @param {HTMLElement} currentElement - Currently focused element
+     * @private
+     * @memberof TVNavigationController
      */
-    function navigateCarouselSlide(direction) {
-        const currentElement = focusableElements[currentFocusIndex];
-        const currentCarousel = currentElement?.closest('.carousel');
-        
-        if (!currentCarousel) {
-            console.log('navigateCarouselSlide: Not in carousel');
-            return false;
-        }
-        
-        console.log('navigateCarouselSlide: Direction =', direction, 'from element:', currentElement);
-        
-        // Get carousel instance
-        const carouselInstance = bootstrap.Carousel.getInstance(currentCarousel) || new bootstrap.Carousel(currentCarousel);
-        
-        // Get current slide and ALL visible thumbnails in that slide
-        const currentSlide = currentCarousel.querySelector('.carousel-item.active');
-        const visibleThumbnails = Array.from(currentSlide.querySelectorAll('.thumbnail, .thumbnail-home'));
-        const currentIndex = visibleThumbnails.indexOf(currentElement);
-        
-        console.log('navigateCarouselSlide: Found', visibleThumbnails.length, 'thumbnails, current at index:', currentIndex);
-        
-        if (direction === 'right') {
-            // Only advance slide if we're at the actual LAST visible item
-            if (currentIndex === visibleThumbnails.length - 1) {
-                const slides = currentCarousel.querySelectorAll('.carousel-item');
-                const activeSlide = currentCarousel.querySelector('.carousel-item.active');
-                const activeIndex = Array.from(slides).indexOf(activeSlide);
-                
-                console.log('navigateCarouselSlide: At last item. Slide', activeIndex + 1, 'of', slides.length);
-                
-                if (activeIndex < slides.length - 1) {
-                    console.log('navigateCarouselSlide: Moving to next slide');
-                    carouselInstance.next();
-                    
-                    setTimeout(() => {
-                        updateFocusableElements();
-                        const newSlide = currentCarousel.querySelector('.carousel-item.active');
-                        const firstThumbnail = newSlide.querySelector('.thumbnail, .thumbnail-home');
-                        if (firstThumbnail) {
-                            const newIndex = focusableElements.indexOf(firstThumbnail);
-                            if (newIndex !== -1) {
-                                setFocus(newIndex);
-                                updateCarouselIndicators();
-                            }
-                        }
-                    }, 300);
-                    return true;
-                } else {
-                    console.log('navigateCarouselSlide: No more slides, staying put');
-                    return true; // We handled it (stayed put)
-                }
-            }
-        } else if (direction === 'left') {
-            // Only go to previous slide if we're at the actual FIRST visible item
-            if (currentIndex === 0) {
-                const slides = currentCarousel.querySelectorAll('.carousel-item');
-                const activeSlide = currentCarousel.querySelector('.carousel-item.active');
-                const activeIndex = Array.from(slides).indexOf(activeSlide);
-                
-                console.log('navigateCarouselSlide: At first item. Slide', activeIndex + 1, 'of', slides.length);
-                
-                if (activeIndex > 0) {
-                    console.log('navigateCarouselSlide: Moving to previous slide');
-                    carouselInstance.prev();
-                    
-                    setTimeout(() => {
-                        updateFocusableElements();
-                        const newSlide = currentCarousel.querySelector('.carousel-item.active');
-                        const thumbnails = Array.from(newSlide.querySelectorAll('.thumbnail, .thumbnail-home'));
-                        const lastThumbnail = thumbnails[thumbnails.length - 1];
-                        if (lastThumbnail) {
-                            const newIndex = focusableElements.indexOf(lastThumbnail);
-                            if (newIndex !== -1) {
-                                setFocus(newIndex);
-                                updateCarouselIndicators();
-                            }
-                        }
-                    }, 300);
-                    return true;
-                } else {
-                    console.log('navigateCarouselSlide: No previous slides, staying put');
-                    return true; // We handled it (stayed put)
-                }
-            }
-        }
-        
-        console.log('navigateCarouselSlide: Not at edge, normal navigation should handle');
-        return false; // Not at edge, let normal navigation handle it
-    }
+    handleDownNavigation(currentElement) {
+        const isDropdownToggle = this.dropdownManager.isDropdownToggle(currentElement);
+        const isDropdownOpen = this.dropdownManager.isDropdownOpen(currentElement);
 
-    
-    /**
-     * Update carousel visual indicators
-     */
-    function updateCarouselIndicators() {
-        document.querySelectorAll('.carousel').forEach(carousel => {
-            const slides = carousel.querySelectorAll('.carousel-item');
-            const activeSlide = carousel.querySelector('.carousel-item.active');
-            const activeIndex = Array.from(slides).indexOf(activeSlide);
-            
-            // Check if there are previous/next slides
-            const hasPrev = activeIndex > 0;
-            const hasNext = activeIndex < slides.length - 1;
-            
-            // Set data attributes for CSS
-            carousel.setAttribute('data-has-prev', hasPrev);
-            carousel.setAttribute('data-has-next', hasNext);
-            
-            // Check if focused element is at edge of current slide
-            const currentElement = focusableElements[currentFocusIndex];
-            if (currentElement && currentElement.closest('.carousel') === carousel) {
-                const visibleThumbnails = Array.from(activeSlide.querySelectorAll('.thumbnail:not([style*="display: none"])'));
-                const currentIndex = visibleThumbnails.indexOf(currentElement);
-                
-                // Set edge indicators
-                carousel.setAttribute('data-at-start', currentIndex === 0 && hasPrev);
-                carousel.setAttribute('data-at-end', currentIndex === visibleThumbnails.length - 1 && hasNext);
-            } else {
-                // Remove edge indicators if not focused in this carousel
-                carousel.setAttribute('data-at-start', false);
-                carousel.setAttribute('data-at-end', false);
+        if (isDropdownToggle && !isDropdownOpen) {
+            // Navigate instead of opening dropdown
+            const nextIndex = this.findAlternativeDownNavigation();
+            if (nextIndex !== -1) {
+                this.focusManager.setFocus(nextIndex);
             }
-        });
-    }
-
-
-    // Add keyboard event listener
-    // document.addEventListener('keydown', handleKeydown, true);
-    
-    // Listen for TV mode changes
-    window.addEventListener('tvModeChanged', (e) => {
-        isTV = e.detail.isTV;
-        if (isTV) {
-            startTVNavigation();
         } else {
-            stopTVNavigation();
+            const nextIndex = this.directionalNav.findNextInDirection('down');
+            if (nextIndex !== -1) {
+                this.focusManager.setFocus(nextIndex);
+            }
         }
-    });
-    
-    // Listen for when tvDetection becomes available
-    window.addEventListener('tvDetectionReady', () => {
-        updateTVStatus();
-        if (isTV) {
-            startTVNavigation();
-        }
-    });
-    
-    // Initial setup
-    if (updateTVStatus() && isTV) {
-        // Small delay to ensure page is fully loaded
-        setTimeout(startTVNavigation, 500);
     }
-    
-    // Debug helper for workstation testing
-    window.debugTVNavigation = {
-        start: () => {
-            isTV = true;
-            navigationActive = true;
-            startTVNavigation();
-        },
-        
-        stop: () => {
-            isTV = false;
-            stopTVNavigation();
-        },
-        
-        showElements: () => {
-            updateFocusableElements();
-            focusableElements.forEach((el, index) => {
-                const rect = el.getBoundingClientRect();
-                const section = el.closest('.navbar') ? 'navbar' : 
-                               el.closest('.carousel') ? 'carousel' : 
-                               el.closest('[id*="profile"]') ? 'profile' : 'other';
-            });
-        },
-        
-        focusElement: (index) => {
-            if (index >= 0 && index < focusableElements.length) {
-                setFocus(index);
-            }
-        }
-    };
 
-    // Keyboard shortcut for debug mode
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.altKey && e.key === 't') {
-            if (navigationActive) {
-                window.debugTVNavigation.stop();
-            } else {
-                window.debugTVNavigation.start();
-            }
+    /**
+     * Handle upward navigation
+     * @param {HTMLElement} currentElement - Currently focused element
+     * @private
+     * @memberof TVNavigationController
+     */
+    handleUpNavigation(currentElement) {
+        const nextIndex = this.directionalNav.findNextInDirection('up');
+        if (nextIndex !== -1) {
+            this.focusManager.setFocus(nextIndex);
         }
-    });
+    }
 
-   
-    // Override Bootstrap dropdown behavior in TV mode
-    document.addEventListener('click', function(e) {
-        if (!isTV || !navigationActive) return;
-        
-        const dropdownToggle = e.target.closest('.dropdown-toggle');
-        if (dropdownToggle) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
+    /**
+     * Handle horizontal navigation
+     * @param {string} direction - 'ArrowLeft' or 'ArrowRight'
+     * @param {HTMLElement} currentElement - Currently focused element
+     * @private
+     * @memberof TVNavigationController
+     */
+    handleHorizontalNavigation(direction, currentElement) {
+        // Close dropdown if moving horizontally
+        if (this.dropdownManager.isDropdownToggle(currentElement) && this.dropdownManager.isDropdownOpen(currentElement)) {
+            this.dropdownManager.closeAllDropdowns();
         }
-    }, true);
-    
-    // Prevent Bootstrap from handling dropdown events in TV mode
-    document.addEventListener('keydown', function(e) {
-        if (!isTV || !navigationActive) return;
-        
-        const dropdownToggle = e.target.closest('.dropdown-toggle');
-        if (dropdownToggle && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-        }
-    }, true);
-    
-    // Replace the two separate observers with this single combined one:
-    
-    // Watch for content changes AND force close Bootstrap dropdowns
-    const observer = new MutationObserver((mutations) => {
-        if (!isTV || !navigationActive) return;
-        
-        mutations.forEach((mutation) => {
-            // Handle content changes (original first observer functionality)
-            if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                // Debounce the element update to avoid excessive calls
-                clearTimeout(observer.updateTimeout);
-                observer.updateTimeout = setTimeout(() => {
-                    updateFocusableElements();
-                    // Keep focus on current element if it still exists
-                    if (currentFocusIndex < focusableElements.length) {
-                        setFocus(currentFocusIndex);
-                    } else if (focusableElements.length > 0) {
-                        setFocus(0);
-                    }
-                }, 100);
+
+        const navDirection = direction === 'ArrowRight' ? 'right' : 'left';
+        let nextIndex = this.directionalNav.findNextInDirection(navDirection);
+
+        // If normal navigation fails and we're in a carousel, try slide navigation
+        if (nextIndex === -1 && currentElement?.closest('.carousel')) {
+            const slideChanged = this.carouselNav.navigateCarouselSlide(navDirection);
+            if (slideChanged) {
+                return;
             }
-            
-            // Handle Bootstrap dropdown prevention (original second observer functionality)
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === 1 && node.classList?.contains('dropdown-menu') && node.classList?.contains('show')) {
-                    // If a Bootstrap dropdown opens and we're in TV mode, close it unless it's our TV dropdown
-                    if (!node.classList.contains('tv-dropdown-open')) {
-                        node.classList.remove('show');
-                    }
+        }
+
+        if (nextIndex !== -1) {
+            this.focusManager.setFocus(nextIndex);
+        }
+    }
+
+    /**
+     * Handle activation (Enter/Space)
+     * @param {HTMLElement} currentElement - Currently focused element
+     * @private
+     * @memberof TVNavigationController
+     */
+    handleActivation(currentElement) {
+        if (!currentElement) return;
+
+        if (this.dropdownManager.isDropdownToggle(currentElement)) {
+            this.dropdownManager.toggleDropdown(currentElement);
+        } else {
+            this.activateElement(currentElement);
+        }
+    }
+
+    /**
+     * Handle escape key
+     * @private
+     * @memberof TVNavigationController
+     */
+    handleEscape() {
+        const openDropdowns = document.querySelectorAll('.dropdown-menu.tv-dropdown-open');
+        if (openDropdowns.length > 0) {
+            this.dropdownManager.closeAllDropdowns();
+        } else {
+            window.history.back();
+        }
+    }
+
+    /**
+     * Activate an element (click it)
+     * @param {HTMLElement} element - Element to activate
+     * @private
+     * @memberof TVNavigationController
+     */
+    activateElement(element) {
+        console.log('Enter pressed on element:', element);
+
+        // Enhanced click handling for carousel items
+        if (element.classList.contains('thumbnail') || element.classList.contains('thumbnail-home')) {
+            const linkElement = this.findClickableElement(element);
+            if (linkElement) {
+                if (linkElement.href) {
+                    console.log('Navigating to:', linkElement.href);
+                    window.location.href = linkElement.href;
+                } else {
+                    console.log('Clicking element:', linkElement);
+                    linkElement.click();
                 }
-            });
+            } else {
+                console.log('No link found, clicking thumbnail directly');
+                element.click();
+            }
+        } else {
+            console.log('Normal click on:', element);
+            element.click();
+        }
+    }
+
+    /**
+     * Find clickable element within a thumbnail
+     * @param {HTMLElement} thumbnailElement - Thumbnail element to search
+     * @returns {HTMLElement|null} Clickable element or null
+     * @private
+     * @memberof TVNavigationController
+     */
+    findClickableElement(thumbnailElement) {
+        // Try to find a link within the thumbnail
+        let linkElement = thumbnailElement.querySelector('a[href]');
+
+        // If no link inside, check if the thumbnail itself is a link
+        if (!linkElement && thumbnailElement.tagName === 'A') {
+            linkElement = thumbnailElement;
+        }
+
+        // If no direct link, check if parent is a link
+        if (!linkElement) {
+            linkElement = thumbnailElement.closest('a[href]');
+        }
+
+        // If still no link, try to find any clickable element inside
+        if (!linkElement) {
+            linkElement = thumbnailElement.querySelector('[onclick], [data-bs-toggle], button');
+        }
+
+        return linkElement;
+    }
+
+    /**
+     * Find alternative navigation for dropdown scenarios
+     * @returns {number} Next element index or -1
+     * @private
+     * @memberof TVNavigationController
+     */
+    findAlternativeDownNavigation() {
+        const currentFocusIndex = this.focusManager.getCurrentFocusIndex();
+        const focusableElements = this.elementManager.getFocusableElements();
+        const currentElement = focusableElements[currentFocusIndex];
+
+        for (let i = currentFocusIndex + 1; i < focusableElements.length; i++) {
+            const candidate = focusableElements[i];
+            const candidateSection = this.directionalNav.getElementSection(candidate);
+            const currentSection = this.directionalNav.getElementSection(currentElement);
+
+            if (candidateSection !== currentSection) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Expose debug functions for development
+     * @memberof TVNavigationController
+     */
+    exposeDebugInterface() {
+        window.debugTVNavigation = {
+            start: () => {
+                this.tvDetection.isTV = true;
+                this.startTVNavigation();
+            },
+            stop: () => {
+                this.tvDetection.isTV = false;
+                this.stopTVNavigation();
+            },
+            showElements: () => {
+                this.elementManager.updateFocusableElements();
+                const elements = this.elementManager.getFocusableElements();
+                elements.forEach((el, index) => {
+                    const rect = el.getBoundingClientRect();
+                    const section = this.directionalNav.getElementSection(el);
+                    console.log(`Element ${index}: ${el.tagName} in ${section} at (${rect.left}, ${rect.top})`);
+                });
+            },
+            focusElement: (index) => {
+                const elements = this.elementManager.getFocusableElements();
+                if (index >= 0 && index < elements.length) {
+                    this.focusManager.setFocus(index);
+                }
+            }
+        };
+
+        // Keyboard shortcut for debug mode
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.altKey && e.key === 't') {
+                if (this.navigationActive) {
+                    window.debugTVNavigation.stop();
+                } else {
+                    window.debugTVNavigation.start();
+                }
+            }
         });
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['style', 'class']
-    });
+    }
+}
+
+// Initialize TV Navigation when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const tvNav = new TVNavigationController();
+    tvNav.exposeDebugInterface();
 });
