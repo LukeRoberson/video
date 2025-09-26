@@ -20,9 +20,7 @@
 
 # Scraper
 
-- [ ] Issue #8
-  - [ ] Get real categories (not just 'latest')
-  - [ ] Add date to new videos
+- [x] Issue #8 - Add date to new videos
 
 </br></br>
 

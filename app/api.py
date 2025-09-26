@@ -823,6 +823,7 @@ def add_videos() -> Response:
     url_240 = data.get("url_240", None)
     thumbnail = data.get("thumbnail", None)
     duration = data.get("duration", None)
+    today = datetime.now().strftime("%d-%m-%Y")
 
     if not video_name:
         logging.error("Missing 'video_name' in request data.")
@@ -875,7 +876,8 @@ def add_videos() -> Response:
             url_360=url_360,
             url_240=url_240,
             thumbnail=thumbnail,
-            duration=duration
+            duration=duration,
+            date_added=today,
         )
 
         if video_id is None:

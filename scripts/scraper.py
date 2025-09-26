@@ -1029,7 +1029,10 @@ class BuildDb:
                     exists = video_manager.name_to_id(row['video_name'])
                     if exists:
                         update = True
-                        self.videos.at[idx, 'exist'] = True
+                        # Use boolean mask for safer indexing
+                        mask = self.videos.index == idx
+
+                        self.videos.loc[mask, 'exist'] = True
                         print(
                             Fore.GREEN,
                             f"Video found in DB: {row['video_name']}",
