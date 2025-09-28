@@ -60,13 +60,13 @@ class ThumbnailScrollManager {
          * Left scroll arrow element
          * @type {HTMLElement}
          */
-        this.leftArrow = wrapperElement.querySelector('.scroll-arrow.left');
+        this.leftArrow = wrapperElement.querySelector('.carousel-scroll-arrow--left');
         
         /**
          * Right scroll arrow element
          * @type {HTMLElement}
          */
-        this.rightArrow = wrapperElement.querySelector('.scroll-arrow.right');
+        this.rightArrow = wrapperElement.querySelector('.carousel-scroll-arrow--right');
         
         /**
          * Wrapper element ID
@@ -102,11 +102,6 @@ class ThumbnailScrollManager {
     validateElements() {
         if (!this.thumbnails) {
             console.warn(`Thumbnails container not found in wrapper ${this.wrapperId}`);
-            return false;
-        }
-
-        if (!this.leftArrow || !this.rightArrow) {
-            console.warn(`Scroll arrows not found in wrapper ${this.wrapperId}`);
             return false;
         }
 
@@ -158,6 +153,16 @@ class ThumbnailScrollManager {
      * @memberof ThumbnailScrollManager
      */
     updateArrows() {
+        // Re-query arrows each time in case they were created dynamically
+        this.leftArrow = this.wrapper.querySelector('.carousel-scroll-arrow--left');
+        this.rightArrow = this.wrapper.querySelector('.carousel-scroll-arrow--right');
+        
+        // If arrows don't exist, skip updating them
+        if (!this.leftArrow || !this.rightArrow) {
+            console.log(`Scroll arrows not yet available for wrapper ${this.wrapperId}`);
+            return;
+        }
+
         const canScrollLeft = this.thumbnails.scrollLeft > 0;
         const canScrollRight = (this.thumbnails.scrollLeft + this.thumbnails.clientWidth) < this.thumbnails.scrollWidth;
         
@@ -246,7 +251,6 @@ class GlobalScrollManager {
      */
     setupScrollManagers() {
         const wrappers = document.querySelectorAll('.thumbnail-wrapper');
-        console.log(`Found ${wrappers.length} thumbnail wrappers`);
         
         wrappers.forEach(wrapper => {
             if (!wrapper.id) {
@@ -257,8 +261,6 @@ class GlobalScrollManager {
             const manager = new ThumbnailScrollManager(wrapper);
             this.scrollManagers.set(wrapper.id, manager);
         });
-
-        console.log(`Initialized ${this.scrollManagers.size} scroll managers`);
     }
 
     /**
@@ -288,7 +290,6 @@ class GlobalScrollManager {
          * @param {string} wrapperId - The ID of the thumbnails wrapper
          */
         window.updateArrows = (wrapperId) => {
-            console.log(`Updating arrows for wrapper ${wrapperId}`);
             const manager = this.scrollManagers.get(wrapperId);
             if (manager) {
                 manager.updateArrows();
