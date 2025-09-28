@@ -1002,6 +1002,8 @@ class CustomControls {
         this.isTV = window.tvDetection?.isTV() || false;
         /** @type {boolean} Whether the device is a mobile device */
         this.isMobile = this.detectMobile();
+        /** @type {Function|null} Bound click handler for theatre mode exit */
+        this.theatreModeClickHandler = null;
         this.init();
     }
 
@@ -1027,6 +1029,7 @@ class CustomControls {
         // Only add theatre button if not on mobile
         if (!this.isMobile) {
             this.addTheatreButton();
+            this.setupTheatreModeClickHandler();
         }
         
         this.setupKeyboardControls();
@@ -1036,6 +1039,71 @@ class CustomControls {
             this.player.ready(() => {
                 this.hideMobileButtonsFallback();
             });
+        }
+    }
+
+    /**
+     * Sets up click handler for exiting theatre mode when clicking outside the player.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    setupTheatreModeClickHandler() {
+        this.theatreModeClickHandler = (e) => {
+            // Only handle clicks when in theatre mode
+            if (!this.container.classList.contains('theatre-mode')) {
+                return;
+            }
+            
+            // Check if click is outside the video player container
+            if (!this.container.contains(e.target)) {
+                this.exitTheatreMode();
+            }
+        };
+
+        // Add the event listener to the document
+        document.addEventListener('click', this.theatreModeClickHandler, true);
+        
+        // Clean up event listener when player is disposed
+        this.player.on('dispose', () => {
+            if (this.theatreModeClickHandler) {
+                document.removeEventListener('click', this.theatreModeClickHandler, true);
+                this.theatreModeClickHandler = null;
+            }
+        });
+    }
+
+    /**
+     * Exits theatre mode by removing the theatre-mode class from the container.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    exitTheatreMode() {
+        this.container.classList.remove('theatre-mode');
+    }
+
+    /**
+     * Enters theatre mode by adding the theatre-mode class to the container.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    enterTheatreMode() {
+        this.container.classList.add('theatre-mode');
+    }
+
+    /**
+     * Toggles theatre mode on/off.
+     * 
+     * @private
+     * @memberof CustomControls
+     */
+    toggleTheatreMode() {
+        if (this.container.classList.contains('theatre-mode')) {
+            this.exitTheatreMode();
+        } else {
+            this.enterTheatreMode();
         }
     }
 
@@ -1069,7 +1137,7 @@ class CustomControls {
      */
     addTheatreButton() {
         const Button = videojs.getComponent('Button');
-        const container = this.container; // Capture the container reference
+        const customControls = this; // Capture reference to CustomControls instance
         
         class TheatreButton extends Button {
             constructor(player, options) {
@@ -1079,7 +1147,7 @@ class CustomControls {
             }
             
             handleClick() {
-                container.classList.toggle('theatre-mode'); // Use the captured container
+                customControls.toggleTheatreMode(); // Use CustomControls method
             }
         }
     
@@ -1120,7 +1188,6 @@ class CustomControls {
         });
     }
 }
-
 
 /**
  * Main video player initialization event handler.

@@ -27,8 +27,8 @@
 
 # Video Player
 
-- [ ] Issue #7
-  - [ ] When in theatre mode, click outside of the player to close theatre mode
+- [x] Issue #7
+  - [x] When in theatre mode, click outside of the player to close theatre mode
 - [ ] Touch Screen; Tap the video to pause/play
   * Currently this does nothing, need to use play/pause buttons
 
