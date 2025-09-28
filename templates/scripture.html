@@ -1,6 +1,294 @@
 {% extends "base.html" %}
 
 {% block head %}
+<style>
+    /* Modern Scripture Page Styles - Following theme.css patterns */
+    
+    .scripture-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        padding: 2rem 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    
+    .scripture-card {
+        max-width: 1200px;
+        width: 90%;
+        margin: 0 auto;
+        background: rgba(23, 23, 23, 0.95);
+        border-radius: 20px;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .scripture-header {
+        background: linear-gradient(135deg, #3a3a3a 0%, #1e1e1e 100%);
+        padding: 3rem 2rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .scripture-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border-radius: 2px;
+    }
+    
+    .scripture-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin: 0 0 1rem 0;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .controls-section {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .control-btn {
+        background: rgba(0, 123, 255, 0.1);
+        border: 1px solid rgba(0, 123, 255, 0.3);
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .control-btn:hover {
+        background: rgba(0, 123, 255, 0.2);
+        border-color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.2);
+        color: #ffffff;
+    }
+    
+    .scripture-content {
+        padding: 0;
+    }
+    
+    .book-section {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .book-section:last-child {
+        border-bottom: none;
+    }
+    
+    .scripture-book-header {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 1.5rem 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: none;
+        color: #e9ecef;
+        margin: 0;
+        position: relative;
+    }
+    
+    .scripture-book-header:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-1px);
+    }
+    
+    .book-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .book-title {
+        font-size: 1.8rem;
+        font-weight: 400;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .book-title::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 25px;
+        background: linear-gradient(180deg, #007bff, #0056b3);
+        margin-right: 1rem;
+        border-radius: 2px;
+    }
+    
+    .book-meta {
+        display: flex;
+        align-items: center;
+    }
+    
+    .collapse-icon {
+        transition: transform 0.3s ease;
+        color: #007bff;
+        font-size: 1.2rem;
+    }
+    
+    .scripture-book-header[aria-expanded="true"] .collapse-icon {
+        transform: rotate(90deg);
+    }
+    
+    .book-content {
+        padding: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+    
+    .chapter-section {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        flex: 0 0 calc(33.333% - 1rem);
+        min-width: 280px;
+        max-width: 350px;
+    }
+    
+    .chapter-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+    }
+    
+    .chapter-header {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        color: #d4d4d4;
+        margin: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .chapter-header:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .chapter-content {
+        padding: 1rem 1.5rem 1.5rem;
+        color: #d4d4d4;
+    }
+    
+    .chapter-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .chapter-badge {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: #ffffff;
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        flex-shrink: 0;
+    }
+    
+    .chapter-collapse-icon {
+        transition: transform 0.3s ease;
+        color: #007bff;
+        font-size: 1rem;
+        margin-left: 1rem;
+    }
+    
+    .chapter-header[aria-expanded="true"] .chapter-collapse-icon {
+        transform: rotate(90deg);
+    }
+    
+    .verses-container {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .verse-link {
+        display: inline-block;
+        padding: 0.5rem 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: #ffffff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .verse-link:hover {
+        background: rgba(0, 123, 255, 0.15);
+        border-color: rgba(0, 123, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        color: #ffffff;
+        text-decoration: none;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .scripture-title {
+            font-size: 2rem;
+        }
+        
+        .controls-section {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .book-content {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            gap: 1rem;
+        }
+        
+        .chapter-section {
+            flex: none;
+            min-width: auto;
+            max-width: none;
+        }
+        
+        .chapter-badge {
+            width: 45px;
+            height: 45px;
+            font-size: 1rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block title %}
@@ -8,45 +296,113 @@
 {% endblock %}
 
 {% block content %}
-<!-- The card with the main content-->
-<div class="container d-flex justify-content-center my-5" style="min-height: 80vh;">
-    <div class="card shadow-lg bg-dark text-white" style="width: 80%; border-radius: 18px;">
-        <div class="card-body p-4">
-            <h1>Scriptures</h1>
-        </div>
-
-        <!-- Loop through books dynamically -->
-        {% for book, chapters in scriptures_by_book.items() %}
-        <div class="card-body p-4">
-            <h3>{{ book }}</h3>
-            <div class="row">
-
-                {% for chapter, verses in chapters|dictsort %}
-                <div class="col-12 col-md-6 col-lg-4 mb-3">
-                    <div class="d-flex align-items-center">
-
-                        <!-- Display the chapter in a card-like box -->
-                        <div class="tag-item d-flex align-items-center justify-content-center p-2 border rounded bg-dark bg-gradient text-light" style="height: 40px; width: 40px;">
-                            <strong>{{ chapter }}</strong>
-                        </div>
-
-                        <!-- Display the verses as a horizontal list -->
-                        <div class="ms-3 d-flex flex-wrap">
-                            {% for verse in verses %}
-                                <a href="/scripture/{{ verse.id }}" class="text-light text-decoration-none me-3">
-                                    {{ verse.verse }}
-                                </a>
-                            {% endfor %}
-                        </div>
-
-                    </div>
-                </div>
-                {% endfor %}
-
+<!-- Modern Scripture Page Layout -->
+<div class="scripture-page">
+    <div class="scripture-card">
+        <!-- Header section -->
+        <div class="scripture-header">
+            <h1 class="scripture-title">Scriptures</h1>
+            <div class="controls-section">
+                <button class="control-btn" onclick="expandAllBooks()">Expand All</button>
+                <button class="control-btn" onclick="collapseAllBooks()">Collapse All</button>
             </div>
         </div>
-        {% endfor %}
 
+        <!-- Content sections -->
+        <div class="scripture-content">
+            <!-- Loop through books dynamically -->
+            {% for book, chapters in scriptures_by_book.items() %}
+            <div class="book-section">
+                <!-- Collapsible book header -->
+                <div class="scripture-book-header" data-bs-toggle="collapse" data-bs-target="#book-{{ loop.index }}" aria-expanded="false" aria-controls="book-{{ loop.index }}">
+                    <div class="book-header-content">
+                        <h2 class="book-title">{{ book }}</h2>
+                        <div class="book-meta">
+                            <i class="fas fa-chevron-right collapse-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collapsible book content -->
+                <div class="collapse" id="book-{{ loop.index }}">
+                    <div class="book-content">
+                        {% for chapter, verses in chapters|dictsort %}
+                        <div class="chapter-section">
+                            <!-- Collapsible chapter header -->
+                            <div class="chapter-header" data-bs-toggle="collapse" data-bs-target="#chapter-{{ loop.index0 }}-{{ chapter }}" aria-expanded="false" aria-controls="chapter-{{ loop.index0 }}-{{ chapter }}">
+                                <!-- Chapter number badge -->
+                                <div class="chapter-badge">
+                                    {{ chapter }}
+                                </div>
+                                <div class="book-meta">
+                                    <i class="fas fa-chevron-right chapter-collapse-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Collapsible chapter content -->
+                            <div class="collapse" id="chapter-{{ loop.index0 }}-{{ chapter }}">
+                                <div class="chapter-content">
+                                    <!-- Verses container -->
+                                    <div class="verses-container">
+                                        {% for verse in verses %}
+                                            <a href="/scripture/{{ verse.id }}" class="verse-link">
+                                                {{ verse.verse }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<script>
+function expandAllBooks() {
+    // Expand all books
+    const bookCollapses = document.querySelectorAll('[id^="book-"]');
+    bookCollapses.forEach(collapse => {
+        const bsCollapse = new bootstrap.Collapse(collapse, { show: true });
+    });
+    
+    // Expand all chapters within books
+    setTimeout(() => {
+        const chapterCollapses = document.querySelectorAll('[id^="chapter-"]');
+        chapterCollapses.forEach(collapse => {
+            const bsCollapse = new bootstrap.Collapse(collapse, { show: true });
+        });
+    }, 300);
+}
+
+function collapseAllBooks() {
+    // Collapse all chapters first
+    const chapterCollapses = document.querySelectorAll('[id^="chapter-"]');
+    chapterCollapses.forEach(collapse => {
+        const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+        if (bsCollapse) {
+            bsCollapse.hide();
+        } else {
+            new bootstrap.Collapse(collapse, { show: false });
+        }
+    });
+    
+    // Then collapse all books
+    setTimeout(() => {
+        const bookCollapses = document.querySelectorAll('[id^="book-"]');
+        bookCollapses.forEach(collapse => {
+            const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+            if (bsCollapse) {
+                bsCollapse.hide();
+            } else {
+                new bootstrap.Collapse(collapse, { show: false });
+            }
+        });
+    }, 150);
+}
+</script>
 {% endblock %}

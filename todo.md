@@ -47,7 +47,7 @@
 - [x] Use Jinja to convert newline to HTML breaks for descriptions
   - [x] Character profiles
   - [x] Scriptures
-- [ ] Scriptures page organization
+- [x] Scriptures page organization
     * It's too complicated right now with so many scriptures
 
 </br></br>
