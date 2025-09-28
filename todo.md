@@ -37,9 +37,9 @@
 
 # UI
 
-- [ ] Issue #6
-  - [ ] Add badge to tags to show how many times they are used
-  - [ ] Sort tags (on tag page) alphabetically or by count
+- [x] Issue #6
+  - [x] Add badge to tags to show how many times they are used
+  - [x] Sort tags (on tag page) alphabetically or by count
 - [ ] Nav bar: slider to hide watched videos
 - [ ] Stats page
   - [ ] Total videos watched / total videos
@@ -84,6 +84,9 @@
 - [ ] Scriptures page: Book can link to the book overview video
 - [ ] Homepage:
   - [ ] Random (unwatched) morning worship for the day
+- [ ] Admin, add videos
+  - [ ] Make scriptures field resizable (like description is)
+  - [ ] Make tags resizable
 
 </br></br>
 
@@ -100,6 +103,9 @@
 - [ ] Search Method: Support searching based on duration
 - [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
 - [ ] Fields for extra links, such as links to WT articles
+- [ ] Link some verses to bible characters (more for the less common ones)
+    * So when we look at a scripture, we can see the character's profile listed
+    * When we look at a character, we can see key scriptures
 
 </br></br>
 

@@ -16,14 +16,36 @@
             <h1>Tags</h1>
         </div>
 
+        <!-- Sort tags alphabetically or by count -->
+        <div class="card-body px-4 pt-0 pb-2">
+            <form method="get" class="d-flex align-items-center gap-2">
+                <label for="sort" class="form-label mb-0 text-light">Sort by:</label>
+                <select id="sort" name="sort" class="form-select form-select-sm w-auto">
+                    <option value="alpha" {% if request.args.get('sort', 'alpha') == 'alpha' %}selected{% endif %}>Alphabetical</option>
+                    <option value="count" {% if request.args.get('sort') == 'count' %}selected{% endif %}>Video Count</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+            </form>
+        </div>
+
+        <!-- Sort the tags as requested -->
+        {% set sort = request.args.get('sort', 'alpha') %}
+        {% if sort == 'count' %}
+            {% set tags = tags|sort(attribute='video_count', reverse=True) %}
+        {% else %}
+            {% set tags = tags|sort(attribute='name') %}
+        {% endif %}
+
         <div class="card-body p-4">
             <div class="row">
+                <!-- Loop through tags and display them in a grid -->
                 {% for tag in tags %}
                     <div class="col-12 col-md-6 col-lg-3 mb-3">
                         <div class="tag-item d-flex align-items-center justify-content-center p-2 border rounded .bg-dark.bg-gradient text-light">
                             <a href="/tag/{{ tag.id }}" class="text-center m-0 text-light text-decoration-none w-100 h-100 d-flex align-items-center justify-content-center">
                                 <strong>{{ tag.name }}</strong>
                             </a>
+                            <span class="badge bg-secondary ms-2">{{ tag.video_count }}</span>
                         </div>
                     </div>
                 {% endfor %}

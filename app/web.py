@@ -596,7 +596,13 @@ def tags() -> Response:
 
     with DatabaseContext() as db:
         tag_mgr = TagManager(db)
+        video_mgr = VideoManager(db)
         tags: List[Dict[str, Any]] = tag_mgr.get() or []
+
+        # Get the video count for each tag
+        for tag in tags:
+            videos = video_mgr.get_filter(tag_id=tag['id'])
+            tag['video_count'] = len(videos) if videos else 0
 
     # Sort tags by name in a case-insensitive manner
     tags = sorted(tags, key=lambda tag: tag.get('name', '').lower())
