@@ -188,7 +188,8 @@ class VideoPlayerCore {
         this.container = document.getElementById(this.playerId).parentElement;
         this.applyTVSettings();
         this.setupTVModeListener();
-        this.setupMobileFullscreen();        
+        this.setupMobileFullscreen();
+        this.setupTouchPlayPause(); // Add touch play/pause support
         
         // Register with global manager for multi-player coordination
         this.globalManager.registerPlayer(this.player);
@@ -196,6 +197,78 @@ class VideoPlayerCore {
         return this.player;
     }
 
+    /**
+     * Sets up touch-based play/pause functionality for mobile devices.
+     * 
+     * @private
+     * @memberof VideoPlayerCore
+     */
+    setupTouchPlayPause() {
+        // Check if device has touch capability
+        const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (!hasTouchSupport) return;
+    
+        this.player.ready(() => {
+            const videoElement = this.player.tech().el();
+            const playerElement = this.player.el();
+            let touchStartTime = 0;
+            let touchMoved = false;
+    
+            // Handle touch start
+            const handleTouchStart = (e) => {
+                touchStartTime = Date.now();
+                touchMoved = false;
+            };
+    
+            // Handle touch move (to detect if user is scrolling)
+            const handleTouchMove = (e) => {
+                touchMoved = true;
+            };
+    
+            // Handle touch end - toggle play/pause if it was a tap
+            const handleTouchEnd = (e) => {
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                
+                // Only trigger play/pause if:
+                // 1. Touch was quick (less than 300ms)
+                // 2. User didn't move (not a scroll gesture)
+                // 3. Not touching control bar elements
+                if (touchDuration < 300 && !touchMoved && !e.target.closest('.vjs-control-bar')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (this.player.paused()) {
+                        this.player.play();
+                    } else {
+                        this.player.pause();
+                    }
+                }
+            };
+    
+            // Add event listeners to both video element and player container
+            [videoElement, playerElement].forEach(element => {
+                if (element) {
+                    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+                    element.addEventListener('touchmove', handleTouchMove, { passive: true });
+                    element.addEventListener('touchend', handleTouchEnd, { passive: false });
+                }
+            });
+    
+            // Clean up event listeners when player is disposed
+            this.player.on('dispose', () => {
+                [videoElement, playerElement].forEach(element => {
+                    if (element) {
+                        element.removeEventListener('touchstart', handleTouchStart);
+                        element.removeEventListener('touchmove', handleTouchMove);
+                        element.removeEventListener('touchend', handleTouchEnd);
+                    }
+                });
+            });
+        });
+    }
+    
     /**
      * Sets up automatic fullscreen behavior for mobile devices.
      * 
@@ -258,8 +331,6 @@ class VideoPlayerCore {
         });
     }
 }
-
-// ...existing code for other classes...
 
 
 /**
