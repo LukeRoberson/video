@@ -245,7 +245,8 @@ class GlobalScrollManager {
      * @memberof GlobalScrollManager
      */
     setupScrollManagers() {
-        const wrappers = document.querySelectorAll('.thumbnails-wrapper');
+        const wrappers = document.querySelectorAll('.thumbnail-wrapper');
+        console.log(`Found ${wrappers.length} thumbnail wrappers`);
         
         wrappers.forEach(wrapper => {
             if (!wrapper.id) {
@@ -287,6 +288,7 @@ class GlobalScrollManager {
          * @param {string} wrapperId - The ID of the thumbnails wrapper
          */
         window.updateArrows = (wrapperId) => {
+            console.log(`Updating arrows for wrapper ${wrapperId}`);
             const manager = this.scrollManagers.get(wrapperId);
             if (manager) {
                 manager.updateArrows();

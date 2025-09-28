@@ -404,8 +404,10 @@ class CategoryPopulator {
                 return;
             }
 
+            console.log(`Category ${categoryId}, Subcategory ${subcategoryId}, Container: ${container}`);
+
             this.thumbnailRenderer.renderThumbnails(videos, container);
-            this.updateArrowVisibility(subcategoryId);
+            this.updateArrowVisibility(container);
             
         } catch (error) {
             console.error(`Failed to populate category ${categoryId}/${subcategoryId}:`, error);
