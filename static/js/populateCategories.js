@@ -45,8 +45,30 @@ class VideoThumbnailRenderer {
 
         const thumbnailsHTML = videos.map(video => this.createThumbnailHTML(video)).join('');
         container.innerHTML = thumbnailsHTML;
+        
+        // Apply current toggle state to newly rendered thumbnails
+        this.applyCurrentToggleState(container);
     }
 
+    /**
+     * Apply current watched video toggle state to newly rendered thumbnails
+     * @param {HTMLElement} container - Container element for thumbnails
+     * @private
+     * @memberof VideoThumbnailRenderer
+     */
+    applyCurrentToggleState(container) {
+        // Check if watched videos should be hidden based on current toggle state
+        const hideWatched = document.body.classList.contains('hide-watched');
+        
+        if (hideWatched) {
+            const watchedThumbnails = container.querySelectorAll('.thumbnail--watched, [data-watched="true"]');
+            watchedThumbnails.forEach(thumbnail => {
+                thumbnail.style.display = 'none';
+                thumbnail.setAttribute('data-hidden-by-toggle', 'true');
+            });
+        }
+    }
+    
     /**
      * Create HTML for a single video thumbnail
      * @param {Object} video - Video object with id, name, thumbnail, duration, watched properties
@@ -55,11 +77,13 @@ class VideoThumbnailRenderer {
      * @memberof VideoThumbnailRenderer
      */
     createThumbnailHTML(video) {
-        const watchedClass = video.watched ? ' watched' : '';
+        // Apply BEM naming convention for watched videos
+        const watchedClass = video.watched ? ' thumbnail--watched' : '';
         const watchedIcon = video.watched ? this.createWatchedIcon() : '';
+        const watchedDataAttribute = video.watched ? ' data-watched="true"' : '';
 
         return `
-            <div class="thumbnail${watchedClass}">
+            <div class="thumbnail${watchedClass}"${watchedDataAttribute}>
                 <a href="/video/${video.id}">
                     ${watchedIcon}
                     <img src="${video.thumbnail}" alt="${video.name}">

@@ -463,3 +463,87 @@
     text-decoration: none; /* Remove underline from links */
     color: inherit; /* Inherit the text color from the parent */
 }
+
+
+/**
+ * Watched Video Styling
+ * =====================
+ * 
+ * @component thumbnail--watched
+ * @description Visual styling for watched video thumbnails
+ */
+
+/* ==========================================================================
+   WATCHED VIDEO INDICATORS
+   ========================================================================== */
+
+/**
+ * Darken watched video thumbnails
+ */
+.thumbnail--watched img,
+[data-watched="true"] img {
+    opacity: 0.6;                       /* Reduce opacity to darken */
+    filter: brightness(0.7);            /* Additional darkening effect */
+    transition: opacity 0.3s ease,      /* Smooth transitions */
+                filter 0.3s ease;
+}
+
+/**
+ * Restore brightness on hover for watched videos
+ */
+.thumbnail--watched:hover img,
+[data-watched="true"]:hover img {
+    opacity: 0.8;                       /* Slightly brighter on hover */
+    filter: brightness(0.9);            /* Less darkening on hover */
+}
+
+/**
+ * Watched icon overlay styling
+ */
+.thumbnail-watched-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(40, 167, 69, 0.9);  /* Success green background */
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+/**
+ * Watched icon SVG styling
+ */
+.thumbnail-watched-icon svg {
+    width: 14px;
+    height: 14px;
+    fill: white;
+}
+
+/**
+ * Optional: Add a subtle overlay to watched thumbnails
+ */
+.thumbnail--watched::before,
+[data-watched="true"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);  /* Dark overlay */
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/**
+ * Reduce overlay on hover
+ */
+.thumbnail--watched:hover::before,
+[data-watched="true"]:hover::before {
+    background-color: rgba(0, 0, 0, 0.15); /* Lighter overlay on hover */
+}

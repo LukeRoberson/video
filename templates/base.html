@@ -14,7 +14,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- Title is set by the child template -->
-        <title>{% block title %}{% endblock %}</title>
+        <title>
+            {% block title %}
+            {% endblock %}
+        </title>
         
         <!-- favicon -->
         <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
@@ -116,6 +119,15 @@
                         <input class="form-control mr-sm-2" type="search"  name="q" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success my-2 my-sm-0 mx-1" type="submit">Search</button>
                     </form>
+
+                    <!-- Watched Videos Toggle -->
+                    <div class="watched-toggle">
+                        <span class="watched-toggle__label">Hide Watched</span>
+                        <div class="watched-toggle__switch">
+                            <input class="watched-toggle__input" type="checkbox" role="switch" id="watchedToggle">
+                            <label class="watched-toggle__label--hidden" for="watchedToggle">Toggle watched videos visibility</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Profile Icon (fixed to top right) -->
@@ -137,5 +149,6 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous"></script>
         <script src="{{ url_for('static', filename='js/profileMgmt.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/toggleWatched.js') }}"></script>
     </body>
 </html>

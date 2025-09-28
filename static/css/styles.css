@@ -408,3 +408,142 @@ q::after {
 .dropdown-list::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;
 }
+
+
+/**
+ * Watched Videos Toggle Component
+ * ===============================
+ * 
+ * @component watched-toggle
+ * @description Toggle switch for hiding/showing watched videos
+ * @author Network Direction
+ * @version 1.0.0
+ * @created 2025-09-28
+ */
+
+/* ==========================================================================
+   WATCHED TOGGLE COMPONENT
+   ========================================================================== */
+
+/**
+ * Toggle container styling
+ */
+.watched-toggle {
+    display: flex;
+    align-items: center;               /* Vertically center items */
+    margin-right: 1rem;
+    height: 100%;                      /* Match parent navbar height */
+}
+
+/**
+ * Toggle label styling
+ */
+.watched-toggle__label {
+    color: #fff;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+    line-height: 1;                    /* Normalize line height */
+}
+
+/**
+ * Hidden label for accessibility
+ */
+.watched-toggle__label--hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/**
+ * Toggle switch container
+ */
+.watched-toggle__switch {
+    position: relative;
+    display: flex;                     /* Use flex for centering */
+    align-items: center;               /* Center the toggle switch */
+}
+
+/**
+ * Toggle switch input styling - default state
+ */
+.watched-toggle__input {
+    appearance: none;
+    width: 3rem;
+    height: 1.5rem;
+    background-color: #6c757d;
+    border: 1px solid #6c757d;
+    border-radius: 0.75rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin: 0;                         /* Remove any default margins */
+    display: flex;                     /* Use flex for internal positioning */
+    align-items: center;               /* Center the pseudo-element */
+}
+
+/**
+ * Toggle switch input styling - checked state
+ */
+.watched-toggle__input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+/**
+ * Toggle switch input styling - focus state
+ */
+.watched-toggle__input:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+/**
+ * Toggle switch handle (pseudo-element)
+ */
+.watched-toggle__input::before {
+    content: '';
+    position: absolute;
+    top: 50%;                          /* Position at vertical center */
+    left: 2px;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+    transform: translateY(-50%);       /* Center vertically */
+}
+
+/**
+ * Toggle switch handle - checked position
+ */
+.watched-toggle__input:checked::before {
+    transform: translateX(1.5rem) translateY(-50%); /* Maintain vertical centering when moved */
+}
+
+
+/* ==========================================================================
+   HIDE WATCHED FUNCTIONALITY
+   ========================================================================== */
+
+/**
+ * Hide watched video items when toggle is active
+ * Uses !important to override any conflicting display properties
+ */
+.hide-watched .video-item--watched {
+    display: none !important;
+}
+
+/**
+ * Alternative selectors for different video item structures
+ */
+.hide-watched .video-card--watched,
+.hide-watched .thumbnail--watched {
+    display: none !important;
+}
