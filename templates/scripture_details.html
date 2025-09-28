@@ -33,7 +33,7 @@
 
                     <!-- Scripture text, if available -->
                     {% if scripture.verse_text %}
-                        <q class="blockquote">{{ scripture.verse_text }}</q>
+                        <q class="blockquote">{{ scripture.verse_text | replace('\n', '<br>') | safe}}</q>
                     {% else %}
                         <blockquote class="blockquote text-center">
                             <p class="text-info">Not available</p>

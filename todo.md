@@ -44,9 +44,9 @@
 - [ ] Stats page
   - [ ] Total videos watched / total videos
   - [ ] Video watch time / total watch time
-- [ ] Use Jinja to convert newline to HTML breaks for descriptions
-  - [ ] Character profiles
-  - [ ] Scriptures
+- [x] Use Jinja to convert newline to HTML breaks for descriptions
+  - [x] Character profiles
+  - [x] Scriptures
 
 </br></br>
 
