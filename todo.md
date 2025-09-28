@@ -40,7 +40,7 @@
 - [x] Issue #6
   - [x] Add badge to tags to show how many times they are used
   - [x] Sort tags (on tag page) alphabetically or by count
-- [ ] Nav bar: slider to hide watched videos
+- [x] Nav bar: slider to hide watched videos
 - [ ] Stats page
   - [ ] Total videos watched / total videos
   - [ ] Video watch time / total watch time
