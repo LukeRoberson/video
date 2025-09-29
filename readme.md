@@ -129,7 +129,33 @@ docker run -d -p 5000:5000 -v ${PWD}/local.db:/app/local.db lukerobertson19/1320
 
 
 ----
-# 📚 Documentation
+# �️ Development
+
+## TypeScript Development
+
+This project includes TypeScript files for enhanced type safety and developer experience:
+
+```bash
+# Build TypeScript files
+npm run build
+
+# Watch for changes and auto-compile
+npm run watch
+
+# Clean compiled files
+npm run clean
+```
+
+### Files migrated to TypeScript:
+- `static/js/tvDetection.ts` - TV device detection with type safety
+- `static/js/tvNavigation.ts` - TV remote navigation with strict typing
+
+Compiled JavaScript files are automatically generated in `static/js/dist/` and included in the application.
+</br></br>
+
+
+----
+# �📚 Documentation
 
 Additional documentation can be found in the `docs/` directory:
 - `project.md` - General project structure information

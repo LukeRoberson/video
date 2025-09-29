@@ -8,8 +8,8 @@ This document outlines the JavaScript architecture, coding patterns, and documen
 ### Core Files
 - `videoPlayer.js` - Complete video player implementation with Video.js integration
 - `populateCategories.js` - Category population and lazy loading functionality
-- `tvNavigation.js` - TV remote control navigation for Smart TV platforms
-- `tvDetection.js` - TV platform detection and mode switching
+- `tvNavigation.ts` - TV remote control navigation for Smart TV platforms (TypeScript)
+- `tvDetection.ts` - TV platform detection and mode switching (TypeScript)
 - `scroll.js` - Horizontal scrolling controls for thumbnail carousels
 - `advancedSearch.js` - Advanced search interface and autocomplete
 - `profileMgmt.js` - Profile management and selection functionality
@@ -18,6 +18,13 @@ This document outlines the JavaScript architecture, coding patterns, and documen
 - `homeThumbs.js` - Home page thumbnail management
 - `metadata.js` - Video metadata display and interaction
 - `videoAdd.js` - Video addition and management interface
+
+### TypeScript Files
+The following files have been migrated to TypeScript for enhanced type safety and developer experience:
+- `tvDetection.ts` - Comprehensive TV device detection with type-safe interfaces
+- `tvNavigation.ts` - TV navigation system with strict typing for remote control handling
+
+Compiled JavaScript files are automatically generated in the `dist/` directory and included in templates.
 
 ## Architecture Patterns
 
