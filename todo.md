@@ -107,6 +107,7 @@
 - [ ] Video details pages:
   - [ ] Share Links
   - [ ] Organise scriptures by book first
+  - [ ] Option to show the transcript (from subtitles)
 - [ ] Scriptures page: Book can link to the book overview video
 - [ ] Homepage:
   - [ ] Random (unwatched) morning worship for the day

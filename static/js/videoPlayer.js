@@ -1261,19 +1261,118 @@ class CustomControls {
 }
 
 /**
+ * Subtitle management for video player.
+ * 
+ * Automatically detects and loads subtitle files matching the video ID.
+ * Checks for .vtt files in the /static/subtitles/ directory and adds them
+ * as text tracks to the video player if available.
+ * 
+ * @class SubtitleManager
+ * @example
+ * new SubtitleManager(player, 123); // Loads /static/subtitles/123.vtt if exists
+ */
+class SubtitleManager {
+    /**
+     * Creates an instance of SubtitleManager.
+     * 
+     * @param {Object} player - The video.js player instance
+     * @param {number} videoId - The video ID to match subtitle file
+     * @memberof SubtitleManager
+     */
+    constructor(player, videoId) {
+        /** @type {Object} The video.js player instance */
+        this.player = player;
+        /** @type {number} The video ID for matching subtitle files */
+        this.videoId = videoId;
+        /** @type {string} Path to subtitle directory */
+        this.subtitlePath = '/static/subtitles';
+        this.init();
+    }
+
+    /**
+     * Initializes subtitle loading by checking for file existence.
+     * 
+     * @private
+     * @memberof SubtitleManager
+     */
+    init() {
+        if (!this.videoId) {
+            console.log('No video ID provided for subtitles');
+            return;
+        }
+
+        this.checkAndLoadSubtitle();
+    }
+
+    /**
+     * Checks if subtitle file exists and loads it if available.
+     * Makes a HEAD request to verify file existence before adding track.
+     * Checks for .vtt files (WebVTT format required by video.js).
+     * 
+     * @private
+     * @memberof SubtitleManager
+     */
+    checkAndLoadSubtitle() {
+        const subtitleUrl = `${this.subtitlePath}/${this.videoId}.vtt`;
+        
+        // Check if subtitle file exists
+        fetch(subtitleUrl, { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Subtitle file found: ${subtitleUrl}`);
+                    this.addSubtitleTrack(subtitleUrl);
+                } else {
+                    console.log(
+                        `No subtitle file found: ${subtitleUrl}`
+                    );
+                }
+            })
+            .catch(err => {
+                console.log('Error checking subtitle file:', err);
+            });
+    }
+
+    /**
+     * Adds subtitle track to the video player.
+     * Uses video.js native method to add WebVTT subtitle track.
+     * 
+     * @private
+     * @param {string} subtitleUrl - The URL to the subtitle file
+     * @memberof SubtitleManager
+     */
+    addSubtitleTrack(subtitleUrl) {
+        this.player.ready(() => {
+            // Add text track to player using video.js method
+            this.player.addRemoteTextTrack({
+                kind: 'subtitles',
+                label: 'English',
+                srclang: 'en',
+                src: subtitleUrl,
+                default: false  // Set to true to enable by default
+            }, false);
+            
+            console.log(`Subtitle track added: ${subtitleUrl}`);
+        });
+    }
+}
+
+/**
  * Main video player initialization event handler.
  * 
- * Coordinates the initialization of all video player modules when the DOM is ready.
- * Creates the core player instance, retrieves video metadata from DOM attributes,
- * and initializes all supporting modules (context menu, custom controls, URL handling, 
- * and progress tracking) once the player is ready.
+ * Coordinates the initialization of all video player modules when the 
+ * DOM is ready. Creates the core player instance, retrieves video 
+ * metadata from DOM attributes, and initializes all supporting modules
+ * (context menu, custom controls, URL handling, progress tracking, and
+ * subtitles) once the player is ready.
  * 
  * @function
  * @name DOMContentLoaded
  * @listens DOMContentLoaded
  * @example
  * // This runs automatically when the page loads
- * // Requires HTML element: <video id="player" data-video-id="123" data-profile-id="456" data-current-time="120">
+ * // Requires HTML element: 
+ * // <video id="player" data-video-id="123" data-profile-id="456" 
+ * //        data-current-time="120">
  */
 document.addEventListener('DOMContentLoaded', function () {
     // Find all video elements with the video-js class
@@ -1289,7 +1388,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Get video data from DOM attributes
         const profileId = videoElement.getAttribute('data-profile-id');
         const videoId = videoElement.getAttribute('data-video-id');
-        const currentTime = parseInt(videoElement.getAttribute('data-current-time'), 10) || 0;
+        const currentTime = parseInt(
+            videoElement.getAttribute('data-current-time'), 10
+        ) || 0;
 
         // Initialize all modules when player is ready
         player.ready(() => {
@@ -1297,6 +1398,7 @@ document.addEventListener('DOMContentLoaded', function () {
             new CustomControls(player, playerCore.container);
             new UrlTimeHandler(player);
             new ProgressTracker(player, videoId, profileId, currentTime);
+            new SubtitleManager(player, videoId);  // Add subtitle support
             
             // Ensure control bar is visible
             player.controlBar.show();
