@@ -6,8 +6,6 @@
 
 /**
  * Configuration constants for category population
- * @readonly
- * @enum {number|string}
  */
 const CategoryConfig = {
     /** API endpoint pattern for category videos */
@@ -18,32 +16,52 @@ const CategoryConfig = {
     INTERSECTION_THRESHOLD: 0.1,
     /** Observer root margin */
     INTERSECTION_ROOT_MARGIN: '50px'
-};
+} as const;
+
+/**
+ * Video data object structure
+ */
+interface Video {
+    /** Video ID */
+    id: number | string;
+    /** Video name/title */
+    name: string;
+    /** Thumbnail URL */
+    thumbnail: string;
+    /** Video duration string */
+    duration: string;
+    /** Whether the video has been watched */
+    watched: boolean;
+}
+
+/**
+ * TV detection interface
+ */
+interface TVDetection {
+    isTV(): boolean;
+}
 
 /**
  * Handles video thumbnail rendering and display
- * @class VideoThumbnailRenderer
  */
 class VideoThumbnailRenderer {
     /**
      * Create a video thumbnail renderer
-     * @memberof VideoThumbnailRenderer
      */
     constructor() {}
 
     /**
      * Render video thumbnails for a category
-     * @param {Array<Object>} videos - Array of video objects
-     * @param {HTMLElement} container - Container element for thumbnails
-     * @memberof VideoThumbnailRenderer
+     * @param videos - Array of video objects
+     * @param container - Container element for thumbnails
      */
-    renderThumbnails(videos, container) {
+    renderThumbnails(videos: Video[], container: HTMLElement | null): void {
         if (!container) {
             console.warn('Thumbnail container not found');
             return;
         }
 
-        const thumbnailsHTML = videos.map(video => this.createThumbnailHTML(video)).join('');
+        const thumbnailsHTML = videos.map((video: Video) => this.createThumbnailHTML(video)).join('');
         container.innerHTML = thumbnailsHTML;
         
         // Apply current toggle state to newly rendered thumbnails
@@ -52,31 +70,28 @@ class VideoThumbnailRenderer {
 
     /**
      * Apply current watched video toggle state to newly rendered thumbnails
-     * @param {HTMLElement} container - Container element for thumbnails
-     * @private
-     * @memberof VideoThumbnailRenderer
+     * @param container - Container element for thumbnails
      */
-    applyCurrentToggleState(container) {
+    private applyCurrentToggleState(container: HTMLElement): void {
         // Check if watched videos should be hidden based on current toggle state
         const hideWatched = document.body.classList.contains('hide-watched');
         
         if (hideWatched) {
             const watchedThumbnails = container.querySelectorAll('.thumbnail--watched, [data-watched="true"]');
-            watchedThumbnails.forEach(thumbnail => {
-                thumbnail.style.display = 'none';
-                thumbnail.setAttribute('data-hidden-by-toggle', 'true');
+            watchedThumbnails.forEach((thumbnail: Element) => {
+                const htmlElement = thumbnail as HTMLElement;
+                htmlElement.style.display = 'none';
+                htmlElement.setAttribute('data-hidden-by-toggle', 'true');
             });
         }
     }
     
     /**
      * Create HTML for a single video thumbnail
-     * @param {Object} video - Video object with id, name, thumbnail, duration, watched properties
-     * @returns {string} HTML string for the thumbnail
-     * @private
-     * @memberof VideoThumbnailRenderer
+     * @param video - Video object with id, name, thumbnail, duration, watched properties
+     * @returns HTML string for the thumbnail
      */
-    createThumbnailHTML(video) {
+    private createThumbnailHTML(video: Video): string {
         // Apply BEM naming convention for watched videos
         const watchedClass = video.watched ? ' thumbnail--watched' : '';
         const watchedIcon = video.watched ? this.createWatchedIcon() : '';
@@ -96,11 +111,9 @@ class VideoThumbnailRenderer {
 
     /**
      * Create watched icon HTML
-     * @returns {string} HTML for watched icon
-     * @private
-     * @memberof VideoThumbnailRenderer
+     * @returns HTML for watched icon
      */
-    createWatchedIcon() {
+    private createWatchedIcon(): string {
         return `
             <div class="thumbnail-watched-icon">
                 <svg viewBox="0 0 24 24">
@@ -113,27 +126,23 @@ class VideoThumbnailRenderer {
 
 /**
  * Handles API calls for category data
- * @class CategoryApiService
  */
 class CategoryApiService {
     /**
      * Create a category API service
-     * @memberof CategoryApiService
      */
     constructor() {}
 
     /**
      * Fetch videos for a specific category and subcategory
-     * @param {string|number} categoryId - The main category ID
-     * @param {string|number} subcategoryId - The subcategory ID
-     * @returns {Promise<Array<Object>>} Promise resolving to array of video objects
-     * @async
-     * @memberof CategoryApiService
+     * @param categoryId - The main category ID
+     * @param subcategoryId - The subcategory ID
+     * @returns Promise resolving to array of video objects
      */
-    async fetchCategoryVideos(categoryId, subcategoryId) {
+    async fetchCategoryVideos(categoryId: string | number, subcategoryId: string | number): Promise<Video[]> {
         const endpoint = CategoryConfig.API_ENDPOINT_PATTERN
-            .replace('{categoryId}', categoryId)
-            .replace('{subcategoryId}', subcategoryId);
+            .replace('{categoryId}', String(categoryId))
+            .replace('{subcategoryId}', String(subcategoryId));
 
         try {
             const response = await fetch(endpoint);
@@ -152,43 +161,34 @@ class CategoryApiService {
 
 /**
  * Manages lazy loading of category content using IntersectionObserver
- * @class CategoryLazyLoader
  */
 class CategoryLazyLoader {
+    /** Category populator instance */
+    private categoryPopulator: CategoryPopulator;
+    
+    /** Intersection observer instance */
+    private observer: IntersectionObserver;
+    
+    /** Set of observed category rows */
+    private observedRows: Set<HTMLElement>;
+
     /**
      * Create a category lazy loader
-     * @param {CategoryPopulator} categoryPopulator - The category populator instance
-     * @memberof CategoryLazyLoader
+     * @param categoryPopulator - The category populator instance
      */
-    constructor(categoryPopulator) {
-        /**
-         * Category populator instance
-         * @type {CategoryPopulator}
-         */
+    constructor(categoryPopulator: CategoryPopulator) {
         this.categoryPopulator = categoryPopulator;
-        
-        /**
-         * Intersection observer instance
-         * @type {IntersectionObserver}
-         */
         this.observer = this.createObserver();
-        
-        /**
-         * Set of observed category rows
-         * @type {Set<HTMLElement>}
-         */
-        this.observedRows = new Set();
+        this.observedRows = new Set<HTMLElement>();
     }
 
     /**
      * Create and configure intersection observer
-     * @returns {IntersectionObserver} Configured intersection observer
-     * @private
-     * @memberof CategoryLazyLoader
+     * @returns Configured intersection observer
      */
-    createObserver() {
-        return new IntersectionObserver((entries) => {
-            entries.forEach(entry => this.handleIntersection(entry));
+    private createObserver(): IntersectionObserver {
+        return new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry: IntersectionObserverEntry) => this.handleIntersection(entry));
         }, {
             threshold: CategoryConfig.INTERSECTION_THRESHOLD,
             rootMargin: CategoryConfig.INTERSECTION_ROOT_MARGIN
@@ -197,41 +197,41 @@ class CategoryLazyLoader {
 
     /**
      * Handle intersection observer callback
-     * @param {IntersectionObserverEntry} entry - The intersection observer entry
-     * @private
-     * @memberof CategoryLazyLoader
+     * @param entry - The intersection observer entry
      */
-    handleIntersection(entry) {
+    private handleIntersection(entry: IntersectionObserverEntry): void {
         if (entry.isIntersecting) {
-            const categoryId = entry.target.dataset.categoryId;
-            const subcategoryId = entry.target.dataset.subcategoryId;
+            const target = entry.target as HTMLElement;
+            const categoryId = target.dataset.categoryId;
+            const subcategoryId = target.dataset.subcategoryId;
             
-            this.categoryPopulator.populateCategory(categoryId, subcategoryId);
-            this.observer.unobserve(entry.target);
-            this.observedRows.delete(entry.target);
+            if (categoryId && subcategoryId) {
+                this.categoryPopulator.populateCategory(categoryId, subcategoryId);
+                this.observer.unobserve(entry.target);
+                this.observedRows.delete(target);
+            }
         }
     }
 
     /**
      * Start observing category rows for lazy loading
-     * @memberof CategoryLazyLoader
      */
-    observeCategoryRows() {
+    observeCategoryRows(): void {
         const categoryRows = document.querySelectorAll('.category-row');
         
-        categoryRows.forEach(row => {
-            if (!this.observedRows.has(row)) {
-                this.observer.observe(row);
-                this.observedRows.add(row);
+        categoryRows.forEach((row: Element) => {
+            const htmlRow = row as HTMLElement;
+            if (!this.observedRows.has(htmlRow)) {
+                this.observer.observe(htmlRow);
+                this.observedRows.add(htmlRow);
             }
         });
     }
 
     /**
      * Stop observing all category rows and cleanup
-     * @memberof CategoryLazyLoader
      */
-    destroy() {
+    destroy(): void {
         this.observer.disconnect();
         this.observedRows.clear();
     }
@@ -239,36 +239,31 @@ class CategoryLazyLoader {
 
 /**
  * Handles TV-specific enhancements for category navigation
- * @class TVCategoryEnhancer
  */
 class TVCategoryEnhancer {
+    /** Whether the current device is a TV */
+    private isTV: boolean;
+
     /**
      * Create a TV category enhancer
-     * @memberof TVCategoryEnhancer
      */
     constructor() {
-        /**
-         * Whether the current device is a TV
-         * @type {boolean}
-         */
         this.isTV = this.detectTVDevice();
     }
 
     /**
      * Detect if the current device is a TV
-     * @returns {boolean} True if device is detected as TV
-     * @private
-     * @memberof TVCategoryEnhancer
+     * @returns True if device is detected as TV
      */
-    detectTVDevice() {
-        return window.tvDetection?.isTV() || false;
+    private detectTVDevice(): boolean {
+        const tvDetection = (window as any).tvDetection as TVDetection | undefined;
+        return tvDetection?.isTV() || false;
     }
 
     /**
      * Apply TV-specific enhancements to category navigation
-     * @memberof TVCategoryEnhancer
      */
-    enhanceForTV() {
+    enhanceForTV(): void {
         if (!this.isTV) {
             return;
         }
@@ -279,45 +274,42 @@ class TVCategoryEnhancer {
 
     /**
      * Enhance category rows for TV viewing
-     * @private
-     * @memberof TVCategoryEnhancer
      */
-    enhanceCategoryRows() {
+    private enhanceCategoryRows(): void {
         const categoryRows = document.querySelectorAll('.category-row');
         
-        categoryRows.forEach(row => {
-            row.style.marginBottom = '3em';
+        categoryRows.forEach((row: Element) => {
+            const htmlRow = row as HTMLElement;
+            htmlRow.style.marginBottom = '3em';
             
-            const title = row.querySelector('.category-title');
+            const title = htmlRow.querySelector('.category-title');
             if (title) {
-                title.style.fontSize = '1.4em';
-                title.style.marginBottom = '1em';
+                const htmlTitle = title as HTMLElement;
+                htmlTitle.style.fontSize = '1.4em';
+                htmlTitle.style.marginBottom = '1em';
             }
         });
     }
 
     /**
      * Add visual scroll indicators for TV navigation
-     * @private
-     * @memberof TVCategoryEnhancer
      */
-    addScrollIndicators() {
+    private addScrollIndicators(): void {
         const thumbnailContainers = document.querySelectorAll('.thumbnails');
         
-        thumbnailContainers.forEach(container => {
-            if (container.scrollWidth > container.clientWidth) {
-                this.addScrollIndicator(container);
+        thumbnailContainers.forEach((container: Element) => {
+            const htmlContainer = container as HTMLElement;
+            if (htmlContainer.scrollWidth > htmlContainer.clientWidth) {
+                this.addScrollIndicator(htmlContainer);
             }
         });
     }
 
     /**
      * Add scroll indicator to a specific container
-     * @param {HTMLElement} container - The thumbnail container
-     * @private
-     * @memberof TVCategoryEnhancer
+     * @param container - The thumbnail container
      */
-    addScrollIndicator(container) {
+    private addScrollIndicator(container: HTMLElement): void {
         container.style.position = 'relative';
         
         const scrollIndicator = document.createElement('div');
@@ -341,44 +333,34 @@ class TVCategoryEnhancer {
 
 /**
  * Main controller for category population functionality
- * @class CategoryPopulator
  */
 class CategoryPopulator {
+    /** Video thumbnail renderer instance */
+    private thumbnailRenderer: VideoThumbnailRenderer;
+    
+    /** Category API service instance */
+    private apiService: CategoryApiService;
+    
+    /** Lazy loader instance */
+    private lazyLoader: CategoryLazyLoader;
+    
+    /** TV enhancement instance */
+    private tvEnhancer: TVCategoryEnhancer;
+
     /**
      * Create a category populator instance
-     * @memberof CategoryPopulator
      */
     constructor() {
-        /**
-         * Video thumbnail renderer instance
-         * @type {VideoThumbnailRenderer}
-         */
         this.thumbnailRenderer = new VideoThumbnailRenderer();
-        
-        /**
-         * Category API service instance
-         * @type {CategoryApiService}
-         */
         this.apiService = new CategoryApiService();
-        
-        /**
-         * Lazy loader instance
-         * @type {CategoryLazyLoader}
-         */
         this.lazyLoader = new CategoryLazyLoader(this);
-        
-        /**
-         * TV enhancement instance
-         * @type {TVCategoryEnhancer}
-         */
         this.tvEnhancer = new TVCategoryEnhancer();
     }
 
     /**
      * Initialize the category populator
-     * @memberof CategoryPopulator
      */
-    init() {
+    init(): void {
         this.lazyLoader.observeCategoryRows();
         
         // Delay TV enhancements to allow categories to load
@@ -389,12 +371,10 @@ class CategoryPopulator {
 
     /**
      * Populate a specific category with videos
-     * @param {string|number} categoryId - The main category ID
-     * @param {string|number} subcategoryId - The subcategory ID
-     * @async
-     * @memberof CategoryPopulator
+     * @param categoryId - The main category ID
+     * @param subcategoryId - The subcategory ID
      */
-    async populateCategory(categoryId, subcategoryId) {
+    async populateCategory(categoryId: string | number, subcategoryId: string | number): Promise<void> {
         try {
             const videos = await this.apiService.fetchCategoryVideos(categoryId, subcategoryId);
             const container = this.getThumbnailContainer(subcategoryId);
@@ -409,31 +389,28 @@ class CategoryPopulator {
             
         } catch (error) {
             console.error(`Failed to populate category ${categoryId}/${subcategoryId}:`, error);
-            this.handlePopulationError(subcategoryId, error);
+            this.handlePopulationError(subcategoryId, error as Error);
         }
     }
 
     /**
      * Get thumbnail container element for a subcategory
-     * @param {string|number} subcategoryId - The subcategory ID
-     * @returns {HTMLElement|null} The thumbnail container element
-     * @private
-     * @memberof CategoryPopulator
+     * @param subcategoryId - The subcategory ID
+     * @returns The thumbnail container element or null
      */
-    getThumbnailContainer(subcategoryId) {
+    private getThumbnailContainer(subcategoryId: string | number): HTMLElement | null {
         return document.querySelector(`#category-${subcategoryId} .thumbnails`);
     }
 
     /**
      * Update arrow visibility for carousel navigation
-     * @param {string|number} subcategoryId - The subcategory ID
-     * @private
-     * @memberof CategoryPopulator
+     * @param subcategoryId - The subcategory ID
      */
-    updateArrowVisibility(subcategoryId) {
+    private updateArrowVisibility(subcategoryId: string | number): void {
         const wrapperId = `wrapper-${subcategoryId}`;
         
         // Call global updateArrows function if it exists
+        const updateArrows = (window as any).updateArrows as ((id: string) => void) | undefined;
         if (typeof updateArrows === 'function') {
             updateArrows(wrapperId);
         }
@@ -441,19 +418,17 @@ class CategoryPopulator {
 
     /**
      * Handle errors during category population
-     * @param {string|number} subcategoryId - The subcategory ID
-     * @param {Error} error - The error that occurred
-     * @private
-     * @memberof CategoryPopulator
+     * @param subcategoryId - The subcategory ID
+     * @param _error - The error that occurred
      */
-    handlePopulationError(subcategoryId, error) {
+    private handlePopulationError(subcategoryId: string | number, _error: Error): void {
         const container = this.getThumbnailContainer(subcategoryId);
         
         if (container) {
             container.innerHTML = `
                 <div class="error-message">
                     <p>Failed to load videos for this category.</p>
-                    <button onclick="categoryPopulator.populateCategory('${subcategoryId}')" class="retry-button">
+                    <button onclick="categoryPopulator.populateCategory('${subcategoryId}', '${subcategoryId}')" class="retry-button">
                         Retry
                     </button>
                 </div>
@@ -463,15 +438,14 @@ class CategoryPopulator {
 
     /**
      * Cleanup resources and observers
-     * @memberof CategoryPopulator
      */
-    destroy() {
+    destroy(): void {
         this.lazyLoader.destroy();
     }
 }
 
 // Global instance
-let categoryPopulator;
+let categoryPopulator: CategoryPopulator | undefined;
 
 /**
  * Initialize category population functionality when DOM is ready

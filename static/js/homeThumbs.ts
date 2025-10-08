@@ -1,5 +1,5 @@
 /**
- * homeThumbs.js
+ * homeThumbs.ts
  * 
  * Manages the sizing and dynamic loading of thumbnail carousels on the home page.
  * Thumbnails are loaded as batches for a nice scrolling experience.
@@ -8,19 +8,28 @@
  */
 
 /**
+ * Configuration object returned by CarouselConfig.getScreenConfig
+ */
+interface ScreenConfig {
+    /** Number of thumbnails per batch */
+    batchSize: number;
+    /** Padding value for calculations */
+    padding: number;
+    /** Fixed thumbnail width for TV mode (optional) */
+    thumbnailWidth?: number;
+}
+
+/**
  * Configuration class for carousel display settings
- * @class CarouselConfig
  */
 class CarouselConfig {
     /**
      * Get screen configuration based on screen width and device type
-     * @static
-     * @param {number} screenWidth - The current screen width in pixels
-     * @param {boolean} [isTV=false] - Whether the device is a TV
-     * @returns {Object} Configuration object with batchSize, padding, and optional thumbnailWidth
-     * @memberof CarouselConfig
+     * @param screenWidth - The current screen width in pixels
+     * @param isTV - Whether the device is a TV
+     * @returns Configuration object with batchSize, padding, and optional thumbnailWidth
      */
-    static getScreenConfig(screenWidth, isTV = false) {
+    static getScreenConfig(screenWidth: number, isTV: boolean = false): ScreenConfig {
         if (isTV) {
             if (screenWidth >= 3840) {
                 return { batchSize: 6, thumbnailWidth: 350, padding: 35 };
@@ -43,49 +52,42 @@ class CarouselConfig {
 
 /**
  * Manages individual thumbnail carousel behavior and layout
- * @class ThumbnailCarousel
  */
 class ThumbnailCarousel {
+    /** The main carousel DOM element */
+    private carousel: HTMLElement;
+    
+    /** The carousel inner container element */
+    private carouselInner: HTMLElement;
+    
+    /** Array of video thumbnail elements */
+    private videos: HTMLElement[];
+    
+    /** Auto-advance interval ID */
+    private autoAdvanceInterval: number | null;
+
     /**
      * Create a thumbnail carousel instance
-     * @param {HTMLElement} carouselElement - The carousel DOM element
-     * @memberof ThumbnailCarousel
+     * @param carouselElement - The carousel DOM element
      */
-    constructor(carouselElement) {
-        /**
-         * The main carousel DOM element
-         * @type {HTMLElement}
-         */
+    constructor(carouselElement: HTMLElement) {
         this.carousel = carouselElement;
         
-        /**
-         * The carousel inner container element
-         * @type {HTMLElement}
-         */
-        this.carouselInner = carouselElement.querySelector('.carousel-inner');
+        const innerElement = carouselElement.querySelector('.carousel-inner');
+        if (!innerElement) {
+            throw new Error('Carousel inner element not found');
+        }
+        this.carouselInner = innerElement as HTMLElement;
         
-        /**
-         * Array of video thumbnail elements
-         * @type {HTMLElement[]}
-         */
-        this.videos = Array.from(this.carouselInner.querySelectorAll('.thumbnail-home'));
-        
-        /**
-         * Auto-advance interval ID
-         * @type {?number}
-         */
+        this.videos = Array.from(this.carouselInner.querySelectorAll('.thumbnail-home')) as HTMLElement[];
         this.autoAdvanceInterval = null;
     }
 
     /**
      * Update the carousel layout based on configuration
-     * @param {Object} config - Configuration object from CarouselConfig
-     * @param {number} config.batchSize - Number of thumbnails per batch
-     * @param {number} config.padding - Padding value for calculations
-     * @param {number} [config.thumbnailWidth] - Fixed thumbnail width for TV mode
-     * @memberof ThumbnailCarousel
+     * @param config - Configuration object from CarouselConfig
      */
-    updateLayout(config) {
+    updateLayout(config: ScreenConfig): void {
         this.clearCarousel();
         
         const parentWidth = this.carousel.offsetWidth || window.innerWidth;
@@ -98,33 +100,29 @@ class ThumbnailCarousel {
 
     /**
      * Calculate the appropriate thumbnail width based on parent container and configuration
-     * @param {number} parentWidth - Width of the parent container
-     * @param {Object} config - Configuration object
-     * @param {number} [config.thumbnailWidth] - Fixed width for TV mode
-     * @param {number} config.batchSize - Number of thumbnails per batch
-     * @param {number} config.padding - Padding value
-     * @returns {number} Calculated thumbnail width in pixels
-     * @memberof ThumbnailCarousel
+     * @param parentWidth - Width of the parent container
+     * @param config - Configuration object
+     * @returns Calculated thumbnail width in pixels
      */
-    calculateThumbnailWidth(parentWidth, config) {
+    private calculateThumbnailWidth(parentWidth: number, config: ScreenConfig): number {
         if (config.thumbnailWidth) {
             return config.thumbnailWidth; // TV mode has fixed width
         }
         
-        let width = (parentWidth - config.padding) / config.batchSize;
+        const width = (parentWidth - config.padding) / config.batchSize;
         return Math.min(width, 330); // Maximum thumbnail width is 330px
     }
 
     /**
      * Apply width and height styles to all thumbnail elements
-     * @param {number} thumbnailWidth - Width to apply to thumbnails
-     * @memberof ThumbnailCarousel
+     * @param thumbnailWidth - Width to apply to thumbnails
      */
-    applyThumbnailStyles(thumbnailWidth) {
-        this.videos.forEach(thumbnail => {
+    private applyThumbnailStyles(thumbnailWidth: number): void {
+        this.videos.forEach((thumbnail: HTMLElement) => {
             thumbnail.style.width = `${thumbnailWidth}px`;
             // Apply height for TV mode to maintain aspect ratio
-            if (window.tvDetection?.isTV()) {
+            const tvDetection = (window as any).tvDetection as TVDetection | undefined;
+            if (tvDetection?.isTV()) {
                 thumbnail.style.height = `${thumbnailWidth * 0.75}px`;
             }
         });
@@ -132,10 +130,9 @@ class ThumbnailCarousel {
 
     /**
      * Create carousel batches from video thumbnails
-     * @param {number} batchSize - Number of thumbnails per batch
-     * @memberof ThumbnailCarousel
+     * @param batchSize - Number of thumbnails per batch
      */
-    createBatches(batchSize) {
+    private createBatches(batchSize: number): void {
         for (let i = 0; i < this.videos.length; i += batchSize) {
             const batch = this.videos.slice(i, i + batchSize);
             const carouselItem = this.createCarouselItem(batch, i === 0);
@@ -145,19 +142,18 @@ class ThumbnailCarousel {
 
     /**
      * Create a single carousel item containing a batch of thumbnails
-     * @param {HTMLElement[]} batch - Array of thumbnail elements for this batch
-     * @param {boolean} [isActive=false] - Whether this should be the active carousel item
-     * @returns {HTMLElement} The created carousel item element
-     * @memberof ThumbnailCarousel
+     * @param batch - Array of thumbnail elements for this batch
+     * @param isActive - Whether this should be the active carousel item
+     * @returns The created carousel item element
      */
-    createCarouselItem(batch, isActive = false) {
+    private createCarouselItem(batch: HTMLElement[], isActive: boolean = false): HTMLElement {
         const carouselItem = document.createElement('div');
         carouselItem.classList.add('carousel-item');
         if (isActive) carouselItem.classList.add('active');
 
         const batchContainer = document.createElement('div');
         batchContainer.classList.add('d-flex', 'gap-3', 'justify-content-center');
-        batch.forEach(video => batchContainer.appendChild(video));
+        batch.forEach((video: HTMLElement) => batchContainer.appendChild(video));
 
         carouselItem.appendChild(batchContainer);
         return carouselItem;
@@ -165,17 +161,15 @@ class ThumbnailCarousel {
 
     /**
      * Clear all content from the carousel inner container
-     * @memberof ThumbnailCarousel
      */
-    clearCarousel() {
+    private clearCarousel(): void {
         this.carouselInner.innerHTML = '';
     }
 
     /**
      * Make the carousel visible by setting visibility and opacity
-     * @memberof ThumbnailCarousel
      */
-    showCarousel() {
+    private showCarousel(): void {
         this.carousel.style.visibility = 'visible';
         this.carousel.style.opacity = '1';
     }
@@ -183,25 +177,23 @@ class ThumbnailCarousel {
     /**
      * Start auto-advance functionality for the carousel
      * Automatically advances to the next slide every 10 seconds
-     * @memberof ThumbnailCarousel
      */
-    startAutoAdvance() {
+    startAutoAdvance(): void {
         this.stopAutoAdvance(); // Clear any existing interval
         
-        this.autoAdvanceInterval = setInterval(() => {
+        this.autoAdvanceInterval = window.setInterval(() => {
             const nextButton = this.carousel.querySelector('.carousel-control-next');
             if (nextButton && !document.querySelector('.tv-focused')) {
-                nextButton.click();
+                (nextButton as HTMLElement).click();
             }
         }, 10000);
     }
 
     /**
      * Stop auto-advance functionality
-     * @memberof ThumbnailCarousel
      */
-    stopAutoAdvance() {
-        if (this.autoAdvanceInterval) {
+    stopAutoAdvance(): void {
+        if (this.autoAdvanceInterval !== null) {
             clearInterval(this.autoAdvanceInterval);
             this.autoAdvanceInterval = null;
         }
@@ -209,35 +201,46 @@ class ThumbnailCarousel {
 }
 
 /**
+ * TV detection interface for type safety
+ */
+interface TVDetection {
+    isTV(): boolean;
+}
+
+/**
+ * Custom event detail for TV mode changes
+ */
+interface TVModeChangeEvent extends CustomEvent {
+    detail: {
+        isTV: boolean;
+    };
+}
+
+/**
  * Main manager class that orchestrates all thumbnail carousels on the home page
- * @class HomeThumbnailManager
  */
 class HomeThumbnailManager {
+    /** Array of ThumbnailCarousel instances */
+    private carousels: ThumbnailCarousel[];
+    
+    /** Whether the current device is a TV */
+    private isTV: boolean;
+
     /**
      * Create the thumbnail manager and initialize all carousels
-     * @memberof HomeThumbnailManager
      */
     constructor() {
-        /**
-         * Array of ThumbnailCarousel instances
-         * @type {ThumbnailCarousel[]}
-         */
         this.carousels = [];
-        
-        /**
-         * Whether the current device is a TV
-         * @type {boolean}
-         */
-        this.isTV = window.tvDetection?.isTV() || false;
+        const tvDetection = (window as any).tvDetection as TVDetection | undefined;
+        this.isTV = tvDetection?.isTV() || false;
         
         this.init();
     }
 
     /**
      * Initialize the thumbnail manager
-     * @memberof HomeThumbnailManager
      */
-    init() {
+    private init(): void {
         this.initializeCarousels();
         this.setupEventListeners();
         this.updateAllCarousels();
@@ -249,25 +252,25 @@ class HomeThumbnailManager {
 
     /**
      * Find and initialize all dynamic carousels on the page
-     * @memberof HomeThumbnailManager
      */
-    initializeCarousels() {
+    private initializeCarousels(): void {
         const carouselElements = document.querySelectorAll('.carousel[data-dynamic="true"]');
-        carouselElements.forEach(element => {
-            this.carousels.push(new ThumbnailCarousel(element));
+        carouselElements.forEach((element: Element) => {
+            this.carousels.push(new ThumbnailCarousel(element as HTMLElement));
         });
     }
 
     /**
      * Set up event listeners for resize and TV mode changes
-     * @memberof HomeThumbnailManager
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         window.addEventListener('resize', () => this.updateAllCarousels());
         
-        if (window.tvDetection) {
-            window.addEventListener('tvModeChanged', (e) => {
-                this.isTV = e.detail.isTV;
+        const tvDetection = (window as any).tvDetection as TVDetection | undefined;
+        if (tvDetection) {
+            window.addEventListener('tvModeChanged', (e: Event) => {
+                const tvEvent = e as TVModeChangeEvent;
+                this.isTV = tvEvent.detail.isTV;
                 if (this.isTV) {
                     this.setupTVMode();
                 } else {
@@ -279,36 +282,33 @@ class HomeThumbnailManager {
 
     /**
      * Update the layout of all carousels based on current screen size
-     * @memberof HomeThumbnailManager
      */
-    updateAllCarousels() {
+    private updateAllCarousels(): void {
         const screenWidth = window.innerWidth;
         const config = CarouselConfig.getScreenConfig(screenWidth, this.isTV);
 
-        this.carousels.forEach(carousel => {
+        this.carousels.forEach((carousel: ThumbnailCarousel) => {
             carousel.updateLayout(config);
         });
     }
 
     /**
      * Configure carousels for TV mode operation
-     * @memberof HomeThumbnailManager
      */
-    setupTVMode() {
+    private setupTVMode(): void {
         this.updateAllCarousels();
         
         // Start auto-advance for TV mode
-        this.carousels.forEach(carousel => {
+        this.carousels.forEach((carousel: ThumbnailCarousel) => {
             carousel.startAutoAdvance();
         });
     }
 
     /**
      * Reset carousels from TV mode to normal mode
-     * @memberof HomeThumbnailManager
      */
-    resetToNormalMode() {
-        this.carousels.forEach(carousel => {
+    private resetToNormalMode(): void {
+        this.carousels.forEach((carousel: ThumbnailCarousel) => {
             carousel.stopAutoAdvance();
         });
         

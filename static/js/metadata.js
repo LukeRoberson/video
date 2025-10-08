@@ -1,6 +1,7 @@
 /**
  * @fileoverview Metadata management functionality for videos and scriptures.
  * Handles form submissions for adding video metadata and scripture text.
+ * Used with the 'admin' page.
  */
 
 /**

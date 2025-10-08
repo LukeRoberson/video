@@ -19,8 +19,6 @@
 
 /**
  * Configuration constants for scroll functionality
- * @readonly
- * @enum {number}
  */
 const ScrollConfig = {
     /** Mouse wheel scroll speed multiplier */
@@ -31,57 +29,57 @@ const ScrollConfig = {
     DIRECTION_LEFT: -1,
     /** Scroll direction: right */
     DIRECTION_RIGHT: 1
-};
+} as const;
 
 /**
  * Manages scroll functionality for a single thumbnail container
- * @class ThumbnailScrollManager
  */
 class ThumbnailScrollManager {
+    /** The wrapper element containing thumbnails and arrows */
+    private wrapper: HTMLElement;
+    
+    /** The scrollable thumbnails container */
+    private thumbnails: HTMLElement;
+    
+    /** Left scroll arrow element */
+    private leftArrow: HTMLElement | null;
+    
+    /** Right scroll arrow element */
+    private rightArrow: HTMLElement | null;
+    
+    /** Wrapper element ID */
+    private wrapperId: string;
+    
+    /** Bound update arrows method for event listeners */
+    private boundUpdateArrows: () => void;
+
     /**
      * Create a ThumbnailScrollManager instance
-     * @param {HTMLElement} wrapperElement - The thumbnail wrapper element
-     * @memberof ThumbnailScrollManager
+     * @param wrapperElement - The thumbnail wrapper element
      */
-    constructor(wrapperElement) {
-        /**
-         * The wrapper element containing thumbnails and arrows
-         * @type {HTMLElement}
-         */
+    constructor(wrapperElement: HTMLElement) {
         this.wrapper = wrapperElement;
         
-        /**
-         * The scrollable thumbnails container
-         * @type {HTMLElement}
-         */
-        this.thumbnails = wrapperElement.querySelector('.thumbnails');
+        const thumbnailsElement = wrapperElement.querySelector('.thumbnails');
+        if (!thumbnailsElement) {
+            throw new Error('Thumbnails container not found');
+        }
+        this.thumbnails = thumbnailsElement as HTMLElement;
         
-        /**
-         * Left scroll arrow element
-         * @type {HTMLElement}
-         */
         this.leftArrow = wrapperElement.querySelector('.carousel-scroll-arrow--left');
-        
-        /**
-         * Right scroll arrow element
-         * @type {HTMLElement}
-         */
         this.rightArrow = wrapperElement.querySelector('.carousel-scroll-arrow--right');
+        this.wrapperId = wrapperElement.id || 'unknown';
         
-        /**
-         * Wrapper element ID
-         * @type {string}
-         */
-        this.wrapperId = wrapperElement.id;
+        // Bind method for proper 'this' context in event listeners
+        this.boundUpdateArrows = this.updateArrows.bind(this);
 
         this.init();
     }
 
     /**
      * Initialize the scroll manager
-     * @memberof ThumbnailScrollManager
      */
-    init() {
+    private init(): void {
         if (!this.validateElements()) {
             return;
         }
@@ -95,11 +93,9 @@ class ThumbnailScrollManager {
 
     /**
      * Validate that required elements exist
-     * @returns {boolean} True if all required elements exist
-     * @private
-     * @memberof ThumbnailScrollManager
+     * @returns True if all required elements exist
      */
-    validateElements() {
+    private validateElements(): boolean {
         if (!this.thumbnails) {
             console.warn(`Thumbnails container not found in wrapper ${this.wrapperId}`);
             return false;
@@ -110,21 +106,17 @@ class ThumbnailScrollManager {
 
     /**
      * Set up scroll and resize event listeners
-     * @private
-     * @memberof ThumbnailScrollManager
      */
-    setupEventListeners() {
-        this.thumbnails.addEventListener('scroll', () => this.updateArrows());
-        window.addEventListener('resize', () => this.updateArrows());
+    private setupEventListeners(): void {
+        this.thumbnails.addEventListener('scroll', this.boundUpdateArrows);
+        window.addEventListener('resize', this.boundUpdateArrows);
     }
 
     /**
      * Set up mouse wheel scrolling functionality
-     * @private
-     * @memberof ThumbnailScrollManager
      */
-    setupMouseWheelScrolling() {
-        this.thumbnails.addEventListener('wheel', (event) => {
+    private setupMouseWheelScrolling(): void {
+        this.thumbnails.addEventListener('wheel', (event: WheelEvent) => {
             event.preventDefault();
             
             const scrollAmount = event.deltaY * ScrollConfig.WHEEL_SPEED_FACTOR;
@@ -137,10 +129,9 @@ class ThumbnailScrollManager {
 
     /**
      * Scroll thumbnails horizontally by one page width
-     * @param {number} direction - Direction to scroll (-1 for left, 1 for right)
-     * @memberof ThumbnailScrollManager
+     * @param direction - Direction to scroll (-1 for left, 1 for right)
      */
-    scrollThumbnails(direction) {
+    scrollThumbnails(direction: number): void {
         const scrollAmount = this.thumbnails.clientWidth;
         this.thumbnails.scrollBy({
             left: direction * scrollAmount,
@@ -150,9 +141,8 @@ class ThumbnailScrollManager {
 
     /**
      * Update visibility of scroll arrows based on current scroll position
-     * @memberof ThumbnailScrollManager
      */
-    updateArrows() {
+    updateArrows(): void {
         // Re-query arrows each time in case they were created dynamically
         this.leftArrow = this.wrapper.querySelector('.carousel-scroll-arrow--left');
         this.rightArrow = this.wrapper.querySelector('.carousel-scroll-arrow--right');
@@ -172,26 +162,23 @@ class ThumbnailScrollManager {
 
     /**
      * Scroll to the left by one page width
-     * @memberof ThumbnailScrollManager
      */
-    scrollLeft() {
+    scrollLeft(): void {
         this.scrollThumbnails(ScrollConfig.DIRECTION_LEFT);
     }
 
     /**
      * Scroll to the right by one page width
-     * @memberof ThumbnailScrollManager
      */
-    scrollRight() {
+    scrollRight(): void {
         this.scrollThumbnails(ScrollConfig.DIRECTION_RIGHT);
     }
 
     /**
      * Get current scroll position as percentage
-     * @returns {number} Scroll position percentage (0-100)
-     * @memberof ThumbnailScrollManager
+     * @returns Scroll position percentage (0-100)
      */
-    getScrollPercentage() {
+    getScrollPercentage(): number {
         const maxScroll = this.thumbnails.scrollWidth - this.thumbnails.clientWidth;
         if (maxScroll <= 0) return 0;
         
@@ -200,82 +187,79 @@ class ThumbnailScrollManager {
 
     /**
      * Check if container can scroll in either direction
-     * @returns {boolean} True if scrollable
-     * @memberof ThumbnailScrollManager
+     * @returns True if scrollable
      */
-    isScrollable() {
+    isScrollable(): boolean {
         return this.thumbnails.scrollWidth > this.thumbnails.clientWidth;
     }
 
     /**
      * Destroy the scroll manager and clean up event listeners
-     * @memberof ThumbnailScrollManager
      */
-    destroy() {
-        this.thumbnails.removeEventListener('scroll', this.updateArrows);
-        window.removeEventListener('resize', this.updateArrows);
-        this.thumbnails.removeEventListener('wheel', this.setupMouseWheelScrolling);
+    destroy(): void {
+        this.thumbnails.removeEventListener('scroll', this.boundUpdateArrows);
+        window.removeEventListener('resize', this.boundUpdateArrows);
     }
 }
 
 /**
+ * Global functions interface for backward compatibility
+ */
+interface WindowWithScrollFunctions extends Window {
+    scrollThumbnails?: (wrapperId: string, direction: number) => void;
+    updateArrows?: (wrapperId: string) => void;
+}
+
+/**
  * Global manager for all thumbnail scroll functionality
- * @class GlobalScrollManager
  */
 class GlobalScrollManager {
+    /** Map of wrapper IDs to their scroll managers */
+    private scrollManagers: Map<string, ThumbnailScrollManager>;
+
     /**
      * Create a GlobalScrollManager instance
-     * @memberof GlobalScrollManager
      */
     constructor() {
-        /**
-         * Map of wrapper IDs to their scroll managers
-         * @type {Map<string, ThumbnailScrollManager>}
-         */
-        this.scrollManagers = new Map();
+        this.scrollManagers = new Map<string, ThumbnailScrollManager>();
     }
 
     /**
      * Initialize scroll managers for all thumbnail wrappers
-     * @memberof GlobalScrollManager
      */
-    init() {
+    init(): void {
         this.setupScrollManagers();
         this.exposeGlobalFunctions();
     }
 
     /**
      * Set up scroll managers for all thumbnail wrappers on the page
-     * @private
-     * @memberof GlobalScrollManager
      */
-    setupScrollManagers() {
+    private setupScrollManagers(): void {
         const wrappers = document.querySelectorAll('.thumbnail-wrapper');
         
-        wrappers.forEach(wrapper => {
-            if (!wrapper.id) {
+        wrappers.forEach((wrapper: Element) => {
+            const htmlWrapper = wrapper as HTMLElement;
+            if (!htmlWrapper.id) {
                 console.warn('Thumbnail wrapper found without ID, skipping');
                 return;
             }
 
-            const manager = new ThumbnailScrollManager(wrapper);
-            this.scrollManagers.set(wrapper.id, manager);
+            const manager = new ThumbnailScrollManager(htmlWrapper);
+            this.scrollManagers.set(htmlWrapper.id, manager);
         });
     }
 
     /**
      * Expose global functions for backward compatibility
-     * @private
-     * @memberof GlobalScrollManager
      */
-    exposeGlobalFunctions() {
+    private exposeGlobalFunctions(): void {
+        const windowObj = window as WindowWithScrollFunctions;
+        
         /**
          * Global function to scroll thumbnails (for backward compatibility)
-         * @global
-         * @param {string} wrapperId - The ID of the thumbnails wrapper
-         * @param {number} direction - Direction to scroll (-1 for left, 1 for right)
          */
-        window.scrollThumbnails = (wrapperId, direction) => {
+        windowObj.scrollThumbnails = (wrapperId: string, direction: number): void => {
             const manager = this.scrollManagers.get(wrapperId);
             if (manager) {
                 manager.scrollThumbnails(direction);
@@ -286,10 +270,8 @@ class GlobalScrollManager {
 
         /**
          * Global function to update arrows (for backward compatibility)
-         * @global
-         * @param {string} wrapperId - The ID of the thumbnails wrapper
          */
-        window.updateArrows = (wrapperId) => {
+        windowObj.updateArrows = (wrapperId: string): void => {
             const manager = this.scrollManagers.get(wrapperId);
             if (manager) {
                 manager.updateArrows();
@@ -301,21 +283,19 @@ class GlobalScrollManager {
 
     /**
      * Get scroll manager for a specific wrapper
-     * @param {string} wrapperId - The wrapper ID
-     * @returns {ThumbnailScrollManager|null} The scroll manager or null if not found
-     * @memberof GlobalScrollManager
+     * @param wrapperId - The wrapper ID
+     * @returns The scroll manager or null if not found
      */
-    getScrollManager(wrapperId) {
+    getScrollManager(wrapperId: string): ThumbnailScrollManager | null {
         return this.scrollManagers.get(wrapperId) || null;
     }
 
     /**
      * Add a new scroll manager for a dynamically created wrapper
-     * @param {HTMLElement} wrapperElement - The new wrapper element
-     * @returns {ThumbnailScrollManager} The created scroll manager
-     * @memberof GlobalScrollManager
+     * @param wrapperElement - The new wrapper element
+     * @returns The created scroll manager
      */
-    addScrollManager(wrapperElement) {
+    addScrollManager(wrapperElement: HTMLElement): ThumbnailScrollManager {
         if (!wrapperElement.id) {
             throw new Error('Wrapper element must have an ID');
         }
@@ -328,10 +308,9 @@ class GlobalScrollManager {
 
     /**
      * Remove a scroll manager
-     * @param {string} wrapperId - The wrapper ID to remove
-     * @memberof GlobalScrollManager
+     * @param wrapperId - The wrapper ID to remove
      */
-    removeScrollManager(wrapperId) {
+    removeScrollManager(wrapperId: string): void {
         const manager = this.scrollManagers.get(wrapperId);
         if (manager) {
             manager.destroy();
@@ -341,29 +320,28 @@ class GlobalScrollManager {
 
     /**
      * Get all scroll managers
-     * @returns {Array<ThumbnailScrollManager>} Array of all scroll managers
-     * @memberof GlobalScrollManager
+     * @returns Array of all scroll managers
      */
-    getAllScrollManagers() {
+    getAllScrollManagers(): ThumbnailScrollManager[] {
         return Array.from(this.scrollManagers.values());
     }
 
     /**
      * Destroy all scroll managers and clean up
-     * @memberof GlobalScrollManager
      */
-    destroy() {
-        this.scrollManagers.forEach(manager => manager.destroy());
+    destroy(): void {
+        this.scrollManagers.forEach((manager: ThumbnailScrollManager) => manager.destroy());
         this.scrollManagers.clear();
         
         // Clean up global functions
-        delete window.scrollThumbnails;
-        delete window.updateArrows;
+        const windowObj = window as WindowWithScrollFunctions;
+        delete windowObj.scrollThumbnails;
+        delete windowObj.updateArrows;
     }
 }
 
 // Global instance
-let globalScrollManager;
+let globalScrollManager: GlobalScrollManager | undefined;
 
 /**
  * Initialize scroll functionality when DOM is ready

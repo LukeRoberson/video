@@ -5,8 +5,6 @@
 
 /**
  * Configuration constants for the profile carousel
- * @readonly
- * @enum {string}
  */
 const ProfileCarouselConfig = {
     /** Default carousel element ID */
@@ -17,48 +15,70 @@ const ProfileCarouselConfig = {
     SELECTED_CLASS: 'selected',
     /** Data attribute for profile picture value */
     DATA_PIC_ATTRIBUTE: 'data-pic'
-};
+} as const;
+
+/**
+ * Bootstrap Carousel interface
+ */
+interface BootstrapCarousel {
+    to(index: number): void;
+    next(): void;
+    prev(): void;
+    dispose(): void;
+}
+
+/**
+ * Bootstrap object interface
+ */
+interface Bootstrap {
+    Carousel: {
+        getOrCreateInstance(element: HTMLElement): BootstrapCarousel;
+    };
+}
 
 /**
  * Manages profile picture selection and carousel navigation
- * @class ProfileCarouselManager
  */
 class ProfileCarouselManager {
+    /** The carousel DOM element */
+    private carousel: HTMLElement;
+    
+    /** Array of carousel item elements */
+    private items: NodeListOf<Element> | null;
+    
+    /** Hidden input element to store selected profile picture value */
+    private hiddenInput: HTMLInputElement;
+    
+    /** Bootstrap carousel instance */
+    private carouselInstance: BootstrapCarousel | null;
+    
+    /** Currently selected item index */
+    private selectedIndex: number;
+
     /**
      * Create a ProfileCarouselManager instance
-     * @param {string} [carouselId='profilePicCarousel'] - ID of the carousel element
-     * @param {string} [hiddenInputId='profile_pic'] - ID of the hidden input element
-     * @memberof ProfileCarouselManager
+     * @param carouselId - ID of the carousel element
+     * @param hiddenInputId - ID of the hidden input element
      */
-    constructor(carouselId = ProfileCarouselConfig.DEFAULT_CAROUSEL_ID, hiddenInputId = ProfileCarouselConfig.DEFAULT_HIDDEN_INPUT_ID) {
-        /**
-         * The carousel DOM element
-         * @type {HTMLElement}
-         */
-        this.carousel = document.getElementById(carouselId);
+    constructor(
+        carouselId: string = ProfileCarouselConfig.DEFAULT_CAROUSEL_ID,
+        hiddenInputId: string = ProfileCarouselConfig.DEFAULT_HIDDEN_INPUT_ID
+    ) {
+        const carouselElement = document.getElementById(carouselId);
+        if (!carouselElement) {
+            throw new Error(`Carousel element with ID "${carouselId}" not found`);
+        }
+        this.carousel = carouselElement;
         
-        /**
-         * Array of carousel item elements
-         * @type {NodeList}
-         */
         this.items = null;
         
-        /**
-         * Hidden input element to store selected profile picture value
-         * @type {HTMLInputElement}
-         */
-        this.hiddenInput = document.getElementById(hiddenInputId);
+        const inputElement = document.getElementById(hiddenInputId);
+        if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
+            throw new Error(`Hidden input element with ID "${hiddenInputId}" not found`);
+        }
+        this.hiddenInput = inputElement;
         
-        /**
-         * Bootstrap carousel instance
-         * @type {Object}
-         */
         this.carouselInstance = null;
-        
-        /**
-         * Currently selected item index
-         * @type {number}
-         */
         this.selectedIndex = 0;
 
         this.init();
@@ -66,9 +86,8 @@ class ProfileCarouselManager {
 
     /**
      * Initialize the profile carousel manager
-     * @memberof ProfileCarouselManager
      */
-    init() {
+    private init(): void {
         if (!this.validateElements()) {
             return;
         }
@@ -82,11 +101,9 @@ class ProfileCarouselManager {
 
     /**
      * Validate that required DOM elements exist
-     * @returns {boolean} True if all required elements exist
-     * @private
-     * @memberof ProfileCarouselManager
+     * @returns True if all required elements exist
      */
-    validateElements() {
+    private validateElements(): boolean {
         if (!this.carousel) {
             console.error('Profile carousel element not found');
             return false;
@@ -102,11 +119,10 @@ class ProfileCarouselManager {
 
     /**
      * Get or create Bootstrap carousel instance
-     * @returns {Object} Bootstrap carousel instance
-     * @private
-     * @memberof ProfileCarouselManager
+     * @returns Bootstrap carousel instance or null if Bootstrap is not available
      */
-    getBootstrapCarouselInstance() {
+    private getBootstrapCarouselInstance(): BootstrapCarousel | null {
+        const bootstrap = (window as any).bootstrap as Bootstrap | undefined;
         if (typeof bootstrap === 'undefined' || !bootstrap.Carousel) {
             console.warn('Bootstrap Carousel not available');
             return null;
@@ -117,21 +133,19 @@ class ProfileCarouselManager {
 
     /**
      * Set up event listeners for carousel interactions
-     * @private
-     * @memberof ProfileCarouselManager
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         this.setupClickListeners();
         this.setupSlideListener();
     }
 
     /**
      * Set up click event listeners on carousel items
-     * @private
-     * @memberof ProfileCarouselManager
      */
-    setupClickListeners() {
-        this.items.forEach((item, index) => {
+    private setupClickListeners(): void {
+        if (!this.items) return;
+
+        this.items.forEach((item: Element, index: number) => {
             const img = item.querySelector('img');
             if (img) {
                 img.addEventListener('click', () => this.handleItemClick(index));
@@ -142,32 +156,30 @@ class ProfileCarouselManager {
 
     /**
      * Set up slide event listener for carousel
-     * @private
-     * @memberof ProfileCarouselManager
      */
-    setupSlideListener() {
-        this.carousel.addEventListener('slid.bs.carousel', (e) => {
-            this.selectItem(e.to);
+    private setupSlideListener(): void {
+        this.carousel.addEventListener('slid.bs.carousel', (e: Event) => {
+            const slideEvent = e as any;
+            if (typeof slideEvent.to === 'number') {
+                this.selectItem(slideEvent.to);
+            }
         });
     }
 
     /**
      * Handle click on carousel item
-     * @param {number} index - Index of clicked item
-     * @private
-     * @memberof ProfileCarouselManager
+     * @param index - Index of clicked item
      */
-    handleItemClick(index) {
+    private handleItemClick(index: number): void {
         this.selectItem(index);
         this.navigateToItem(index);
     }
 
     /**
      * Select a carousel item by index
-     * @param {number} index - Index of item to select
-     * @memberof ProfileCarouselManager
+     * @param index - Index of item to select
      */
-    selectItem(index) {
+    selectItem(index: number): void {
         if (!this.isValidIndex(index)) {
             console.warn(`Invalid item index: ${index}`);
             return;
@@ -181,43 +193,40 @@ class ProfileCarouselManager {
 
     /**
      * Check if index is valid for current items
-     * @param {number} index - Index to validate
-     * @returns {boolean} True if index is valid
-     * @private
-     * @memberof ProfileCarouselManager
+     * @param index - Index to validate
+     * @returns True if index is valid
      */
-    isValidIndex(index) {
-        return index >= 0 && index < this.items.length;
+    private isValidIndex(index: number): boolean {
+        return this.items !== null && index >= 0 && index < this.items.length;
     }
 
     /**
      * Clear selection from all carousel items
-     * @private
-     * @memberof ProfileCarouselManager
      */
-    clearAllSelections() {
-        this.items.forEach(item => {
+    private clearAllSelections(): void {
+        if (!this.items) return;
+
+        this.items.forEach((item: Element) => {
             item.classList.remove(ProfileCarouselConfig.SELECTED_CLASS);
         });
     }
 
     /**
      * Mark specific item as selected
-     * @param {number} index - Index of item to mark as selected
-     * @private
-     * @memberof ProfileCarouselManager
+     * @param index - Index of item to mark as selected
      */
-    setSelectedItem(index) {
+    private setSelectedItem(index: number): void {
+        if (!this.items) return;
         this.items[index].classList.add(ProfileCarouselConfig.SELECTED_CLASS);
     }
 
     /**
      * Update hidden input with selected profile picture value
-     * @param {number} index - Index of selected item
-     * @private
-     * @memberof ProfileCarouselManager
+     * @param index - Index of selected item
      */
-    updateHiddenInput(index) {
+    private updateHiddenInput(index: number): void {
+        if (!this.items) return;
+
         const selectedItem = this.items[index];
         const picValue = selectedItem.getAttribute(ProfileCarouselConfig.DATA_PIC_ATTRIBUTE);
         
@@ -230,10 +239,9 @@ class ProfileCarouselManager {
 
     /**
      * Navigate carousel to specific item
-     * @param {number} index - Index of item to navigate to
-     * @memberof ProfileCarouselManager
+     * @param index - Index of item to navigate to
      */
-    navigateToItem(index) {
+    navigateToItem(index: number): void {
         if (this.carouselInstance && this.isValidIndex(index)) {
             this.carouselInstance.to(index);
         }
@@ -241,36 +249,33 @@ class ProfileCarouselManager {
 
     /**
      * Get currently selected item index
-     * @returns {number} Currently selected index
-     * @memberof ProfileCarouselManager
+     * @returns Currently selected index
      */
-    getSelectedIndex() {
+    getSelectedIndex(): number {
         return this.selectedIndex;
     }
 
     /**
      * Get currently selected profile picture value
-     * @returns {string} Currently selected profile picture value
-     * @memberof ProfileCarouselManager
+     * @returns Currently selected profile picture value
      */
-    getSelectedValue() {
+    getSelectedValue(): string {
         return this.hiddenInput.value;
     }
 
     /**
      * Get total number of carousel items
-     * @returns {number} Number of carousel items
-     * @memberof ProfileCarouselManager
+     * @returns Number of carousel items
      */
-    getItemCount() {
-        return this.items.length;
+    getItemCount(): number {
+        return this.items ? this.items.length : 0;
     }
 
     /**
      * Programmatically select next item
-     * @memberof ProfileCarouselManager
      */
-    selectNext() {
+    selectNext(): void {
+        if (!this.items) return;
         const nextIndex = (this.selectedIndex + 1) % this.items.length;
         this.selectItem(nextIndex);
         this.navigateToItem(nextIndex);
@@ -278,9 +283,9 @@ class ProfileCarouselManager {
 
     /**
      * Programmatically select previous item
-     * @memberof ProfileCarouselManager
      */
-    selectPrevious() {
+    selectPrevious(): void {
+        if (!this.items) return;
         const prevIndex = (this.selectedIndex - 1 + this.items.length) % this.items.length;
         this.selectItem(prevIndex);
         this.navigateToItem(prevIndex);
@@ -288,28 +293,36 @@ class ProfileCarouselManager {
 
     /**
      * Destroy the carousel manager and clean up event listeners
-     * @memberof ProfileCarouselManager
      */
-    destroy() {
+    destroy(): void {
+        if (!this.items) return;
+
         // Remove click listeners
-        this.items.forEach(item => {
+        this.items.forEach((item: Element) => {
             const img = item.querySelector('img');
             if (img) {
-                img.removeEventListener('click', this.handleItemClick);
+                const newImg = img.cloneNode(true);
+                img.parentNode?.replaceChild(newImg, img);
             }
         });
 
-        // Remove carousel listener
-        this.carousel.removeEventListener('slid.bs.carousel', this.selectItem);
+        // Bootstrap handles its own cleanup
+        if (this.carouselInstance) {
+            this.carouselInstance.dispose();
+        }
     }
 }
 
 // Global instance
-let profileCarouselManager;
+let profileCarouselManager: ProfileCarouselManager | undefined;
 
 /**
  * Initialize profile carousel functionality when DOM is ready
  */
 document.addEventListener('DOMContentLoaded', function() {
-    profileCarouselManager = new ProfileCarouselManager();
+    try {
+        profileCarouselManager = new ProfileCarouselManager();
+    } catch (error) {
+        console.error('Failed to initialize profile carousel:', error);
+    }
 });

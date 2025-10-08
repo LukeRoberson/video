@@ -31,7 +31,7 @@
   - [x] When in theatre mode, click outside of the player to close theatre mode
 - [x] Touch Screen; Tap the video to pause/play
   * Currently this does nothing, need to use play/pause buttons
-- [ ] Add subtitle button when srt files exist
+- [x] Add subtitle button when vtt files exist
 
 </br></br>
 

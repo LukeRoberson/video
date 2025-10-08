@@ -6,8 +6,6 @@
 
 /**
  * Configuration constants for watched video toggle
- * @readonly
- * @enum {number|string}
  */
 const WatchedToggleConfig = {
     /** Local storage key for toggle state */
@@ -18,19 +16,19 @@ const WatchedToggleConfig = {
     INITIAL_LOAD_DELAY: 500,
     /** CSS class applied to body when hiding watched videos */
     BODY_CLASS: 'hide-watched'
-};
+} as const;
 
 /**
  * Handles visibility toggling of watched video elements
- * @class WatchedVideoVisibilityManager
  */
 class WatchedVideoVisibilityManager {
+    /** CSS selectors for watched video elements */
+    private watchedSelectors: readonly string[];
+
     /**
      * Create a watched video visibility manager
-     * @memberof WatchedVideoVisibilityManager
      */
     constructor() {
-        /** @private {Array<string>} CSS selectors for watched video elements */
         this.watchedSelectors = [
             '.video-item--watched',
             '.video-card--watched', 
@@ -42,57 +40,63 @@ class WatchedVideoVisibilityManager {
 
     /**
      * Apply hide/show functionality to all watched videos
-     * @param {boolean} hideWatched - Whether to hide watched videos
-     * @memberof WatchedVideoVisibilityManager
+     * @param hideWatched - Whether to hide watched videos
      */
-    applyWatchedVisibility(hideWatched) {
-        this.watchedSelectors.forEach(selector => {
+    applyWatchedVisibility(hideWatched: boolean): void {
+        this.watchedSelectors.forEach((selector: string) => {
             const elements = document.querySelectorAll(selector);
-            elements.forEach(element => {
+            elements.forEach((element: Element) => {
+                const htmlElement = element as HTMLElement;
                 if (hideWatched) {
-                    element.style.display = 'none';
-                    element.setAttribute('data-hidden-by-toggle', 'true');
+                    htmlElement.style.display = 'none';
+                    htmlElement.setAttribute('data-hidden-by-toggle', 'true');
                 } else {
-                    element.style.display = '';
-                    element.removeAttribute('data-hidden-by-toggle');
+                    htmlElement.style.display = '';
+                    htmlElement.removeAttribute('data-hidden-by-toggle');
                 }
             });
         });
     }
 }
 
+/**
+ * Callback type for when video elements are added
+ */
+type VideoElementsAddedCallback = () => void;
 
 /**
  * Handles observation of dynamically added video content
- * @class DynamicContentObserver
  */
 class DynamicContentObserver {
+    /** Callback for when video elements are added */
+    private onVideoElementsAdded: VideoElementsAddedCallback;
+    
+    /** DOM mutation observer */
+    private observer: MutationObserver | null;
+
     /**
      * Create a dynamic content observer
-     * @param {Function} onVideoElementsAdded - Callback when video elements are added
-     * @memberof DynamicContentObserver
+     * @param onVideoElementsAdded - Callback when video elements are added
      */
-    constructor(onVideoElementsAdded) {
-        /** @private {Function} Callback for when video elements are added */
+    constructor(onVideoElementsAdded: VideoElementsAddedCallback) {
         this.onVideoElementsAdded = onVideoElementsAdded;
-        /** @private {MutationObserver} DOM mutation observer */
         this.observer = null;
     }
 
     /**
      * Initialize observation of dynamic content
-     * @memberof DynamicContentObserver
      */
-    initialize() {
-        this.observer = new MutationObserver(mutations => {
+    initialize(): void {
+        this.observer = new MutationObserver((mutations: MutationRecord[]) => {
             let shouldApplyVisibility = false;
             
-            mutations.forEach(mutation => {
+            mutations.forEach((mutation: MutationRecord) => {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    const addedVideoElements = Array.from(mutation.addedNodes).some(node => {
+                    const addedVideoElements = Array.from(mutation.addedNodes).some((node: Node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            return node.matches('.video-item, .video-card, .thumbnail, .video-thumbnail') ||
-                                   node.querySelector('.video-item, .video-card, .thumbnail, .video-thumbnail');
+                            const element = node as Element;
+                            return element.matches('.video-item, .video-card, .thumbnail, .video-thumbnail') ||
+                                   element.querySelector('.video-item, .video-card, .thumbnail, .video-thumbnail') !== null;
                         }
                         return false;
                     });
@@ -115,13 +119,13 @@ class DynamicContentObserver {
 
     /**
      * Observe thumbnail containers for changes
-     * @private
-     * @memberof DynamicContentObserver
      */
-    observeContainers() {
+    private observeContainers(): void {
+        if (!this.observer) return;
+
         const thumbnailContainers = document.querySelectorAll('.thumbnails');
-        thumbnailContainers.forEach(container => {
-            this.observer.observe(container, {
+        thumbnailContainers.forEach((container: Element) => {
+            this.observer!.observe(container, {
                 childList: true,
                 subtree: true
             });
@@ -138,9 +142,8 @@ class DynamicContentObserver {
 
     /**
      * Disconnect the observer
-     * @memberof DynamicContentObserver
      */
-    disconnect() {
+    disconnect(): void {
         if (this.observer) {
             this.observer.disconnect();
         }
@@ -148,34 +151,51 @@ class DynamicContentObserver {
 }
 
 /**
+ * Custom event detail for watched toggle changes
+ */
+interface WatchedToggleEventDetail {
+    hideWatched: boolean;
+}
+
+/**
+ * Custom event for watched toggle changes
+ */
+interface WatchedToggleEvent extends CustomEvent {
+    detail: WatchedToggleEventDetail;
+}
+
+/**
  * Main controller for watched video toggle functionality
- * @class WatchedVideoToggleController
  */
 class WatchedVideoToggleController {
+    /** Toggle input element */
+    private toggleElement: HTMLInputElement | null;
+    
+    /** Visibility manager instance */
+    private visibilityManager: WatchedVideoVisibilityManager;
+    
+    /** Dynamic content observer instance */
+    private contentObserver: DynamicContentObserver | null;
+
     /**
      * Create a watched video toggle controller
-     * @memberof WatchedVideoToggleController
      */
     constructor() {
-        /** @private {HTMLElement} Toggle input element */
         this.toggleElement = null;
-        /** @private {WatchedVideoVisibilityManager} Visibility manager instance */
         this.visibilityManager = new WatchedVideoVisibilityManager();
-        /** @private {DynamicContentObserver} Dynamic content observer instance */
         this.contentObserver = null;
     }
 
     /**
      * Initialize the toggle functionality
-     * @memberof WatchedVideoToggleController
      */
-    initialize() {
-        this.toggleElement = document.getElementById('watchedToggle');
-        
-        if (!this.toggleElement) {
+    initialize(): void {
+        const element = document.getElementById('watchedToggle');
+        if (!element || !(element instanceof HTMLInputElement)) {
             console.warn('Watched toggle element not found');
             return;
         }
+        this.toggleElement = element;
 
         this.setupEventListeners();
         this.loadSavedState();
@@ -185,10 +205,10 @@ class WatchedVideoToggleController {
 
     /**
      * Set up event listeners for the toggle
-     * @private
-     * @memberof WatchedVideoToggleController
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
+        if (!this.toggleElement) return;
+
         this.toggleElement.addEventListener('change', () => {
             this.handleToggleChange();
         });
@@ -196,10 +216,10 @@ class WatchedVideoToggleController {
 
     /**
      * Handle toggle state changes
-     * @private
-     * @memberof WatchedVideoToggleController
      */
-    handleToggleChange() {
+    private handleToggleChange(): void {
+        if (!this.toggleElement) return;
+
         const isChecked = this.toggleElement.checked;
         
         this.saveToggleState(isChecked);
@@ -209,11 +229,9 @@ class WatchedVideoToggleController {
 
     /**
      * Apply toggle state to DOM and visibility
-     * @param {boolean} isChecked - Whether toggle is checked
-     * @private
-     * @memberof WatchedVideoToggleController
+     * @param isChecked - Whether toggle is checked
      */
-    applyToggleState(isChecked) {
+    private applyToggleState(isChecked: boolean): void {
         if (isChecked) {
             document.body.classList.add(WatchedToggleConfig.BODY_CLASS);
             this.visibilityManager.applyWatchedVisibility(true);
@@ -225,20 +243,18 @@ class WatchedVideoToggleController {
 
     /**
      * Save toggle state to localStorage
-     * @param {boolean} isChecked - Whether toggle is checked
-     * @private
-     * @memberof WatchedVideoToggleController
+     * @param isChecked - Whether toggle is checked
      */
-    saveToggleState(isChecked) {
+    private saveToggleState(isChecked: boolean): void {
         localStorage.setItem(WatchedToggleConfig.STORAGE_KEY, isChecked.toString());
     }
 
     /**
      * Load saved toggle state from localStorage
-     * @private
-     * @memberof WatchedVideoToggleController
      */
-    loadSavedState() {
+    private loadSavedState(): void {
+        if (!this.toggleElement) return;
+
         const savedState = localStorage.getItem(WatchedToggleConfig.STORAGE_KEY);
         if (savedState === 'true') {
             this.toggleElement.checked = true;
@@ -248,12 +264,10 @@ class WatchedVideoToggleController {
 
     /**
      * Initialize dynamic content observer
-     * @private
-     * @memberof WatchedVideoToggleController
      */
-    initializeDynamicContentObserver() {
+    private initializeDynamicContentObserver(): void {
         this.contentObserver = new DynamicContentObserver(() => {
-            if (this.toggleElement.checked) {
+            if (this.toggleElement?.checked) {
                 this.visibilityManager.applyWatchedVisibility(true);
             }
         });
@@ -262,12 +276,10 @@ class WatchedVideoToggleController {
 
     /**
      * Apply initial visibility to existing content
-     * @private
-     * @memberof WatchedVideoToggleController
      */
-    applyInitialVisibility() {
+    private applyInitialVisibility(): void {
         setTimeout(() => {
-            if (this.toggleElement.checked) {
+            if (this.toggleElement?.checked) {
                 this.visibilityManager.applyWatchedVisibility(true);
             }
         }, WatchedToggleConfig.INITIAL_LOAD_DELAY);
@@ -275,20 +287,46 @@ class WatchedVideoToggleController {
 
     /**
      * Dispatch custom event for toggle changes
-     * @param {boolean} isChecked - Whether toggle is checked
-     * @private
-     * @memberof WatchedVideoToggleController
+     * @param isChecked - Whether toggle is checked
      */
-    dispatchToggleEvent(isChecked) {
-        const toggleEvent = new CustomEvent('watchedToggleChanged', {
+    private dispatchToggleEvent(isChecked: boolean): void {
+        const toggleEvent = new CustomEvent<WatchedToggleEventDetail>('watchedToggleChanged', {
             detail: { hideWatched: isChecked }
         });
         document.dispatchEvent(toggleEvent);
     }
+
+    /**
+     * Get current toggle state
+     * @returns Current toggle state
+     */
+    getToggleState(): boolean {
+        return this.toggleElement?.checked || false;
+    }
+
+    /**
+     * Set toggle state programmatically
+     * @param state - New toggle state
+     */
+    setToggleState(state: boolean): void {
+        if (!this.toggleElement) return;
+
+        this.toggleElement.checked = state;
+        this.handleToggleChange();
+    }
+
+    /**
+     * Cleanup and destroy the controller
+     */
+    destroy(): void {
+        if (this.contentObserver) {
+            this.contentObserver.disconnect();
+        }
+    }
 }
 
 // Global instance
-let watchedToggleController;
+let watchedToggleController: WatchedVideoToggleController | undefined;
 
 /**
  * Initialize watched video toggle functionality when DOM is ready
