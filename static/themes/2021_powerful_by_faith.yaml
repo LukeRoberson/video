@@ -1,0 +1,74 @@
+# The 2021 Powerful by Faith theme file in YAML format
+
+---
+# Main file data
+title: Powerful by Faith
+heading: 2021 Powerful by Faith Convention
+
+# A link to a banner image
+banner: https://cms-imgp.jw-cdn.org/img/p/1102021194/univ/art/1102021194_univ_lsr_lg.jpg
+
+---
+section:
+# Need an image here
+# Change the heading style
+- heading: Friday
+
+# Change the quote style
+- quote: “Give us more faith”​—Luke 17:5
+
+# Need a subheading here
+- heading: Morning
+
+# Need a subheading here
+- heading: Afternoon
+
+---
+section:
+# Need an image here
+- heading: Saturday
+- quote: “Put up a hard fight for the faith”​—Jude 3
+
+# Need a subheading here
+- heading: Morning
+
+# Need a subheading here
+- heading: Afternoon
+
+---
+section:
+# Need an image here
+- heading: Sunday
+- quote: “If you have faith . . . , it will happen”​—Matthew 21:21
+
+# Need a subheading here
+- heading: Morning
+
+# Need a subheading here
+- heading: Afternoon
+
+---
+section:
+- heading: More Content
+- link:
+    url: https://www.jw.org/en/library/programs/2021-Convention-Program/ 
+    text: Convention Program
+
+# Need an option for a smaller video player in these cases
+
+# Convention Invitation video
+- video:
+    # Need an option to add a strong title for the video
+    id: 2217
+
+# Excerpts of the 2021 Regional Convention
+- video:
+    id: 1034
+
+# Music video presentation
+- video:
+    id: 1011
+
+# With Eyes of Faith Music Video
+- video:
+    id: 2434

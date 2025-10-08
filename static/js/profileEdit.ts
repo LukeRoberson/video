@@ -6,8 +6,6 @@
 
 /**
  * Configuration constants for profile editing
- * @readonly
- * @enum {string}
  */
 const ProfileEditConfig = {
     /** API endpoint for profile pictures */
@@ -24,63 +22,101 @@ const ProfileEditConfig = {
     JSON_CONTENT_TYPE: 'application/json',
     /** Profile pictures directory path */
     PROFILE_PICS_PATH: '/static/img/profiles/'
+} as const;
+
+/**
+ * Interface for profile data from DOM
+ */
+interface ProfileEditData {
+    id: number;
+    image: string;
+}
+
+/**
+ * Interface for profile pictures API response
+ */
+interface ProfilePicturesResponse {
+    success: boolean;
+    profile_pics: string[];
+}
+
+/**
+ * Interface for API response
+ */
+interface ApiResponse {
+    success: boolean;
+    message?: string;
+}
+
+/**
+ * Interface for profile update data
+ */
+interface ProfileUpdateData {
+    name: string;
+    icon: string;
+}
+
+/**
+ * Interface for clear history item request
+ */
+interface ClearHistoryItemRequest {
+    video_id: number;
+}
+
+/**
+ * Interface for mark watched request
+ */
+interface MarkWatchedRequest {
+    video_id: number;
+}
+
+/**
+ * Bootstrap Modal interface
+ */
+interface BootstrapModal {
+    show(): void;
+    hide(): void;
+}
+
+/**
+ * Declare bootstrap global
+ */
+declare const bootstrap: {
+    Modal: {
+        getInstance(element: HTMLElement): BootstrapModal | null;
+        new(element: HTMLElement): BootstrapModal;
+    };
 };
 
 /**
  * Handles profile picture carousel functionality in the modal
- * @class ProfilePictureManager
  */
 class ProfilePictureManager {
+    private loading: HTMLElement | null;
+    private carousel: HTMLElement | null;
+    private carouselInner: HTMLElement | null;
+    private prevBtn: HTMLElement | null;
+    private nextBtn: HTMLElement | null;
+    private confirmBtn: HTMLButtonElement | null;
+
     /**
      * Create a ProfilePictureManager instance
-     * @memberof ProfilePictureManager
      */
     constructor() {
-        /**
-         * Loading spinner element
-         * @type {HTMLElement}
-         */
         this.loading = document.getElementById('modalLoading');
-        
-        /**
-         * Carousel container element
-         * @type {HTMLElement}
-         */
         this.carousel = document.getElementById('modalProfilePicCarousel');
-        
-        /**
-         * Carousel inner container
-         * @type {HTMLElement}
-         */
-        this.carouselInner = this.carousel?.querySelector('.carousel-inner');
-        
-        /**
-         * Previous button element
-         * @type {HTMLElement}
-         */
+        this.carouselInner = this.carousel?.querySelector('.carousel-inner') || null;
         this.prevBtn = document.querySelector('.carousel-control-prev');
-        
-        /**
-         * Next button element
-         * @type {HTMLElement}
-         */
         this.nextBtn = document.querySelector('.carousel-control-next');
-        
-        /**
-         * Confirm selection button
-         * @type {HTMLElement}
-         */
-        this.confirmBtn = document.getElementById('confirmPicSelection');
+        this.confirmBtn = document.getElementById('confirmPicSelection') as HTMLButtonElement | null;
     }
 
     /**
      * Load available profile pictures into the modal carousel
-     * @async
-     * @memberof ProfilePictureManager
      */
-    async loadProfilePictures() {
+    async loadProfilePictures(): Promise<void> {
         // Only load if not already loaded
-        if (this.carouselInner.children.length > 0) {
+        if (this.carouselInner && this.carouselInner.children.length > 0) {
             this.showCarousel();
             return;
         }
@@ -89,7 +125,7 @@ class ProfilePictureManager {
 
         try {
             const response = await fetch(ProfileEditConfig.PROFILE_PICTURES_ENDPOINT);
-            const data = await response.json();
+            const data: ProfilePicturesResponse = await response.json();
             
             const profileData = ProfileDataManager.getProfileData();
             this.populateCarousel(data.profile_pics, profileData.image);
@@ -103,50 +139,74 @@ class ProfilePictureManager {
 
     /**
      * Show loading spinner and hide carousel
-     * @private
-     * @memberof ProfilePictureManager
      */
-    showLoading() {
-        this.loading.classList.add('d-flex');
-        this.loading.style.display = 'flex';
-        this.carousel.style.display = 'none';
-        this.prevBtn.style.display = 'none';
-        this.nextBtn.style.display = 'none';
-        this.confirmBtn.disabled = true;
+    private showLoading(): void {
+        if (this.loading) {
+            this.loading.classList.add('d-flex');
+            this.loading.style.display = 'flex';
+        }
+        
+        if (this.carousel) {
+            this.carousel.style.display = 'none';
+        }
+        
+        if (this.prevBtn) {
+            this.prevBtn.style.display = 'none';
+        }
+        
+        if (this.nextBtn) {
+            this.nextBtn.style.display = 'none';
+        }
+        
+        if (this.confirmBtn) {
+            this.confirmBtn.disabled = true;
+        }
     }
 
     /**
      * Show carousel and hide loading spinner
-     * @private
-     * @memberof ProfilePictureManager
      */
-    showCarousel() {
-        this.loading.classList.remove('d-flex');
-        this.loading.style.display = 'none';
-        this.carousel.style.display = 'block';
-        this.prevBtn.style.display = 'block';
-        this.nextBtn.style.display = 'block';
-        this.confirmBtn.disabled = false;
+    private showCarousel(): void {
+        if (this.loading) {
+            this.loading.classList.remove('d-flex');
+            this.loading.style.display = 'none';
+        }
+        
+        if (this.carousel) {
+            this.carousel.style.display = 'block';
+        }
+        
+        if (this.prevBtn) {
+            this.prevBtn.style.display = 'block';
+        }
+        
+        if (this.nextBtn) {
+            this.nextBtn.style.display = 'block';
+        }
+        
+        if (this.confirmBtn) {
+            this.confirmBtn.disabled = false;
+        }
     }
 
     /**
      * Show error message in loading area
-     * @param {string} message - Error message to display
-     * @private
-     * @memberof ProfilePictureManager
+     * @param message - Error message to display
      */
-    showError(message) {
-        this.loading.innerHTML = `<div class="text-danger">${message}</div>`;
+    private showError(message: string): void {
+        if (this.loading) {
+            this.loading.innerHTML = `<div class="text-danger">${message}</div>`;
+        }
     }
 
     /**
      * Populate carousel with profile picture options
-     * @param {Array<string>} profilePics - Array of profile picture filenames
-     * @param {string} currentImage - Currently selected image filename
-     * @private
-     * @memberof ProfilePictureManager
+     * @param profilePics - Array of profile picture filenames
+     * @param currentImage - Currently selected image filename
      */
-    populateCarousel(profilePics, currentImage) {
+    private populateCarousel(profilePics: string[], currentImage: string): void {
+        if (!this.carouselInner) return;
+        
         this.carouselInner.innerHTML = '';
         let hasActiveItem = false;
 
@@ -155,7 +215,7 @@ class ProfilePictureManager {
             if (isActive) hasActiveItem = true;
 
             const carouselItem = this.createCarouselItem(pic, isActive);
-            this.carouselInner.appendChild(carouselItem);
+            this.carouselInner!.appendChild(carouselItem);
         });
 
         // If no item was marked as active, make the first one active
@@ -166,13 +226,11 @@ class ProfilePictureManager {
 
     /**
      * Create a carousel item element
-     * @param {string} pic - Profile picture filename
-     * @param {boolean} isActive - Whether this item should be active
-     * @returns {HTMLElement} Carousel item element
-     * @private
-     * @memberof ProfilePictureManager
+     * @param pic - Profile picture filename
+     * @param isActive - Whether this item should be active
+     * @returns Carousel item element
      */
-    createCarouselItem(pic, isActive) {
+    private createCarouselItem(pic: string, isActive: boolean): HTMLElement {
         const carouselItem = document.createElement('div');
         carouselItem.className = `carousel-item ${isActive ? 'active selected' : ''}`;
         carouselItem.setAttribute('data-pic', pic);
@@ -188,78 +246,71 @@ class ProfilePictureManager {
 
     /**
      * Confirm the selected profile picture
-     * @memberof ProfilePictureManager
      */
-    confirmSelection() {
+    confirmSelection(): void {
         const activeItem = document.querySelector('#modalProfilePicCarousel .carousel-item.active');
         if (!activeItem) return;
 
         const selectedPic = activeItem.getAttribute('data-pic');
+        if (!selectedPic) return;
         
         // Update the main profile image
-        const profileAvatar = document.getElementById('profileAvatar');
-        profileAvatar.src = `${ProfileEditConfig.PROFILE_PICS_PATH}${selectedPic}`;
-        profileAvatar.setAttribute('data-selected-image', selectedPic);
+        const profileAvatar = document.getElementById('profileAvatar') as HTMLImageElement;
+        if (profileAvatar) {
+            profileAvatar.src = `${ProfileEditConfig.PROFILE_PICS_PATH}${selectedPic}`;
+            profileAvatar.setAttribute('data-selected-image', selectedPic);
+        }
         
         // Close the modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('profilePicModal'));
-        modal.hide();
+        const modalElement = document.getElementById('profilePicModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            modal?.hide();
+        }
     }
 }
 
 /**
  * Manages profile data extraction and validation
- * @class ProfileDataManager
  */
 class ProfileDataManager {
     /**
      * Get profile data from DOM data attributes
-     * @static
-     * @returns {Object} Profile data object
-     * @returns {number} returns.id - Profile ID
-     * @returns {string} returns.image - Current profile image filename
-     * @memberof ProfileDataManager
+     * @returns Profile data object
      */
-    static getProfileData() {
-        const container = document.querySelector('.edit-profile');
+    static getProfileData(): ProfileEditData {
+        const container = document.querySelector('.edit-profile') as HTMLElement;
         
         if (!container) {
             throw new Error('Profile container not found');
         }
 
         return {
-            id: parseInt(container.dataset.profileId),
-            image: container.dataset.profileImage
+            id: parseInt(container.dataset.profileId || '0'),
+            image: container.dataset.profileImage || ''
         };
     }
 
     /**
      * Validate profile name input
-     * @static
-     * @param {string} name - Profile name to validate
-     * @returns {boolean} True if valid
-     * @memberof ProfileDataManager
+     * @param name - Profile name to validate
+     * @returns True if valid
      */
-    static validateProfileName(name) {
-        return name && name.trim().length > 0;
+    static validateProfileName(name: string): boolean {
+        return !!(name && name.trim().length > 0);
     }
 }
 
 /**
  * Handles API calls for profile operations
- * @class ProfileApiService
  */
-class ProfileApiService {
+class ProfileEditApiService {
     /**
      * Delete a profile
-     * @static
-     * @async
-     * @param {number} profileId - ID of profile to delete
-     * @returns {Promise<void>}
-     * @memberof ProfileApiService
+     * @param profileId - ID of profile to delete
      */
-    static async deleteProfile(profileId) {
-        const endpoint = ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId);
+    static async deleteProfile(profileId: number): Promise<void> {
+        const endpoint = ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId.toString());
         
         const response = await fetch(endpoint, {
             method: 'DELETE',
@@ -269,24 +320,18 @@ class ProfileApiService {
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data: ApiResponse = await response.json();
             throw new Error(data.message || 'Failed to delete profile');
         }
     }
 
     /**
      * Update a profile
-     * @static
-     * @async
-     * @param {number} profileId - ID of profile to update
-     * @param {Object} profileData - Profile data to update
-     * @param {string} profileData.name - Profile name
-     * @param {string} profileData.icon - Profile icon filename
-     * @returns {Promise<void>}
-     * @memberof ProfileApiService
+     * @param profileId - ID of profile to update
+     * @param profileData - Profile data to update
      */
-    static async updateProfile(profileId, profileData) {
-        const endpoint = ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId);
+    static async updateProfile(profileId: number, profileData: ProfileUpdateData): Promise<void> {
+        const endpoint = ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString());
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -297,21 +342,17 @@ class ProfileApiService {
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data: ApiResponse = await response.json();
             throw new Error(data.message || 'Failed to update profile');
         }
     }
 
     /**
      * Clear entire watch history for a profile
-     * @static
-     * @async
-     * @param {number} profileId - ID of profile
-     * @returns {Promise<void>}
-     * @memberof ProfileApiService
+     * @param profileId - ID of profile
      */
-    static async clearHistory(profileId) {
-        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId);
+    static async clearHistory(profileId: number): Promise<void> {
+        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString());
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -321,56 +362,52 @@ class ProfileApiService {
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data: ApiResponse = await response.json();
             throw new Error(data.message || 'Failed to clear history');
         }
     }
 
     /**
      * Clear a single item from watch history
-     * @static
-     * @async
-     * @param {number} profileId - ID of profile
-     * @param {number} videoId - ID of video to remove from history
-     * @returns {Promise<void>}
-     * @memberof ProfileApiService
+     * @param profileId - ID of profile
+     * @param videoId - ID of video to remove from history
      */
-    static async clearHistoryItem(profileId, videoId) {
-        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId);
+    static async clearHistoryItem(profileId: number, videoId: number): Promise<void> {
+        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString());
+        
+        const requestBody: ClearHistoryItemRequest = { video_id: videoId };
         
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
-            body: JSON.stringify({ video_id: videoId })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data: ApiResponse = await response.json();
             throw new Error(data.message || 'Failed to remove item');
         }
     }
 
     /**
      * Mark a video as watched
-     * @static
-     * @async
-     * @param {number} videoId - ID of video to mark as watched
-     * @returns {Promise<void>}
-     * @memberof ProfileApiService
+     * @param videoId - ID of video to mark as watched
      */
-    static async markWatched(videoId) {
+    static async markWatched(videoId: number): Promise<void> {
+        const requestBody: MarkWatchedRequest = { video_id: videoId };
+        
         const response = await fetch(ProfileEditConfig.MARK_WATCHED_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
-            body: JSON.stringify({ video_id: videoId })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
-            const data = await response.json();
+            const data: ApiResponse = await response.json();
             throw new Error(data.message || 'Failed to mark as watched');
         }
     }
@@ -378,18 +415,14 @@ class ProfileApiService {
 
 /**
  * Main controller for profile editing functionality
- * @class ProfileEditController
  */
 class ProfileEditController {
+    private pictureManager: ProfilePictureManager;
+
     /**
      * Create a ProfileEditController instance
-     * @memberof ProfileEditController
      */
     constructor() {
-        /**
-         * Profile picture manager instance
-         * @type {ProfilePictureManager}
-         */
         this.pictureManager = new ProfilePictureManager();
         
         this.init();
@@ -397,18 +430,15 @@ class ProfileEditController {
 
     /**
      * Initialize the profile edit controller
-     * @memberof ProfileEditController
      */
-    init() {
+    private init(): void {
         this.setupEventListeners();
     }
 
     /**
      * Set up all event listeners
-     * @private
-     * @memberof ProfileEditController
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         this.setupButtonListeners();
         this.setupModalListeners();
         this.setupHistoryListeners();
@@ -416,10 +446,8 @@ class ProfileEditController {
 
     /**
      * Set up main button event listeners
-     * @private
-     * @memberof ProfileEditController
      */
-    setupButtonListeners() {
+    private setupButtonListeners(): void {
         const saveBtn = document.querySelector('.btn-save');
         const deleteBtn = document.querySelector('.btn-delete');
         const editBtn = document.querySelector('.edit-icon');
@@ -431,10 +459,8 @@ class ProfileEditController {
 
     /**
      * Set up modal event listeners
-     * @private
-     * @memberof ProfileEditController
      */
-    setupModalListeners() {
+    private setupModalListeners(): void {
         const modal = document.getElementById('profilePicModal');
         const confirmBtn = document.getElementById('confirmPicSelection');
 
@@ -449,53 +475,45 @@ class ProfileEditController {
 
     /**
      * Set up watch history event listeners
-     * @private
-     * @memberof ProfileEditController
      */
-    setupHistoryListeners() {
+    private setupHistoryListeners(): void {
         const clearAllBtn = document.querySelector('.btn-clear-all');
         clearAllBtn?.addEventListener('click', () => this.handleClearHistory());
 
         document.querySelectorAll('.btn-remove-item').forEach(button => {
-            button.addEventListener('click', () => this.handleClearHistoryItem(button));
+            button.addEventListener('click', () => this.handleClearHistoryItem(button as HTMLElement));
         });
 
         document.querySelectorAll('.btn-mark-watched').forEach(button => {
-            button.addEventListener('click', () => this.handleMarkWatched(button));
+            button.addEventListener('click', () => this.handleMarkWatched(button as HTMLElement));
         });
     }
 
     /**
      * Handle profile deletion with confirmation
-     * @async
-     * @private
-     * @memberof ProfileEditController
      */
-    async handleDeleteProfile() {
+    private async handleDeleteProfile(): Promise<void> {
         if (!confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
             return;
         }
 
         try {
             const profileData = ProfileDataManager.getProfileData();
-            await ProfileApiService.deleteProfile(profileData.id);
+            await ProfileEditApiService.deleteProfile(profileData.id);
             window.location.href = '/';
         } catch (error) {
             console.error('Error deleting profile:', error);
-            alert('Failed to delete profile: ' + error.message);
+            alert('Failed to delete profile: ' + (error as Error).message);
         }
     }
 
     /**
      * Handle profile save operation
-     * @async
-     * @private
-     * @memberof ProfileEditController
      */
-    async handleSaveProfile() {
+    private async handleSaveProfile(): Promise<void> {
         try {
             const profileData = ProfileDataManager.getProfileData();
-            const profileNameInput = document.querySelector('.profile-name-input');
+            const profileNameInput = document.querySelector('.profile-name-input') as HTMLInputElement;
             const profileName = profileNameInput.value.trim();
 
             if (!ProfileDataManager.validateProfileName(profileName)) {
@@ -503,97 +521,93 @@ class ProfileEditController {
                 return;
             }
 
-            const profileAvatar = document.getElementById('profileAvatar');
+            const profileAvatar = document.getElementById('profileAvatar') as HTMLImageElement;
             const selectedImage = profileAvatar.getAttribute('data-selected-image') || profileData.image;
 
-            const updateData = {
+            const updateData: ProfileUpdateData = {
                 name: profileName,
                 icon: selectedImage
             };
 
-            await ProfileApiService.updateProfile(profileData.id, updateData);
+            await ProfileEditApiService.updateProfile(profileData.id, updateData);
             window.location.href = '/';
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert('Failed to update profile: ' + error.message);
+            alert('Failed to update profile: ' + (error as Error).message);
         }
     }
 
     /**
      * Handle avatar edit button click
-     * @private
-     * @memberof ProfileEditController
      */
-    handleEditAvatar() {
-        const modal = new bootstrap.Modal(document.getElementById('profilePicModal'));
-        modal.show();
+    private handleEditAvatar(): void {
+        const modalElement = document.getElementById('profilePicModal');
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
     }
 
     /**
      * Handle clearing entire watch history
-     * @async
-     * @private
-     * @memberof ProfileEditController
      */
-    async handleClearHistory() {
+    private async handleClearHistory(): Promise<void> {
         try {
             const profileData = ProfileDataManager.getProfileData();
-            await ProfileApiService.clearHistory(profileData.id);
+            await ProfileEditApiService.clearHistory(profileData.id);
             
-            const clearAllBtn = document.querySelector('.btn-clear-all');
-            clearAllBtn.disabled = true;
-            clearAllBtn.textContent = 'Removed';
+            const clearAllBtn = document.querySelector('.btn-clear-all') as HTMLButtonElement;
+            if (clearAllBtn) {
+                clearAllBtn.disabled = true;
+                clearAllBtn.textContent = 'Removed';
+            }
         } catch (error) {
             console.error('Error clearing history:', error);
-            alert('Failed to clear history: ' + error.message);
+            alert('Failed to clear history: ' + (error as Error).message);
         }
     }
 
     /**
      * Handle clearing individual history item
-     * @async
-     * @param {HTMLElement} button - Button that was clicked
-     * @private
-     * @memberof ProfileEditController
+     * @param button - Button that was clicked
      */
-    async handleClearHistoryItem(button) {
+    private async handleClearHistoryItem(button: HTMLElement): Promise<void> {
         try {
             const profileData = ProfileDataManager.getProfileData();
-            const videoId = parseInt(button.getAttribute('data-video-id'));
+            const videoId = parseInt(button.getAttribute('data-video-id') || '0');
             
-            await ProfileApiService.clearHistoryItem(profileData.id, videoId);
+            await ProfileEditApiService.clearHistoryItem(profileData.id, videoId);
             
-            button.disabled = true;
-            button.textContent = 'Removed';
+            const btn = button as HTMLButtonElement;
+            btn.disabled = true;
+            btn.textContent = 'Removed';
         } catch (error) {
             console.error('Error removing item:', error);
-            alert('Failed to remove item: ' + error.message);
+            alert('Failed to remove item: ' + (error as Error).message);
         }
     }
 
     /**
      * Handle marking video as watched
-     * @async
-     * @param {HTMLElement} button - Button that was clicked
-     * @private
-     * @memberof ProfileEditController
+     * @param button - Button that was clicked
      */
-    async handleMarkWatched(button) {
+    private async handleMarkWatched(button: HTMLElement): Promise<void> {
         try {
-            const videoId = parseInt(button.getAttribute('data-video-id'));
-            await ProfileApiService.markWatched(videoId);
+            const videoId = parseInt(button.getAttribute('data-video-id') || '0');
+            await ProfileEditApiService.markWatched(videoId);
             
-            button.disabled = true;
-            button.textContent = 'Watched';
+            const btn = button as HTMLButtonElement;
+            btn.disabled = true;
+            btn.textContent = 'Watched';
         } catch (error) {
             console.error('Error marking as watched:', error);
-            alert('Failed to mark as watched: ' + error.message);
+            alert('Failed to mark as watched: ' + (error as Error).message);
         }
     }
 }
 
 // Global controller instance
-let profileEditController;
+let profileEditController: ProfileEditController;
 
 /**
  * Initialize profile edit functionality when DOM is ready

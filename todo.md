@@ -31,6 +31,7 @@
   - [x] When in theatre mode, click outside of the player to close theatre mode
 - [x] Touch Screen; Tap the video to pause/play
   * Currently this does nothing, need to use play/pause buttons
+- [ ] Add subtitle button when srt files exist
 
 </br></br>
 
@@ -41,14 +42,15 @@
   - [x] Add badge to tags to show how many times they are used
   - [x] Sort tags (on tag page) alphabetically or by count
 - [x] Nav bar: slider to hide watched videos
-- [ ] Stats page
-  - [ ] Total videos watched / total videos
-  - [ ] Video watch time / total watch time
 - [x] Use Jinja to convert newline to HTML breaks for descriptions
   - [x] Character profiles
   - [x] Scriptures
 - [x] Scriptures page organization
     * It's too complicated right now with so many scriptures
+- [ ] Theme template update
+  - [ ] Display an image, like a banner
+  - [ ] Subheadings
+  - [ ] Videos in a grid
 
 </br></br>
 
@@ -68,18 +70,40 @@
 ----
 # Future Versions
 
-## Performance and Code
+## Architecture
 
-- [ ] Cache thumbnails to make loading faster
-- [ ] Can NGINX cache images? Or pre-cache?
 - [ ] Use consistent logging, not just print statements
 - [ ] Investigate accessibility for template files (e.g., 'alt' tags for images)
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
+- [ ] Add a helper function to get similar videos
+
+</br></br>
+
+
+## Database
+- [ ] DB entry for video type (talk, interview, dramatization, etc)
+    * Talk
+    * Interview
+    * Experience
+    * Dramatization
+    * Collection (monthly program, Gilead graduations, annual meetings, full convention programs)
+- [ ] Search Method: Support searching based on duration
+- [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
+- [ ] Fields for extra links, such as links to WT articles
+- [ ] Link some verses to bible characters (more for the less common ones)
+    * So when we look at a scripture, we can see the character's profile listed
+    * When we look at a character, we can see key scriptures
+- [ ] Locations
+  - [ ] Add classifications to locations
+    * Modern/Ancient
+    * Country/City
 
 </br></br>
 
 
 ## UI
+
+- [ ] Investigate React for a better UI
 - [ ] Video details pages:
   - [ ] Share Links
   - [ ] Organise scriptures by book first
@@ -88,26 +112,40 @@
   - [ ] Random (unwatched) morning worship for the day
 - [ ] Admin, add videos
   - [ ] Make scriptures field resizable (like description is)
-  - [ ] Make tags resizable
+  - [ ] Make tags field resizable
+- [ ] TV
+  - [ ] Capture remote control input (for navigation)
+  - [ ] Menu should not be collapsed (as seen on Amazon Fire)
+- [ ] Stats page
+  * After TypeScript and React are evaluated
+  - [ ] Total videos watched / total videos
+  - [ ] Video watch time / total watch time
 
 </br></br>
 
 
-## TV
-- [ ] Capture remote control input (for navigation)
-- [ ] Menu should not be collapsed (as seen on Amazon Fire)
+## Tags
 
-</br></br>
-
-
-## Database
-- [ ] DB entry for video type (talk, interview, dramatization, etc)
-- [ ] Search Method: Support searching based on duration
-- [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
-- [ ] Fields for extra links, such as links to WT articles
-- [ ] Link some verses to bible characters (more for the less common ones)
-    * So when we look at a scripture, we can see the character's profile listed
-    * When we look at a character, we can see key scriptures
+- [ ] Aliases, so different tags can mean the same thing
+  * eg, 'rto' and 'remote translation office'
+- [ ] Tag categories
+  * To group tags into
+  * Not too many
+  * Separate people out from tags first
+  * Categories:
+    * conflict; wars, etc
+    * culture; Languages, cultural groups, political groups, greek words
+    * creation; Animals, science
+    * history/dates; 1914, 539 bce, 'snare and a racket'
+    * qualities/traits; Wisdom, polite, pride, guilt, etc
+    * JW terms; Book names, departments, JW library
+    * Bible terms; fruitage of the spirit, faithful and discrete slave, etc
+- [ ] Add sorting tags by category
+- [ ] Colour code tags by category
+- [ ] See if some of the rarer tags are actually needed
+- [ ] Add a tag count to the top of the tags page
+- [ ] Filter 'gilead_*' out of tags page
+    * Same as with 'bcast_*'
 
 </br></br>
 
@@ -124,8 +162,6 @@
 
 
 ## General Improvements
-- [ ] Code Improvement
-  - [ ] Add a helper function to get similar videos
 - [ ] Profiles
   - [ ] 'Watch later' feature
   - [ ] Options for a PIN on profiles
@@ -136,8 +172,12 @@
   - [ ] Marks on the progress bar to show chapters
   - [ ] Show chapters to the side (on larger screens); Like on Youtube
   - [ ] Tiny icon on thumbnails to show that a video has chapters
-- [ ] Tags
-  - [ ] Aliases, so different tags can mean the same thing
+- [ ] Speaker Details
+  - [ ] DB: Add field for life story, interview, etc
+  - [ ] Add lifestory/interview (if there is one) to their page
+- [ ] Video details page
+  - [ ] Show a speaker's profile pic next to their name
+  - [ ] Tooltip for scriptures: Show the scripture on hover
 
 </br></br>
 
@@ -150,6 +190,9 @@
 - [ ] AI
   - [ ] Model to transcribe to captions
   - [ ] Model to summarize content (for searching)
+  - [ ] Video2vec
+    - [ ] Build a vector database representing each video
+    * Similar to word2vec
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
 - [ ] Improved scripture management
@@ -160,10 +203,6 @@
   - [ ] Add an icon to the thumbnail to show that video has this feature
   - [ ] Click a slider to turn this on or off
   - [ ] In reality, just plays a different video
-- [ ] Video2vec
-  - [ ] Similar to word2vec
-  - [ ] Build a vector database representing each video
-- [ ] Investigate React
 
 </br></br>
 

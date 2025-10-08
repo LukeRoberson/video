@@ -6,158 +6,174 @@
 
 /**
  * Configuration constants for the advanced search functionality
- * @readonly
- * @enum {number}
  */
 const SearchConfig = {
     /** Maximum items to display in dropdown for performance */
     MAX_DROPDOWN_ITEMS: 50,
     /** Maximum description length for result cards */
     MAX_DESCRIPTION_LENGTH: 100
-};
+} as const;
+
+/**
+ * Interface for multi-select item data
+ */
+interface MultiSelectItem {
+    id: string;
+    name: string;
+}
+
+/**
+ * Interface for video search result
+ */
+interface VideoResult {
+    id: string;
+    name: string;
+    thumbnail?: string;
+    description?: string;
+    duration?: string;
+    watched?: boolean;
+}
+
+/**
+ * Interface for multi-select data structure
+ */
+interface MultiSelectData {
+    speakers: MultiSelectItem[];
+    characters: MultiSelectItem[];
+    locations: MultiSelectItem[];
+    tags: MultiSelectItem[];
+}
+
+/**
+ * Interface for search API response
+ */
+interface SearchApiResponse {
+    success: boolean;
+    data?: VideoResult[];
+    error?: string;
+}
+
+/**
+ * Interface for all selected items
+ */
+interface AllSelectedItems {
+    speakers: MultiSelectItem[];
+    characters: MultiSelectItem[];
+    locations: MultiSelectItem[];
+    tags: MultiSelectItem[];
+}
 
 /**
  * Manages multi-select dropdowns for speakers, characters, locations, and tags.
  * Allows users to search and select multiple items, displaying them as badges.
- * 
- * @class MultiSelectManager
  */
 class MultiSelectManager {
+    private container: HTMLElement;
+    private searchInput: HTMLInputElement;
+    private dropdown: HTMLElement;
+    private selectedContainer: HTMLElement;
+    private hiddenInputsContainer: HTMLElement;
+    private dataKey: string;
+    private data: MultiSelectItem[];
+    private selectedItems: Map<string, MultiSelectItem>;
+
     /**
      * Create a MultiSelectManager instance
-     * @param {string} containerId - The ID of the container element
-     * @param {string} inputId - The ID of the search input element
-     * @param {string} dropdownId - The ID of the dropdown element
-     * @param {string} selectedId - The ID of the selected items container
-     * @param {string} hiddenInputsId - The ID of the hidden inputs container
-     * @param {string} dataKey - The key used to identify the type of data (e.g., 'speaker', 'character')
-     * @memberof MultiSelectManager
+     * @param containerId - The ID of the container element
+     * @param inputId - The ID of the search input element
+     * @param dropdownId - The ID of the dropdown element
+     * @param selectedId - The ID of the selected items container
+     * @param hiddenInputsId - The ID of the hidden inputs container
+     * @param dataKey - The key used to identify the type of data (e.g., 'speaker', 'character')
      */
-    constructor(containerId, inputId, dropdownId, selectedId, hiddenInputsId, dataKey) {
-        /**
-         * Main container element
-         * @type {HTMLElement}
-         */
-        this.container = document.getElementById(containerId);
-        
-        /**
-         * Search input element
-         * @type {HTMLInputElement}
-         */
-        this.searchInput = document.getElementById(inputId);
-        
-        /**
-         * Dropdown container element
-         * @type {HTMLElement}
-         */
-        this.dropdown = document.getElementById(dropdownId);
-        
-        /**
-         * Container for selected item badges
-         * @type {HTMLElement}
-         */
-        this.selectedContainer = document.getElementById(selectedId);
-        
-        /**
-         * Container for hidden form inputs
-         * @type {HTMLElement}
-         */
-        this.hiddenInputsContainer = document.getElementById(hiddenInputsId);
-        
-        /**
-         * Data key identifier for this manager type
-         * @type {string}
-         */
+    constructor(
+        containerId: string,
+        inputId: string,
+        dropdownId: string,
+        selectedId: string,
+        hiddenInputsId: string,
+        dataKey: string
+    ) {
+        this.container = document.getElementById(containerId) as HTMLElement;
+        this.searchInput = document.getElementById(inputId) as HTMLInputElement;
+        this.dropdown = document.getElementById(dropdownId) as HTMLElement;
+        this.selectedContainer = document.getElementById(selectedId) as HTMLElement;
+        this.hiddenInputsContainer = document.getElementById(hiddenInputsId) as HTMLElement;
         this.dataKey = dataKey;
-        
-        /**
-         * Array of available items for selection
-         * @type {Array<Object>}
-         */
         this.data = [];
-        
-        /**
-         * Map of currently selected items (id -> item)
-         * @type {Map<string, Object>}
-         */
-        this.selectedItems = new Map();
+        this.selectedItems = new Map<string, MultiSelectItem>();
         
         this.setupEventListeners();
     }
-    
+
     /**
      * Set the data array for this multi-select manager
-     * @param {Array<Object>} data - Array of items with id and name properties
-     * @memberof MultiSelectManager
+     * @param data - Array of items with id and name properties
      */
-    setData(data) {
+    setData(data: MultiSelectItem[]): void {
         this.data = data;
         this.renderDropdown(data);
     }
-    
+
     /**
      * Set up event listeners for user interactions
-     * @private
-     * @memberof MultiSelectManager
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         // Filter dropdown based on input
-        this.searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
+        this.searchInput.addEventListener('input', (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            const query = target.value.toLowerCase();
             const filtered = this.data.filter(item => 
                 item.name.toLowerCase().includes(query)
             );
             this.renderDropdown(filtered);
             this.showDropdown();
         });
-        
+
         // Show dropdown on focus
         this.searchInput.addEventListener('focus', () => {
             this.renderDropdown(this.data);
             this.showDropdown();
         });
-        
+
         // Hide dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
+        document.addEventListener('click', (e: Event) => {
+            const target = e.target as Node;
+            if (!this.container.contains(target)) {
                 this.hideDropdown();
             }
         });
     }
-    
+
     /**
      * Render dropdown items based on filtered data
-     * @param {Array<Object>} items - Filtered items to display
-     * @private
-     * @memberof MultiSelectManager
+     * @param items - Filtered items to display
      */
-    renderDropdown(items) {
+    private renderDropdown(items: MultiSelectItem[]): void {
         this.dropdown.innerHTML = '';
-        
+
         // Limit items for performance
         const limitedItems = items.slice(0, SearchConfig.MAX_DROPDOWN_ITEMS);
-        
+
         limitedItems.forEach(item => {
             if (!this.selectedItems.has(item.id)) {
                 const dropdownItem = this.createDropdownItem(item);
                 this.dropdown.appendChild(dropdownItem);
             }
         });
-        
+
         // Show "no items found" message if needed
         if (limitedItems.length === 0) {
             this.dropdown.appendChild(this.createNoItemsMessage());
         }
     }
-    
+
     /**
      * Create a single dropdown item element
-     * @param {Object} item - Item data with id and name
-     * @returns {HTMLElement} Dropdown item element
-     * @private
-     * @memberof MultiSelectManager
+     * @param item - Item data with id and name
+     * @returns Dropdown item element
      */
-    createDropdownItem(item) {
+    private createDropdownItem(item: MultiSelectItem): HTMLElement {
         const div = document.createElement('div');
         div.className = 'dropdown-item p-2 cursor-pointer';
         div.style.cursor = 'pointer';
@@ -165,58 +181,50 @@ class MultiSelectManager {
         div.addEventListener('click', () => this.selectItem(item));
         return div;
     }
-    
+
     /**
      * Create "no items found" message element
-     * @returns {HTMLElement} No items message element
-     * @private
-     * @memberof MultiSelectManager
+     * @returns No items message element
      */
-    createNoItemsMessage() {
+    private createNoItemsMessage(): HTMLElement {
         const div = document.createElement('div');
         div.className = 'dropdown-item p-2 text-muted';
         div.textContent = 'No items found';
         return div;
     }
-    
+
     /**
      * Select an item and add it to selected items
-     * @param {Object} item - Item to select with id and name properties
-     * @memberof MultiSelectManager
+     * @param item - Item to select with id and name properties
      */
-    selectItem(item) {
+    selectItem(item: MultiSelectItem): void {
         this.selectedItems.set(item.id, item);
         this.renderSelected();
         this.searchInput.value = '';
         this.hideDropdown();
     }
-    
+
     /**
      * Remove an item from selected items
-     * @param {string} itemId - ID of the item to remove
-     * @memberof MultiSelectManager
+     * @param itemId - ID of the item to remove
      */
-    removeItem(itemId) {
+    removeItem(itemId: string): void {
         this.selectedItems.delete(itemId);
         this.renderSelected();
     }
-    
+
     /**
      * Render selected items as badges and update hidden form inputs
-     * @private
-     * @memberof MultiSelectManager
      */
-    renderSelected() {
+    private renderSelected(): void {
         this.renderSelectedBadges();
         this.updateHiddenInputs();
     }
-    
+
     /**
      * Render selected items as removable badges
-     * @private
-     * @memberof MultiSelectManager
      */
-    renderSelectedBadges() {
+    private renderSelectedBadges(): void {
         this.selectedContainer.innerHTML = '';
 
         this.selectedItems.forEach(item => {
@@ -224,15 +232,13 @@ class MultiSelectManager {
             this.selectedContainer.appendChild(badge);
         });
     }
-    
+
     /**
      * Create a badge element for a selected item
-     * @param {Object} item - Selected item data
-     * @returns {HTMLElement} Badge element
-     * @private
-     * @memberof MultiSelectManager
+     * @param item - Selected item data
+     * @returns Badge element
      */
-    createSelectedBadge(item) {
+    private createSelectedBadge(item: MultiSelectItem): HTMLElement {
         const badge = document.createElement('span');
         badge.className = 'badge bg-primary me-1 mb-1';
         badge.innerHTML = `
@@ -244,21 +250,19 @@ class MultiSelectManager {
                     data-manager="${this.dataKey}">
             </button>
         `;
-        
-        const closeButton = badge.querySelector('.btn-close');
+
+        const closeButton = badge.querySelector('.btn-close') as HTMLButtonElement;
         closeButton.addEventListener('click', () => this.removeItem(item.id));
-        
+
         return badge;
     }
-    
+
     /**
      * Update hidden form inputs for selected items
-     * @private
-     * @memberof MultiSelectManager
      */
-    updateHiddenInputs() {
+    private updateHiddenInputs(): void {
         this.hiddenInputsContainer.innerHTML = '';
-        
+
         this.selectedItems.forEach(item => {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -270,25 +274,22 @@ class MultiSelectManager {
 
     /**
      * Show the dropdown menu
-     * @memberof MultiSelectManager
      */
-    showDropdown() {
+    showDropdown(): void {
         this.dropdown.style.display = 'block';
     }
-    
+
     /**
      * Hide the dropdown menu
-     * @memberof MultiSelectManager
      */
-    hideDropdown() {
+    hideDropdown(): void {
         this.dropdown.style.display = 'none';
     }
-    
+
     /**
      * Clear all selected items and reset the search input
-     * @memberof MultiSelectManager
      */
-    clear() {
+    clear(): void {
         this.selectedItems.clear();
         this.renderSelected();
         this.searchInput.value = '';
@@ -296,65 +297,56 @@ class MultiSelectManager {
 
     /**
      * Get array of selected item IDs
-     * @returns {Array<string>} Array of selected item IDs
-     * @memberof MultiSelectManager
+     * @returns Array of selected item IDs
      */
-    getSelectedIds() {
+    getSelectedIds(): string[] {
         return Array.from(this.selectedItems.keys());
     }
 
     /**
      * Get array of selected items
-     * @returns {Array<Object>} Array of selected item objects
-     * @memberof MultiSelectManager
+     * @returns Array of selected item objects
      */
-    getSelectedItems() {
+    getSelectedItems(): MultiSelectItem[] {
         return Array.from(this.selectedItems.values());
     }
 }
 
 /**
  * Manages search result display and formatting
- * @class SearchResultRenderer
  */
 class SearchResultRenderer {
+    private resultsContainer: HTMLElement;
+
     /**
      * Create a SearchResultRenderer instance
-     * @param {string} resultsContainerId - ID of the results container element
-     * @memberof SearchResultRenderer
+     * @param resultsContainerId - ID of the results container element
      */
-    constructor(resultsContainerId) {
-        /**
-         * Results container element
-         * @type {HTMLElement}
-         */
-        this.resultsContainer = document.getElementById(resultsContainerId);
+    constructor(resultsContainerId: string) {
+        this.resultsContainer = document.getElementById(resultsContainerId) as HTMLElement;
     }
 
     /**
      * Display loading state in results container
-     * @memberof SearchResultRenderer
      */
-    showLoading() {
+    showLoading(): void {
         this.resultsContainer.style.display = 'block';
         this.resultsContainer.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
     }
 
     /**
      * Display error message in results container
-     * @param {string} error - Error message to display
-     * @memberof SearchResultRenderer
+     * @param error - Error message to display
      */
-    showError(error) {
+    showError(error: string): void {
         this.resultsContainer.innerHTML = `<div class="alert alert-danger">Search failed: ${error}</div>`;
     }
 
     /**
      * Display search results or no results message
-     * @param {Array<Object>} videos - Array of video objects from search
-     * @memberof SearchResultRenderer
+     * @param videos - Array of video objects from search
      */
-    displayResults(videos) {
+    displayResults(videos: VideoResult[]): void {
         if (!videos || videos.length === 0) {
             this.showNoResults();
             return;
@@ -366,10 +358,8 @@ class SearchResultRenderer {
 
     /**
      * Show no results found message
-     * @private
-     * @memberof SearchResultRenderer
      */
-    showNoResults() {
+    private showNoResults(): void {
         this.resultsContainer.innerHTML = `
             <div class="card bg-dark border-secondary">
                 <div class="card-body text-center py-5">
@@ -383,33 +373,29 @@ class SearchResultRenderer {
 
     /**
      * Build HTML for search results
-     * @param {Array<Object>} videos - Array of video objects
-     * @returns {string} HTML string for results
-     * @private
-     * @memberof SearchResultRenderer
+     * @param videos - Array of video objects
+     * @returns HTML string for results
      */
-    buildResultsHTML(videos) {
+    private buildResultsHTML(videos: VideoResult[]): string {
         let html = `
             <h4 class="text-white mb-3">Search Results (${videos.length} videos found)</h4>
             <div class="row">
         `;
-        
+
         videos.forEach(video => {
             html += this.buildVideoCard(video);
         });
-        
+
         html += '</div>';
         return html;
     }
 
     /**
      * Build HTML for a single video card
-     * @param {Object} video - Video object with properties like id, name, thumbnail, etc.
-     * @returns {string} HTML string for video card
-     * @private
-     * @memberof SearchResultRenderer
+     * @param video - Video object with properties like id, name, thumbnail, etc.
+     * @returns HTML string for video card
      */
-    buildVideoCard(video) {
+    private buildVideoCard(video: VideoResult): string {
         const watchedClass = video.watched ? ' watched' : '';
         const watchedIcon = video.watched ? this.buildWatchedIcon() : '';
         const thumbnail = video.thumbnail ? this.buildThumbnailHTML(video, watchedIcon) : '';
@@ -434,23 +420,19 @@ class SearchResultRenderer {
 
     /**
      * Build watched icon HTML
-     * @returns {string} HTML for watched icon
-     * @private
-     * @memberof SearchResultRenderer
+     * @returns HTML for watched icon
      */
-    buildWatchedIcon() {
+    private buildWatchedIcon(): string {
         return '<div class="thumbnail-watched-icon" style="position: absolute; top: 10px; left: 10px; z-index: 2;"><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="10" fill="rgba(0,255,0,0.8)"/><path d="m9 12 2 2 4-4" stroke="white" stroke-width="2" fill="none"/></svg></div>';
     }
 
     /**
      * Build thumbnail HTML with watched state styling
-     * @param {Object} video - Video object
-     * @param {string} watchedIcon - HTML for watched icon
-     * @returns {string} HTML for thumbnail
-     * @private
-     * @memberof SearchResultRenderer
+     * @param video - Video object
+     * @param watchedIcon - HTML for watched icon
+     * @returns HTML for thumbnail
      */
-    buildThumbnailHTML(video, watchedIcon) {
+    private buildThumbnailHTML(video: VideoResult, watchedIcon: string): string {
         const opacity = video.watched ? 'opacity: 0.6;' : '';
         return `
             ${watchedIcon}
@@ -460,74 +442,47 @@ class SearchResultRenderer {
 
     /**
      * Build description HTML with length limit
-     * @param {string} description - Video description
-     * @returns {string} HTML for description
-     * @private
-     * @memberof SearchResultRenderer
+     * @param description - Video description
+     * @returns HTML for description
      */
-    buildDescriptionHTML(description) {
+    private buildDescriptionHTML(description?: string): string {
         if (!description) return '';
-        
+
         const truncated = description.length > SearchConfig.MAX_DESCRIPTION_LENGTH 
             ? description.substring(0, SearchConfig.MAX_DESCRIPTION_LENGTH) + '...' 
             : description;
-            
+
         return `<p class="card-text">${truncated}</p>`;
     }
 }
 
 /**
  * Main controller for advanced search functionality
- * @class AdvancedSearchController
  */
 class AdvancedSearchController {
+    private speakerManager: MultiSelectManager;
+    private characterManager: MultiSelectManager;
+    private locationManager: MultiSelectManager;
+    private tagManager: MultiSelectManager;
+    private resultRenderer: SearchResultRenderer;
+    private searchForm: HTMLFormElement | null;
+
     /**
      * Create an AdvancedSearchController instance
-     * @memberof AdvancedSearchController
      */
     constructor() {
-        /**
-         * Multi-select manager for speakers
-         * @type {MultiSelectManager}
-         */
-        this.speakerManager = null;
-        
-        /**
-         * Multi-select manager for characters
-         * @type {MultiSelectManager}
-         */
-        this.characterManager = null;
-        
-        /**
-         * Multi-select manager for locations
-         * @type {MultiSelectManager}
-         */
-        this.locationManager = null;
-        
-        /**
-         * Multi-select manager for tags
-         * @type {MultiSelectManager}
-         */
-        this.tagManager = null;
-
-        /**
-         * Search result renderer instance
-         * @type {SearchResultRenderer}
-         */
+        this.speakerManager = null!;
+        this.characterManager = null!;
+        this.locationManager = null!;
+        this.tagManager = null!;
         this.resultRenderer = new SearchResultRenderer('search-results');
-
-        /**
-         * Advanced search form element
-         * @type {HTMLFormElement}
-         */
         this.searchForm = null;
     }
 
     /**
      * Initialize the advanced search controller
-     * @memberof AdvancedSearchController
      */
-    init() {
+    init(): void {
         this.initializeManagers();
         this.setupEventListeners();
         this.loadMultiSelectData();
@@ -535,25 +490,23 @@ class AdvancedSearchController {
 
     /**
      * Initialize all multi-select managers
-     * @private
-     * @memberof AdvancedSearchController
      */
-    initializeManagers() {
+    private initializeManagers(): void {
         this.speakerManager = new MultiSelectManager(
             'speaker-container', 'speaker-search', 'speaker-dropdown', 
             'selected-speakers', 'speaker-inputs', 'speaker'
         );
-        
+
         this.characterManager = new MultiSelectManager(
             'character-container', 'character-search', 'character-dropdown', 
             'selected-characters', 'character-inputs', 'character'
         );
-        
+
         this.locationManager = new MultiSelectManager(
             'location-container', 'location-search', 'location-dropdown', 
             'selected-locations', 'location-inputs', 'location'
         );
-        
+
         this.tagManager = new MultiSelectManager(
             'tag-container', 'tag-search', 'tag-dropdown', 
             'selected-tags', 'tag-inputs', 'tag'
@@ -562,21 +515,19 @@ class AdvancedSearchController {
 
     /**
      * Set up event listeners for form interactions
-     * @private
-     * @memberof AdvancedSearchController
      */
-    setupEventListeners() {
-        this.searchForm = document.getElementById('advanced-search-form');
-        
+    private setupEventListeners(): void {
+        this.searchForm = document.getElementById('advanced-search-form') as HTMLFormElement | null;
+
         // Clear form handler
         const clearButton = document.getElementById('clear-form');
         if (clearButton) {
             clearButton.addEventListener('click', () => this.clearForm());
         }
-        
+
         // Form submission handler
         if (this.searchForm) {
-            this.searchForm.addEventListener('submit', (e) => {
+            this.searchForm.addEventListener('submit', (e: Event) => {
                 e.preventDefault();
                 this.performAdvancedSearch();
             });
@@ -585,23 +536,21 @@ class AdvancedSearchController {
 
     /**
      * Load data for all multi-select dropdowns
-     * @private
-     * @memberof AdvancedSearchController
      */
-    loadMultiSelectData() {
+    private loadMultiSelectData(): void {
         try {
             const dataElement = document.getElementById('multi-select-data');
             if (!dataElement) {
                 throw new Error('Multi-select data element not found');
             }
 
-            const data = JSON.parse(dataElement.textContent);
-            
+            const data: MultiSelectData = JSON.parse(dataElement.textContent || '{}');
+
             this.speakerManager.setData(data.speakers || []);
             this.characterManager.setData(data.characters || []);
             this.locationManager.setData(data.locations || []);
             this.tagManager.setData(data.tags || []);
-            
+
         } catch (error) {
             console.error('Error loading multi-select data:', error);
             // Set empty arrays as fallback
@@ -614,13 +563,12 @@ class AdvancedSearchController {
 
     /**
      * Clear all form inputs and selected items
-     * @memberof AdvancedSearchController
      */
-    clearForm() {
+    clearForm(): void {
         if (this.searchForm) {
             this.searchForm.reset();
         }
-        
+
         this.speakerManager.clear();
         this.characterManager.clear();
         this.locationManager.clear();
@@ -629,10 +577,8 @@ class AdvancedSearchController {
 
     /**
      * Perform advanced search based on form data
-     * @async
-     * @memberof AdvancedSearchController
      */
-    async performAdvancedSearch() {
+    async performAdvancedSearch(): Promise<void> {
         if (!this.searchForm) {
             console.error('Search form not found');
             return;
@@ -640,15 +586,15 @@ class AdvancedSearchController {
 
         const formData = new FormData(this.searchForm);
         const params = this.buildSearchParams(formData);
-        
+
         try {
             this.resultRenderer.showLoading();
             const data = await this.executeSearch(params);
-            
-            if (data.success) {
+
+            if (data.success && data.data) {
                 this.resultRenderer.displayResults(data.data);
             } else {
-                this.resultRenderer.showError(data.error);
+                this.resultRenderer.showError(data.error || 'Unknown error');
             }
         } catch (error) {
             console.error('Search error:', error);
@@ -658,46 +604,42 @@ class AdvancedSearchController {
 
     /**
      * Build URL search parameters from form data
-     * @param {FormData} formData - Form data to process
-     * @returns {URLSearchParams} URL search parameters
-     * @private
-     * @memberof AdvancedSearchController
+     * @param formData - Form data to process
+     * @returns URL search parameters
      */
-    buildSearchParams(formData) {
+    private buildSearchParams(formData: FormData): URLSearchParams {
         const params = new URLSearchParams();
-        
-        for (let [key, value] of formData.entries()) {
-            if (value.trim()) {
-                params.append(key, value);
+
+        for (const [key, value] of formData.entries()) {
+            const stringValue = value.toString();
+            if (stringValue.trim()) {
+                params.append(key, stringValue);
             }
         }
-        
+
         return params;
     }
 
     /**
      * Execute the search API call
-     * @param {URLSearchParams} params - Search parameters
-     * @returns {Promise<Object>} Search response data
-     * @private
-     * @memberof AdvancedSearchController
+     * @param params - Search parameters
+     * @returns Search response data
      */
-    async executeSearch(params) {
+    private async executeSearch(params: URLSearchParams): Promise<SearchApiResponse> {
         const response = await fetch(`/api/search/advanced?${params.toString()}`);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         return await response.json();
     }
 
     /**
      * Get all selected items from all managers
-     * @returns {Object} Object containing arrays of selected items by type
-     * @memberof AdvancedSearchController
+     * @returns Object containing arrays of selected items by type
      */
-    getAllSelectedItems() {
+    getAllSelectedItems(): AllSelectedItems {
         return {
             speakers: this.speakerManager.getSelectedItems(),
             characters: this.characterManager.getSelectedItems(),
@@ -708,7 +650,7 @@ class AdvancedSearchController {
 }
 
 // Global controller instance
-let advancedSearchController;
+let advancedSearchController: AdvancedSearchController;
 
 /**
  * Initialize advanced search functionality when DOM is ready

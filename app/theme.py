@@ -133,12 +133,12 @@ class ThemeManager:
                                         },
                                         'start': {
                                             'type': 'integer',
-                                            'required': True,
+                                            'required': False,
                                             'min': 0,
                                         },
                                         'end': {
                                             'type': 'integer',
-                                            'required': True,
+                                            'required': False,
                                             'min': 1,
                                         }
                                     }

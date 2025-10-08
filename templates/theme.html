@@ -71,8 +71,10 @@
                                             poster="{{ video.thumbnail or '' }}"
                                             data-profile-id="{{ session.get('active_profile', 'guest') }}"
                                             data-video-id="{{ video.id }}"
+                                            {% if video.start is defined and video.end is defined %}
                                             data-snippet-start="{{ video.start }}"
                                             data-snippet-end="{{ video.end }}"
+                                            {% endif %}
                                         >
                                             <!-- Set up the available resolutions -->
                                             {% for res, url in resolutions %}
