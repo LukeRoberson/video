@@ -34,6 +34,19 @@
                                 <div class="heading-divider"></div>
                             </div>
                         
+                        <!-- Sub Heading -->
+                        {% elif item.subheading %}
+                            <div class="section-subheading">
+                                <h3>{{ item.subheading }}</h3>
+                                <div class="subheading-divider"></div>
+                            </div>
+
+                        <!-- Image -->
+                        {% elif item.image %}
+                            <div class="content-item image-item mb-4">
+                                <img src="{{ item.image }}" alt="Image" class="img-fluid rounded shadow-sm">
+                            </div>
+
                         <!-- Paragraph -->
                         {% elif item.paragraph %}
                             <div class="content-item paragraph-item">
@@ -61,6 +74,11 @@
                                 ('240', video.url_240)
                             ] %}
                             <div class="content-item video-item">
+                                {% if item.video.title %}
+                                <div class="video-title">
+                                    <h4 class="video-title mb-3">{{ item.video.title }}</h4>
+                                </div>
+                                {% endif %}
                                 <div class="video-wrapper">
                                     <div class="video-player mb-4 position-relative">
                                         <video
@@ -90,6 +108,60 @@
                                             </p>
                                         </video>
                                     </div>
+                                </div>
+                            </div>
+
+                        <!-- Video Grid -->
+                        {% elif item.video_grid %}
+                            <div class="content-item video-grid-container">
+                                <div class="video-grid">
+                                    {% for grid_item in item.video_grid %}
+                                        {% set video = grid_item.video %}
+                                        {% set resolutions = [
+                                            ('1080', video.url_1080),
+                                            ('720', video.url_720),
+                                            ('480', video.url_480),
+                                            ('360', video.url_360),
+                                            ('240', video.url_240)
+                                        ] %}
+                                        <div class="video-grid-item">
+                                            {% if video.title %}
+                                            <div class="video-title">
+                                                <h4>{{ video.title }}</h4>
+                                            </div>
+                                            {% endif %}
+                                            <div class="video-wrapper">
+                                                <div class="video-player position-relative">
+                                                    <video
+                                                        id="player-{{ video.id }}"
+                                                        class="video-js"
+                                                        controls
+                                                        preload="auto"
+                                                        poster="{{ video.thumbnail or '' }}"
+                                                        data-profile-id="{{ session.get('active_profile', 'guest') }}"
+                                                        data-video-id="{{ video.id }}"
+                                                        {% if video.start is defined and video.end is defined %}
+                                                        data-snippet-start="{{ video.start }}"
+                                                        data-snippet-end="{{ video.end }}"
+                                                        {% endif %}
+                                                    >
+                                                        <!-- Set up the available resolutions -->
+                                                        {% for res, url in resolutions %}
+                                                            {% if url %}
+                                                                <source src="{{ url }}" type="video/mp4" label="{{ res }}p" res="{{ res|replace('p', '') }}">
+                                                            {% endif %}
+                                                        {% endfor %}
+
+                                                        <!-- fallback content -->
+                                                        <p class="vjs-no-js">
+                                                            To view this video please enable JavaScript, and consider upgrading to a web browser that
+                                                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                                                        </p>
+                                                    </video>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div>
 

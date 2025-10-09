@@ -47,10 +47,11 @@
   - [x] Scriptures
 - [x] Scriptures page organization
     * It's too complicated right now with so many scriptures
-- [ ] Theme template update
-  - [ ] Display an image, like a banner
-  - [ ] Subheadings
-  - [ ] Videos in a grid
+- [x] Theme template update
+  - [x] Display an image, like a banner
+  - [x] Subheadings
+  - [x] Strong title for a video
+  - [x] Videos in a grid
 
 </br></br>
 

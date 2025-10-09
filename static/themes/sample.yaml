@@ -27,6 +27,7 @@ section:
 # A video snippet, containting the ID, start time and end time (in seconds)
 - video:
     id: 1682
+    title: A sample video
     start: 30
     end: 60
 
@@ -42,14 +43,34 @@ section:
 # Another section of content
 section:
 - heading: Section 2.
+- subheading: Subheading 1
 - paragraph: >
     This is a longer paragraph.
     Notice that it contains multiple sentences. This is known as a 'folding' string.
     This is because of the '>' character at the end of the first line.
     However, this will still be rendered as a single paragraph in HTML.
+- subheading: Subheading 2
 - paragraph: |
     This is also a longer paragraph of information.
     This also contains multiple sentences. This is different to the 'folding' string above.
     This is known as a 'block' string. This is because of the '|' character at the end of the first line.
     New lines in this block string will be preserved in the rendered HTML.
+- image: https://cms-imgp.jw-cdn.org/img/p/1102021195/univ/art/1102021195_univ_lsr_lg.jpg
+- video_grid:
+    - video:
+        # Need an option to add a strong title for the video
+        id: 2217
+        title: Convention Invitation
+
+    - video:
+        id: 1034
+        title: Excerpts of the 2021 Regional Convention
+
+    - video:
+        id: 1011
+        title: Music Video Presentation
+
+    - video:
+        id: 2434
+        title: With Eyes of Faith Music Video
 ...

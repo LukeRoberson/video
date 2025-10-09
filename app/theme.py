@@ -96,6 +96,26 @@ class ThemeManager:
                                 }
                             }
                         },
+                        # Subheading
+                        {
+                            'schema': {
+                                'subheading': {
+                                    'type': 'string',
+                                    'required': True,
+                                    'empty': False,
+                                }
+                            }
+                        },
+                        # Image
+                        {
+                            'schema': {
+                                'image': {
+                                    'type': 'string',
+                                    'required': True,
+                                    'empty': False,
+                                }
+                            }
+                        },
                         # Paragraph
                         {
                             'schema': {
@@ -119,6 +139,46 @@ class ThemeManager:
                                 }
                             }
                         },
+                        # Video Grid
+                        {
+                            'schema': {
+                                'video_grid': {
+                                    'type': 'list',
+                                    'required': True,
+                                    'schema': {
+                                        'type': 'dict',
+                                        'schema': {
+                                            'video': {
+                                                'type': 'dict',
+                                                'required': True,
+                                                'schema': {
+                                                    'id': {
+                                                        'type': 'integer',
+                                                        'required': True,
+                                                        'min': 1
+                                                    },
+                                                    'title': {
+                                                        'type': 'string',
+                                                        'required': False,
+                                                        'empty': False
+                                                    },
+                                                    'start': {
+                                                        'type': 'integer',
+                                                        'required': False,
+                                                        'min': 0
+                                                    },
+                                                    'end': {
+                                                        'type': 'integer',
+                                                        'required': False,
+                                                        'min': 1
+                                                    },
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         # Video snippet
                         {
                             'schema': {
@@ -130,6 +190,11 @@ class ThemeManager:
                                             'type': 'integer',
                                             'required': True,
                                             'min': 1,
+                                        },
+                                        'title': {
+                                            'type': 'string',
+                                            'required': False,
+                                            'empty': False,
                                         },
                                         'start': {
                                             'type': 'integer',
@@ -253,6 +318,7 @@ class ThemeManager:
         # Loop through each section document (skipping the main document)
         for section in self.theme_documents[1:]:
             for item in section.get('section', []):
+                # Handle single video
                 if 'video' in item:
                     video_id = item['video'].get('id')
 
@@ -270,6 +336,28 @@ class ThemeManager:
                         # Update the video info with fetched details
                         details = details[0]
                         item['video'].update(details)
+
+                # Handle video grid
+                elif 'video_grid' in item:
+                    for grid_item in item['video_grid']:
+                        if 'video' in grid_item:
+                            video_id = grid_item['video'].get('id')
+
+                            # Get video details from the database
+                            with DatabaseContext() as db:
+                                video_mgr = VideoManager(db)
+                                details = video_mgr.get(video_id)
+
+                                if not details:
+                                    logging.warning(
+                                        f"Video ID {video_id} "
+                                        f"not found in database."
+                                    )
+                                    continue
+
+                                # Update the video info with fetched details
+                                details = details[0]
+                                grid_item['video'].update(details)
 
     def load_theme(
         self,

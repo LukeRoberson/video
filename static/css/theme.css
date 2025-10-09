@@ -170,6 +170,90 @@
 }
 
 /* ===========================
+   Subheadings
+   =========================== */
+
+.section-subheading {
+    padding: 1.5rem 2rem 1rem;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.section-subheading h3 {
+    color: #d4d4d4;
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.section-subheading h3::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    background: linear-gradient(180deg, #0056b3, #003d82);
+    margin-right: 1rem;
+    border-radius: 2px;
+}
+
+.subheading-divider {
+    width: 40px;
+    height: 1.5px;
+    background: linear-gradient(90deg, #0056b3, transparent);
+    border-radius: 1px;
+    margin-left: 1.5rem;
+}
+
+/* ===========================
+   Video Titles
+   =========================== */
+
+.video-title {
+    padding: 1rem 2rem 0.75rem;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.video-title h4 {
+    color: #b8b8b8;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.3px;
+}
+
+.video-title h4::before {
+    content: '▸';
+    color: #007bff;
+    font-size: 1rem;
+    margin-right: 0.75rem;
+    opacity: 0.7;
+}
+
+.video-title h4:hover {
+    color: #d4d4d4;
+}
+
+.video-title h4:hover::before {
+    opacity: 1;
+}
+
+/* Optional subtitle for video */
+.video-subtitle {
+    color: #8a8a8a;
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin: 0.25rem 0 0 1.5rem;
+    font-style: italic;
+}
+
+/* ===========================
    Content Items
    =========================== */
 
@@ -301,6 +385,46 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* ===========================
+   Video Grid Layout
+   =========================== */
+
+.video-grid-container {
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.video-grid-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.video-grid-item .video-title {
+    padding: 1rem 0 0.75rem;
+    background: transparent;
+}
+
+.video-grid-item .video-title h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.video-grid-item .video-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.video-grid-item .video-player {
+    flex: 1;
+}
+
 /* ==========================================================================
    5. RESPONSIVE DESIGN
    ========================================================================== */
@@ -336,8 +460,33 @@
         padding: 2rem 1.5rem 1rem; /* Adjusted section padding */
     }
     
+    .section-subheading {
+        padding: 1rem 1.5rem 0.75rem; /* Adjusted subheading padding */
+    }
+    
+    .section-subheading h3 {
+        font-size: 1.2rem;         /* Smaller subheading */
+    }
+    
+    .video-title {
+        padding: 0.75rem 1.5rem 0.5rem; /* Adjusted video title padding */
+    }
+    
+    .video-title h4 {
+        font-size: 1rem;           /* Smaller video title */
+    }
+    
     .video-item {
         padding: 1.5rem;           /* Reduced video padding */
+    }
+    
+    /* Video grid responsive adjustments */
+    .video-grid {
+        gap: 1.5rem;               /* Smaller gap on tablets */
+    }
+    
+    .video-grid-container {
+        padding: 1.5rem;           /* Reduced grid container padding */
     }
     
     /* Adjust interactive elements for touch */
@@ -375,6 +524,27 @@
         font-size: 1.5rem;         /* Smaller section headings */
     }
     
+    .section-subheading {
+        padding: 1rem;             /* Compact subheading padding */
+    }
+    
+    .section-subheading h3 {
+        font-size: 1.1rem;         /* Mobile-appropriate subheading */
+    }
+    
+    .video-title {
+        padding: 0.5rem 1rem;      /* Compact video title padding */
+    }
+    
+    .video-title h4 {
+        font-size: 0.95rem;        /* Mobile video title */
+    }
+    
+    .video-subtitle {
+        font-size: 0.85rem;        /* Smaller subtitle on mobile */
+        margin-left: 1.25rem;      /* Reduced indent */
+    }
+    
     .content-item {
         padding: 0.75rem 1rem;     /* Compact content padding */
         font-size: 1rem;           /* Standard text size */
@@ -388,6 +558,20 @@
     .quote-item {
         margin: 0.75rem 0;         /* Reduced quote margins */
         padding: 1rem;             /* Compact quote padding */
+    }
+    
+    /* Video grid mobile adjustments */
+    .video-grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 1.5rem;               /* Vertical spacing between videos */
+    }
+    
+    .video-grid-container {
+        padding: 1rem;             /* Minimal padding on mobile */
+    }
+    
+    .video-grid-item .video-title h4 {
+        font-size: 0.95rem;        /* Smaller title on mobile */
     }
     
     .styled-link {
