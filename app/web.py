@@ -391,9 +391,17 @@ def about() -> Response:
         Response: A rendered HTML page with information about the application.
     """
 
+    with open('changelog.yaml', 'r', encoding='utf-8') as f:
+        try:
+            changelog = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            print(f"Error loading changelog.yaml: {e}")
+            changelog = []
+
     return make_response(
         render_template(
-            "about.html"
+            "about.html",
+            changes=changelog,
         )
     )
 

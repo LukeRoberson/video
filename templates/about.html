@@ -24,13 +24,45 @@ About
         </div>
         <hr />
         <div class="card-body p-4">
-            <h5 class="card-title">About This Site</h5>
+            <h4 class="card-title">About This Site</h4>
             <p class="card-text">
                 This site is a collection of videos and resources from jw.org. It is designed to help you find videos by topic, speaker, or bible character.
             </p>
             <p class="card-text">
                 This site is not affiliated with jw.org. It does not distribute any video content, as all videos are embedded from jw.org.
             </p>
+        </div>
+        <div class="card-body p-4">
+            <hr>
+            {% for release in changes %}
+                <h4>{{ release.version }}</h4>
+                <h5>{{ release.date }}</h5>
+                <br>
+                
+                <b>Features</b>
+                <ul>
+                    {% for item in release.features %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                <br>
+
+                <b>Code Improvements</b>
+                <ul>
+                    {% for item in release.code %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                <br>
+
+                <b>Bug Fixes</b>
+                <ul>
+                    {% for item in release.code %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                <br>
+            {% endfor %}
         </div>
     </div>
 </div>

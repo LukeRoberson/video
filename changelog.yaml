@@ -1,0 +1,22 @@
+- version: "1.2.0"
+  date: "2025-10-09"
+  features:
+    - Added a badge to tags to show number of associated items
+    - Added a 'hide watched items' filter to the navigation bar
+    - Cleaned up descriptions on character and scripture pages
+    - Reformatted the scriptures page for better usability
+    - Added new features to theme pages
+    - Added support for subtitles (not all videos have them yet)
+  code:
+    - Added JSDoc comments for better code documentation
+    - Refactored JavaScript code to TypeScript
+    - Refactored CSS to use BEM format
+  fixes:
+    - Click outside of theatre mode to exit theatre mode
+    - Touch screen play/pause tap support
+    - Cleaned up descriptions on character and scripture pages by adding new line conversion
+    - Fixed profile editing when running in a container
+    - Fixed snippets when running in a container
+    - Fixed categories missing on some videos
+    - Fixed incorrect count on progress bar for some categories
+    - Fixed admin page adding categories to videos

@@ -63,7 +63,7 @@
 - [x] Add JSDoc to all JS files
 - [x] Refactor CSS to use BEM format
 - [x] Refactor HTML to match CSS BEM
-- [ ] Refactor to use TypeScript
+- [x] Refactor to use TypeScript
 
 </br></br>
 
