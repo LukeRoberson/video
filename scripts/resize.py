@@ -27,6 +27,11 @@ SPEAKERS = os.path.join(
     'speakers'
 )
 
+IMAGE_LIST = [
+    CHARACTERS,
+    SPEAKERS,
+]
+
 
 class ImageHandler:
     """
@@ -127,22 +132,34 @@ class ImageHandler:
 
 
 if __name__ == "__main__":
-    # Create an ImageHandler instance for the speakers directory
-    handler = ImageHandler(
-        directory=SPEAKERS,
-        type='png',
-        resolution=(320, 320),
-    )
+    """
+    Main execution block to resize images in specified directories.
 
-    # Scan the directory for images to resize
-    handler.scan_directory()
+    1. Loop through each directory in IMAGE_LIST.
+    2. Create an ImageHandler instance for the directory.
+    3. Scan the directory for images to resize.
+    4. Resize each image found.
+    """
 
-    # Resize each image found
-    if len(handler.file_list) == 0:
-        print("No images to resize.")
-    else:
-        for image in handler.file_list:
-            handler.resize_image(
-                filename=image,
-                overwrite=True,
-            )
+    for directory in IMAGE_LIST:
+        print(f"\nProcessing directory: {directory}")
+
+        # Create an ImageHandler instance for the directory
+        handler = ImageHandler(
+            directory=directory,
+            type='png',
+            resolution=(320, 320),
+        )
+
+        # Scan the directory for images to resize
+        handler.scan_directory()
+
+        # Resize each image found
+        if len(handler.file_list) == 0:
+            print("No images to resize.")
+        else:
+            for image in handler.file_list:
+                handler.resize_image(
+                    filename=image,
+                    overwrite=True,
+                )
