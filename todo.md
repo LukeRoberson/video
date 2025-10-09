@@ -52,6 +52,7 @@
   - [x] Subheadings
   - [x] Strong title for a video
   - [x] Videos in a grid
+- [ ] Add change log to about page
 
 </br></br>
 

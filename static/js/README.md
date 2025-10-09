@@ -5,13 +5,22 @@ This document outlines the JavaScript architecture, coding patterns, and documen
 
 ## File Organization
 
-### Core Files (JavaScript)
-- `videoPlayer.js` - Complete video player implementation with Video.js integration
-- `metadata.js` - Video metadata display and interaction
-- `videoAdd.js` - Video addition and management interface
-
 ### TypeScript Files
-The following files have been migrated to TypeScript for enhanced type safety and developer experience:
+All core files have been migrated to TypeScript for enhanced type safety and developer experience:
+
+#### Video Player & Media Management
+- `videoPlayer.ts` - Complete video player implementation with Video.js integration, includes:
+  - GlobalPlayerManager - Prevents multiple simultaneous playback
+  - VideoPlayerCore - Core player initialization and TV mode detection
+  - VideoContextMenu - Right-click context menu for timestamped URL sharing
+  - ProgressTracker - Progress tracking and automatic watched status management
+  - UrlTimeHandler - URL timestamp parameter handling (t=seconds)
+  - CustomControls - Theatre mode button and keyboard controls
+  - SubtitleManager - Automatic subtitle loading
+
+#### Admin & Metadata Management
+- `metadata.ts` - Video metadata and scripture text form submission handling
+- `videoAdd.ts` - Video addition from CSV and management interface
 
 #### UI Components
 - `homeThumbs.ts` - Home page thumbnail carousel management with dynamic loading

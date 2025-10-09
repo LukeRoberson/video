@@ -1,5 +1,5 @@
 /**
- * @file videoPlayer.js
+ * @file videoPlayer.ts
  * @description Complete video player implementation with modular class-based architecture
  *
  * This file provides a comprehensive video player solution built on video.js with
@@ -12,20 +12,62 @@
  * - Form-based watched/unwatched status toggling
  *
  * @requires videojs
- * 
- * @example
- * // HTML requirements:
- * // <video id="player" data-video-id="123" data-profile-id="456" data-current-time="120">
- * // <form id="markWatchedForm" data-api-url="/api/profile/mark_watched" data-video-id="123">
- * 
- * // Classes are automatically initialized on DOMContentLoaded
- * 
- * @see {@link VideoPlayerCore} - Core player initialization
- * @see {@link VideoContextMenu} - Right-click context menu
- * @see {@link ProgressTracker} - Progress and watched status tracking  
- * @see {@link UrlTimeHandler} - URL timestamp handling
- * @see {@link CustomControls} - Theatre mode and keyboard controls
  */
+
+// Declare videojs as a global variable
+declare const videojs: any;
+
+/**
+ * Interface for video.js player instance
+ */
+interface VideoJsPlayer {
+    ready(callback: () => void): void;
+    on(event: string, callback: (...args: any[]) => void): void;
+    one(event: string, callback: (...args: any[]) => void): void;
+    off(event: string, callback?: (...args: any[]) => void): void;
+    currentTime(): number;
+    currentTime(seconds: number): VideoJsPlayer;
+    duration(): number;
+    paused(): boolean;
+    play(): Promise<void>;
+    pause(): void;
+    volume(): number;
+    volume(level: number): VideoJsPlayer;
+    isFullscreen(): boolean;
+    requestFullscreen(): void;
+    userActive(active: boolean): void;
+    el(): HTMLElement;
+    tech(): { el(): HTMLVideoElement };
+    controlBar: any;
+    bigPlayButton: any;
+    posterImage: any;
+    getChild(name: string): any;
+    addRemoteTextTrack(options: TextTrackOptions, manualCleanup: boolean): void;
+}
+
+/**
+ * Interface for text track options
+ */
+interface TextTrackOptions {
+    kind: string;
+    label: string;
+    srclang: string;
+    src: string;
+    default: boolean;
+}
+
+/**
+ * Interface for API response structure
+ */
+interface ApiResponse {
+    success: boolean;
+    [key: string]: any;
+}
+
+/**
+ * Type for snippet source
+ */
+type SnippetSource = 'url' | 'theme' | null;
 
 
 /**
@@ -33,31 +75,24 @@
  * 
  * Manages all video player instances and ensures only one video plays at a time
  * by automatically pausing other players when a new one starts playing.
- * 
- * @class GlobalPlayerManager
- * @example
- * // Automatically initialized - no direct instantiation needed
- * // Registers players automatically when VideoPlayerCore instances are created
  */
 class GlobalPlayerManager {
+    /** Singleton instance */
+    private static instance: GlobalPlayerManager;
+    
+    /** Array of all registered video.js player instances */
+    private players: VideoJsPlayer[] = [];
+
     /**
      * Creates the singleton instance of GlobalPlayerManager.
-     * 
-     * @memberof GlobalPlayerManager
      */
-    constructor() {
-        /** @type {Array<Object>} Array of all registered video.js player instances */
-        this.players = [];
-    }
+    private constructor() {}
 
     /**
      * Gets the singleton instance of GlobalPlayerManager.
-     * 
-     * @static
-     * @returns {GlobalPlayerManager} The singleton instance
-     * @memberof GlobalPlayerManager
+     * @returns The singleton instance
      */
-    static getInstance() {
+    static getInstance(): GlobalPlayerManager {
         if (!GlobalPlayerManager.instance) {
             GlobalPlayerManager.instance = new GlobalPlayerManager();
         }
@@ -66,11 +101,9 @@ class GlobalPlayerManager {
 
     /**
      * Registers a player instance and sets up play event monitoring.
-     * 
-     * @param {Object} player - The video.js player instance to register
-     * @memberof GlobalPlayerManager
+     * @param player - The video.js player instance to register
      */
-    registerPlayer(player) {
+    registerPlayer(player: VideoJsPlayer): void {
         this.players.push(player);
         
         // Listen for play event and pause other players
@@ -86,11 +119,9 @@ class GlobalPlayerManager {
 
     /**
      * Unregisters a player instance from management.
-     * 
-     * @param {Object} player - The video.js player instance to unregister
-     * @memberof GlobalPlayerManager
+     * @param player - The video.js player instance to unregister
      */
-    unregisterPlayer(player) {
+    unregisterPlayer(player: VideoJsPlayer): void {
         const index = this.players.indexOf(player);
         if (index > -1) {
             this.players.splice(index, 1);
@@ -99,11 +130,9 @@ class GlobalPlayerManager {
 
     /**
      * Pauses all players except the currently playing one.
-     * 
-     * @param {Object} currentPlayer - The player that should continue playing
-     * @memberof GlobalPlayerManager
+     * @param currentPlayer - The player that should continue playing
      */
-    pauseOtherPlayers(currentPlayer) {
+    pauseOtherPlayers(currentPlayer: VideoJsPlayer): void {
         this.players.forEach(player => {
             if (player && player !== currentPlayer && !player.paused()) {
                 player.pause();
@@ -118,53 +147,52 @@ class GlobalPlayerManager {
  * 
  * Handles the main video.js player setup, TV mode detection,
  * and responsive settings configuration.
- * 
- * @class VideoPlayerCore
- * @example
- * const playerCore = new VideoPlayerCore('my-player');
- * const player = playerCore.initialize();
  */
 class VideoPlayerCore {
+    /** The HTML element ID for the video player */
+    private playerId: string;
+    
+    /** The video.js player instance */
+    private player: VideoJsPlayer | null = null;
+    
+    /** The container element */
+    public container: HTMLElement | null = null;
+    
+    /** Whether the device is detected as a TV */
+    private isTV: boolean;
+    
+    /** Whether the device is a mobile device */
+    private isMobile: boolean;
+    
+    /** Reference to the global player manager */
+    private globalManager: GlobalPlayerManager;
+
     /**
      * Creates an instance of VideoPlayerCore.
-     * 
-     * @param {string} [playerId='player'] - The ID of the video element
-     * @memberof VideoPlayerCore
-     */    
-    constructor(playerId = 'player') {
-        /** @type {string} The HTML element ID for the video player */
+     * @param playerId - The ID of the video element
+     */
+    constructor(playerId: string = 'player') {
         this.playerId = playerId;
-        /** @type {Object|null} The video.js player instance */
-        this.player = null;
-        /** @type {HTMLElement|null} The container element */
-        this.container = null;
-        /** @type {boolean} Whether the device is detected as a TV */
         this.isTV = window.tvDetection?.isTV() || false;
-        /** @type {boolean} Whether the device is a mobile device */
         this.isMobile = this.detectMobile();
-        /** @type {GlobalPlayerManager} Reference to the global player manager */
         this.globalManager = GlobalPlayerManager.getInstance();
     }
 
     /**
      * Detects if the device is a mobile device.
-     * 
-     * @returns {boolean} True if mobile device detected
-     * @private
-     * @memberof VideoPlayerCore
+     * @returns True if mobile device detected
      */
-    detectMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
+    private detectMobile(): boolean {
+        const mobileTest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const touchTest = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
+        return mobileTest || Boolean(touchTest);
     }
 
     /**
      * Initializes the video.js player with configuration options.
-     * 
-     * @returns {Object} The initialized video.js player instance
-     * @memberof VideoPlayerCore
-     */    
-    initialize() {
+     * @returns The initialized video.js player instance
+     */
+    initialize(): VideoJsPlayer {
         this.player = videojs(this.playerId, {
             controlBar: {
                 skipButtons: { forward: 10, backward: 5 },
@@ -185,57 +213,61 @@ class VideoPlayerCore {
             })
         });
 
-        this.container = document.getElementById(this.playerId).parentElement;
+        this.container = document.getElementById(this.playerId)?.parentElement || null;
         this.applyTVSettings();
         this.setupTVModeListener();
         this.setupMobileFullscreen();
-        this.setupTouchPlayPause(); // Add touch play/pause support
+        this.setupTouchPlayPause();
         
         // Register with global manager for multi-player coordination
-        this.globalManager.registerPlayer(this.player);
+        if (this.player) {
+            this.globalManager.registerPlayer(this.player);
+        }
         
-        return this.player;
+        return this.player!;
     }
 
     /**
      * Sets up touch-based play/pause functionality for mobile devices.
-     * 
-     * @private
-     * @memberof VideoPlayerCore
      */
-    setupTouchPlayPause() {
+    private setupTouchPlayPause(): void {
+        if (!this.player) return;
+        
         // Check if device has touch capability
         const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
         if (!hasTouchSupport) return;
     
         this.player.ready(() => {
+            if (!this.player) return;
+            
             const videoElement = this.player.tech().el();
             const playerElement = this.player.el();
             let touchStartTime = 0;
             let touchMoved = false;
     
             // Handle touch start
-            const handleTouchStart = (e) => {
+            const handleTouchStart = (_e: TouchEvent): void => {
                 touchStartTime = Date.now();
                 touchMoved = false;
             };
     
             // Handle touch move (to detect if user is scrolling)
-            const handleTouchMove = (e) => {
+            const handleTouchMove = (_e: TouchEvent): void => {
                 touchMoved = true;
             };
     
             // Handle touch end - toggle play/pause if it was a tap
-            const handleTouchEnd = (e) => {
+            const handleTouchEnd = (e: TouchEvent): void => {
+                if (!this.player) return;
+                
                 const touchEndTime = Date.now();
                 const touchDuration = touchEndTime - touchStartTime;
                 
-                // Only trigger play/pause if:
-                // 1. Touch was quick (less than 300ms)
-                // 2. User didn't move (not a scroll gesture)
-                // 3. Not touching control bar elements
-                if (touchDuration < 300 && !touchMoved && !e.target.closest('.vjs-control-bar')) {
+                const target = e.target as HTMLElement;
+                
+                // Only trigger play/pause if conditions are met
+                if (touchDuration < 300 && !touchMoved && !target.closest('.vjs-control-bar')) {
                     e.preventDefault();
                     e.stopPropagation();
                     
@@ -271,20 +303,21 @@ class VideoPlayerCore {
     
     /**
      * Sets up automatic fullscreen behavior for mobile devices.
-     * 
-     * @private
-     * @memberof VideoPlayerCore
      */
-    setupMobileFullscreen() {
-        if (!this.isMobile) return;
+    private setupMobileFullscreen(): void {
+        if (!this.isMobile || !this.player) return;
 
         this.player.ready(() => {
+            if (!this.player) return;
+            
             // Enter fullscreen when play is triggered on mobile
             this.player.on('play', () => {
+                if (!this.player) return;
+                
                 if (!this.player.isFullscreen()) {
                     // Small delay to ensure video is actually playing
                     setTimeout(() => {
-                        if (!this.player.paused()) {
+                        if (this.player && !this.player.paused()) {
                             this.player.requestFullscreen();
                         }
                     }, 100);
@@ -295,22 +328,23 @@ class VideoPlayerCore {
 
     /**
      * Applies TV-specific settings to the player interface.
-     * 
-     * @private
-     * @memberof VideoPlayerCore
-     */    
-    applyTVSettings() {
+     */
+    private applyTVSettings(): void {
         if (!this.isTV || !this.player) return;
 
         this.player.ready(() => {
+            if (!this.player) return;
+            
             const controlBar = this.player.controlBar.el();
             controlBar.style.height = '60px';
             controlBar.style.fontSize = '1.2em';
             
             this.player.off('userinactive');
             this.player.on('userinactive', () => {
+                if (!this.player) return;
+                
                 setTimeout(() => {
-                    if (!this.player.paused()) {
+                    if (this.player && !this.player.paused()) {
                         this.player.userActive(false);
                     }
                 }, 8000);
@@ -320,13 +354,11 @@ class VideoPlayerCore {
 
     /**
      * Sets up event listener for TV mode changes.
-     * 
-     * @private
-     * @memberof VideoPlayerCore
-     */    
-    setupTVModeListener() {
-        window.addEventListener('tvModeChanged', (e) => {
-            this.isTV = e.detail.isTV;
+     */
+    private setupTVModeListener(): void {
+        window.addEventListener('tvModeChanged', (e: Event) => {
+            const customEvent = e as any;
+            this.isTV = customEvent.detail.isTV;
             this.applyTVSettings();
         });
     }
@@ -338,95 +370,82 @@ class VideoPlayerCore {
  * 
  * Provides a context menu when right-clicking on the video progress bar,
  * allowing users to copy timestamped URLs for sharing specific moments.
- * 
- * @class VideoContextMenu
- * @example
- * new VideoContextMenu(player); // Adds right-click menu to progress bar
  */
 class VideoContextMenu {
+    /** The video.js player instance */
+    private player: VideoJsPlayer;
+    
+    /** The context menu DOM element */
+    private contextMenu: HTMLElement;
+
     /**
      * Creates an instance of VideoContextMenu.
-     * 
-     * @param {Object} player - The video.js player instance
-     * @memberof VideoContextMenu
+     * @param player - The video.js player instance
      */
-    constructor(player) {
-        /** @type {Object} The video.js player instance */
+    constructor(player: VideoJsPlayer) {
         this.player = player;
-        /** @type {HTMLElement|null} The context menu DOM element */
-        this.contextMenu = null;
+        this.contextMenu = this.createContextMenu();
         this.init();
     }
 
     /**
      * Initializes the context menu by creating DOM elements and setting up events.
-     * 
-     * @private
-     * @memberof VideoContextMenu
      */
-    init() {
-        this.createContextMenu();
+    private init(): void {
         this.setupEventListeners();
     }
 
     /**
      * Creates the context menu DOM structure and appends it to the document body.
-     * 
-     * @private
-     * @memberof VideoContextMenu
+     * @returns The created context menu element
      */
-    createContextMenu() {
-        this.contextMenu = document.createElement('div');
-        this.contextMenu.className = 'video-context-menu';
+    private createContextMenu(): HTMLElement {
+        const contextMenu = document.createElement('div');
+        contextMenu.className = 'video-context-menu';
         
         const menuItem = document.createElement('div');
         menuItem.textContent = 'Copy link at current time';
         menuItem.className = 'video-context-menu-item';
 
-        this.contextMenu.appendChild(menuItem);
-        document.body.appendChild(this.contextMenu);
+        contextMenu.appendChild(menuItem);
+        document.body.appendChild(contextMenu);
+        
+        return contextMenu;
     }
 
     /**
      * Sets up event listeners for right-click, menu interactions, and hiding the menu.
-     * 
-     * @private
-     * @memberof VideoContextMenu
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         const progressControl = this.player.controlBar.progressControl.el();
-        const menuItem = this.contextMenu.querySelector('.video-context-menu-item');
+        const menuItem = this.contextMenu.querySelector('.video-context-menu-item') as HTMLElement;
 
         // Right-click handler
-        progressControl.addEventListener('contextmenu', (e) => this.showMenu(e));
+        progressControl.addEventListener('contextmenu', (e: MouseEvent) => this.showMenu(e));
         
         // Prevent right-click issues
         ['mousedown', 'mouseup'].forEach(event => {
-            progressControl.addEventListener(event, (e) => {
+            progressControl.addEventListener(event, (e: MouseEvent) => {
                 if (e.button === 2) {
                     e.preventDefault();
                     e.stopPropagation();
-                    return false;
                 }
             });
         });
 
         // Menu item click
-        menuItem.addEventListener('click', (e) => this.handleMenuClick(e));
+        menuItem.addEventListener('click', (e: MouseEvent) => this.handleMenuClick(e));
         
         // Hide menu when clicking elsewhere
-        document.addEventListener('click', (e) => this.hideMenu(e), true);
+        document.addEventListener('click', (e: MouseEvent) => this.hideMenu(e), true);
     }
 
     /**
      * Shows the context menu at the cursor position.
-     * 
-     * @param {MouseEvent} e - The right-click mouse event
-     * @returns {boolean} Always returns false to prevent default context menu
-     * @private
-     * @memberof VideoContextMenu
+     * @param e - The right-click mouse event
+     * @returns Always returns false to prevent default context menu
      */
-    showMenu(e) {
+    private showMenu(e: MouseEvent): boolean {
         e.preventDefault();
         
         this.player.el().style.pointerEvents = 'none';
@@ -441,12 +460,9 @@ class VideoContextMenu {
 
     /**
      * Adjusts the menu position to ensure it stays within the viewport.
-     * 
-     * @param {MouseEvent} e - The original mouse event for position reference
-     * @private
-     * @memberof VideoContextMenu
+     * @param e - The original mouse event for position reference
      */
-    adjustMenuPosition(e) {
+    private adjustMenuPosition(e: MouseEvent): void {
         const rect = this.contextMenu.getBoundingClientRect();
         if (rect.right > window.innerWidth) {
             this.contextMenu.style.left = (e.pageX - rect.width) + 'px';
@@ -458,12 +474,9 @@ class VideoContextMenu {
 
     /**
      * Handles menu item click by copying timestamped URL to clipboard.
-     * 
-     * @param {MouseEvent} e - The click event on the menu item
-     * @private
-     * @memberof VideoContextMenu
+     * @param e - The click event on the menu item
      */
-    handleMenuClick(e) {
+    private handleMenuClick(e: MouseEvent): void {
         e.preventDefault();
         e.stopPropagation();
        
@@ -481,14 +494,11 @@ class VideoContextMenu {
 
     /**
      * Hides the context menu when clicking outside of it.
-     * 
-     * @param {MouseEvent} e - The click event
-     * @private
-     * @memberof VideoContextMenu
+     * @param e - The click event
      */
-    hideMenu(e) {
+    private hideMenu(e: MouseEvent): void {
         if (this.contextMenu.style.display === 'block') {
-            if (!this.contextMenu.contains(e.target)) {
+            if (!this.contextMenu.contains(e.target as Node)) {
                 this.hideMenuAndReEnablePlayer();
                 e.preventDefault();
                 e.stopPropagation();
@@ -498,37 +508,28 @@ class VideoContextMenu {
 
     /**
      * Hides the context menu and re-enables player pointer events.
-     * 
-     * @private
-     * @memberof VideoContextMenu
      */
-    hideMenuAndReEnablePlayer() {
+    private hideMenuAndReEnablePlayer(): void {
         this.contextMenu.style.display = 'none';
         this.player.el().style.pointerEvents = '';
     }
 
     /**
      * Generates a timestamped URL with the current video playback time.
-     * 
-     * @returns {string} The URL with 't' parameter set to current time in seconds
-     * @private
-     * @memberof VideoContextMenu
+     * @returns The URL with 't' parameter set to current time in seconds
      */
-    getTimestampedUrl() {
+    private getTimestampedUrl(): string {
         const currentTime = Math.floor(this.player.currentTime());
         const url = new URL(window.location.href);
-        url.searchParams.set('t', currentTime);
+        url.searchParams.set('t', currentTime.toString());
         return url.toString();
     }
 
     /**
      * Shows a temporary notification message to the user.
-     * 
-     * @param {string} message - The message to display in the notification
-     * @private
-     * @memberof VideoContextMenu
+     * @param message - The message to display in the notification
      */
-    showNotification(message) {
+    private showNotification(message: string): void {
         const notification = document.createElement('div');
         notification.textContent = message;
         notification.className = 'video-notification';
@@ -554,41 +555,46 @@ class VideoContextMenu {
  * 
  * Tracks video playback progress, saves position for resume functionality,
  * and automatically marks videos as watched when 96% complete.
- * 
- * @class ProgressTracker
- * @example
- * new ProgressTracker(player, 123, 456, 120); // Start at 2:00
  */
 class ProgressTracker {
+    /** The video.js player instance */
+    private player: VideoJsPlayer;
+    
+    /** The video ID for tracking */
+    private videoId: number;
+    
+    /** The user profile ID */
+    private profileId: number;
+    
+    /** Initial playback position in seconds */
+    private initialTime: number;
+    
+    /** Timestamp of last progress update */
+    private lastUpdateTime: number = 0;
+    
+    /** Whether video has been marked as watched */
+    private hasMarkedWatched: boolean = false;
+
     /**
      * Creates an instance of ProgressTracker.
-     * 
-     * @param {Object} player - The video.js player instance
-     * @param {number} videoId - The video ID for tracking
-     * @param {number} profileId - The user profile ID
-     * @param {number} [initialTime=0] - Initial playback position in seconds
-     * @memberof ProgressTracker
+     * @param player - The video.js player instance
+     * @param videoId - The video ID for tracking
+     * @param profileId - The user profile ID
+     * @param initialTime - Initial playback position in seconds
      */
-    constructor(player, videoId, profileId, initialTime = 0) {
+    constructor(player: VideoJsPlayer, videoId: number, profileId: number, initialTime: number = 0) {
         this.player = player;
         this.videoId = videoId;
         this.profileId = profileId;
         this.initialTime = initialTime;
-        /** @type {number} Timestamp of last progress update */
-        this.lastUpdateTime = 0;
-        /** @type {boolean} Whether video has been marked as watched */
-        this.hasMarkedWatched = false;
         
         this.init();
     }
 
     /**
      * Initializes the progress tracker and validates required parameters.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    init() {
+    private init(): void {
         if (!this.profileId || !this.videoId) {
             console.error('Missing profileId or videoId. Progress tracking will not work.');
             return;
@@ -599,11 +605,8 @@ class ProgressTracker {
 
     /**
      * Sets up event listeners for video player events.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         this.player.on('loadedmetadata', () => this.setInitialPosition());
         this.player.on('play', () => this.removeProgressOverlay());
         this.player.on('timeupdate', () => this.trackProgress());
@@ -612,11 +615,8 @@ class ProgressTracker {
 
     /**
      * Sets the initial playback position when video metadata is loaded.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    setInitialPosition() {
+    private setInitialPosition(): void {
         if (this.initialTime > 0) {
             console.log('Setting playback position to:', this.initialTime);
             this.player.currentTime(this.initialTime);
@@ -625,11 +625,8 @@ class ProgressTracker {
 
     /**
      * Removes the progress overlay element from the DOM when playback starts.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    removeProgressOverlay() {
+    private removeProgressOverlay(): void {
         const progressOverlay = document.querySelector('.progress-overlay');
         if (progressOverlay) {
             progressOverlay.remove();
@@ -640,11 +637,8 @@ class ProgressTracker {
     /**
      * Tracks video playback progress and automatically marks as watched.
      * Updates progress every 2 seconds and marks as watched at 96% completion.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    trackProgress() {
+    private trackProgress(): void {
         const currentTime = Math.floor(this.player.currentTime());
         const duration = Math.floor(this.player.duration());
         const now = Date.now();
@@ -665,12 +659,9 @@ class ProgressTracker {
 
     /**
      * Sends progress update to the server API.
-     * 
-     * @private
-     * @param {number} currentTime - The current playback time in seconds
-     * @memberof ProgressTracker
+     * @param currentTime - The current playback time in seconds
      */
-    updateProgress(currentTime) {
+    private updateProgress(currentTime: number): void {
         fetch('/api/profile/in_progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -684,11 +675,8 @@ class ProgressTracker {
     /**
      * Marks the video as watched and removes it from in-progress list.
      * Sends API requests to update watched status and clean up progress tracking.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    markAsWatched() {
+    private markAsWatched(): void {
         this.hasMarkedWatched = true;
 
         // Remove from in-progress
@@ -709,14 +697,11 @@ class ProgressTracker {
     /**
      * Handles video playback completion.
      * Removes theatre mode class from container if active.
-     * 
-     * @private
-     * @memberof ProgressTracker
      */
-    handleVideoEnd() {
+    private handleVideoEnd(): void {
         console.log('Video playback completed.');
         const container = this.player.el().parentElement;
-        if (container.classList.contains('theatre-mode')) {
+        if (container && container.classList.contains('theatre-mode')) {
             container.classList.remove('theatre-mode');
         }
     }
@@ -729,44 +714,36 @@ class ProgressTracker {
  * Automatically detects timestamp parameters in the URL or data attributes and
  * creates video snippets by jumping to start time and pausing at end time.
  * Supports both URL parameters (?t=60&end=120) and theme data attributes.
- * 
- * @class UrlTimeHandler
- * @example
- * // URL: /video/123?t=60&end=120 - 1 minute snippet from 1:00 to 2:00
- * // OR: <video data-snippet-start="60" data-snippet-end="120">
- * new UrlTimeHandler(player);
  */
 class UrlTimeHandler {
+    /** The video.js player instance */
+    private player: VideoJsPlayer;
+    
+    /** End time for snippet in seconds */
+    private endTime: number | null = null;
+    
+    /** Whether we're currently in snippet mode */
+    private isSnippet: boolean = false;
+    
+    /** Snippet indicator element */
+    private snippetIndicator: HTMLElement | null = null;
+    
+    /** Source of snippet ('url' or 'theme') */
+    private snippetSource: SnippetSource = null;
+
     /**
      * Creates an instance of UrlTimeHandler.
-     * 
-     * @param {Object} player - The video.js player instance
-     * @memberof UrlTimeHandler
+     * @param player - The video.js player instance
      */
-    constructor(player) {
-        /** @type {Object} The video.js player instance */
+    constructor(player: VideoJsPlayer) {
         this.player = player;
-        /** @type {number|null} End time for snippet in seconds */
-        this.endTime = null;
-        /** @type {boolean} Whether we're currently in snippet mode */
-        this.isSnippet = false;
-        /** @type {HTMLElement|null} Snippet indicator element */
-        this.snippetIndicator = null;
-        /** @type {string} Source of snippet ('url' or 'theme') */
-        this.snippetSource = null;
         this.init();
     }
 
     /**
      * Initializes the URL time handler by checking for 't' and 'end' parameters or data attributes.
-     *  't' and 'end' are URL parameters
-     *  'data-snippet-start' and 'data-snippet-end' are data attributes on the video element
-     *  If both are present, URL parameters take priority.
-     * 
-     * @private
-     * @memberof UrlTimeHandler
      */
-    init() {
+    private init(): void {
         console.log('UrlTimeHandler init() called');
         
         // Check URL parameters first (takes priority)
@@ -823,12 +800,10 @@ class UrlTimeHandler {
 
     /**
      * Sets up a video snippet with start and end times.
-     * 
-     * @param {number} startTime - The start time in seconds
-     * @param {number} endTime - The end time in seconds
-     * @memberof UrlTimeHandler
+     * @param startTime - The start time in seconds
+     * @param endTime - The end time in seconds
      */
-    setupSnippet(startTime, endTime) {
+    private setupSnippet(startTime: number, endTime: number): void {
         this.endTime = endTime;
         this.isSnippet = true;
         
@@ -841,11 +816,9 @@ class UrlTimeHandler {
 
     /**
      * Jumps the video to a specific time and prepares for playback.
-     * 
-     * @param {number} time - The time in seconds to jump to
-     * @memberof UrlTimeHandler
+     * @param time - The time in seconds to jump to
      */
-    jumpToTime(time) {
+    private jumpToTime(time: number): void {
         this.player.ready(() => {
             this.player.currentTime(time);
             this.player.pause();
@@ -861,13 +834,10 @@ class UrlTimeHandler {
 
     /**
      * Creates visual indicator for snippet mode.
-     * 
-     * @private
-     * @param {number} startTime - Snippet start time
-     * @param {number} endTime - Snippet end time
-     * @memberof UrlTimeHandler
+     * @param startTime - Snippet start time
+     * @param endTime - Snippet end time
      */
-    createSnippetIndicator(startTime, endTime) {
+    private createSnippetIndicator(startTime: number, endTime: number): void {
         console.log('Creating snippet indicator - start:', startTime, 'end:', endTime, 'source:', this.snippetSource);
         
         // Create snippet info overlay
@@ -895,7 +865,7 @@ class UrlTimeHandler {
         
         // Add close button event listener for URL-based snippets
         if (this.snippetSource === 'url') {
-            const closeBtn = this.snippetIndicator.querySelector('.snippet-close');
+            const closeBtn = this.snippetIndicator.querySelector('.snippet-close') as HTMLElement;
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => this.exitSnippetMode());
             }
@@ -907,16 +877,13 @@ class UrlTimeHandler {
 
     /**
      * Highlights the snippet range on the progress bar.
-     * 
-     * @private
-     * @param {number} startTime - Snippet start time
-     * @param {number} endTime - Snippet end time
-     * @memberof UrlTimeHandler
+     * @param startTime - Snippet start time
+     * @param endTime - Snippet end time
      */
-    highlightSnippetRange(startTime, endTime) {
+    private highlightSnippetRange(startTime: number, endTime: number): void {
         console.log('highlightSnippetRange called - start:', startTime, 'end:', endTime);
         
-        const createHighlight = () => {
+        const createHighlight = (): void => {
             const duration = this.player.duration();
             console.log('Player duration:', duration);
             
@@ -956,13 +923,10 @@ class UrlTimeHandler {
     
     /**
      * Sets up snippet-specific controls and behavior.
-     * 
-     * @private
-     * @memberof UrlTimeHandler
      */
-    setupSnippetControls() {
+    private setupSnippetControls(): void {
         // Monitor playback to pause at end time
-        const checkEndTime = () => {
+        const checkEndTime = (): void => {
             if (this.isSnippet && this.endTime && this.player.currentTime() >= this.endTime) {
                 this.player.pause();
                 this.player.currentTime(this.endTime);
@@ -976,20 +940,24 @@ class UrlTimeHandler {
             if (!this.isSnippet) return;
             
             const currentTime = this.player.currentTime();
-            let startTime;
+            let startTime: number | null = null;
 
             if (this.snippetSource === 'url') {
                 const urlParams = new URLSearchParams(window.location.search);
-                startTime = parseInt(urlParams.get('t'), 10);
+                const startParam = urlParams.get('t');
+                startTime = startParam ? parseInt(startParam, 10) : null;
             } else if (this.snippetSource === 'theme') {
                 const videoElement = this.player.el();
-                startTime = parseInt(videoElement.getAttribute('data-snippet-start'), 10);
+                const startAttr = videoElement.getAttribute('data-snippet-start');
+                startTime = startAttr ? parseInt(startAttr, 10) : null;
             }
             
-            if (currentTime < startTime) {
-                this.player.currentTime(startTime);
-            } else if (currentTime > this.endTime) {
-                this.player.currentTime(this.endTime);
+            if (startTime !== null && this.endTime !== null) {
+                if (currentTime < startTime) {
+                    this.player.currentTime(startTime);
+                } else if (currentTime > this.endTime) {
+                    this.player.currentTime(this.endTime);
+                }
             }
         });
     }
@@ -997,10 +965,8 @@ class UrlTimeHandler {
     /**
      * Exits snippet mode and returns to normal video playback.
      * Only works for URL-based snippets, not theme-based ones.
-     * 
-     * @memberof UrlTimeHandler
      */
-    exitSnippetMode() {
+    private exitSnippetMode(): void {
         // Only allow exiting URL-based snippets
         if (this.snippetSource !== 'url') return;
 
@@ -1020,20 +986,17 @@ class UrlTimeHandler {
         }
         
         // Update URL to remove end parameter
-        const url = new URL(window.location);
+        const url = new URL(window.location.href);
         url.searchParams.delete('end');
-        window.history.replaceState({}, '', url);
+        window.history.replaceState({}, '', url.toString());
     }
 
     /**
      * Formats seconds into MM:SS or HH:MM:SS format.
-     * 
-     * @private
-     * @param {number} seconds - Time in seconds
-     * @returns {string} Formatted time string
-     * @memberof UrlTimeHandler
+     * @param seconds - Time in seconds
+     * @returns Formatted time string
      */
-    formatTime(seconds) {
+    private formatTime(seconds: number): string {
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
@@ -1049,54 +1012,51 @@ class UrlTimeHandler {
  * Custom player controls and buttons.
  * 
  * Adds custom functionality to the video player including theatre mode button
- * and keyboard controls for TV devices. Enhances the default video.js controls
- * with additional user interface elements.
- * 
- * @class CustomControls
- * @example
- * new CustomControls(player, container); // Adds theatre button and keyboard controls
+ * and keyboard controls for TV devices.
  */
 class CustomControls {
+    /** The video.js player instance */
+    private player: VideoJsPlayer;
+    
+    /** The container element for the player */
+    private container: HTMLElement;
+    
+    /** Whether the device is detected as a TV */
+    private isTV: boolean;
+    
+    /** Whether the device is a mobile device */
+    private isMobile: boolean;
+    
+    /** Bound click handler for theatre mode exit */
+    private theatreModeClickHandler: ((e: MouseEvent) => void) | null = null;
+
     /**
      * Creates an instance of CustomControls.
-     * 
-     * @param {Object} player - The video.js player instance
-     * @param {HTMLElement} container - The container element for the player
-     * @memberof CustomControls
+     * @param player - The video.js player instance
+     * @param container - The container element for the player
      */
-    constructor(player, container) {
-        /** @type {Object} The video.js player instance */
+    constructor(player: VideoJsPlayer, container: HTMLElement) {
         this.player = player;
-        /** @type {HTMLElement} The container element for the player */
         this.container = container;
-        /** @type {boolean} Whether the device is detected as a TV */
         this.isTV = window.tvDetection?.isTV() || false;
-        /** @type {boolean} Whether the device is a mobile device */
         this.isMobile = this.detectMobile();
-        /** @type {Function|null} Bound click handler for theatre mode exit */
-        this.theatreModeClickHandler = null;
         this.init();
     }
 
     /**
      * Detects if the device is a mobile device.
-     * 
-     * @returns {boolean} True if mobile device detected
-     * @private
-     * @memberof CustomControls
+     * @returns True if mobile device detected
      */
-    detectMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
+    private detectMobile(): boolean {
+        const mobileTest = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const touchTest = navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
+        return mobileTest || Boolean(touchTest);
     }
 
     /**
      * Initializes custom controls by adding buttons and setting up keyboard controls.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    init() {
+    private init(): void {
         // Only add theatre button if not on mobile
         if (!this.isMobile) {
             this.addTheatreButton();
@@ -1115,19 +1075,16 @@ class CustomControls {
 
     /**
      * Sets up click handler for exiting theatre mode when clicking outside the player.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    setupTheatreModeClickHandler() {
-        this.theatreModeClickHandler = (e) => {
+    private setupTheatreModeClickHandler(): void {
+        this.theatreModeClickHandler = (e: MouseEvent): void => {
             // Only handle clicks when in theatre mode
             if (!this.container.classList.contains('theatre-mode')) {
                 return;
             }
             
             // Check if click is outside the video player container
-            if (!this.container.contains(e.target)) {
+            if (!this.container.contains(e.target as Node)) {
                 this.exitTheatreMode();
             }
         };
@@ -1146,31 +1103,22 @@ class CustomControls {
 
     /**
      * Exits theatre mode by removing the theatre-mode class from the container.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    exitTheatreMode() {
+    private exitTheatreMode(): void {
         this.container.classList.remove('theatre-mode');
     }
 
     /**
      * Enters theatre mode by adding the theatre-mode class to the container.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    enterTheatreMode() {
+    private enterTheatreMode(): void {
         this.container.classList.add('theatre-mode');
     }
 
     /**
      * Toggles theatre mode on/off.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    toggleTheatreMode() {
+    private toggleTheatreMode(): void {
         if (this.container.classList.contains('theatre-mode')) {
             this.exitTheatreMode();
         } else {
@@ -1180,11 +1128,8 @@ class CustomControls {
 
     /**
      * Fallback method to hide buttons on mobile (safety net).
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    hideMobileButtonsFallback() {
+    private hideMobileButtonsFallback(): void {
         // Hide picture-in-picture button on mobile (fallback)
         const pipButton = this.player.controlBar.getChild('PictureInPictureToggle');
         if (pipButton) {
@@ -1200,25 +1145,20 @@ class CustomControls {
 
     /**
      * Adds a theatre mode button to the video player control bar.
-     * Creates a custom video.js button component that toggles theatre mode
-     * by adding/removing the 'theatre-mode' class from the container.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    addTheatreButton() {
+    private addTheatreButton(): void {
         const Button = videojs.getComponent('Button');
         const customControls = this; // Capture reference to CustomControls instance
         
         class TheatreButton extends Button {
-            constructor(player, options) {
+            constructor(player: VideoJsPlayer, options: any) {
                 super(player, options);
-                this.controlText("Theatre Mode");
-                this.addClass('vjs-theatre-button');
+                (this as any).controlText("Theatre Mode");
+                (this as any).addClass('vjs-theatre-button');
             }
             
-            handleClick() {
-                customControls.toggleTheatreMode(); // Use CustomControls method
+            handleClick(): void {
+                customControls.toggleTheatreMode();
             }
         }
     
@@ -1226,7 +1166,7 @@ class CustomControls {
         
         const controlBar = this.player.getChild('controlBar');
         const fullscreenIndex = controlBar.children()
-            .findIndex(child => child.name && child.name() === 'FullscreenToggle');
+            .findIndex((child: any) => child.name && child.name() === 'FullscreenToggle');
         const insertIndex = fullscreenIndex > 0 ? fullscreenIndex : controlBar.children().length - 1;
         
         controlBar.addChild('TheatreButton', {}, insertIndex);
@@ -1234,17 +1174,12 @@ class CustomControls {
 
     /**
      * Sets up keyboard controls for TV devices.
-     * Adds arrow key navigation for seeking and volume control,
-     * plus Enter key for play/pause functionality.
-     * 
-     * @private
-     * @memberof CustomControls
      */
-    setupKeyboardControls() {
-        document.addEventListener('keydown', (e) => {
-            if (!document.activeElement?.closest('.video-js') || !this.isTV) return;
+    private setupKeyboardControls(): void {
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (!(document.activeElement as HTMLElement)?.closest('.video-js') || !this.isTV) return;
 
-            const actions = {
+            const actions: Record<string, () => void> = {
                 'ArrowLeft': () => this.player.currentTime(Math.max(0, this.player.currentTime() - 10)),
                 'ArrowRight': () => this.player.currentTime(this.player.currentTime() + 10),
                 'ArrowUp': () => this.player.volume(Math.min(1, this.player.volume() + 0.1)),
@@ -1264,38 +1199,32 @@ class CustomControls {
  * Subtitle management for video player.
  * 
  * Automatically detects and loads subtitle files matching the video ID.
- * Checks for .vtt files in the /static/subtitles/ directory and adds them
- * as text tracks to the video player if available.
- * 
- * @class SubtitleManager
- * @example
- * new SubtitleManager(player, 123); // Loads /static/subtitles/123.vtt if exists
  */
 class SubtitleManager {
+    /** The video.js player instance */
+    private player: VideoJsPlayer;
+    
+    /** The video ID for matching subtitle files */
+    private videoId: number;
+    
+    /** Path to subtitle directory */
+    private subtitlePath: string = '/static/subtitles';
+
     /**
      * Creates an instance of SubtitleManager.
-     * 
-     * @param {Object} player - The video.js player instance
-     * @param {number} videoId - The video ID to match subtitle file
-     * @memberof SubtitleManager
+     * @param player - The video.js player instance
+     * @param videoId - The video ID to match subtitle file
      */
-    constructor(player, videoId) {
-        /** @type {Object} The video.js player instance */
+    constructor(player: VideoJsPlayer, videoId: number) {
         this.player = player;
-        /** @type {number} The video ID for matching subtitle files */
         this.videoId = videoId;
-        /** @type {string} Path to subtitle directory */
-        this.subtitlePath = '/static/subtitles';
         this.init();
     }
 
     /**
      * Initializes subtitle loading by checking for file existence.
-     * 
-     * @private
-     * @memberof SubtitleManager
      */
-    init() {
+    private init(): void {
         if (!this.videoId) {
             console.log('No video ID provided for subtitles');
             return;
@@ -1306,13 +1235,8 @@ class SubtitleManager {
 
     /**
      * Checks if subtitle file exists and loads it if available.
-     * Makes a HEAD request to verify file existence before adding track.
-     * Checks for .vtt files (WebVTT format required by video.js).
-     * 
-     * @private
-     * @memberof SubtitleManager
      */
-    checkAndLoadSubtitle() {
+    private checkAndLoadSubtitle(): void {
         const subtitleUrl = `${this.subtitlePath}/${this.videoId}.vtt`;
         
         // Check if subtitle file exists
@@ -1322,9 +1246,7 @@ class SubtitleManager {
                     console.log(`Subtitle file found: ${subtitleUrl}`);
                     this.addSubtitleTrack(subtitleUrl);
                 } else {
-                    console.log(
-                        `No subtitle file found: ${subtitleUrl}`
-                    );
+                    console.log(`No subtitle file found: ${subtitleUrl}`);
                 }
             })
             .catch(err => {
@@ -1334,13 +1256,9 @@ class SubtitleManager {
 
     /**
      * Adds subtitle track to the video player.
-     * Uses video.js native method to add WebVTT subtitle track.
-     * 
-     * @private
-     * @param {string} subtitleUrl - The URL to the subtitle file
-     * @memberof SubtitleManager
+     * @param subtitleUrl - The URL to the subtitle file
      */
-    addSubtitleTrack(subtitleUrl) {
+    private addSubtitleTrack(subtitleUrl: string): void {
         this.player.ready(() => {
             // Add text track to player using video.js method
             this.player.addRemoteTextTrack({
@@ -1358,25 +1276,10 @@ class SubtitleManager {
 
 /**
  * Main video player initialization event handler.
- * 
- * Coordinates the initialization of all video player modules when the 
- * DOM is ready. Creates the core player instance, retrieves video 
- * metadata from DOM attributes, and initializes all supporting modules
- * (context menu, custom controls, URL handling, progress tracking, and
- * subtitles) once the player is ready.
- * 
- * @function
- * @name DOMContentLoaded
- * @listens DOMContentLoaded
- * @example
- * // This runs automatically when the page loads
- * // Requires HTML element: 
- * // <video id="player" data-video-id="123" data-profile-id="456" 
- * //        data-current-time="120">
  */
 document.addEventListener('DOMContentLoaded', function () {
     // Find all video elements with the video-js class
-    const videoElements = document.querySelectorAll('video.video-js');
+    const videoElements = document.querySelectorAll<HTMLVideoElement>('video.video-js');
     
     videoElements.forEach(videoElement => {
         const playerId = videoElement.id;
@@ -1386,19 +1289,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const player = playerCore.initialize();
         
         // Get video data from DOM attributes
-        const profileId = videoElement.getAttribute('data-profile-id');
-        const videoId = videoElement.getAttribute('data-video-id');
-        const currentTime = parseInt(
-            videoElement.getAttribute('data-current-time'), 10
-        ) || 0;
+        const profileId = parseInt(videoElement.getAttribute('data-profile-id') || '0', 10);
+        const videoId = parseInt(videoElement.getAttribute('data-video-id') || '0', 10);
+        const currentTime = parseInt(videoElement.getAttribute('data-current-time') || '0', 10);
 
         // Initialize all modules when player is ready
         player.ready(() => {
             new VideoContextMenu(player);
-            new CustomControls(player, playerCore.container);
+            if (playerCore.container) {
+                new CustomControls(player, playerCore.container);
+            }
             new UrlTimeHandler(player);
             new ProgressTracker(player, videoId, profileId, currentTime);
-            new SubtitleManager(player, videoId);  // Add subtitle support
+            new SubtitleManager(player, videoId);
             
             // Ensure control bar is visible
             player.controlBar.show();
@@ -1409,27 +1312,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /**
  * Form submission handler for marking videos as watched/unwatched.
- * 
- * Prevents default form submission and sends AJAX request to toggle
- * the watched status of a video. Updates the button text and API URL
- * based on the response to reflect the current state.
- * 
- * @function
- * @name markWatchedFormSubmit
- * @listens submit
- * @example
- * // Requires HTML form: <form id="markWatchedForm" data-api-url="/api/profile/mark_watched" data-video-id="123">
  */
-const markWatchedForm = document.getElementById('markWatchedForm');
+const markWatchedForm = document.getElementById('markWatchedForm') as HTMLFormElement;
 if (markWatchedForm) {
-    document.getElementById('markWatchedForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent the default form submission
+    markWatchedForm.addEventListener('submit', function(e: Event) {
+        e.preventDefault();
 
-        // Get the API URL and video ID from data attributes
-        const apiUrl = this.dataset.apiUrl;
-        const videoId = this.dataset.videoId;
+        const apiUrl = this.dataset.apiUrl || '';
+        const videoId = this.dataset.videoId || '';
 
-        // Send a POST request to the server to mark the video as watched
         fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -1438,15 +1329,16 @@ if (markWatchedForm) {
             },
             body: JSON.stringify({ video_id: videoId })
         })
-        .then(response => response.json()) // Parse the JSON response
-        .then(data => {
-            // If the server responds with success, update the button
+        .then(response => response.json())
+        .then((data: ApiResponse) => {
             if (data.success && this.dataset.apiUrl === '/api/profile/mark_watched') {
-                this.querySelector('button').textContent = 'Watched!';
+                const button = this.querySelector('button');
+                if (button) button.textContent = 'Watched!';
                 this.dataset.apiUrl = '/api/profile/mark_unwatched';
             }
             else if (data.success && this.dataset.apiUrl === '/api/profile/mark_unwatched') {
-                this.querySelector('button').textContent = 'Unwatched!';
+                const button = this.querySelector('button');
+                if (button) button.textContent = 'Unwatched!';
                 this.dataset.apiUrl = '/api/profile/mark_watched';
             }
         })
