@@ -6,8 +6,6 @@
 
 /**
  * Configuration constants for video addition
- * @readonly
- * @enum {string}
  */
 const VideoAddConfig = {
     /** API endpoint for fetching CSV video data */
@@ -22,22 +20,44 @@ const VideoAddConfig = {
         SECONDARY: 'btn-secondary',
         DISABLED: 'btn-secondary'
     }
-};
+} as const;
+
+/**
+ * Interface for video data structure
+ */
+interface VideoData {
+    video_name?: string;
+    video_url?: string;
+    main_cat_name?: string;
+    sub_cat_name?: string;
+    url_1080?: string;
+    url_720?: string;
+    url_480?: string;
+    url_360?: string;
+    url_240?: string;
+    thumbnail?: string;
+    duration?: string;
+}
+
+/**
+ * Interface for video add API response structure
+ */
+interface VideoAddApiResponse {
+    success?: boolean;
+    message?: string;
+    error?: string;
+}
 
 /**
  * Handles API calls for video operations
- * @class VideoApiService
  */
 class VideoApiService {
     /**
      * Fetch videos from CSV endpoint
-     * @static
-     * @async
-     * @returns {Promise<Array>} Array of video objects
-     * @throws {Error} If API call fails
-     * @memberof VideoApiService
+     * @returns Array of video objects
+     * @throws Error if API call fails
      */
-    static async fetchVideosFromCSV() {
+    static async fetchVideosFromCSV(): Promise<VideoData[]> {
         const response = await fetch(VideoAddConfig.CSV_ENDPOINT);
         
         if (!response.ok) {
@@ -52,14 +72,11 @@ class VideoApiService {
 
     /**
      * Add a video to the database
-     * @static
-     * @async
-     * @param {Object} videoData - Video data to add
-     * @returns {Promise<Object>} API response data
-     * @throws {Error} If API call fails
-     * @memberof VideoApiService
+     * @param videoData - Video data to add
+     * @returns API response data
+     * @throws Error if API call fails
      */
-    static async addVideoToDatabase(videoData) {
+    static async addVideoToDatabase(videoData: VideoData): Promise<VideoAddApiResponse> {
         const response = await fetch(VideoAddConfig.ADD_ENDPOINT, {
             method: 'POST',
             headers: {
@@ -78,35 +95,34 @@ class VideoApiService {
 
 /**
  * Handles video table generation and display
- * @class VideoTableManager
  */
 class VideoTableManager {
+    /** Container element for the video table */
+    private container: HTMLElement | null;
+    
+    /** Wrapper element for the video table */
+    private wrapper: HTMLElement | null;
+
     /**
      * Create a VideoTableManager instance
-     * @param {string} containerId - ID of the container element for the table
-     * @param {string} wrapperId - ID of the wrapper element to show/hide
-     * @memberof VideoTableManager
+     * @param containerId - ID of the container element for the table
+     * @param wrapperId - ID of the wrapper element to show/hide
      */
-    constructor(containerId = 'videosTableContainer', wrapperId = 'videosTableWrapper') {
-        /**
-         * Container element for the video table
-         * @type {HTMLElement}
-         */
+    constructor(
+        containerId: string = 'videosTableContainer',
+        wrapperId: string = 'videosTableWrapper'
+    ) {
         this.container = document.getElementById(containerId);
-        
-        /**
-         * Wrapper element for the video table
-         * @type {HTMLElement}
-         */
         this.wrapper = document.getElementById(wrapperId);
     }
 
     /**
      * Generate and display video table
-     * @param {Array<Object>} videos - Array of video objects
-     * @memberof VideoTableManager
+     * @param videos - Array of video objects
      */
-    displayVideos(videos) {
+    public displayVideos(videos: VideoData[]): void {
+        if (!this.container) return;
+        
         if (!videos || videos.length === 0) {
             this.showNoVideosMessage();
             return;
@@ -119,28 +135,27 @@ class VideoTableManager {
 
     /**
      * Show no videos found message
-     * @private
-     * @memberof VideoTableManager
      */
-    showNoVideosMessage() {
-        this.container.innerHTML = '<p class="text-warning">No videos found.</p>';
+    private showNoVideosMessage(): void {
+        if (this.container) {
+            this.container.innerHTML = '<p class="text-warning">No videos found.</p>';
+        }
     }
 
     /**
      * Show error message
-     * @param {string} message - Error message to display
-     * @memberof VideoTableManager
+     * @param message - Error message to display
      */
-    showError(message = 'Error loading videos.') {
-        this.container.innerHTML = `<p class="text-danger">${message}</p>`;
+    public showError(message: string = 'Error loading videos.'): void {
+        if (this.container) {
+            this.container.innerHTML = `<p class="text-danger">${message}</p>`;
+        }
     }
 
     /**
      * Show the table wrapper
-     * @private
-     * @memberof VideoTableManager
      */
-    showTable() {
+    private showTable(): void {
         if (this.wrapper) {
             this.wrapper.classList.remove('d-none');
         }
@@ -148,12 +163,10 @@ class VideoTableManager {
 
     /**
      * Generate complete table HTML
-     * @param {Array<Object>} videos - Array of video objects
-     * @returns {string} Complete table HTML
-     * @private
-     * @memberof VideoTableManager
+     * @param videos - Array of video objects
+     * @returns Complete table HTML
      */
-    generateTableHTML(videos) {
+    private generateTableHTML(videos: VideoData[]): string {
         const tableHeader = this.generateTableHeader();
         const tableBody = this.generateTableBody(videos);
         
@@ -169,11 +182,9 @@ class VideoTableManager {
 
     /**
      * Generate table header HTML
-     * @returns {string} Table header HTML
-     * @private
-     * @memberof VideoTableManager
+     * @returns Table header HTML
      */
-    generateTableHeader() {
+    private generateTableHeader(): string {
         return `
             <thead>
                 <tr>
@@ -196,23 +207,19 @@ class VideoTableManager {
 
     /**
      * Generate table body HTML
-     * @param {Array<Object>} videos - Array of video objects
-     * @returns {string} Table body HTML
-     * @private
-     * @memberof VideoTableManager
+     * @param videos - Array of video objects
+     * @returns Table body HTML
      */
-    generateTableBody(videos) {
+    private generateTableBody(videos: VideoData[]): string {
         return videos.map(video => this.generateVideoRow(video)).join('');
     }
 
     /**
      * Generate a single video row HTML
-     * @param {Object} video - Video object
-     * @returns {string} Video row HTML
-     * @private
-     * @memberof VideoTableManager
+     * @param video - Video object
+     * @returns Video row HTML
      */
-    generateVideoRow(video) {
+    private generateVideoRow(video: VideoData): string {
         const videoJson = JSON.stringify(video).replace(/"/g, '&quot;');
         
         return `
@@ -242,12 +249,10 @@ class VideoTableManager {
 
     /**
      * Generate status cell with checkmark or X
-     * @param {string} value - Value to check
-     * @returns {string} Status cell HTML
-     * @private
-     * @memberof VideoTableManager
+     * @param value - Value to check
+     * @returns Status cell HTML
      */
-    generateStatusCell(value) {
+    private generateStatusCell(value?: string): string {
         if (value) {
             return `<span style="color: green;" title="${this.sanitizeAttribute(value)}">✔</span>`;
         }
@@ -256,12 +261,10 @@ class VideoTableManager {
 
     /**
      * Sanitize text for HTML display
-     * @param {string} text - Text to sanitize
-     * @returns {string} Sanitized text
-     * @private
-     * @memberof VideoTableManager
+     * @param text - Text to sanitize
+     * @returns Sanitized text
      */
-    sanitizeText(text) {
+    private sanitizeText(text: string): string {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -269,24 +272,20 @@ class VideoTableManager {
 
     /**
      * Sanitize text for HTML attributes
-     * @param {string} text - Text to sanitize
-     * @returns {string} Sanitized text
-     * @private
-     * @memberof VideoTableManager
+     * @param text - Text to sanitize
+     * @returns Sanitized text
      */
-    sanitizeAttribute(text) {
+    private sanitizeAttribute(text: string): string {
         return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 }
 
 /**
  * Handles individual video addition operations
- * @class VideoAdditionHandler
  */
 class VideoAdditionHandler {
     /**
      * Create a VideoAdditionHandler instance
-     * @memberof VideoAdditionHandler
      */
     constructor() {
         this.setupEventListeners();
@@ -294,26 +293,22 @@ class VideoAdditionHandler {
 
     /**
      * Set up event listeners for video addition buttons
-     * @private
-     * @memberof VideoAdditionHandler
      */
-    setupEventListeners() {
+    private setupEventListeners(): void {
         // Use event delegation to handle dynamically created buttons
-        document.addEventListener('click', (event) => {
-            if (event.target.classList.contains('video-add-btn')) {
-                this.handleAddVideo(event.target);
+        document.addEventListener('click', (event: Event) => {
+            const target = event.target as HTMLElement;
+            if (target.classList.contains('video-add-btn')) {
+                this.handleAddVideo(target as HTMLButtonElement);
             }
         });
     }
 
     /**
      * Handle video addition button click
-     * @async
-     * @param {HTMLButtonElement} button - The clicked button
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param button - The clicked button
      */
-    async handleAddVideo(button) {
+    private async handleAddVideo(button: HTMLButtonElement): Promise<void> {
         try {
             const videoData = this.extractVideoData(button);
             
@@ -334,49 +329,41 @@ class VideoAdditionHandler {
 
     /**
      * Extract video data from button's data attribute
-     * @param {HTMLButtonElement} button - Button element
-     * @returns {Object} Video data object
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param button - Button element
+     * @returns Video data object
      */
-    extractVideoData(button) {
+    private extractVideoData(button: HTMLButtonElement): VideoData {
         const videoJson = button.getAttribute('data-video');
         if (!videoJson) {
             throw new Error('No video data found in button');
         }
         
-        return JSON.parse(videoJson);
+        return JSON.parse(videoJson) as VideoData;
     }
 
     /**
      * Disable the add button
-     * @param {HTMLButtonElement} button - Button to disable
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param button - Button to disable
      */
-    disableButton(button) {
+    private disableButton(button: HTMLButtonElement): void {
         button.disabled = true;
         button.textContent = '...';
     }
 
     /**
      * Enable the add button
-     * @param {HTMLButtonElement} button - Button to enable
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param button - Button to enable
      */
-    enableButton(button) {
+    private enableButton(button: HTMLButtonElement): void {
         button.disabled = false;
         button.textContent = '+';
     }
 
     /**
      * Mark button as completed
-     * @param {HTMLButtonElement} button - Button to mark as completed
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param button - Button to mark as completed
      */
-    markButtonAsCompleted(button) {
+    private markButtonAsCompleted(button: HTMLButtonElement): void {
         button.disabled = true;
         button.classList.remove(VideoAddConfig.BUTTON_CLASSES.SUCCESS);
         button.classList.add(VideoAddConfig.BUTTON_CLASSES.DISABLED);
@@ -386,62 +373,48 @@ class VideoAdditionHandler {
 
     /**
      * Show success message to user
-     * @param {string} message - Success message
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param message - Success message
      */
-    showSuccessMessage(message) {
+    private showSuccessMessage(message: string): void {
         alert(message); // Could be replaced with a better notification system
     }
 
     /**
      * Show error message to user
-     * @param {string} message - Error message
-     * @private
-     * @memberof VideoAdditionHandler
+     * @param message - Error message
      */
-    showErrorMessage(message) {
+    private showErrorMessage(message: string): void {
         alert(message); // Could be replaced with a better notification system
     }
 }
 
 /**
  * Main controller for video addition functionality
- * @class VideoAddController
  */
 class VideoAddController {
+    /** Video table manager instance */
+    private tableManager: VideoTableManager;
+    
+    /** List videos button element */
+    private listButton: HTMLButtonElement | null;
+
     /**
      * Create a VideoAddController instance
-     * @param {string} listButtonId - ID of the list videos button
-     * @memberof VideoAddController
+     * @param listButtonId - ID of the list videos button
      */
-    constructor(listButtonId = 'listVideosBtn') {
-        /**
-         * Video table manager instance
-         * @type {VideoTableManager}
-         */
+    constructor(listButtonId: string = 'listVideosBtn') {
         this.tableManager = new VideoTableManager();
-        
-        /**
-         * Video addition handler instance
-         * @type {VideoAdditionHandler}
-         */
-        this.additionHandler = new VideoAdditionHandler();
-        
-        /**
-         * List videos button element
-         * @type {HTMLButtonElement}
-         */
-        this.listButton = document.getElementById(listButtonId);
+        // Initialize the addition handler to set up event listeners
+        new VideoAdditionHandler();
+        this.listButton = document.getElementById(listButtonId) as HTMLButtonElement;
         
         this.init();
     }
 
     /**
      * Initialize the video add controller
-     * @memberof VideoAddController
      */
-    init() {
+    private init(): void {
         if (this.listButton) {
             this.setupListButton();
         } else {
@@ -451,10 +424,10 @@ class VideoAddController {
 
     /**
      * Set up the list videos button event listener
-     * @private
-     * @memberof VideoAddController
      */
-    setupListButton() {
+    private setupListButton(): void {
+        if (!this.listButton) return;
+        
         this.listButton.addEventListener('click', () => {
             this.handleListVideos();
         });
@@ -462,11 +435,8 @@ class VideoAddController {
 
     /**
      * Handle list videos button click
-     * @async
-     * @private
-     * @memberof VideoAddController
      */
-    async handleListVideos() {
+    private async handleListVideos(): Promise<void> {
         try {
             this.setLoadingState(true);
             
@@ -485,11 +455,11 @@ class VideoAddController {
 
     /**
      * Set loading state for list button
-     * @param {boolean} isLoading - Whether to show loading state
-     * @private
-     * @memberof VideoAddController
+     * @param isLoading - Whether to show loading state
      */
-    setLoadingState(isLoading) {
+    private setLoadingState(isLoading: boolean): void {
+        if (!this.listButton) return;
+        
         if (isLoading) {
             this.listButton.disabled = true;
             this.listButton.textContent = 'Loading...';
@@ -501,7 +471,7 @@ class VideoAddController {
 }
 
 // Global controller instance
-let videoAddController;
+let videoAddController: VideoAddController;
 
 /**
  * Initialize video addition functionality when DOM is ready
@@ -513,9 +483,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Expose global function for backward compatibility (if needed)
 /**
  * @deprecated Use VideoAddController instead
- * @global
  */
-window.addToDatabase = function(video, button) {
+(window as any).addToDatabase = function(_video: VideoData, _button: HTMLButtonElement): void {
     console.warn('addToDatabase function is deprecated. Use VideoAddController instead.');
     // Could implement backward compatibility here if needed
 };

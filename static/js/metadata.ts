@@ -6,8 +6,6 @@
 
 /**
  * Configuration constants for metadata management
- * @readonly
- * @enum {string}
  */
 const MetadataConfig = {
     /** API endpoint for video metadata */
@@ -16,30 +14,81 @@ const MetadataConfig = {
     SCRIPTURE_ENDPOINT: '/api/scripture',
     /** Content type for JSON requests */
     JSON_CONTENT_TYPE: 'application/json'
-};
+} as const;
+
+/**
+ * Interface for API response structure
+ */
+interface ApiResponse {
+    success: boolean;
+    error?: string;
+    message?: string;
+}
+
+/**
+ * Interface for video metadata form data
+ */
+interface VideoMetadataFormData extends Record<string, string> {
+    videoName: string;
+    description: string;
+    url: string;
+    tagName: string;
+    locationName: string;
+    speakerName: string;
+    characterName: string;
+    scriptureName: string;
+    categoryName: string;
+    dateAdded: string;
+}
+
+/**
+ * Interface for video metadata API payload
+ */
+interface VideoMetadataPayload {
+    video_name: string;
+    description: string;
+    url: string;
+    tag_name: string;
+    location_name: string;
+    speaker_name: string;
+    character_name: string;
+    scripture_name: string;
+    category_name: string;
+    date_added: string | null;
+}
+
+/**
+ * Interface for scripture form data
+ */
+interface ScriptureFormData extends Record<string, string> {
+    scrName: string;
+    scrText: string;
+}
+
+/**
+ * Interface for scripture API payload
+ */
+interface ScripturePayload {
+    scr_name: string;
+    scr_text: string;
+}
 
 /**
  * Base class for handling form submissions with common functionality
- * @class BaseFormHandler
  */
-class BaseFormHandler {
+abstract class BaseFormHandler {
+    /** The form element */
+    protected form: HTMLFormElement | null;
+    
+    /** Whether the form is currently submitting */
+    protected isSubmitting: boolean = false;
+
     /**
      * Create a BaseFormHandler instance
-     * @param {string} formId - The ID of the form element
-     * @memberof BaseFormHandler
+     * @param formId - The ID of the form element
      */
-    constructor(formId) {
-        /**
-         * The form element
-         * @type {HTMLFormElement}
-         */
-        this.form = document.getElementById(formId);
-        
-        /**
-         * Whether the form is currently submitting
-         * @type {boolean}
-         */
-        this.isSubmitting = false;
+    constructor(formId: string) {
+        this.form = document.getElementById(formId) as HTMLFormElement;
         
         if (!this.form) {
             console.warn(`Form with ID '${formId}' not found`);
@@ -51,11 +100,11 @@ class BaseFormHandler {
 
     /**
      * Set up form submission event listener
-     * @private
-     * @memberof BaseFormHandler
      */
-    setupEventListener() {
-        this.form.addEventListener('submit', async (e) => {
+    private setupEventListener(): void {
+        if (!this.form) return;
+        
+        this.form.addEventListener('submit', async (e: Event) => {
             e.preventDefault();
             await this.handleSubmit();
         });
@@ -63,42 +112,34 @@ class BaseFormHandler {
 
     /**
      * Handle form submission - to be implemented by subclasses
-     * @abstract
-     * @async
-     * @memberof BaseFormHandler
      */
-    async handleSubmit() {
-        throw new Error('handleSubmit method must be implemented by subclass');
-    }
+    protected abstract handleSubmit(): Promise<void>;
 
     /**
      * Extract form data into an object
-     * @param {Array<string>} fieldIds - Array of field IDs to extract
-     * @returns {Object} Object containing form field values
-     * @protected
-     * @memberof BaseFormHandler
+     * @param fieldIds - Array of field IDs to extract
+     * @returns Object containing form field values
      */
-    extractFormData(fieldIds) {
-        const data = {};
+    protected extractFormData<T extends Record<string, string>>(fieldIds: readonly string[]): T {
+        const data: Record<string, string> = {};
+        
         fieldIds.forEach(fieldId => {
-            const element = document.getElementById(fieldId);
+            const element = document.getElementById(fieldId) as HTMLInputElement | HTMLTextAreaElement;
             if (element) {
                 data[fieldId] = element.value;
             }
         });
-        return data;
+        
+        return data as T;
     }
 
     /**
      * Send POST request to specified endpoint
-     * @param {string} endpoint - API endpoint URL
-     * @param {Object} payload - Data to send in request body
-     * @returns {Promise<Object>} Response data
-     * @protected
-     * @async
-     * @memberof BaseFormHandler
+     * @param endpoint - API endpoint URL
+     * @param payload - Data to send in request body
+     * @returns Response data
      */
-    async sendRequest(endpoint, payload) {
+    protected async sendRequest<T extends ApiResponse>(endpoint: string, payload: unknown): Promise<T> {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -111,35 +152,29 @@ class BaseFormHandler {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        return await response.json();
+        return await response.json() as T;
     }
 
     /**
      * Display success message to user
-     * @param {string} message - Success message to display
-     * @protected
-     * @memberof BaseFormHandler
+     * @param message - Success message to display
      */
-    showSuccess(message) {
+    protected showSuccess(message: string): void {
         alert(message);
     }
 
     /**
      * Display error message to user
-     * @param {string} message - Error message to display
-     * @protected
-     * @memberof BaseFormHandler
+     * @param message - Error message to display
      */
-    showError(message) {
+    protected showError(message: string): void {
         alert(message);
     }
 
     /**
      * Reset the form to its initial state
-     * @protected
-     * @memberof BaseFormHandler
      */
-    resetForm() {
+    protected resetForm(): void {
         if (this.form) {
             this.form.reset();
         }
@@ -147,42 +182,40 @@ class BaseFormHandler {
 
     /**
      * Set submitting state to prevent double submissions
-     * @param {boolean} submitting - Whether form is currently submitting
-     * @protected
-     * @memberof BaseFormHandler
+     * @param submitting - Whether form is currently submitting
      */
-    setSubmitting(submitting) {
+    protected setSubmitting(submitting: boolean): void {
         this.isSubmitting = submitting;
-        const submitButton = this.form.querySelector('button[type="submit"]');
+        
+        if (!this.form) return;
+        
+        const submitButton = this.form.querySelector('button[type="submit"]') as HTMLButtonElement;
         if (submitButton) {
             submitButton.disabled = submitting;
-            submitButton.textContent = submitting ? 'Submitting...' : submitButton.dataset.originalText || 'Submit';
+            
             if (!submitButton.dataset.originalText) {
-                submitButton.dataset.originalText = submitButton.textContent;
+                submitButton.dataset.originalText = submitButton.textContent || 'Submit';
             }
+            
+            submitButton.textContent = submitting ? 'Submitting...' : submitButton.dataset.originalText;
         }
     }
 }
 
 /**
  * Handles video metadata form submissions
- * @class VideoMetadataHandler
- * @extends BaseFormHandler
  */
 class VideoMetadataHandler extends BaseFormHandler {
+    /** Field IDs for video metadata form */
+    private readonly fieldIds: string[];
+
     /**
      * Create a VideoMetadataHandler instance
-     * @param {string} formId - The ID of the video metadata form
-     * @memberof VideoMetadataHandler
+     * @param formId - The ID of the video metadata form
      */
-    constructor(formId = 'addMetadataForm') {
+    constructor(formId: string = 'addMetadataForm') {
         super(formId);
         
-        /**
-         * Field IDs for video metadata form
-         * @type {Array<string>}
-         * @private
-         */
         this.fieldIds = [
             'videoName', 'description', 'url', 'tagName', 'locationName',
             'speakerName', 'characterName', 'scriptureName', 'categoryName', 'dateAdded'
@@ -191,19 +224,20 @@ class VideoMetadataHandler extends BaseFormHandler {
 
     /**
      * Handle video metadata form submission
-     * @async
-     * @memberof VideoMetadataHandler
      */
-    async handleSubmit() {
+    protected async handleSubmit(): Promise<void> {
         if (this.isSubmitting) return;
         
         try {
             this.setSubmitting(true);
             
-            const formData = this.extractFormData(this.fieldIds);
+            const formData = this.extractFormData<VideoMetadataFormData>(this.fieldIds);
             const payload = this.buildMetadataPayload(formData);
             
-            const result = await this.sendRequest(MetadataConfig.VIDEO_METADATA_ENDPOINT, payload);
+            const result = await this.sendRequest<ApiResponse>(
+                MetadataConfig.VIDEO_METADATA_ENDPOINT,
+                payload
+            );
             
             if (result.success) {
                 this.showSuccess('Metadata added successfully!');
@@ -214,7 +248,8 @@ class VideoMetadataHandler extends BaseFormHandler {
             
         } catch (error) {
             console.error('Video metadata submission error:', error);
-            this.showError('Error: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.showError('Error: ' + errorMessage);
         } finally {
             this.setSubmitting(false);
         }
@@ -222,12 +257,10 @@ class VideoMetadataHandler extends BaseFormHandler {
 
     /**
      * Build the payload object for video metadata API
-     * @param {Object} formData - Raw form data
-     * @returns {Object} Formatted payload for API
-     * @private
-     * @memberof VideoMetadataHandler
+     * @param formData - Raw form data
+     * @returns Formatted payload for API
      */
-    buildMetadataPayload(formData) {
+    private buildMetadataPayload(formData: VideoMetadataFormData): VideoMetadataPayload {
         return {
             video_name: formData.videoName,
             description: formData.description,
@@ -245,41 +278,37 @@ class VideoMetadataHandler extends BaseFormHandler {
 
 /**
  * Handles scripture text form submissions
- * @class ScriptureTextHandler
- * @extends BaseFormHandler
  */
 class ScriptureTextHandler extends BaseFormHandler {
+    /** Field IDs for scripture form */
+    private readonly fieldIds: string[];
+
     /**
      * Create a ScriptureTextHandler instance
-     * @param {string} formId - The ID of the scripture form
-     * @memberof ScriptureTextHandler
+     * @param formId - The ID of the scripture form
      */
-    constructor(formId = 'addScrForm') {
+    constructor(formId: string = 'addScrForm') {
         super(formId);
         
-        /**
-         * Field IDs for scripture form
-         * @type {Array<string>}
-         * @private
-         */
         this.fieldIds = ['scrName', 'scrText'];
     }
 
     /**
      * Handle scripture text form submission
-     * @async
-     * @memberof ScriptureTextHandler
      */
-    async handleSubmit() {
+    protected async handleSubmit(): Promise<void> {
         if (this.isSubmitting) return;
         
         try {
             this.setSubmitting(true);
             
-            const formData = this.extractFormData(this.fieldIds);
+            const formData = this.extractFormData<ScriptureFormData>(this.fieldIds);
             const payload = this.buildScripturePayload(formData);
             
-            const result = await this.sendRequest(MetadataConfig.SCRIPTURE_ENDPOINT, payload);
+            const result = await this.sendRequest<ApiResponse>(
+                MetadataConfig.SCRIPTURE_ENDPOINT,
+                payload
+            );
             
             if (result.success) {
                 this.showSuccess('Scripture text added successfully!');
@@ -290,7 +319,8 @@ class ScriptureTextHandler extends BaseFormHandler {
             
         } catch (error) {
             console.error('Scripture submission error:', error);
-            this.showError('Error: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.showError('Error: ' + errorMessage);
         } finally {
             this.setSubmitting(false);
         }
@@ -298,12 +328,10 @@ class ScriptureTextHandler extends BaseFormHandler {
 
     /**
      * Build the payload object for scripture API
-     * @param {Object} formData - Raw form data
-     * @returns {Object} Formatted payload for API
-     * @private
-     * @memberof ScriptureTextHandler
+     * @param formData - Raw form data
+     * @returns Formatted payload for API
      */
-    buildScripturePayload(formData) {
+    private buildScripturePayload(formData: ScriptureFormData): ScripturePayload {
         return {
             scr_name: formData.scrName,
             scr_text: formData.scrText
@@ -312,11 +340,9 @@ class ScriptureTextHandler extends BaseFormHandler {
 
     /**
      * Clear only the scripture text field (keeping the name field)
-     * @private
-     * @memberof ScriptureTextHandler
      */
-    clearScriptureText() {
-        const textField = document.getElementById('scrText');
+    private clearScriptureText(): void {
+        const textField = document.getElementById('scrText') as HTMLTextAreaElement;
         if (textField) {
             textField.value = '';
         }
@@ -325,55 +351,42 @@ class ScriptureTextHandler extends BaseFormHandler {
 
 /**
  * Main controller for metadata management functionality
- * @class MetadataController
  */
 class MetadataController {
+    /** Video metadata form handler */
+    private videoHandler: VideoMetadataHandler | null = null;
+    
+    /** Scripture text form handler */
+    private scriptureHandler: ScriptureTextHandler | null = null;
+
     /**
      * Create a MetadataController instance
-     * @memberof MetadataController
      */
     constructor() {
-        /**
-         * Video metadata form handler
-         * @type {VideoMetadataHandler}
-         */
-        this.videoHandler = null;
-        
-        /**
-         * Scripture text form handler
-         * @type {ScriptureTextHandler}
-         */
-        this.scriptureHandler = null;
-        
         this.init();
     }
 
     /**
      * Initialize the metadata controller
-     * @memberof MetadataController
      */
-    init() {
+    private init(): void {
         this.initializeHandlers();
         this.setupGlobalErrorHandling();
     }
 
     /**
      * Initialize form handlers
-     * @private
-     * @memberof MetadataController
      */
-    initializeHandlers() {
+    private initializeHandlers(): void {
         this.videoHandler = new VideoMetadataHandler();
         this.scriptureHandler = new ScriptureTextHandler();
     }
 
     /**
      * Set up global error handling for unhandled promise rejections
-     * @private
-     * @memberof MetadataController
      */
-    setupGlobalErrorHandling() {
-        window.addEventListener('unhandledrejection', (event) => {
+    private setupGlobalErrorHandling(): void {
+        window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
             console.error('Unhandled promise rejection:', event.reason);
             // Prevent the default behavior of logging to console
             event.preventDefault();
@@ -382,25 +395,23 @@ class MetadataController {
 
     /**
      * Get the video metadata handler instance
-     * @returns {VideoMetadataHandler} Video handler instance
-     * @memberof MetadataController
+     * @returns Video handler instance
      */
-    getVideoHandler() {
+    public getVideoHandler(): VideoMetadataHandler | null {
         return this.videoHandler;
     }
 
     /**
      * Get the scripture text handler instance
-     * @returns {ScriptureTextHandler} Scripture handler instance
-     * @memberof MetadataController
+     * @returns Scripture handler instance
      */
-    getScriptureHandler() {
+    public getScriptureHandler(): ScriptureTextHandler | null {
         return this.scriptureHandler;
     }
 }
 
 // Global controller instance
-let metadataController;
+let metadataController: MetadataController;
 
 /**
  * Initialize metadata functionality when DOM is ready
