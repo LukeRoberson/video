@@ -14,6 +14,9 @@
     * Series > The Bible Changes Lives: 14 videos shown, progress bar says 16
     * Series > Viewpoints on the Origin of Life: Videos (10), bar (11)
 - [x] Admin page can't add categories to videos
+- [ ] About page does not load (fine locally, bad in container)
+- [ ] Captions button missing (fine locally, bad in container)
+- [ ] Some errors in Chrome console
 
 </br></br>
 
@@ -52,7 +55,7 @@
   - [x] Subheadings
   - [x] Strong title for a video
   - [x] Videos in a grid
-- [ ] Add change log to about page
+- [x] Add change log to about page
 
 </br></br>
 
@@ -78,6 +81,7 @@
 - [ ] Investigate accessibility for template files (e.g., 'alt' tags for images)
 - [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
 - [ ] Add a helper function to get similar videos
+- [ ] Create a testing script to try each URL and check the response is 200 OK
 
 </br></br>
 

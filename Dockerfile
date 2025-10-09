@@ -42,8 +42,10 @@ COPY static/css/ ./static/css/
 COPY static/js/ ./static/js/
 COPY templates/ ./templates/
 COPY static/vtt/ ./static/vtt/
+COPY static/subtitles/ ./static/subtitles/
 COPY static/themes/ ./static/themes/
 COPY app/ ./app/
+COPY changelog.yaml .
 COPY videos.db .
 
 # Expose the application port
