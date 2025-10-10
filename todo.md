@@ -14,8 +14,8 @@
     * Series > The Bible Changes Lives: 14 videos shown, progress bar says 16
     * Series > Viewpoints on the Origin of Life: Videos (10), bar (11)
 - [x] Admin page can't add categories to videos
-- [ ] About page does not load (fine locally, bad in container)
-- [ ] Captions button missing (fine locally, bad in container)
+- [x] About page does not load (fine locally, bad in container)
+- [x] Captions button missing (fine locally, bad in container)
 - [ ] Some errors in Chrome console
 
 </br></br>

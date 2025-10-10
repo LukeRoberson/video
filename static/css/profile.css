@@ -72,6 +72,34 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle depth */
 }
 
+/* Modal profile picture carousel layout fix */
+.carousel-profile-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    min-height: 200px;
+}
+
+/* Constrain the carousel width and keep it centered */
+#modalProfilePicCarousel {
+    width: 180px;
+    max-width: 180px;
+    min-width: 120px;
+    display: block !important;
+    margin: 0 1rem;
+}
+
+/* Make carousel images oval and not stretched */
+#modalProfilePicCarousel .carousel-inner img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background: #222;
+}
+
 /**
  * Profile carousel image styling
  * Circular images with hover effects and accessibility
@@ -81,11 +109,10 @@
  */
 .profile-carousel__image {
     max-height: 140px;                /* Consistent image height */
-    width: 100%;                      /* Full width of container */
     object-fit: contain;              /* Maintain aspect ratio */
     border: 3px solid transparent;    /* Invisible border for hover effect */
     border-radius: 50%;               /* Circular images */
-    background: #f8f9fa;              /* Light background for contrast */
+    background: #f8f9fa;            /* Light background for contrast */
     padding: 8px;                     /* Internal spacing */
     cursor: pointer;                  /* Indicates interactivity */
     transition: all 0.2s ease-in-out; /* Smooth transitions */
