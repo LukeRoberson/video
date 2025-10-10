@@ -1275,6 +1275,58 @@ class SubtitleManager {
 }
 
 /**
+ * Chapters menu positioner for video player.
+ * 
+ * Adjusts the position of the chapters menu to fit within the viewport,
+ * especially for mobile devices in portrait mode.
+ */
+class ChaptersMenuPositioner {
+    private player: VideoJsPlayer;
+
+    constructor(player: VideoJsPlayer) {
+        this.player = player;
+        this.player.ready(() => this.hook());
+    }
+
+    private hook(): void {
+        const controlBar: any = (this.player as any).controlBar;
+        if (!controlBar || !controlBar.chaptersButton) return;
+
+        const button = controlBar.chaptersButton;
+        const menuEl: HTMLElement | null = button?.menu?.el();
+        if (!menuEl) return;
+
+        const apply = () => this.apply(menuEl);
+        button.on('menuopen', apply);
+        button.on('menuclose', () => {
+            menuEl.style.maxHeight = '';
+            menuEl.style.left = '';
+            menuEl.style.right = '';
+        });
+
+        window.addEventListener('resize', apply);
+        window.addEventListener('orientationchange', () => setTimeout(apply, 150));
+    }
+
+    private apply(menuEl: HTMLElement): void {
+        const portrait = window.innerHeight >= window.innerWidth;
+        const content = menuEl.querySelector<HTMLElement>('.vjs-menu-content');
+
+        if (portrait) {
+            menuEl.style.left = `${Math.max(10, (window.innerWidth - menuEl.offsetWidth) / 2)}px`;
+            menuEl.style.right = 'auto';
+            menuEl.style.bottom = '48px';
+            if (content) content.style.maxHeight = `${Math.round(window.innerHeight * 0.5)}px`;
+        } else {
+            menuEl.style.left = `${Math.max(10, (window.innerWidth - menuEl.offsetWidth) / 2)}px`;
+            menuEl.style.right = 'auto';
+            menuEl.style.bottom = '56px';
+            if (content) content.style.maxHeight = `${Math.round(window.innerHeight * 0.85)}px`;
+        }
+    }
+}
+
+/**
  * Main video player initialization event handler.
  */
 document.addEventListener('DOMContentLoaded', function () {
@@ -1302,6 +1354,7 @@ document.addEventListener('DOMContentLoaded', function () {
             new UrlTimeHandler(player);
             new ProgressTracker(player, videoId, profileId, currentTime);
             new SubtitleManager(player, videoId);
+            new ChaptersMenuPositioner(player);
             
             // Ensure control bar is visible
             player.controlBar.show();

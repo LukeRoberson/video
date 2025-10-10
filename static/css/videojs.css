@@ -270,113 +270,249 @@
    Longer videos have chapters
    =========================== */
 
-/* Make the chapters menu wider and responsive */
-.video-js .vjs-chapters-button .vjs-menu,
-.video-js .vjs-menu[aria-labelledby*="chapters"] {
-    width: 400px !important;
-    max-width: 90vw !important;  /* Don't exceed 90% of viewport width */
-    min-height: 30vh !important;
-    height: auto !important;
-    max-height: 70vh !important;
-    white-space: normal;
-    word-break: break-word;
-    overflow-y: auto !important;
-    right: 0 !important;  /* Align to right edge of button */
-    left: auto !important;  /* Override default left positioning */
-}
-
-/* For smaller screens, adjust positioning and size */
-@media (max-width: 768px) {
+/* Make the chapters menu wider and responsive - DESKTOP ONLY */
+@media (min-width: 769px) {
     .video-js .vjs-chapters-button .vjs-menu,
     .video-js .vjs-menu[aria-labelledby*="chapters"] {
-        width: 90vw !important;
+        width: 400px !important;
         max-width: 90vw !important;
-        right: -20px !important;  /* Slight offset from right edge */
-        transform: translateX(-80%) !important;  /* Center it better */
+        min-height: 30vh !important;
+        height: auto !important;
+        max-height: 70vh !important;
+        white-space: normal;
+        word-break: break-word;
+        overflow-y: auto !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    /* Target the menu content wrapper */
+    .video-js .vjs-chapters-button .vjs-menu-content {
+        max-height: 30vh !important;
+        overflow-y: auto !important;
+    }
+
+    /* Add padding and spacing to menu items */
+    .video-js .vjs-menu-item {
+        padding: 10px 16px;
+        font-size: 1rem;
+        line-height: 1.3;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Style hovered/selected chapter */
+    .video-js .vjs-menu-item:hover,
+    .video-js .vjs-menu-item.vjs-selected {
+        background: #222;
+        color: #fff;
     }
 }
 
+/* ==========================================================================
+   3. CHAPTERS MENU - MOBILE RESPONSIVE
+   ========================================================================== */
+
+/**
+ * Chapters Menu Mobile Positioning & Sizing
+ * Handles portrait, landscape, and various screen sizes
+ */
+
+/* Common mobile base styles (all devices < 768px) */
+@media (max-width: 768px) {
+    /* Base positioning - shared across orientations */
+    .video-js .vjs-chapters-button .vjs-menu,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] {
+        bottom: 3em;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 40px);
+        font-size: 1rem;
+    }
+    
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Menu items */
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item {
+        padding: 12px 16px;
+        min-height: 44px;
+        font-size: 1rem;
+        line-height: 1.4;
+        white-space: normal;
+        word-break: break-word;
+    }
+    
+    /* Portrait-specific adjustments */
+    @media (orientation: portrait) {
+        .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+        .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+            max-height: 40vh;
+        }
+    }
+    
+    /* Landscape-specific adjustments - maximize vertical space */
+    @media (orientation: landscape) {
+        .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+        .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+            max-height: calc(100vh - 4em);
+            min-height: 80vh;
+        }
+    }
+    
+    /* Accessibility: Focus & active states */
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item:focus,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item:focus {
+        outline: 2px solid #fff;
+        outline-offset: -2px;
+        background: #333;
+    }
+    
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item:active,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item:active {
+        background: #444;
+        transform: scale(0.98);
+    }
+    
+    /* Custom scrollbar styling */
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar-thumb,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
+}
+
+/* Small phones (< 480px) */
 @media (max-width: 480px) {
     .video-js .vjs-chapters-button .vjs-menu,
     .video-js .vjs-menu[aria-labelledby*="chapters"] {
-        width: 95vw !important;
-        max-width: 95vw !important;
-        transform: translateX(-85%) !important;
+        max-width: calc(100vw - 30px);
+        font-size: 0.95rem;
+    }
+    
+    @media (orientation: portrait) {
+        .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+        .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+            max-height: 30vh;
+        }
+    }
+    
+    @media (orientation: landscape) {
+        .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+        .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+            min-height: 75vh;
+        }
     }
 }
 
-/* Target the menu content wrapper */
-.video-js .vjs-chapters-button .vjs-menu-content {
-    max-height: 30vh !important;
-    overflow-y: auto !important;
+/* Tablets in landscape (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) and (orientation: landscape) {
+    .video-js .vjs-chapters-button .vjs-menu,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] {
+        max-width: 600px;
+        width: 70vw;
+        font-size: 1.1rem;
+    }
+    
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content {
+        max-height: calc(100vh - 3.5em);
+        min-height: 85vh;
+    }
+    
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item {
+        padding: 14px 18px;
+        font-size: 1.1rem;
+    }
 }
 
-/* Add padding and spacing to menu items */
-.video-js .vjs-menu-item {
-    padding: 10px 16px;
-    font-size: 1rem;
-    line-height: 1.3;
-    white-space: normal;
-    word-break: break-word;
+/**
+ * Accessibility Enhancements
+ * ---------------------------
+ * Improved usability for all users
+ * =========================== */
+
+/**
+ * Focus visible states for keyboard navigation
+ * Ensures chapters menu is accessible via keyboard
+ */
+@media (max-width: 768px) {
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item:focus,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item:focus {
+        /* Clear focus indicator */
+        outline: 2px solid #fff;
+        outline-offset: -2px;
+        background: #333;
+    }
+
+    /**
+     * Active/pressed state for touch feedback
+     * Provides visual confirmation of touch interactions
+     */
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-item:active,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-item:active {
+        background: #444;
+        transform: scale(0.98);
+    }
 }
 
-/* Style hovered/selected chapter */
-.video-js .vjs-menu-item:hover,
-.video-js .vjs-menu-item.vjs-selected {
-    background: #222;
-    color: #fff;
+/**
+ * Scrollbar styling for mobile chapters menu
+ * Webkit browsers (iOS Safari, Chrome)
+ */
+@media (max-width: 768px) {
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar-track,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar-thumb,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
+
+    .video-js .vjs-chapters-button .vjs-menu .vjs-menu-content::-webkit-scrollbar-thumb:hover,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
 }
 
+/* Before multiple @media blocks, add a common selector variable approach
+   or consolidate the selectors */
 
-/* ===========================
-   Snippets
-   ---------------------------
-   Visual indicators for video snippets
-   =========================== */
-
-/* A box in the top left corner. Shown when in snippet mode */
-.snippet-indicator {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    pointer-events: none;
+/* Example consolidation: */
+@media (max-width: 768px) {
+    .video-js .vjs-chapters-button .vjs-menu,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] {
+        /* Combined rules here */
+    }
+    
+    /* Instead of repeating for .vjs-menu-content, .vjs-menu-item, etc. */
 }
 
-/* Container within the indicator for snippet info and close button */
-.snippet-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Close button to exit snippet mode */
-.snippet-close {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
-    pointer-events: all;
-}
-
-/* Change color on hover */
-.snippet-close:hover {
-    color: #ff6b6b;
-}
-
-/* Highlight overlay on the progress bar. Shows snippet duration */
-.snippet-highlight {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.3);
-    pointer-events: none;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+.video-js .vjs-chapters-button .vjs-menu,
+.video-js .vjs-chapters-button .vjs-menu *,
+.video-js .vjs-menu[aria-labelledby*="chapters"],
+.video-js .vjs-menu[aria-labelledby*="chapters"] * {
+    box-sizing: border-box;
 }
