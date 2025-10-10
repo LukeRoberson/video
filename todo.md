@@ -16,7 +16,7 @@
 - [x] Admin page can't add categories to videos
 - [x] About page does not load (fine locally, bad in container)
 - [x] Captions button missing (fine locally, bad in container)
-- [ ] Some errors in Chrome console
+- [x] Some errors in Chrome console
 
 </br></br>
 

@@ -37,8 +37,8 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tv.css') }}" />
         
         <!-- TV scripts (compiled from TypeScript) -->
-        <script src="{{ url_for('static', filename='js/dist/tvDetection.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/dist/tvNavigation.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/dist/tvDetection.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/dist/tvNavigation.js') }}"></script>
 
         <!-- Child templates add <head> tags here -->
         {% block head %}

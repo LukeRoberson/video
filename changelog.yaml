@@ -1,5 +1,5 @@
 - version: "1.2.0"
-  date: "2025-10-09"
+  date: "2025-10-11"
   features:
     - Added a badge to tags to show number of associated items
     - Added a 'hide watched items' filter to the navigation bar

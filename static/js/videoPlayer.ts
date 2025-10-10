@@ -37,7 +37,7 @@ interface VideoJsPlayer {
     requestFullscreen(): void;
     userActive(active: boolean): void;
     el(): HTMLElement;
-    tech(): { el(): HTMLVideoElement };
+    tech(options?: { IWillNotUseThisInPlugins: boolean }): { el(): HTMLVideoElement };
     controlBar: any;
     bigPlayButton: any;
     posterImage: any;
@@ -241,7 +241,7 @@ class VideoPlayerCore {
         this.player.ready(() => {
             if (!this.player) return;
             
-            const videoElement = this.player.tech().el();
+            const videoElement = this.player.tech({ IWillNotUseThisInPlugins: true }).el();
             const playerElement = this.player.el();
             let touchStartTime = 0;
             let touchMoved = false;
