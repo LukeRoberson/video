@@ -22,21 +22,49 @@ About
             <h3>1320 <small class="text-muted">v{{ app_version }}</small></h3>
             <q class="blockquote">The one walking with the wise will become wise</q>
         </div>
-        <hr />
-        <div class="card-body p-4">
-            <h4 class="card-title">About This Site</h4>
-            <p class="card-text">
-                This site is a collection of videos and resources from jw.org. It is designed to help you find videos by topic, speaker, or bible character.
-            </p>
-            <p class="card-text">
-                This site is not affiliated with jw.org. It does not distribute any video content, as all videos are embedded from jw.org.
-            </p>
-        </div>
+
+        <!-- Main Area -->
         <div class="card-body p-4">
             <hr>
+            <h4 class="card-title">About This Site</h4>
+            <p class="card-text">
+                This site is a collection of videos and resources from jw.org.
+            </p>
+            <br>
+            <h5>Feature Overview:</h5>
+            <ul>
+                <li>Watch videos directly on the site, and track which ones you've already seen</li>
+                <li>Browse videos by topic, speaker, or bible character. Topics align with those on jw.org.</li>
+                <li>Dig deeper by browsing Bible characters, scriptures, speakers, locations, and tags</li>
+                <li>Search for videos by keyword and other criteria</li>
+                <li>Track videos in progress</li>
+                <li>Curated collections of videos based on themes</li>
+                <li>Video subtitles</li>
+                <li>No special app required. Just use the website on any device</li>
+            </ul>
+        </div>
+
+        <!-- Privacy Statement -->
+        <div class="card-body p-4">
+            <hr>
+            <h4>Privacy</h4>
+            <p class="card-text">
+                This website does not collect, store, or share any personal information from its users.
+                No cookies or tracking technologies are used.
+            </p>
+            <p class="card-text">
+                All video content is embedded from jw.org; and no user data is transmitted to this site.
+                This site is not affiliated with jw.org. It does not distribute any video content.
+            </p>
+        </div>
+
+        <!-- Change Log Area -->
+        <div class="card-body p-4">
+            <hr>
+            <h4>Change Log</h4>
             {% for release in changes %}
-                <h4>{{ release.version }}</h4>
-                <h5>{{ release.date }}</h5>
+                <h5>{{ release.version }}</h5>
+                <h6>{{ release.date }}</h6>
                 <br>
                 
                 <b>Features</b>
