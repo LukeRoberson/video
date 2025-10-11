@@ -1,74 +1,61 @@
-# Version 1.2.0
+# Version 1.3.0
 
-# Bugs
+## GitHub Issues
 
-- [x] Profile edit not working
-  * broken in live, working in devel (containers)
-- [x] Snippets not working
-  * broken in live, working in devel (containers)
-- [x] Issue #4
-  - [x] Video categories missing
-    * Good news according to Jesus (ep, 2 & 3)
-  - [x] Progress bar is wrong on some video categories
-    * Children>Dramas has two videos, progress bar says 70
-    * Series > The Bible Changes Lives: 14 videos shown, progress bar says 16
-    * Series > Viewpoints on the Origin of Life: Videos (10), bar (11)
-- [x] Admin page can't add categories to videos
-- [x] About page does not load (fine locally, bad in container)
-- [x] Captions button missing (fine locally, bad in container)
-- [x] Some errors in Chrome console
+- [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
+- [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
+- [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
+- [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
+- [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 
 </br></br>
 
 
-# Scraper
+## Architecture
 
-- [x] Issue #8 - Add date to new videos
+- [ ] Search
+  - [ ] Add an elasticsearch container
+  - [ ] Integrate elasticsearch with the app
+    * Video titles
+    * Speakers
+    * Locations
+    * Tags
+    * Bible characters
+    * Transcripts (subtitles)
+    * Chapters
+  - [ ] Fallback to basic search if container is unavailable
+  - [ ] Add support to search based on video duration
+  - [ ] Add support for date
+  - [ ] Add support to search by scriptures
 
-</br></br>
+- [ ] Logging
+  - [ ] Create a logger instance with stream and file logging
+  - [ ] Expose the file log in the compose file
+  - [ ] Convert print statements to logs
+  - [ ] Some form of log-rotate, so it doesn't get too big
 
-
-# Video Player
-
-- [x] Issue #7
-  - [x] When in theatre mode, click outside of the player to close theatre mode
-- [x] Touch Screen; Tap the video to pause/play
-  * Currently this does nothing, need to use play/pause buttons
-- [x] Add subtitle button when vtt files exist
-
-</br></br>
-
-
-# UI
-
-- [x] Issue #6
-  - [x] Add badge to tags to show how many times they are used
-  - [x] Sort tags (on tag page) alphabetically or by count
-- [x] Nav bar: slider to hide watched videos
-- [x] Use Jinja to convert newline to HTML breaks for descriptions
-  - [x] Character profiles
-  - [x] Scriptures
-- [x] Scriptures page organization
-    * It's too complicated right now with so many scriptures
-- [x] Theme template update
-  - [x] Display an image, like a banner
-  - [x] Subheadings
-  - [x] Strong title for a video
-  - [x] Videos in a grid
-- [x] Add change log to about page
+- [ ] Testing
+  - [ ] Create a basic testing structure/plan; Expand on it later
+  - [ ] Script to check that all pages return a 200 OK
 
 </br></br>
 
 
-# Other
+## UI
 
-- [x] Refactor JS to use classes
-- [x] Add JSDoc to all JS files
-- [x] Refactor CSS to use BEM format
-- [x] Refactor HTML to match CSS BEM
-- [x] Refactor to use TypeScript
+- [ ] About Page
+  - [ ] Disclaimer: Subtitles are machine generated
+  - [ ] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
+- [ ] Speakers page
+  - [ ] Lazy loading of profile images
+- [ ] Bible Characters
+  - [ ] Lazy loading of profile images
+- [ ] Admin page
+  - [ ] Add video section: Make scriptures field resizable (like description is)
+  - [ ] Add video section: Make tags field resizable
 
 </br></br>
+
 
 
 
@@ -77,11 +64,8 @@
 
 ## Architecture
 
-- [ ] Use consistent logging, not just print statements
 - [ ] Investigate accessibility for template files (e.g., 'alt' tags for images)
-- [ ] Speakers/Characters: Loads all PNGs for the page; Can we load a minimal one to save bandwidth?
 - [ ] Add a helper function to get similar videos
-- [ ] Create a testing script to try each URL and check the response is 200 OK
 
 </br></br>
 
@@ -93,7 +77,6 @@
     * Experience
     * Dramatization
     * Collection (monthly program, Gilead graduations, annual meetings, full convention programs)
-- [ ] Search Method: Support searching based on duration
 - [ ] Convert 'speakers' into 'people' (so references to people that aren't speakers can be included)
 - [ ] Fields for extra links, such as links to WT articles
 - [ ] Link some verses to bible characters (more for the less common ones)
@@ -103,6 +86,9 @@
   - [ ] Add classifications to locations
     * Modern/Ancient
     * Country/City
+- [ ] Audio Descriptions
+    * Add a field for audio descriptions videos
+    * Can use this later to switch to the audio description version
 
 </br></br>
 
@@ -117,9 +103,6 @@
 - [ ] Scriptures page: Book can link to the book overview video
 - [ ] Homepage:
   - [ ] Random (unwatched) morning worship for the day
-- [ ] Admin, add videos
-  - [ ] Make scriptures field resizable (like description is)
-  - [ ] Make tags field resizable
 - [ ] TV
   - [ ] Capture remote control input (for navigation)
   - [ ] Menu should not be collapsed (as seen on Amazon Fire)
@@ -157,17 +140,6 @@
 </br></br>
 
 
-## Search and Filtering
-- [ ] Advanced Search
-  - [ ] Before/after a particular date
-  - [ ] Longer than / shorter than (duration)
-  - [ ] Add scriptures to the search (book, chapter, verse, or all at once?)
-- [ ] Add an elasticsearch container for better searching
-- [ ] Search results: checkbox to show unwatched only
-
-</br></br>
-
-
 ## General Improvements
 - [ ] Profiles
   - [ ] 'Watch later' feature
@@ -195,7 +167,6 @@
 - [ ] A timeline of characters
 - [ ] Locations: Links to maps / 'see the good land'
 - [ ] AI
-  - [ ] Model to transcribe to captions
   - [ ] Model to summarize content (for searching)
   - [ ] Video2vec
     - [ ] Build a vector database representing each video
@@ -205,11 +176,16 @@
 - [ ] Improved scripture management
   - [ ] Primary scriptures: Key scriptures that relate closely to the topic
   - [ ] Secondary: Scriptures that were cited and add value, but not key
-- [ ] Audio descriptions
+- [ ] Audio description videos
   - [ ] Add secondary links to videos that have audio descriptions
   - [ ] Add an icon to the thumbnail to show that video has this feature
   - [ ] Click a slider to turn this on or off
   - [ ] In reality, just plays a different video
+- [ ] Link bible characters to each other
+  * eg, Jonathan links to Saul and David
+  * Include scriptures that show this link
+  * Build a visual map of character links
+  * More scriptures, the stronger the link
 
 </br></br>
 
