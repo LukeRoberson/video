@@ -20,7 +20,8 @@ dev = [
     "pytest==8.4.1",
     "selenium==4.34.2", 
     "tqdm==4.67.1",
-    "beautifulsoup4==4.13.4"
+    "beautifulsoup4==4.13.4",
+    "pillow==11.3.0"
 ]
 
 [tool.flake8]

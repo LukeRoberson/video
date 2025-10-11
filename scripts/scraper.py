@@ -825,11 +825,10 @@ class BuildDb:
 
         if not self.videos.empty:
             print(
-                Fore.GREEN,
-                "Videos loaded from file, skipping fetch.",
+                Fore.YELLOW,
+                "Videos loaded from file, checking for new videos...",
                 Style.RESET_ALL
             )
-            return
 
         # Get videos from a specific sub-category
         for _, row in tqdm(
@@ -852,10 +851,27 @@ class BuildDb:
                     main_cat_name=row['main_category'],
                 )
 
-            self.videos = pd.concat(
-                [self.videos, videos],
-                ignore_index=True
-            )
+            # Only add videos that don't already exist in the DataFrame
+            if not self.videos.empty:
+                # Filter out videos that already exist
+                new_videos = videos[
+                    ~videos['video_url'].isin(self.videos['video_url'])
+                ]
+                if not new_videos.empty:
+                    print(
+                        Fore.GREEN,
+                        f"Found {len(new_videos)} new videos in {row['name']}",
+                        Style.RESET_ALL
+                    )
+                    self.videos = pd.concat(
+                        [self.videos, new_videos],
+                        ignore_index=True
+                    )
+            else:
+                self.videos = pd.concat(
+                    [self.videos, videos],
+                    ignore_index=True
+                )
 
     def build_latest(
         self,
@@ -1227,7 +1243,7 @@ if __name__ == "__main__":
     """
 
     # Set to true to fetch only the latest videos
-    latest_only = False
+    latest_only = True
 
     # Check if the CSV files already exist
     major_cat_filename = "major_categories.csv" if os.path.exists(
