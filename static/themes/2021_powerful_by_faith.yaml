@@ -1,5 +1,9 @@
 # The 2021 Powerful by Faith theme file in YAML format
 
+# Improvement Notes
+#   Make main headings and subheadings collapsible
+#   Video grid doesn't line up horizontaly on smaller screens when titles wrap lines
+
 ---
 # Main file data
 title: Powerful by Faith
@@ -13,11 +17,52 @@ section:
 - quote: “Give us more faith”​—Luke 17:5
 
 - subheading: Morning
+- paragraph: 9:20 Music-Video Presentation
 - video:
     id: 1010
-    title: 9:20 Music-Video Presentation
     start: 0
     end: 639
+- paragraph: "9:30 Song No. 5 and Prayer"
+- video:
+    id: 2838
+    title: God's Wonderous Works
+- paragraph: "9:40 CHAIRMAN’S ADDRESS: How Powerful Is Faith? (Matthew 17:19, 20; Hebrews 11:1)"
+- video:
+    id: 1079
+    title: "Mark Sanderson: How Powerful Is Faith?"
+
+- paragraph: "10:10 SYMPOSIUM: Why We Have Faith in . . ."
+- video_grid:
+    - video:
+        id: 1078
+        title: "God’s Existence (Ephesians 2:1, 12; Hebrews 11:3)"
+    - video:
+        id: 1077
+        title: "God’s Word (Isaiah 46:10)"
+    - video:
+        id: 1076
+        title: "God’s Moral Standards (Isaiah 48:17)"
+    - video:
+        id: 1075
+        title: "God’s Love (John 6:44)"
+
+- paragraph: "11:05 Song No. 37 and Announcements"
+- video:
+    id: 2866
+    title: Serving Jehovah Whole-Souled
+- paragraph: "11:15 DRAMATIC BIBLE READING: Noah​—Faith Moved Him to Obey (Genesis 6:1–8:22; 9:8-16)"
+- video:
+    id: 1029
+    title: "Noah​—Faith Moved Him to Obey"
+- paragraph: "11:45 “Have Faith and Do Not Doubt” (Matthew 21:21, 22)"
+- video:
+    id: 1074
+    title: Kenneth Cook - Have Faith and Do Not Doubt”
+- paragraph: "12:15 Song No. 118 and Intermission"
+- video:
+    id: 2930
+    title: “Give Us More Faith”
+
 
 - subheading: Afternoon
 

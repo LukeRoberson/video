@@ -505,6 +505,7 @@ def music():
             "Convention Music Presentations",
             "Making Music",
             "Sing to Jehovah",
+            "“Sing Out Joyfully”—Meetings",
         ]
     )
 
