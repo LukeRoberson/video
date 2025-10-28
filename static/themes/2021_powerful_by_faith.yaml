@@ -65,6 +65,41 @@ section:
 
 
 - subheading: Afternoon
+- paragraph: 1:35 Music-Video Presentation
+- video:
+    id: 1008
+    start: 0
+    end: 632
+- paragraph: "1:45 Song No. 2"
+- video:
+    id: 2835
+    title: "2. Jehovah is Your Name"
+
+- paragraph: "1:50 SYMPOSIUM: Use Creation to Build Your Faith"
+- video_grid:
+    - video:
+        id: 1073
+        title: "Use Creation to Build Your Faith—Stars (Isaiah 40:26)"
+    - video:
+        id: 1072
+        title: "Use Creation to Build Your Faith—Oceans (Psalm 93:4)"
+    - video:
+        id: 1071
+        title: "Use Creation to Build Your Faith—Forests (Psalm 37:10, 11, 29)"
+    - video:
+        id: 1070
+        title: "Use Creation to Build Your Faith—Wind and Water (Psalm 147:17, 18)"
+    - video:
+        id: 1069
+        title: "Use Creation to Build Your Faith—Sea Creatures (Psalm 104:27, 28)"
+    - video:
+        id: 1068
+        title: "Use Creation to Build Your Faith—Our Bodies (Isaiah 33:24)"
+- paragraph: "2:50 Song No. 148 - Jehovah Provides Escape"
+- video:
+    id: 2954
+    title: "148. Jehovah Provides Escape"
+
 
 ---
 section:
