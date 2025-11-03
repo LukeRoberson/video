@@ -31,3 +31,6 @@ THIRD_PARTY_LICENSES.chromedriver
 
 # PowerShell
 *.ps1
+
+# Logs
+*.log

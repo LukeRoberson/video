@@ -138,6 +138,60 @@ section:
 - quote: “Put up a hard fight for the faith”​—Jude 3
 
 - subheading: Morning
+- paragraph: 9:20 Music-Video Presentation
+- video:
+    id: 1006
+    start: 0
+    end: 660
+- paragraph: "9:30 Song No. 57 and Prayer"
+- video:
+    id: 2993
+    title: "57. Preaching to All Sorts of People"
+
+- paragraph: "9:40 SYMPOSIUM: Remember​—Faithless People Can Acquire Faith!"
+- video_grid:
+    - video:
+        id: 1060
+        title: "The Ninevites (Jonah 3:5)"
+    - video:
+        id: 1059
+        title: "Jesus’ Fleshly Brothers (1 Corinthians 15:7)"
+    - video:
+        id: 1058
+        title: "Prominent Ones (Philippians 3:7, 8)"
+    - video:
+        id: 1057
+        title: "Nonreligious People (Romans 10:13-15; 1 Corinthians 9:22)"
+
+- paragraph: "10:30 Build Faith Using Enjoy Life Forever! (John 17:3)"
+- video:
+    id: 1056
+    title: "Build Faith Using Enjoy Life Forever!"
+- paragraph: "10:50 Song No. 67 and Announcements"
+- video:
+    id: 2887
+    title: "67. “Preach the Word”"
+
+- paragraph: "911:00 SYMPOSIUM: Successful Fighters for the Faith"
+- video_grid:
+    - video:
+        id: 1055
+        title: "Those With Unbelieving Mates (Philippians 3:17)"
+    - video:
+        id: 1054
+        title: "Those Being Raised by Single Parents (2 Timothy 1:5)"
+    - video:
+        id: 1053
+        title: "Single Christians (1 Corinthians 12:25)"
+
+- paragraph: "11:45 BAPTISM: Exercising Faith Means Everlasting Life! (Matthew 17:20; John 3:16; Hebrews 11:6)"
+- video:
+    id: 1052
+    title: "Exercising Faith Means Everlasting Life!"
+- paragraph: "12:15 Song No. 79 and Intermission"
+- video:
+    id: 2897
+    title: "79. Teach Them to Stand Firm"
 
 - subheading: Afternoon
 
