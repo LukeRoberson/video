@@ -5,13 +5,6 @@
  * @file carousel.css
  * @description Styles for video carousel components including scroll arrows,
  *              custom scrollbars, carousel controls, captions, and progress bars
- * @author Video Development Team
- * @version 1.0.0
- * @created 2025-09-26
- * 
- * @dependencies
- *   - Bootstrap 5.x (carousel components)
- *   - Base styles from styles.css
  * 
  * @components
  *   - .carousel-scroll-arrow: Navigation arrows for carousel scrolling

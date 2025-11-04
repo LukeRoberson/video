@@ -1,4 +1,21 @@
+<!--
+    ==========================================================================
+    Search Results Template
+    --------------------------------------------------------------------------
+    - Displays the results of a search query.
+    - Shows the number of results found and pagination if necessary.
+    - Shows whether Elasticsearch or database search was used.
+    - Cards for each video with thumbnail, title, description.
+    - Displays Elasticsearch-specific data: scores, highlights, metadata.
+    ==========================================================================
+-->
+
 {% extends "base.html" %}
+
+{% block head %}
+<!-- Custom CSS -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/elastic.css')}}" />        
+{% endblock %}
 
 {% block title %}
 {% if query %}Search: {{ query }}{% else %}Search{% endif %}
@@ -59,8 +76,8 @@
             {% if videos %}
                 <div class="row">
                     {% for video in videos %}
-                        {% set vid_id = video.id or video.video_id %}
-                        {% set vid_name = video.name or video.title %}
+                        {% set vid_id = video.video_id or video.id %}
+                        {% set vid_name = video.title or video.name %}
                         {% set vid_thumb = video.thumbnail %}
                         {% set vid_desc = video.description %}
                         {% set vid_watched = video.watched %}
@@ -98,9 +115,9 @@
                                             {{ vid_name }}
                                             
                                             <!-- Relevance Score (Elasticsearch only) -->
-                                            {% if video.score %}
+                                            {% if video.score and using_elasticsearch %}
                                             <small class="text-muted">
-                                                ({{ "%.1f"|format(video.score) }})
+                                                ({{ "%.1f"|format(video.score) }}%)
                                             </small>
                                             {% endif %}
                                         </h6>
@@ -113,15 +130,74 @@
                                             </p>
                                         {% endif %}
                                         
-                                        <!-- Highlights (Elasticsearch only) -->
-                                        {% if video.highlights and video.highlights.transcript %}
-                                            <div class="highlights mt-2 p-2 bg-dark border border-warning rounded">
-                                                <small class="text-warning">
-                                                    <strong>Transcript Match:</strong>
-                                                </small>
-                                                <div class="small text-light">
-                                                    {{ video.highlights.transcript[0]|safe }}
-                                                </div>
+                                        <!-- Highlights Section (Elasticsearch only) -->
+                                        {% if using_elasticsearch and video.highlights %}
+                                            <div class="highlights-section mt-3">
+                                                
+                                                <!-- Title Highlights -->
+                                                {% if video.highlights.title %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-info rounded">
+                                                        <small class="text-info">
+                                                            <i class="fas fa-heading"></i> 
+                                                            <strong>Title Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.title[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Description Highlights -->
+                                                {% if video.highlights.description %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-success rounded">
+                                                        <small class="text-success">
+                                                            <i class="fas fa-align-left"></i> 
+                                                            <strong>Description Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.description[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Transcript Highlights -->
+                                                {% if video.highlights.transcript %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-warning rounded">
+                                                        <small class="text-warning">
+                                                            <i class="fas fa-closed-captioning"></i> 
+                                                            <strong>Transcript Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.transcript[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Speaker Highlights -->
+                                                {% if video.highlights.speaker %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-primary rounded">
+                                                        <small class="text-primary">
+                                                            <i class="fas fa-microphone"></i> 
+                                                            <strong>Speaker Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.speaker[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Tags Highlights -->
+                                                {% if video.highlights.tags %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-secondary rounded">
+                                                        <small class="text-secondary">
+                                                            <i class="fas fa-tags"></i> 
+                                                            <strong>Tag Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.tags[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
                                             </div>
                                         {% endif %}
                                         
@@ -212,30 +288,4 @@
     </div>
 </div>
 
-<style>
-/* Highlight styling for Elasticsearch results */
-.highlights em {
-    background-color: #ffc107;
-    font-style: normal;
-    font-weight: bold;
-    padding: 2px 4px;
-    border-radius: 2px;
-    color: #000;
-}
-
-.highlights {
-    font-size: 0.85rem;
-}
-
-/* Relevance score styling */
-.card-title small.text-muted {
-    font-size: 0.7rem;
-}
-
-/* Badge styling */
-.badge {
-    font-size: 0.85rem;
-    padding: 0.5em 0.75em;
-}
-</style>
 {% endblock %}

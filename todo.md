@@ -16,6 +16,7 @@
   - [ ] Add support to search based on video duration
   - [ ] Add support for date
   - [ ] Add support to search by scriptures
+- [ ] Consider authentication for /api/search/reindex
 - [ ] Update compose file to include container
 - [ ] Update all docs
 
@@ -52,6 +53,9 @@
   - [ ] Expose the file log in the compose file
   - [ ] Convert print statements to logs
   - [ ] Some form of log-rotate, so it doesn't get too big
+- [ ] Customise Flask logging
+  - [ ] Include colours for log types
+  - [ ] Suppress unneeded messages
 
 - [ ] Testing
   - [ ] Create a basic testing structure/plan; Expand on it later

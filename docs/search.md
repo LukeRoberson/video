@@ -4,6 +4,230 @@
 > This is still in progress
 
 
+## Overview
+
+The app uses *Elasticsearch* for advanced searching. This runs as a separate container.
+
+If the container isn't available, search functionality will fall back to a basic search.
+
+An API exposes search functions.
+
+</br></br>
+
+
+## API
+
+The API is defined in `app/api_search.py`.
+
+The **base URL** for the search API is `/api/search/`. Routes below use this as a prefix.
+
+| Route     | Method | Notes                                          |
+| --------- | ------ | ---------------------------------------------- |
+| /         | GET    | Perform a search based on a simple query       |
+| /advanced | GET    | An advanced search using additional parameters |
+| /reindex  | POST   | Create indexes or rebuild them                 |
+| /status   | GET    | Check the status of the search service         |
+
+</br></br>
+
+
+## Search Status
+
+URL: `/api/search/status`
+
+Method: `GET`
+
+Query Params: *None*
+
+Response codes:
+* `200 OK` When the endpoint is responding
+
+**Responses**:
+
+Returns JSON data like this:
+
+```json
+{
+  "elasticsearch_available": true,
+  "fallback_active": false,
+  "index_exists": true,
+  "timestamp": "2025-11-04T20:52:50.846649+00:00"
+}
+```
+
+If the elasticsearch container is not working, a `200 OK` code is still returned, as the endpoint is working. However, the response will be different:
+
+```json
+{
+  "elasticsearch_available": false,
+  "fallback_active": true,
+  "index_exists": false,
+  "error": "Some error message here",
+  "timestamp": "2025-11-04T20:52:50.846649+00:00"
+}
+```
+
+
+</br></br>
+
+
+## Reindex
+
+URL: `/api/search/reindex`
+
+Method: `POST`
+
+Query Params: *None*
+
+Response codes:
+* `200 OK` If the indexing process completes successfully.
+* `503 Service Unavailable` If ES is not available.
+* `500 Internal Server Error` If there was some other problem.
+
+**Responses**:
+
+When successful, this returns a JSON response:
+
+```json
+{
+    "failed": 0,
+    "message": "Reindexing completed",
+    "success": 2947,
+    "total": 2947
+}
+```
+
+If unsuccessful, a JSON response with an error will be returned:
+
+```json
+{
+    "error": "Some error message"
+}
+```
+
+
+</br></br>
+
+
+## Basic Search
+
+This is a simple search that doesn't use any advanced filters.
+
+URL: `/api/search/`
+
+Method: `GET`
+
+Query Params:
+* `q` - The search query (required)
+* `page` - Page number for pagination. Default is 1
+* `per_page` - Results per page. Default is 20, maximum is 100
+
+Response codes:
+* `200 OK` Search was successful
+* `400 Bad Request` Missing or invalid parameters
+* `500 Internal Server Error` If there was some other problem.
+
+**Responses**:
+
+A successful search returns:
+
+```json
+{
+    "page": "page number",
+    "pages": "total pages",
+    "per_page": "results per page",
+    "query": "original query",
+    "results": [
+        {
+            "result-1": "First result in a list"
+        },
+    "total": "total results returned",
+    "using_elasticsearch": true
+}
+```
+
+</br></br>
+
+
+Each result in the list will look like this:
+
+```json
+{
+    "description": "Video description",
+    "duration": "Video duration in seconds",
+    "highlights": {
+        "title": [
+            "The video title"
+        ]
+    },
+    "id": "Video ID",
+    "name": "Video Title",
+    "score": "Percent",
+    "thumbnail": "Thumbnail for the video",
+    "title": "Title",
+    "video_id": "video ID",
+    "watched": false
+}
+```
+
+</br></br>
+
+Notes on the results:
+* Video ID and name are returned in multiple formats to support different ways a frontend may query the results
+* The score is a percentage reflecting how well the video matches the search
+* Highlights refers to the metadata in the video that matched the query
+  * The example above shows that something in the title matched the query
+  * This could also be a tag, description, etc.
+* Other video metadata, such as watch status, duration, and thumbnail, are returned here to prevent additional queries before rendering on the results page.
+
+</br></br>
+
+
+If there is an error, JSON will be returned, containing the error message:
+
+```json
+{
+    "error": "error message"
+}
+```
+
+</br></br>
+
+
+## Advanced Search
+
+This is an advanced version of the search, which includes additional filtering parameters.
+
+In this implmentation, the `q` parameter is optional, as other parameters may be used.
+
+URL: `/api/search/advanced`
+
+Method: `GET`
+
+Query Params:
+* `q` - The search query (optional)
+* `page` - Page number for pagination. Default is 1
+* `per_page` - Results per page. Default is 20, maximum is 100
+* `speakers` - Speaker IDs to filter by (optional)
+* `characters` - Character IDs to filter by (optional)
+* `locations` - Location IDs to filter by (optional)
+* `tags` - Tag IDs to filter by (optional)
+
+Response codes:
+* `200 OK` Search was successful
+* `400 Bad Request` Missing or invalid parameters
+* `500 Internal Server Error` If there was some other problem.
+
+**Responses**:
+
+All responses are the same as with the simple search.
+
+The only exception to this is the advanced search will also return a `filters` value, containing additional parameters that were used in the search.
+
+
+</br></br>
+
+
 ## Elastic Search
 
 ### Version

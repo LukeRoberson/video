@@ -1,0 +1,152 @@
+/**
+ * Elastic Search Results Styling
+ * ===============================
+ * 
+ * @file elastic.css
+ * @description Styles for Elasticsearch results display
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
+ * 
+ * @components
+ *   - .highlights: Container for search result highlights
+ *   - .highlights em: Highlighted search terms
+ *   - .highlights-section: Section grouping all highlights
+ *   - .badge: Search method indicator badges
+ * 
+ * @features
+ *   - Color-coded highlight types
+ *   - Visual distinction for different match types
+ *   - Improved readability with borders and spacing
+ *   - Responsive design for mobile and desktop
+ */
+
+/* ===========================================
+   1. HIGHLIGHT STYLING
+   =========================================== */
+
+/**
+ * Highlighted search terms
+ * Uses <em> tags inserted by Elasticsearch
+ * 
+ * @component .highlights em
+ * @note Yellow background for high visibility
+ */
+.highlights em {
+    background-color: #ffc107;         /* Yellow highlight */
+    font-style: normal;                /* Remove italic */
+    font-weight: bold;                 /* Bold for emphasis */
+    padding: 2px 4px;                  /* Comfortable spacing */
+    border-radius: 2px;                /* Slightly rounded */
+    color: #000;                       /* Black text for contrast */
+}
+
+/**
+ * Highlights container base styling
+ * Applied to all highlight sections
+ * 
+ * @component .highlights
+ */
+.highlights {
+    font-size: 0.85rem;                /* Slightly smaller text */
+    line-height: 1.5;                  /* Comfortable reading */
+}
+
+/**
+ * Highlights section wrapper
+ * Groups all highlight types together
+ * 
+ * @component .highlights-section
+ */
+.highlights-section {
+    margin-top: 0.75rem;               /* Spacing from description */
+}
+
+/**
+ * Individual highlight containers
+ * Color-coded by match type
+ */
+.highlights.mb-2 {
+    padding: 0.5rem;                   /* Internal spacing */
+    border-radius: 4px;                /* Rounded corners */
+    margin-bottom: 0.5rem;             /* Spacing between highlights */
+}
+
+/* ===========================================
+   2. RELEVANCE SCORE STYLING
+   =========================================== */
+
+/**
+ * Relevance score badge
+ * Displays next to video title
+ * 
+ * @component .card-title small.text-muted
+ */
+.card-title small.text-muted {
+    font-size: 0.7rem;                 /* Small size */
+    font-weight: normal;               /* Regular weight */
+    opacity: 0.8;                      /* Slightly faded */
+}
+
+/* ===========================================
+   3. BADGE STYLING
+   =========================================== */
+
+/**
+ * Search method indicator badges
+ * Shows Elasticsearch vs Database
+ * 
+ * @component .badge
+ */
+.badge {
+    font-size: 0.85rem;                /* Readable size */
+    padding: 0.5em 0.75em;             /* Comfortable padding */
+    font-weight: 600;                  /* Semi-bold */
+    letter-spacing: 0.5px;             /* Improved readability */
+}
+
+/* ===========================================
+   4. HIGHLIGHT TYPE INDICATORS
+   =========================================== */
+
+/**
+ * Small icons and labels for highlight types
+ * Provides visual distinction
+ */
+.highlights small {
+    font-weight: 600;                  /* Semi-bold labels */
+    display: flex;                     /* Align icon and text */
+    align-items: center;               /* Vertical centering */
+    margin-bottom: 0.25rem;            /* Space before content */
+}
+
+.highlights small i {
+    margin-right: 0.25rem;             /* Space after icon */
+}
+
+/* ===========================================
+   5. RESPONSIVE ADJUSTMENTS
+   =========================================== */
+
+/**
+ * Mobile-specific adjustments
+ * Optimize for smaller screens
+ */
+@media (max-width: 768px) {
+    .highlights {
+        font-size: 0.8rem;             /* Smaller text on mobile */
+    }
+    
+    .highlights.mb-2 {
+        padding: 0.4rem;               /* Reduced padding */
+    }
+    
+    .badge {
+        font-size: 0.75rem;            /* Smaller badge */
+        padding: 0.4em 0.6em;          /* Adjusted padding */
+    }
+    
+    .card-title small.text-muted {
+        font-size: 0.65rem;            /* Smaller score */
+    }
+}
