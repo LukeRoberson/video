@@ -6,9 +6,14 @@ Defines a Flask blueprint for dynamic web routes.
     bible chapter, or scripture.
 
 Functions:
-    - get_one_video: Fetches a single video or item from the database by ID.
-    - get_videos_by_filter: Fetches videos based on filter criteria.
-    - set_watched_status: Sets the watched status for each video in a list.
+    - get_one_video:
+        Fetches a single video or item from the database by ID.
+    - get_videos_by_filter:
+        Fetches videos based on filter criteria.
+    - set_watched_status:
+        Sets the watched status for each video in a list.
+    - get_search_service:
+        Retrieves or creates a SearchService instance.
 
 Routes:
     - /video/<int:video_id>:
@@ -47,6 +52,9 @@ Custom Dependencies:
 
     app.theme:
         ThemeManager: Manages theme-related operations.
+
+    search:
+        SearchService: Provides search functionality.
 """
 
 # Standard library imports
@@ -57,11 +65,11 @@ from flask import (
     make_response,
     request,
     session,
+    current_app
 )
 from typing import Union
 import random
 import os
-from flask import current_app
 import logging
 
 # Custom imports
@@ -82,6 +90,10 @@ from app.local_db import (
     ProgressManager,
 )
 from app.theme import ThemeManager
+from search import SearchService
+
+
+logger = logging.getLogger(__name__)
 
 
 # Setup type variables for manager types
@@ -199,6 +211,23 @@ def set_watched_status(
 
         # Set the 'watched' key to True
         video['watched'] = watched
+
+
+def get_search_service() -> SearchService:
+    """
+    Get or create SearchService instance from application context.
+
+    Args:
+        None
+    
+    Returns:
+        SearchService: Configured search service instance.
+    """
+
+    if 'SEARCH_SERVICE' not in current_app.config:
+        current_app.config['SEARCH_SERVICE'] = SearchService()
+
+    return current_app.config['SEARCH_SERVICE']
 
 
 dynamic_bp = Blueprint(
@@ -681,8 +710,11 @@ def search_results() -> Response:
     """
     Render search results page for video searches.
 
+    Integrates Elasticsearch with database fallback for searching videos.
+
     Query Parameters:
         q (str): The search query string.
+        page (int): The page number for pagination (default is 1).
 
     Returns:
         Response: A rendered HTML page with search results.
@@ -691,6 +723,7 @@ def search_results() -> Response:
 
     # Get the search query from the request
     query = request.args.get("q", "").strip()
+
     if not query:
         return make_response(
             render_template(
@@ -701,39 +734,83 @@ def search_results() -> Response:
             )
         )
 
-    # Use the VideoManager to search for videos
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        videos = video_mgr.search(query=query)
+    # Get pagination parameter
+    try:
+        page = max(1, int(request.args.get('page', 1)))
 
-    # If no videos found, return an empty list and a message
-    if not videos:
-        videos = []
-        message = f"No videos found for '{query}'"
+    except ValueError:
+        page = 1
+    
+    per_page = 20
 
-    # If videos are found, return them with a message
-    else:
-        message = f"Found {len(videos)} videos for '{query}'"
+    # Initialize default values
+    videos = []
+    total = 0
+    pages = 0
+    using_elasticsearch = False
+    message = "Enter a search term to find videos."
 
-    # Check watched status for the videos
-    active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
+    if query:
+        try:
+            # Use SearchService for unified search
+            search_service = get_search_service()
+            (results, total), using_elasticsearch = search_service.search(
+                query=query,
+                page=page,
+                per_page=per_page
+            )
+            
+            # Calculate pagination
+            pages = (total + per_page - 1) // per_page
+            
+            # Convert results to video format for template
+            videos = results
+            
+            # Set appropriate message
+            if total > 0:
+                method = (
+                    "Elasticsearch"
+                    if using_elasticsearch
+                    else "database"
                 )
-                video['watched'] = watched
-
+                message = (
+                    f"Found {total} video{'s' if total != 1 else ''} "
+                    f"matching '{query}' (using {method})"
+                )
+            else:
+                message = f"No videos found matching '{query}'"
+            
+            # Log search operation
+            if using_elasticsearch:
+                logger.info(
+                    f"✓ Elasticsearch search for '{query}': "
+                    f"{total} results, page {page}/{pages}"
+                )
+            else:
+                logger.warning(
+                    f"⚠ Database fallback search for '{query}': "
+                    f"{total} results, page {page}/{pages}"
+                )
+                
+        except Exception as e:
+            logger.error(
+                f"Error during search: {e}",
+                exc_info=True
+            )
+            message = "An error occurred while searching. Please try again."
+            videos = []
+            total = 0
+    
     return make_response(
         render_template(
-            "search_results.html",
+            'search_results.html',
             query=query,
             videos=videos,
-            message=message
+            total=total,
+            page=page,
+            pages=pages,
+            message=message,
+            using_elasticsearch=using_elasticsearch
         )
     )
 
@@ -744,10 +821,10 @@ def search_results() -> Response:
 )
 def advanced_search() -> Response:
     """
-    Render the advanced search page.
-
+    Display advanced search page with filters.
+    
     Returns:
-        Response: A rendered HTML page.
+        Rendered advanced search template with metadata options.
     """
 
     with DatabaseContext() as db:

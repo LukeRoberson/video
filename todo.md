@@ -1,16 +1,5 @@
 # Version 1.3.0
 
-## GitHub Issues
-
-- [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
-- [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
-- [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
-- [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
-- [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
-
-</br></br>
-
-
 ## Architecture
 
 - [ ] Search
@@ -27,6 +16,36 @@
   - [ ] Add support to search based on video duration
   - [ ] Add support for date
   - [ ] Add support to search by scriptures
+- [ ] Update compose file to include container
+- [ ] Update all docs
+
+</br></br>
+
+
+## UI
+
+- [ ] About Page
+  - [ ] Disclaimer: Subtitles are machine generated
+  - [ ] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
+
+</br></br>
+
+
+---
+# Version 1.3.1
+
+## GitHub Issues
+
+- [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
+- [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
+- [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
+- [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
+- [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
+
+</br></br>
+
+
+## Architecture
 
 - [ ] Logging
   - [ ] Create a logger instance with stream and file logging
@@ -43,9 +62,6 @@
 
 ## UI
 
-- [ ] About Page
-  - [ ] Disclaimer: Subtitles are machine generated
-  - [ ] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
 - [ ] Speakers page
   - [ ] Lazy loading of profile images
 - [ ] Bible Characters
@@ -55,6 +71,14 @@
   - [ ] Add video section: Make tags field resizable
 
 </br></br>
+
+
+---
+# Version 1.4.0
+
+## Architecture
+
+- [ ] Separate API and frontend into separate services
 
 
 
@@ -104,8 +128,14 @@
 - [ ] Homepage:
   - [ ] Random (unwatched) morning worship for the day
 - [ ] TV
-  - [ ] Capture remote control input (for navigation)
-  - [ ] Menu should not be collapsed (as seen on Amazon Fire)
+  - [ ] Find which of the current features are actually needed
+  - [ ] Roll back anything not needed
+    * Not developing for TV browser as an app
+    * Will include just enough to make it 'nice'
+  - [ ] Build a sample Native app for Tizen (Samsung TV OS)
+    * IDE is VSCode + extension
+      * https://developer.samsung.com/smarttv/develop/tools/additional-tools/vscode-extension.html
+    * Use React native for the UI
 - [ ] Stats page
   * After TypeScript and React are evaluated
   - [ ] Total videos watched / total videos
@@ -157,6 +187,8 @@
 - [ ] Video details page
   - [ ] Show a speaker's profile pic next to their name
   - [ ] Tooltip for scriptures: Show the scripture on hover
+- [ ] Scripts
+  - [ ] Script to find videos with no subtitles (so we can create them)
 
 </br></br>
 

@@ -1,0 +1,82 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "video_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding", "video_synonym"]
+        }
+      },
+      "filter": {
+        "video_synonym": {
+          "type": "synonym",
+          "synonyms": []
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "video_id": {
+        "type": "integer"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "video_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "type": "text",
+        "analyzer": "video_analyzer"
+      },
+      "speaker": {
+        "type": "text",
+        "analyzer": "video_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "bible_character": {
+        "type": "text",
+        "analyzer": "video_analyzer"
+      },
+      "location": {
+        "type": "text",
+        "analyzer": "video_analyzer"
+      },
+      "scriptures": {
+        "type": "text",
+        "analyzer": "video_analyzer"
+      },
+      "transcript": {
+        "type": "text",
+        "analyzer": "video_analyzer"
+      },
+      "transcript_chunks": {
+        "type": "nested",
+        "properties": {
+          "timestamp": {
+            "type": "keyword"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "video_analyzer"
+          }
+        }
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  }
+}

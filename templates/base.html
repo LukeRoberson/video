@@ -114,9 +114,21 @@
                     </ul>
 
                     <!-- Search -->
-                    <form class="d-flex my-2 my-lg-0 mx-4" action="{{ url_for('dynamic_pages.search_results') }}" method="GET">
-                        <input class="form-control mr-sm-2" type="search"  name="q" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success my-2 my-sm-0 mx-1" type="submit">Search</button>
+                    <form class="d-flex my-2 my-lg-0 mx-4" 
+                        action="{{ url_for('dynamic_pages.search_results') }}" 
+                        method="GET">
+                        <input 
+                            class="form-control mr-sm-2" 
+                            type="search" 
+                            name="q" 
+                            placeholder="Search" 
+                            aria-label="Search"
+                            value="{{ request.args.get('q', '') }}"
+                        >
+                        <button class="btn btn-outline-success my-2 my-sm-0 mx-1" 
+                                type="submit">
+                            Search
+                        </button>
                     </form>
 
                     <!-- Watched Videos Toggle -->
