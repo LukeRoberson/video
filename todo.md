@@ -3,22 +3,27 @@
 ## Architecture
 
 - [ ] Search
-  - [ ] Add an elasticsearch container
-  - [ ] Integrate elasticsearch with the app
-    * Video titles
-    * Speakers
-    * Locations
-    * Tags
-    * Bible characters
-    * Transcripts (subtitles)
-    * Chapters
-  - [ ] Fallback to basic search if container is unavailable
-  - [ ] Add support to search based on video duration
-  - [ ] Add support for date
-  - [ ] Add support to search by scriptures
-- [ ] Consider authentication for /api/search/reindex
-- [ ] Update compose file to include container
-- [ ] Update all docs
+- [ ] Elasticsearch
+    - [x] Add an elasticsearch container
+    - [ ] Integrate elasticsearch with the app
+        * Video titles
+        * Speakers
+        * Locations
+        * Tags
+        * Bible characters
+        * Transcripts (subtitles)
+        * Chapters
+      - [ ] Fallback to basic search if container is unavailable
+      - [x] Some results are not returning 'highlights'
+      - [ ] search_builder.py: adjust fuzziness, so 'green' doesn't match' 'greek' or 'greed'
+      - [ ] Update 'transcript chunks' to not include timestamps
+    - [ ] Consider authentication for /api/search/reindex
+    - [ ] Update compose file to include container
+    - [ ] Update all docs
+  - [ ] General search
+    - [ ] Add support to search based on video duration
+    - [ ] Add support for date
+    - [ ] Add support to search by scriptures (additional index?)
 
 </br></br>
 

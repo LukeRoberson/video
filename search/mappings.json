@@ -5,13 +5,7 @@
         "video_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
-          "filter": ["lowercase", "asciifolding", "video_synonym"]
-        }
-      },
-      "filter": {
-        "video_synonym": {
-          "type": "synonym",
-          "synonyms": []
+          "filter": ["lowercase", "asciifolding"]
         }
       }
     }

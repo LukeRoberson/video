@@ -6,7 +6,7 @@
 
 ## Overview
 
-The app uses *Elasticsearch* for advanced searching. This runs as a separate container.
+The app uses *Elasticsearch* for advanced searching. This runs as a single-node cluster in a separate container.
 
 If the container isn't available, search functionality will fall back to a basic search.
 
@@ -228,16 +228,24 @@ The only exception to this is the advanced search will also return a `filters` v
 </br></br>
 
 
-## Elastic Search
+
+---
+## Elasticsearch
 
 ### Version
 
-Version is 8.19.2, the latest in the 8.x train.
+Elasticsearch 8.19.2 is used, which is the latest in the 8.x train.
 
-Couldn't get 9.x to work (it's new).
+> [!NOTE]
+> 9.x is still quite new at this time.
+
+</br></br>
 
 
 ### Container
+
+> [!WARNING]
+> This section is still being worked on
 
 ```bash
 docker run -d --name video_elasticsearch_dev -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "bootstrap.memory_lock=true" --ulimit memlock=-1:-1  -v elasticsearch_data:/usr/share/elasticsearch/data docker.elastic.co/elasticsearch/elasticsearch:8.19.2
@@ -259,7 +267,50 @@ ELASTICSEARCH_PORT=9200
 For now it's a development container only.
 
 
-### API Status
+### Index Settings and Mappings
+
+Settings and mappings are defined in `search/mappings.json`.
+
+The two sections of the JSON file are:
+* `settings`
+* `mappings`
+
+</br></br>
+
+
+A custom *analyzer* is created. This is the component that processes text fields during searching and indexing.
+
+This analyzer includes:
+* **Tokenizer**: Standard
+* **Filters**:
+  * `lowercase` - Makes all searches case-insensitive.
+  * `asciifolding` - Converts non-ascii characters to ASCII
+
+</br></br>
+
+
+The mappings are a collection of *properties* which describe fields and their types that can be indexed.
+
+These properties of a video are indexed:
+* video_id
+* title
+* tags
+* speaker
+* bible_character
+* location
+* scriptures
+* transcript
+* transcript_chunks
+* created_at
+* updated_at
+
+</br></br>
+
+
+
+
+---
+## Sample Results
 
 Show current status: http://localhost:5000/api/search/status
 

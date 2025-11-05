@@ -50,6 +50,11 @@ class DatabaseContext:
 
     Args:
         db_path (str): The path to the SQLite database file.
+
+    Methods:
+        __init__: Initializes the DatabaseContext with a database path.
+        __enter__: Start the context manager and return the instance.
+        __exit__: Exit the context manager, handling any exceptions.
     """
 
     def __init__(
@@ -118,6 +123,16 @@ class VideoManager:
         db (DatabaseContext):
             An instance of DatabaseContext for database operations.
             This uses a 'composition' approach to manage database interactions.
+
+    Methods:
+        __init__: Initializes the VideoManager with a DatabaseContext.
+        add: Adds a new video to the database.
+        update: Updates an existing video in the database.
+        delete: Deletes a video from the database.
+        get: Retrieves videos from the database.
+        get_filter: Retrieves a filtered list of videos from the database.
+        name_to_id: Resolve a video name to its ID.
+        search: Search for videos by name or description.
     """
 
     def __init__(
@@ -702,6 +717,17 @@ class CategoryManager:
         db (DatabaseContext):
             An instance of DatabaseContext for database operations.
             This uses a 'composition' approach to manage database interactions.
+
+    Methods:
+        __init__: Initializes the CategoryManager with a DatabaseContext.
+        add: Adds a new category to the database.
+        update: Updates an existing category in the database.
+        delete: Deletes a category from the database.
+        get: Retrieves categories from the database.
+        get_from_video: Retrieves categories associated with a specific video.
+        add_to_video: Adds a category to a specific video.
+        remove_from_video: Removes a category from a specific video.
+        name_to_id: Resolve a category name to its ID.
     """
 
     def __init__(
@@ -1080,6 +1106,17 @@ class TagManager:
         db (DatabaseContext):
             An instance of DatabaseContext for database operations.
             This uses a 'composition' approach to manage database interactions.
+
+    Methods:
+        __init__(db: DatabaseContext) -> None
+        add(name: str) -> int | None
+        update(id: int, name: str) -> int | None
+        delete(id: int) -> int | None
+        get(id: int | None = None) -> list[dict] | None
+        get_from_video(video_id: int) -> list[dict] | None
+        add_to_video(video_id: int, tag_id: int) -> bool
+        remove_from_video(video_id: int, tag_id: int) -> bool
+        name_to_id(name: str) -> int | None
     """
 
     def __init__(
