@@ -25,6 +25,9 @@ from typing import (
 
 logger = logging.getLogger(__name__)
 
+# Constants
+FUZZINESS = "AUTO"
+
 
 class SearchQueryBuilder:
     """
@@ -81,7 +84,7 @@ class SearchQueryBuilder:
         self,
         query: str,
         fields: List[str],
-        fuzziness: str = "AUTO"
+        fuzziness: str = FUZZINESS
     ) -> 'SearchQueryBuilder':
         """
         Add a multi-match query across multiple fields.
@@ -265,6 +268,57 @@ class SearchQueryBuilder:
             'pre_tags': ['<em>'],
             'post_tags': ['</em>']
         }
+
+        # Return self for method chaining
+        return self
+
+    def add_should_match_filters(
+        self,
+        field: str,
+        values: List[str]
+    ) -> 'SearchQueryBuilder':
+        """
+        Add multiple match filters with OR logic (should clause).
+
+        Creates a bool query with should clauses for matching any of
+        the provided values. Useful for filtering where any value
+        should match (e.g., speaker1 OR speaker2).
+
+        Parameters:
+            field (str): The field name to filter on.
+            values (List[str]): List of values to match against.
+
+        Returns:
+            SearchQueryBuilder: Self for method chaining.
+        """
+
+        if not values:
+            logger.debug(f"No values provided for field '{field}', skipping")
+            return self
+
+        logger.debug(
+            f"Adding should match filter for field '{field}' "
+            f"with values: {values}"
+        )
+
+        # Create should clauses for each value
+        should_clauses = [
+            {'match': {field: value}}
+            for value in values
+        ]
+
+        # Wrap in a bool query with minimum_should_match
+        bool_filter = {
+            'bool': {
+                'should': should_clauses,
+                'minimum_should_match': 1
+            }
+        }
+
+        logger.debug(f"Created bool filter: {bool_filter}")
+
+        # Add to filter list
+        self.query['query']['bool']['filter'].append(bool_filter)
 
         # Return self for method chaining
         return self

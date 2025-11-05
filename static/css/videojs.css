@@ -5,6 +5,9 @@
  * @file videojs.css
  * @description Custom styles for Video.js player including theatre mode,
  *              progress controls, context menus, and chapter navigation
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
  * 
  * @dependencies
  *   - Video.js 8.x core player
@@ -492,6 +495,19 @@
     .video-js .vjs-menu[aria-labelledby*="chapters"] .vjs-menu-content::-webkit-scrollbar-thumb:hover {
         background: rgba(255, 255, 255, 0.5);
     }
+}
+
+/* Before multiple @media blocks, add a common selector variable approach
+   or consolidate the selectors */
+
+/* Example consolidation: */
+@media (max-width: 768px) {
+    .video-js .vjs-chapters-button .vjs-menu,
+    .video-js .vjs-menu[aria-labelledby*="chapters"] {
+        /* Combined rules here */
+    }
+    
+    /* Instead of repeating for .vjs-menu-content, .vjs-menu-item, etc. */
 }
 
 .video-js .vjs-chapters-button .vjs-menu,

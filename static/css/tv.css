@@ -5,6 +5,9 @@
  * @file tv.css
  * @description Large screen optimizations for TV and living room viewing
  *              with remote control navigation and focus management
+ * @author Video Development Team
+ * @version 1.0.0
+ * @created 2025-09-26
  * 
  * @scope TV Mode (.tv-mode class applied via JavaScript)
  * @scope Desktop Override (.desktop-mode for standard experience on TV)

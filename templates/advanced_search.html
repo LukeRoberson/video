@@ -11,6 +11,11 @@
 
 {% extends "base.html" %}
 
+{% block head %}
+<!-- Custom CSS for Elasticsearch highlights -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/elastic.css')}}" />        
+{% endblock %}
+
 {% block title %}
 Advanced Search
 {% endblock %}
@@ -21,7 +26,7 @@ Advanced Search
         <div class="col-lg-10 col-xl-6">
             <div class="card shadow">
                 <div class="card-body bg-dark text-white">
-                    <form id="advanced-search-form" method="GET" action="/api/search/advanced">
+                    <form id="advanced-search-form" method="GET" action="/search/advanced">
                         
                         <!-- Text Search Section -->
                         <div class="row mb-4">
@@ -34,9 +39,9 @@ Advanced Search
                                     <input type="text" 
                                            class="form-control form-control-lg search-input" 
                                            id="query" 
-                                           name="query" 
+                                           name="q" 
                                            placeholder="Enter title, keywords, or description..."
-                                           value="{{ request.args.get('query', '') }}">
+                                           value="{{ request.args.get('q', '') }}">
                                 </div>
                             </div>
                         </div>
@@ -160,10 +165,264 @@ Advanced Search
                 </div>
             </div>
 
-            <!-- Results will be displayed here -->
-            <div id="search-results" class="mt-4" style="display: none;">
-                <!-- Results will be loaded here via page refresh -->
+            <!-- Search Results Section -->
+            {% if message %}
+            <div class="mt-4">
+                <!-- Search Status Header with Method Badge -->
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <h4 class="text-white">{{ message }}</h4>
+                    
+                    {% if videos %}
+                    <span class="badge {{ 'bg-success' if using_elasticsearch else 'bg-warning text-dark' }} fs-6">
+                        {% if using_elasticsearch %}
+                            <i class="fas fa-bolt"></i> Elasticsearch
+                        {% else %}
+                            <i class="fas fa-database"></i> Database
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Display Results -->
+                {% if videos %}
+                <div class="row">
+                    {% for video in videos %}
+                        {% set vid_id = video.video_id or video.id %}
+                        {% set vid_name = video.title or video.name %}
+                        {% set vid_thumb = video.thumbnail %}
+                        {% set vid_desc = video.description %}
+                        {% set vid_watched = video.watched %}
+                        
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card bg-dark text-white h-100 border-secondary{% if vid_watched %} watched{% endif %}" 
+                                 style="position: relative;">
+                                <a href="{{ url_for('dynamic_pages.video_details', video_id=vid_id) }}" 
+                                   class="text-decoration-none text-white">
+                                    
+                                    <!-- Thumbnail -->
+                                    {% if vid_thumb %}
+                                        {% if vid_watched %}
+                                            <div class="thumbnail-watched-icon" 
+                                                 style="position: absolute; top: 10px; left: 10px; z-index: 2;">
+                                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                                    <path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z" fill="#fff"/>
+                                                </svg>
+                                            </div>
+                                        {% endif %}
+                                        <img src="{{ vid_thumb }}"
+                                             class="card-img-top{% if vid_watched %} watched{% endif %}"
+                                             alt="{{ vid_name }}"
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
+                                             style="height: 200px;">
+                                            <i class="fas fa-video fa-3x text-light"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Video Details -->
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {{ vid_name }}
+                                            
+                                            <!-- Relevance Score (Elasticsearch only) -->
+                                            {% if video.score and using_elasticsearch %}
+                                            <small class="text-muted">
+                                                ({{ "%.1f"|format(video.score) }}%)
+                                            </small>
+                                            {% endif %}
+                                        </h6>
+                                        
+                                        <!-- Description -->
+                                        {% if vid_desc %}
+                                            <p class="card-text small text-light">
+                                                {{ vid_desc[:100] }}
+                                                {% if vid_desc|length > 100 %}...{% endif %}
+                                            </p>
+                                        {% endif %}
+                                        
+                                        <!-- Highlights Section (Elasticsearch only) -->
+                                        {% if using_elasticsearch and video.highlights %}
+                                            <div class="highlights-section mt-3">
+                                                
+                                                <!-- Title Highlights -->
+                                                {% if video.highlights.title %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-info rounded">
+                                                        <small class="text-info">
+                                                            <i class="fas fa-heading"></i> 
+                                                            <strong>Title Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.title[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Description Highlights -->
+                                                {% if video.highlights.description %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-success rounded">
+                                                        <small class="text-success">
+                                                            <i class="fas fa-align-left"></i> 
+                                                            <strong>Description Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.description[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Transcript Highlights -->
+                                                {% if video.highlights.transcript %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-warning rounded">
+                                                        <small class="text-warning">
+                                                            <i class="fas fa-closed-captioning"></i> 
+                                                            <strong>Transcript Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.transcript[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Speaker Highlights -->
+                                                {% if video.highlights.speaker %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-primary rounded">
+                                                        <small class="text-primary">
+                                                            <i class="fas fa-microphone"></i> 
+                                                            <strong>Speaker Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.speaker[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Tags Highlights -->
+                                                {% if video.highlights.tags %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-secondary rounded">
+                                                        <small class="text-secondary">
+                                                            <i class="fas fa-tags"></i> 
+                                                            <strong>Tag Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.tags[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Bible Character Highlights -->
+                                                {% if video.highlights.bible_character %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-danger rounded">
+                                                        <small class="text-danger">
+                                                            <i class="fas fa-user-circle"></i> 
+                                                            <strong>Bible Character Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.bible_character[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Location Highlights -->
+                                                {% if video.highlights.location %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-info rounded">
+                                                        <small class="text-info">
+                                                            <i class="fas fa-map-marker-alt"></i> 
+                                                            <strong>Location Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.location[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Metadata -->
+                                        <div class="mt-2">
+                                            {% if video.speaker %}
+                                            <small class="text-light">
+                                                <i class="fas fa-user"></i> 
+                                                {{ video.speaker }}
+                                            </small>
+                                            <br>
+                                            {% endif %}
+                                            
+                                            {% if video.duration %}
+                                            <small class="text-light">
+                                                <i class="fas fa-clock"></i> 
+                                                {{ video.duration | seconds_to_hhmmss }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if pages > 1 %}
+                <nav aria-label="Search results pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous -->
+                        <li class="page-item {{ 'disabled' if page <= 1 else '' }}">
+                            <a class="page-link" 
+                               href="{{ url_for('dynamic_pages.advanced_search', q=query, speakers=request.args.getlist('speakers'), characters=request.args.getlist('characters'), locations=request.args.getlist('locations'), tags=request.args.getlist('tags'), page=page-1) if page > 1 else '#' }}">
+                                Previous
+                            </a>
+                        </li>
+                        
+                        <!-- Page Numbers -->
+                        {% for p in range(1, pages + 1) %}
+                            {% if p <= 3 or p > pages - 3 or (p >= page - 1 and p <= page + 1) %}
+                            <li class="page-item {{ 'active' if p == page else '' }}">
+                                <a class="page-link" 
+                                   href="{{ url_for('dynamic_pages.advanced_search', q=query, speakers=request.args.getlist('speakers'), characters=request.args.getlist('characters'), locations=request.args.getlist('locations'), tags=request.args.getlist('tags'), page=p) }}">
+                                    {{ p }}
+                                </a>
+                            </li>
+                            {% elif p == 4 or p == pages - 3 %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Next -->
+                        <li class="page-item {{ 'disabled' if page >= pages else '' }}">
+                            <a class="page-link" 
+                               href="{{ url_for('dynamic_pages.advanced_search', q=query, speakers=request.args.getlist('speakers'), characters=request.args.getlist('characters'), locations=request.args.getlist('locations'), tags=request.args.getlist('tags'), page=page+1) if page < pages else '#' }}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% elif query or request.args.get('speakers') or request.args.get('characters') or request.args.get('locations') or request.args.get('tags') %}
+                <!-- No Results Found -->
+                <div class="card bg-dark border-secondary">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-search fa-3x text-light mb-3"></i>
+                        <h4 class="text-white">No videos found</h4>
+                        <p class="text-light mb-4">
+                            We couldn't find any videos matching your criteria
+                        </p>
+                        <div class="text-light">
+                            <p>Try:</p>
+                            <ul class="list-unstyled">
+                                <li>• Using different keywords</li>
+                                <li>• Removing some filters</li>
+                                <li>• Using more general terms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

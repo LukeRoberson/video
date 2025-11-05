@@ -15,6 +15,152 @@ An API exposes search functions.
 </br></br>
 
 
+
+---
+## Elasticsearch
+
+The application uses Elasticsearch for advanced search functionality.
+
+</br></br>
+
+
+### Features
+
+- Fuzzy matching for handling spelling mistakes
+- Multi-field search with prioritization
+- Search across video metadata and transcripts
+- Automatic fallback to database search if Elasticsearch is unavailable
+- Weights to influence particular fields (eg, title is more important than tags)
+
+</br></br>
+
+
+To handle spelling mistakes, Elasticsearch will use fuzzy matching:
+- "sermin" will match "sermon"
+- "Jonh" will match "John"
+- Requires first 2 characters to match exactly
+
+</br></br>
+
+
+### Version
+
+Elasticsearch 8.19.2 is used, which is the latest in the 8.x train.
+
+> [!NOTE]
+> 9.x is still quite new at this time.
+
+</br></br>
+
+
+### Environment Variables
+
+Env variables are used to set the host, port, and VTT directory.
+
+These can be set in an `.env` file, or passed through docker commands/compose.
+
+These are for the app to discover the Elasticsearch container, not to configure the internals of Elasticsearch.
+
+```env
+ELASTICSEARCH_HOST=localhost
+ELASTICSEARCH_PORT=9200
+VTT_DIRECTORY=./vtt
+```
+
+</br></br>
+
+
+### Container
+
+To start a local container:
+
+```bash
+docker run -d --name video_elasticsearch_dev -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "bootstrap.memory_lock=true" --ulimit memlock=-1:-1  -v elasticsearch_data:/usr/share/elasticsearch/data docker.elastic.co/elasticsearch/elasticsearch:8.19.2
+```
+
+</br></br>
+
+
+**tcp/9200** is used for communication between containers.
+
+</br></br>
+
+
+Environment variables:
+
+| Variable               | Setting     | Purpose                            |
+| ---------------------- | ----------- | ---------------------------------- |
+| discovery.type         | single-node | Configure as a single node cluster |
+| xpack.security.enabled | false       | Disable security features          |
+| ES_JAVA_OPTS           | Xms512m     | Min JVM heap size of 512MB         |
+| ES_JAVA_OPTS           | Xmx512m     | Max JVM heap size og 512MB         |
+| bootstrap.memory_lock  | true        | Lock memory to prevent swapping    |
+
+
+> [!NOTE]
+> --ulimit tells the OS not to limit how much memory can be locked
+> This, along with `memory_lock`, prevents swapping for performance
+
+</br></br>
+
+
+**Persistent storage** is used (`/usr/share/elasticsearch/data`) for the indexes.
+
+</br></br>
+
+
+### Index Settings and Mappings
+
+Settings and mappings are defined in `search/mappings.json`.
+
+The two sections of the JSON file are:
+* `settings`
+* `mappings`
+
+</br></br>
+
+
+A custom *analyzer* is created. This is the component that processes text fields during searching and indexing.
+
+This analyzer includes:
+* **Tokenizer**: Standard
+* **Filters**:
+  * `lowercase` - Makes all searches case-insensitive.
+  * `asciifolding` - Converts non-ascii characters to ASCII
+
+</br></br>
+
+
+The mappings are a collection of *properties* which describe fields and their types that can be indexed.
+
+These properties of a video are indexed:
+* video_id
+* title
+* tags
+* speaker
+* bible_character
+* location
+* scriptures
+* transcript
+* created_at
+* updated_at
+
+</br></br>
+
+
+---
+## Fallback Behavior
+
+When Elasticsearch is unavailable:
+- Application automatically uses database search
+- Search functionality continues to work
+- `using_elasticsearch` field in response indicates search method
+- No application restart required when Elasticsearch becomes available
+
+</br></br>
+
+
+---
 ## API
 
 The API is defined in `app/api_search.py`.
@@ -230,85 +376,6 @@ The only exception to this is the advanced search will also return a `filters` v
 
 
 ---
-## Elasticsearch
-
-### Version
-
-Elasticsearch 8.19.2 is used, which is the latest in the 8.x train.
-
-> [!NOTE]
-> 9.x is still quite new at this time.
-
-</br></br>
-
-
-### Container
-
-> [!WARNING]
-> This section is still being worked on
-
-```bash
-docker run -d --name video_elasticsearch_dev -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "bootstrap.memory_lock=true" --ulimit memlock=-1:-1  -v elasticsearch_data:/usr/share/elasticsearch/data docker.elastic.co/elasticsearch/elasticsearch:8.19.2
-```
-
-* What are the ports for?
-  * 9200 returns JSON
-  * 9300 - No idea
-* What are the environment variables?
-
-
-Added a .env file to find the container:
-
-```
-ELASTICSEARCH_HOST=localhost
-ELASTICSEARCH_PORT=9200
-```
-
-For now it's a development container only.
-
-
-### Index Settings and Mappings
-
-Settings and mappings are defined in `search/mappings.json`.
-
-The two sections of the JSON file are:
-* `settings`
-* `mappings`
-
-</br></br>
-
-
-A custom *analyzer* is created. This is the component that processes text fields during searching and indexing.
-
-This analyzer includes:
-* **Tokenizer**: Standard
-* **Filters**:
-  * `lowercase` - Makes all searches case-insensitive.
-  * `asciifolding` - Converts non-ascii characters to ASCII
-
-</br></br>
-
-
-The mappings are a collection of *properties* which describe fields and their types that can be indexed.
-
-These properties of a video are indexed:
-* video_id
-* title
-* tags
-* speaker
-* bible_character
-* location
-* scriptures
-* transcript
-* transcript_chunks
-* created_at
-* updated_at
-
-</br></br>
-
-
-
-
 ---
 ## Sample Results
 
@@ -365,7 +432,6 @@ Run a query through the API: http://localhost:5000/api/search/?q=joy
       "tags": "",
       "title": "The World Has Changed Since 1914",
       "transcript": "",
-      "transcript_chunks": [],
       "video_id": 1941
     }
   "total": 1,
@@ -513,18 +579,6 @@ Check video indices: http://localhost:9200/videos
                 "transcript":{
                     "type":"text",
                     "analyzer":"video_analyzer"
-                },
-                "transcript_chunks":{
-                    "type":"nested",
-                    "properties":{
-                        "text":{
-                            "type":"text",
-                            "analyzer":"video_analyzer"
-                        },
-                        "timestamp":{
-                            "type":"keyword"
-                        }
-                    }
                 },
                 "updated_at":{
                     "type":"date"

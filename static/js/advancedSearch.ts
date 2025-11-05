@@ -266,7 +266,8 @@ class MultiSelectManager {
         this.selectedItems.forEach(item => {
             const input = document.createElement('input');
             input.type = 'hidden';
-            input.name = `${this.dataKey}_ids`;
+            // Use plural form with 's' suffix for backend compatibility
+            input.name = `${this.dataKey}s`;
             input.value = item.id;
             this.hiddenInputsContainer.appendChild(input);
         });
@@ -464,7 +465,6 @@ class AdvancedSearchController {
     private characterManager: MultiSelectManager;
     private locationManager: MultiSelectManager;
     private tagManager: MultiSelectManager;
-    private resultRenderer: SearchResultRenderer;
     private searchForm: HTMLFormElement | null;
 
     /**
@@ -475,7 +475,6 @@ class AdvancedSearchController {
         this.characterManager = null!;
         this.locationManager = null!;
         this.tagManager = null!;
-        this.resultRenderer = new SearchResultRenderer('search-results');
         this.searchForm = null;
     }
 
@@ -525,13 +524,8 @@ class AdvancedSearchController {
             clearButton.addEventListener('click', () => this.clearForm());
         }
 
-        // Form submission handler
-        if (this.searchForm) {
-            this.searchForm.addEventListener('submit', (e: Event) => {
-                e.preventDefault();
-                this.performAdvancedSearch();
-            });
-        }
+        // Note: Form submission is handled by default browser behavior
+        // Form submits to /search with GET parameters
     }
 
     /**
@@ -551,6 +545,9 @@ class AdvancedSearchController {
             this.locationManager.setData(data.locations || []);
             this.tagManager.setData(data.tags || []);
 
+            // Restore selected items from URL parameters
+            this.restoreSelectedItems(data);
+
         } catch (error) {
             console.error('Error loading multi-select data:', error);
             // Set empty arrays as fallback
@@ -559,6 +556,67 @@ class AdvancedSearchController {
             this.locationManager.setData([]);
             this.tagManager.setData([]);
         }
+    }
+
+    /**
+     * Restore selected items from URL query parameters
+     * @param data - Available data for all multi-select managers
+     */
+    private restoreSelectedItems(data: MultiSelectData): void {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Restore speakers
+        const speakerIds = urlParams.getAll('speakers');
+        console.log('Restoring speakers from URL:', speakerIds);
+        speakerIds.forEach(id => {
+            // Convert both to strings for comparison since URL params are strings
+            const speaker = data.speakers.find(s => String(s.id) === String(id));
+            if (speaker) {
+                console.log('Restoring speaker:', speaker);
+                this.speakerManager.selectItem(speaker);
+            } else {
+                console.warn('Speaker not found with id:', id);
+            }
+        });
+
+        // Restore characters
+        const characterIds = urlParams.getAll('characters');
+        console.log('Restoring characters from URL:', characterIds);
+        characterIds.forEach(id => {
+            const character = data.characters.find(c => String(c.id) === String(id));
+            if (character) {
+                console.log('Restoring character:', character);
+                this.characterManager.selectItem(character);
+            } else {
+                console.warn('Character not found with id:', id);
+            }
+        });
+
+        // Restore locations
+        const locationIds = urlParams.getAll('locations');
+        console.log('Restoring locations from URL:', locationIds);
+        locationIds.forEach(id => {
+            const location = data.locations.find(l => String(l.id) === String(id));
+            if (location) {
+                console.log('Restoring location:', location);
+                this.locationManager.selectItem(location);
+            } else {
+                console.warn('Location not found with id:', id);
+            }
+        });
+
+        // Restore tags
+        const tagIds = urlParams.getAll('tags');
+        console.log('Restoring tags from URL:', tagIds);
+        tagIds.forEach(id => {
+            const tag = data.tags.find(t => String(t.id) === String(id));
+            if (tag) {
+                console.log('Restoring tag:', tag);
+                this.tagManager.selectItem(tag);
+            } else {
+                console.warn('Tag not found with id:', id);
+            }
+        });
     }
 
     /**
@@ -573,66 +631,9 @@ class AdvancedSearchController {
         this.characterManager.clear();
         this.locationManager.clear();
         this.tagManager.clear();
-    }
-
-    /**
-     * Perform advanced search based on form data
-     */
-    async performAdvancedSearch(): Promise<void> {
-        if (!this.searchForm) {
-            console.error('Search form not found');
-            return;
-        }
-
-        const formData = new FormData(this.searchForm);
-        const params = this.buildSearchParams(formData);
-
-        try {
-            this.resultRenderer.showLoading();
-            const data = await this.executeSearch(params);
-
-            if (data.success && data.data) {
-                this.resultRenderer.displayResults(data.data);
-            } else {
-                this.resultRenderer.showError(data.error || 'Unknown error');
-            }
-        } catch (error) {
-            console.error('Search error:', error);
-            this.resultRenderer.showError('An error occurred during search.');
-        }
-    }
-
-    /**
-     * Build URL search parameters from form data
-     * @param formData - Form data to process
-     * @returns URL search parameters
-     */
-    private buildSearchParams(formData: FormData): URLSearchParams {
-        const params = new URLSearchParams();
-
-        for (const [key, value] of formData.entries()) {
-            const stringValue = value.toString();
-            if (stringValue.trim()) {
-                params.append(key, stringValue);
-            }
-        }
-
-        return params;
-    }
-
-    /**
-     * Execute the search API call
-     * @param params - Search parameters
-     * @returns Search response data
-     */
-    private async executeSearch(params: URLSearchParams): Promise<SearchApiResponse> {
-        const response = await fetch(`/api/search/advanced?${params.toString()}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        return await response.json();
+        
+        // Redirect to clear URL parameters
+        window.location.href = '/search/advanced';
     }
 
     /**

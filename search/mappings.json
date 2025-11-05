@@ -49,21 +49,13 @@
         "type": "text",
         "analyzer": "video_analyzer"
       },
-      "transcript": {
+      "chapter_markers": {
         "type": "text",
         "analyzer": "video_analyzer"
       },
-      "transcript_chunks": {
-        "type": "nested",
-        "properties": {
-          "timestamp": {
-            "type": "keyword"
-          },
-          "text": {
-            "type": "text",
-            "analyzer": "video_analyzer"
-          }
-        }
+      "transcript": {
+        "type": "text",
+        "analyzer": "video_analyzer"
       },
       "created_at": {
         "type": "date"

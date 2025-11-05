@@ -25,7 +25,8 @@
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <!-- Search Header with Method Badge -->
+            
+            <!-- Search Header with Method Badge (ES or DB) -->
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <div>
                     {% if query %}
@@ -195,6 +196,58 @@
                                                         </small>
                                                         <div class="small text-light mt-1">
                                                             {{ video.highlights.tags[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Bible Character Highlights -->
+                                                {% if video.highlights.bible_character %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-danger rounded">
+                                                        <small class="text-danger">
+                                                            <i class="fas fa-user-circle"></i> 
+                                                            <strong>Bible Character Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.bible_character[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Location Highlights -->
+                                                {% if video.highlights.location %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-info rounded">
+                                                        <small class="text-info">
+                                                            <i class="fas fa-map-marker-alt"></i> 
+                                                            <strong>Location Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.location[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Chapter Markers Highlights -->
+                                                {% if video.highlights.chapter_markers %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-light rounded">
+                                                        <small class="text-light">
+                                                            <i class="fas fa-bookmark"></i> 
+                                                            <strong>Chapter Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.chapter_markers[0]|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Scriptures Highlights -->
+                                                {% if video.highlights.scriptures %}
+                                                    <div class="highlights mb-2 p-2 bg-dark border border-warning rounded">
+                                                        <small class="text-warning">
+                                                            <i class="fas fa-bible"></i> 
+                                                            <strong>Scripture Match:</strong>
+                                                        </small>
+                                                        <div class="small text-light mt-1">
+                                                            {{ video.highlights.scriptures[0]|safe }}
                                                         </div>
                                                     </div>
                                                 {% endif %}

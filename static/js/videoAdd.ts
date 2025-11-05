@@ -37,6 +37,7 @@ interface VideoData {
     url_240?: string;
     thumbnail?: string;
     duration?: string;
+    date_added?: string;
 }
 
 /**
@@ -281,10 +282,14 @@ class VideoTableManager {
 }
 
 /**
+ * @class VideoAdditionHandler
+ * 
  * Handles individual video addition operations
  */
 class VideoAdditionHandler {
     /**
+     * @method constructor
+     * 
      * Create a VideoAdditionHandler instance
      */
     constructor() {
@@ -292,6 +297,8 @@ class VideoAdditionHandler {
     }
 
     /**
+     * @method setupEventListeners
+     * 
      * Set up event listeners for video addition buttons
      */
     private setupEventListeners(): void {
@@ -305,12 +312,18 @@ class VideoAdditionHandler {
     }
 
     /**
+     * @method handleAddVideo
+     * 
      * Handle video addition button click
+     * 
      * @param button - The clicked button
      */
     private async handleAddVideo(button: HTMLButtonElement): Promise<void> {
         try {
             const videoData = this.extractVideoData(button);
+
+            // Add date_added in correct format
+            videoData.date_added = this.getCurrentDateTimeFormatted();
             
             // Disable button immediately to prevent double-clicks
             this.disableButton(button);
@@ -325,6 +338,25 @@ class VideoAdditionHandler {
             this.showErrorMessage('An error occurred while adding the video.');
             this.enableButton(button); // Re-enable button on error
         }
+    }
+
+    /**
+     * @method getCurrentDateTimeFormatted
+     * 
+     * Get current date and time in the format: YYYY-MM-DD HH:MM:SS
+     * 
+     * @returns Formatted date string
+     */
+    private getCurrentDateTimeFormatted(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     /**

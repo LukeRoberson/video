@@ -115,6 +115,7 @@ def search_videos():
             - query: The search query string
     """
 
+    logger.info("API: Processing standard search request...")
     try:
         # Get query parameters
         query = request.args.get('q', '').strip()
@@ -252,6 +253,7 @@ def advanced_search():
             - query: The search query string
     """
 
+    logger.info("API: Processing advanced search request...")
     try:
         # Get text query parameter
         query = request.args.get('query', '').strip()

@@ -219,7 +219,7 @@ def get_search_service() -> SearchService:
 
     Args:
         None
-    
+
     Returns:
         SearchService: Configured search service instance.
     """
@@ -711,10 +711,15 @@ def search_results() -> Response:
     Render search results page for video searches.
 
     Integrates Elasticsearch with database fallback for searching videos.
+    Supports both simple and advanced search with filters.
 
     Query Parameters:
         q (str): The search query string.
         page (int): The page number for pagination (default is 1).
+        speakers (list): Speaker IDs to filter by (advanced search).
+        characters (list): Character IDs to filter by (advanced search).
+        locations (list): Location IDs to filter by (advanced search).
+        tags (list): Tag IDs to filter by (advanced search).
 
     Returns:
         Response: A rendered HTML page with search results.
@@ -723,6 +728,21 @@ def search_results() -> Response:
 
     # Get the search query from the request
     query = request.args.get("q", "").strip()
+
+    # Get advanced search filters
+    filters = {}
+    if request.args.get('speakers'):
+        filters['speakers'] = request.args.getlist('speakers')
+    if request.args.get('characters'):
+        filters['characters'] = request.args.getlist('characters')
+    if request.args.get('locations'):
+        filters['locations'] = request.args.getlist('locations')
+    if request.args.get('tags'):
+        filters['tags'] = request.args.getlist('tags')
+
+    # If no query but filters exist, use wildcard search
+    if not query and filters:
+        query = "*"
 
     if not query:
         return make_response(
@@ -738,9 +758,11 @@ def search_results() -> Response:
     try:
         page = max(1, int(request.args.get('page', 1)))
 
+    # Default to page 1 on error
     except ValueError:
         page = 1
-    
+
+    # Results per page
     per_page = 20
 
     # Initialize default values
@@ -757,41 +779,69 @@ def search_results() -> Response:
             (results, total), using_elasticsearch = search_service.search(
                 query=query,
                 page=page,
-                per_page=per_page
+                per_page=per_page,
+                filters=filters if filters else None
             )
-            
+
             # Calculate pagination
             pages = (total + per_page - 1) // per_page
-            
+
             # Convert results to video format for template
             videos = results
-            
-            # Set appropriate message
+
+            # Add a badge to show which search method was used (ES or DB)
             if total > 0:
                 method = (
                     "Elasticsearch"
                     if using_elasticsearch
                     else "database"
                 )
+
+                # Build filter description for message
+                filter_desc = ""
+                if filters:
+                    filter_parts = []
+                    if 'speakers' in filters:
+                        filter_parts.append(
+                            f"{len(filters['speakers'])} speaker(s)"
+                        )
+                    if 'characters' in filters:
+                        filter_parts.append(
+                            f"{len(filters['characters'])} character(s)"
+                        )
+                    if 'locations' in filters:
+                        filter_parts.append(
+                            f"{len(filters['locations'])} location(s)"
+                        )
+                    if 'tags' in filters:
+                        filter_parts.append(
+                            f"{len(filters['tags'])} tag(s)"
+                        )
+                    if filter_parts:
+                        filter_desc = (
+                            f" with filters: {', '.join(filter_parts)}"
+                        )
                 message = (
                     f"Found {total} video{'s' if total != 1 else ''} "
-                    f"matching '{query}' (using {method})"
+                    f"matching '{query}'{filter_desc} (using {method})"
                 )
+
             else:
                 message = f"No videos found matching '{query}'"
-            
+
             # Log search operation
             if using_elasticsearch:
                 logger.info(
                     f"✓ Elasticsearch search for '{query}': "
                     f"{total} results, page {page}/{pages}"
                 )
+
             else:
                 logger.warning(
                     f"⚠ Database fallback search for '{query}': "
                     f"{total} results, page {page}/{pages}"
                 )
-                
+
         except Exception as e:
             logger.error(
                 f"Error during search: {e}",
@@ -800,7 +850,7 @@ def search_results() -> Response:
             message = "An error occurred while searching. Please try again."
             videos = []
             total = 0
-    
+
     return make_response(
         render_template(
             'search_results.html',
@@ -821,10 +871,20 @@ def search_results() -> Response:
 )
 def advanced_search() -> Response:
     """
-    Display advanced search page with filters.
-    
+    Display advanced search page with filters and results.
+
+    Supports searching with text query and multiple filter types.
+
+    Query Parameters:
+        q (str): Text search query (optional).
+        speakers (list): Speaker IDs to filter by (optional).
+        characters (list): Character IDs to filter by (optional).
+        locations (list): Location IDs to filter by (optional).
+        tags (list): Tag IDs to filter by (optional).
+        page (int): Page number for pagination (default is 1).
+
     Returns:
-        Rendered advanced search template with metadata options.
+        Rendered advanced search template with metadata options and results.
     """
 
     with DatabaseContext() as db:
@@ -856,6 +916,194 @@ def advanced_search() -> Response:
             tags, key=lambda tag: tag.get('name', '').lower()
         )
 
+    # Check if a search was performed
+    query = request.args.get("q", "").strip()
+
+    # Log all request parameters for debugging
+    logger.info(f"All request parameters: {dict(request.args)}")
+
+    # Get advanced search filters (IDs from form)
+    filter_ids = {}
+    if request.args.get('speakers'):
+        filter_ids['speakers'] = request.args.getlist('speakers')
+    if request.args.get('characters'):
+        filter_ids['characters'] = request.args.getlist('characters')
+    if request.args.get('locations'):
+        filter_ids['locations'] = request.args.getlist('locations')
+    if request.args.get('tags'):
+        filter_ids['tags'] = request.args.getlist('tags')
+
+    # Log received filter IDs
+    logger.info(f"Received filter IDs from form: {filter_ids}")
+    if not filter_ids:
+        logger.warning("No filter IDs received despite request parameters")
+
+    # Convert filter IDs to names for Elasticsearch
+    filters = {}
+    if filter_ids:
+        # Convert speaker IDs to names
+        if 'speakers' in filter_ids:
+            logger.debug(
+                f"Available speakers: "
+                f"{[(s['id'], s['name']) for s in speakers[:5]]}"
+            )
+            speaker_names = [
+                s['name'] for s in speakers
+                if str(s['id']) in filter_ids['speakers']
+            ]
+            logger.info(f"Converted speaker IDs to names: {speaker_names}")
+            if speaker_names:
+                filters['speakers'] = speaker_names
+
+        # Convert character IDs to names
+        if 'characters' in filter_ids:
+            logger.debug(
+                f"Available characters: "
+                f"{[(c['id'], c['name']) for c in characters[:5]]}"
+            )
+            character_names = [
+                c['name'] for c in characters
+                if str(c['id']) in filter_ids['characters']
+            ]
+            logger.info(f"Converted character IDs to names: {character_names}")
+            if character_names:
+                filters['characters'] = character_names
+
+        # Convert location IDs to names
+        if 'locations' in filter_ids:
+            logger.debug(
+                f"Available locations: "
+                f"{[(loc['id'], loc['name']) for loc in locations[:5]]}"
+            )
+            location_names = [
+                loc['name'] for loc in locations
+                if str(loc['id']) in filter_ids['locations']
+            ]
+            logger.info(f"Converted location IDs to names: {location_names}")
+            if location_names:
+                filters['locations'] = location_names
+
+        # Convert tag IDs to names
+        if 'tags' in filter_ids:
+            logger.debug(
+                f"Available tags: "
+                f"{[(t['id'], t['name']) for t in tags[:5]]}"
+            )
+            tag_names = [
+                t['name'] for t in tags
+                if str(t['id']) in filter_ids['tags']
+            ]
+            logger.info(f"Converted tag IDs to names: {tag_names}")
+            if tag_names:
+                filters['tags'] = tag_names
+
+    logger.info(f"Final filters being sent to search: {filters}")
+
+    # Initialize default values for results
+    videos = []
+    total = 0
+    pages = 0
+    page = 1
+    using_elasticsearch = False
+    message = None
+
+    # Perform search if query or filters exist
+    if query or filters:
+        # If no query text but filters exist, use wildcard search
+        search_query = query if query else "*"
+
+        # Log the filters being applied
+        if filters:
+            logger.info(f"Advanced search filters applied: {filters}")
+
+        # Get pagination parameter
+        try:
+            page = max(1, int(request.args.get('page', 1)))
+        except ValueError:
+            page = 1
+
+        # Results per page
+        per_page = 20
+
+        try:
+            # Use SearchService for unified search
+            search_service = get_search_service()
+            (results, total), using_elasticsearch = search_service.search(
+                query=search_query,
+                page=page,
+                per_page=per_page,
+                filters=filters if filters else None
+            )
+
+            # Calculate pagination
+            pages = (total + per_page - 1) // per_page
+
+            # Convert results to video format for template
+            videos = results
+
+            # Build message
+            if total > 0:
+                method = (
+                    "Elasticsearch"
+                    if using_elasticsearch
+                    else "database"
+                )
+
+                # Build filter description for message
+                filter_desc = ""
+                if filters:
+                    filter_parts = []
+                    if 'speakers' in filters:
+                        filter_parts.append(
+                            f"{len(filters['speakers'])} speaker(s)"
+                        )
+                    if 'characters' in filters:
+                        filter_parts.append(
+                            f"{len(filters['characters'])} character(s)"
+                        )
+                    if 'locations' in filters:
+                        filter_parts.append(
+                            f"{len(filters['locations'])} location(s)"
+                        )
+                    if 'tags' in filters:
+                        filter_parts.append(
+                            f"{len(filters['tags'])} tag(s)"
+                        )
+                    if filter_parts:
+                        filter_desc = (
+                            f" with filters: {', '.join(filter_parts)}"
+                        )
+
+                query_text = f"'{query}'" if query else "all videos"
+                message = (
+                    f"Found {total} video{'s' if total != 1 else ''} "
+                    f"matching {query_text}{filter_desc} (using {method})"
+                )
+            else:
+                query_text = f"'{query}'" if query else "your criteria"
+                message = f"No videos found matching {query_text}"
+
+            # Log search operation
+            if using_elasticsearch:
+                logger.info(
+                    f"✓ Advanced Elasticsearch search: "
+                    f"{total} results, page {page}/{pages}"
+                )
+            else:
+                logger.warning(
+                    f"⚠ Advanced database search: "
+                    f"{total} results, page {page}/{pages}"
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error during advanced search: {e}",
+                exc_info=True
+            )
+            message = "An error occurred while searching. Please try again."
+            videos = []
+            total = 0
+
     return make_response(
         render_template(
             "advanced_search.html",
@@ -863,5 +1111,12 @@ def advanced_search() -> Response:
             characters=characters,
             locations=locations,
             tags=tags,
+            videos=videos,
+            total=total,
+            page=page,
+            pages=pages,
+            message=message,
+            query=query,
+            using_elasticsearch=using_elasticsearch,
         )
     )

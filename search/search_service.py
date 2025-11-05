@@ -43,6 +43,32 @@ from app.sql_db import (
 
 logger = logging.getLogger(__name__)
 
+# Fields and their weights for multi-match search
+FIELD_WEIGHTS = [
+    "title^3",
+    "description^2",
+    "transcript^2",
+    "speaker",
+    "tags",
+    "bible_character",
+    "chapter_markers",
+    "location",
+    "scriptures"
+]
+
+# Fields to highlight in search results
+HIGHLIGHTS = [
+    "title",
+    "description",
+    "transcript",
+    "speaker",
+    "tags",
+    "bible_character",
+    "chapter_markers",
+    "location",
+    "scriptures"
+]
+
 
 class SearchService:
     """
@@ -59,6 +85,12 @@ class SearchService:
             Fetch a video's data from the database.
         _build_search_query:
             Build Elasticsearch query with filters.
+        _elasticsearch_search:
+            Perform search using Elasticsearch.
+        _database_search:
+            Perform search using database as fallback.
+        search:
+            Search for videos using Elasticsearch or database fallback.
     """
 
     # The index name for videos in Elasticsearch
@@ -178,28 +210,55 @@ class SearchService:
         if query and query != "*":
             builder.add_multi_match(
                 query,
-                [
-                    "title^3",
-                    "description^2",
-                    "transcript^2",
-                    "speaker",
-                    "tags"
-                ]
+                FIELD_WEIGHTS
             )
 
         # Add filters
         if filters:
-            if 'speaker' in filters:
-                builder.add_filter('speaker', filters['speaker'])
+            logger.info(f"Building query with filters: {filters}")
 
-            if 'tags' in filters:
-                for tag in filters['tags']:
-                    builder.add_filter('tags', tag)
+            # Handle speakers filter (maps to 'speaker' field in ES)
+            # Multiple speakers should match ANY (OR logic)
+            if 'speakers' in filters and filters['speakers']:
+                logger.debug(f"Adding speaker filters: {filters['speakers']}")
+                builder.add_should_match_filters(
+                    'speaker',
+                    filters['speakers']
+                )
+
+            # Handle characters filter (maps to 'bible_character' field in ES)
+            # Multiple characters should match ANY (OR logic)
+            if 'characters' in filters and filters['characters']:
+                logger.debug(
+                    f"Adding character filters: {filters['characters']}"
+                )
+                builder.add_should_match_filters(
+                    'bible_character',
+                    filters['characters']
+                )
+
+            # Handle locations filter (maps to 'location' field in ES)
+            # Multiple locations should match ANY (OR logic)
+            if 'locations' in filters and filters['locations']:
+                logger.debug(
+                    f"Adding location filters: {filters['locations']}"
+                )
+                builder.add_should_match_filters(
+                    'location',
+                    filters['locations']
+                )
+
+            # Handle tags filter
+            # Multiple tags should match ANY (OR logic)
+            if 'tags' in filters and filters['tags']:
+                logger.debug(f"Adding tag filters: {filters['tags']}")
+                builder.add_should_match_filters(
+                    'tags',
+                    filters['tags']
+                )
 
         # Add highlighting
-        builder.add_highlight(
-            ['title', 'description', 'transcript', 'speaker', 'tags']
-        )
+        builder.add_highlight(HIGHLIGHTS)
 
         query_dsl = builder.build()
         logger.debug(f"Built query DSL: {query_dsl}")
@@ -235,14 +294,20 @@ class SearchService:
             raise RuntimeError("Elasticsearch client not available")
 
         # Build the search query
-        search_query = self._build_search_query(query, filters)
-        logger.debug(f"Elasticsearch query: {search_query}")
+        search_query = self._build_search_query(
+            query=query,
+            filters=filters
+        )
 
         # Calculate offset (pages of results)
         from_offset = (page - 1) * per_page
 
         try:
             # Execute search
+            logger.info(
+                f"Executing ES search on index '{self.INDEX_NAME}' "
+                f"with from={from_offset}, size={per_page}"
+            )
             response = client.search(
                 index=self.INDEX_NAME,
                 body=search_query,
@@ -250,7 +315,7 @@ class SearchService:
                 size=per_page
             )
 
-            logger.debug(
+            logger.info(
                 f"ES Response: {response['hits']['total']} total hits"
             )
 
@@ -288,6 +353,10 @@ class SearchService:
                         'thumbnail': video_data.get('thumbnail'),
                         'speaker': video_data.get('speaker', ''),
                         'tags': video_data.get('tags', ''),
+                        'bible_character': source.get('bible_character', ''),
+                        'chapter_markers': source.get('chapter_markers', ''),
+                        'location': source.get('location', ''),
+                        'scriptures': source.get('scriptures', ''),
                         'duration': video_data.get('duration'),
                         'watched': video_data.get('watched', False),
                         'score': hit['_score'],
@@ -296,6 +365,10 @@ class SearchService:
                     # Add highlights if available
                     if 'highlight' in hit:
                         result['highlights'] = hit['highlight']
+                        logger.debug(
+                            f"Highlights for {video_id}: "
+                            f"{list(hit['highlight'].keys())}"
+                        )
 
                     results.append(result)
                     logger.debug(
@@ -363,20 +436,50 @@ class SearchService:
 
             # Apply additional filters if provided
             if filters:
-                if 'speaker' in filters:
-                    speaker = filters['speaker'].lower()
-                    filtered = [
-                        v for v in filtered
-                        if speaker in v.get('speaker', '').lower()
-                    ]
-
-                if 'tags' in filters:
-                    tag_filters = [t.lower() for t in filters['tags']]
+                # Handle speakers filter
+                if 'speakers' in filters:
+                    speaker_ids = [s.lower() for s in filters['speakers']]
                     filtered = [
                         v for v in filtered
                         if any(
-                            tag in v.get('tags', '').lower()
-                            for tag in tag_filters
+                            speaker_id in v.get('speaker', '').lower()
+                            for speaker_id in speaker_ids
+                        )
+                    ]
+
+                # Handle characters filter (stored as bible_character in DB)
+                if 'characters' in filters:
+                    character_ids = [c.lower() for c in filters['characters']]
+                    filtered = [
+                        v for v in filtered
+                        if any(
+                            character_id in
+                            v.get('bible_character', '').lower()
+                            for character_id in character_ids
+                        )
+                    ]
+
+                # Handle locations filter
+                if 'locations' in filters:
+                    location_ids = [
+                        loc.lower() for loc in filters['locations']
+                    ]
+                    filtered = [
+                        v for v in filtered
+                        if any(
+                            location_id in v.get('location', '').lower()
+                            for location_id in location_ids
+                        )
+                    ]
+
+                # Handle tags filter
+                if 'tags' in filters:
+                    tag_ids = [t.lower() for t in filters['tags']]
+                    filtered = [
+                        v for v in filtered
+                        if any(
+                            tag_id in v.get('tags', '').lower()
+                            for tag_id in tag_ids
                         )
                     ]
 
@@ -437,7 +540,10 @@ class SearchService:
                 )
 
                 results = self._elasticsearch_search(
-                    query, page, per_page, filters
+                    query=query,
+                    page=page,
+                    per_page=per_page,
+                    filters=filters
                 )
 
                 logger.info(
@@ -460,7 +566,12 @@ class SearchService:
             "(Elasticsearch unavailable)"
         )
 
-        results = self._database_search(query, page, per_page, filters)
+        results = self._database_search(
+            query=query,
+            page=page,
+            per_page=per_page,
+            filters=filters
+        )
 
         logger.warning(
             f"⚠ Database fallback returned {results[1]} results "

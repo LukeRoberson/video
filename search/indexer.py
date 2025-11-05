@@ -12,8 +12,7 @@ NOTE: Indexes are the containers for documents in Elasticsearch.
 Indexes:
     Videos:
         - Fields: video_id, title, description, tags, speaker,
-            bible_character, location, scriptures, transcript,
-            transcript_chunks.
+            bible_character, location, scriptures, transcript, chapter_markers
 
 Classes:
     - ElasticsearchIndexer:
@@ -91,7 +90,7 @@ class ElasticsearchIndexer:
         delete_index:
             Delete the Elasticsearch index.
         index_video:
-            Index a single video with its transcript.
+            Index a single video with its chapter markers and transcript.
         bulk_index_videos:
             Index multiple videos in batches.
         reindex_all:
@@ -102,7 +101,8 @@ class ElasticsearchIndexer:
 
     def __init__(
         self,
-        vtt_directory: Optional[str] = None
+        vtt_directory: Optional[str] = None,
+        subtitle_directory: Optional[str] = None
     ) -> None:
         """
         Initialize the indexer.
@@ -111,6 +111,8 @@ class ElasticsearchIndexer:
             vtt_directory (Optional[str]): Path to directory containing
                 VTT files. Defaults to environment variable VTT_DIRECTORY
                 or './vtt'.
+            subtitle_directory (Optional[str]): Path to directory containing
+                subtitle files.
 
         Returns:
             None
@@ -119,10 +121,16 @@ class ElasticsearchIndexer:
         # Initialize Elasticsearch client
         self.es_client = ElasticsearchClient()
 
-        # Set VTT directory, where transcript files are stored
+        # Set VTT directory, where chapter marker files are stored
         self.vtt_directory = vtt_directory or os.getenv(
             'VTT_DIRECTORY',
-            './vtt'
+            './static/vtt'
+        )
+
+        # Set subtitle directory, where transcript files are stored
+        self.subtitle_directory = subtitle_directory or os.getenv(
+            'SUBTITLE_DIRECTORY',
+            './static/subtitles'
         )
 
     def create_index(
@@ -219,7 +227,7 @@ class ElasticsearchIndexer:
         video_data: Dict
     ) -> bool:
         """
-        Index a single video with its transcript.
+        Index a single video with its chapter markers and transcript.
             This creates a document in the Elasticsearch index.
 
         Args:
@@ -242,12 +250,19 @@ class ElasticsearchIndexer:
                 logger.error("Video data missing ID field")
                 return False
 
-            # Parse transcript if available
+            # Parse chapter markers from static/vtt
             vtt_path = VTTParser.get_vtt_path_for_video(
                 video_id,
                 self.vtt_directory
             )
-            vtt_data = VTTParser.parse_vtt_file(vtt_path)
+            chapter_data = VTTParser.parse_vtt_file(vtt_path)
+
+            # Parse transcript from static/subtitles
+            subtitle_path = VTTParser.get_vtt_path_for_video(
+                video_id,
+                self.subtitle_directory
+            )
+            transcript_data = VTTParser.parse_vtt_file(subtitle_path)
 
             # Fetch related data using managers
             with DatabaseContext() as db:
@@ -295,16 +310,16 @@ class ElasticsearchIndexer:
                         for scr in scriptures
                     ]
                 ) if scriptures else '',
+                'chapter_markers': (
+                    chapter_data['transcript'] if chapter_data else ''
+                ),
+                'transcript': (
+                    (
+                        transcript_data['transcript']
+                        if transcript_data else ''
+                    )
+                )
             }
-
-            # Add transcript data if available
-            if vtt_data:
-                document['transcript'] = vtt_data['transcript']
-                document['transcript_chunks'] = vtt_data['transcript_chunks']
-
-            else:
-                document['transcript'] = ''
-                document['transcript_chunks'] = []
 
             # Index the document
             client.index(
@@ -366,12 +381,19 @@ class ElasticsearchIndexer:
                     stats['failed'] += 1
                     continue
 
-                # Parse VTT file
+                # Parse chapter markers from static/vtt
                 vtt_path = VTTParser.get_vtt_path_for_video(
                     video_id,
                     self.vtt_directory
                 )
-                vtt_data = VTTParser.parse_vtt_file(vtt_path)
+                chapter_data = VTTParser.parse_vtt_file(vtt_path)
+
+                # Parse transcript from static/subtitles
+                subtitle_path = VTTParser.get_vtt_path_for_video(
+                    video_id,
+                    self.subtitle_directory
+                )
+                transcript_data = VTTParser.parse_vtt_file(subtitle_path)
 
                 # Fetch related data using managers
                 with DatabaseContext() as db:
@@ -419,11 +441,26 @@ class ElasticsearchIndexer:
                         ]
                     ) if scriptures else '',
 
-                    'transcript': vtt_data['transcript'] if vtt_data else '',
-                    'transcript_chunks': (
-                        vtt_data['transcript_chunks'] if vtt_data else []
+                    'chapter_markers': (
+                        chapter_data['transcript'] if chapter_data else ''
+                    ),
+                    'transcript': (
+                        (
+                            transcript_data['transcript']
+                            if transcript_data else ''
+                        )
                     )
                 }
+                # Log what's being indexed for debugging
+                logger.info(
+                    f"Indexing video {video_id}: "
+                    f"bible_character='{document['bible_character']}', "
+                    f"scriptures='{
+                        document['scriptures'][:100]
+                        if document['scriptures'] else 'EMPTY'
+                    }', "
+                    f"chapter_markers={len(document['chapter_markers'])} chars"
+                )
 
                 yield {
                     '_index': self.INDEX_NAME,

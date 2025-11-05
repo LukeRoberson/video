@@ -1,5 +1,9 @@
 # The 2021 Powerful by Faith theme file in YAML format
 
+# Improvement Notes
+#   Make main headings and subheadings collapsible
+#   Video grid doesn't line up horizontaly on smaller screens when titles wrap lines
+
 ---
 # Main file data
 title: Powerful by Faith
@@ -13,13 +17,119 @@ section:
 - quote: “Give us more faith”​—Luke 17:5
 
 - subheading: Morning
+- paragraph: 9:20 Music-Video Presentation
 - video:
     id: 1010
-    title: 9:20 Music-Video Presentation
     start: 0
     end: 639
+- paragraph: "9:30 Song No. 5 and Prayer"
+- video:
+    id: 2838
+    title: God's Wonderous Works
+- paragraph: "9:40 CHAIRMAN’S ADDRESS: How Powerful Is Faith? (Matthew 17:19, 20; Hebrews 11:1)"
+- video:
+    id: 1079
+    title: "Mark Sanderson: How Powerful Is Faith?"
+
+- paragraph: "10:10 SYMPOSIUM: Why We Have Faith in . . ."
+- video_grid:
+    - video:
+        id: 1078
+        title: "God’s Existence (Ephesians 2:1, 12; Hebrews 11:3)"
+    - video:
+        id: 1077
+        title: "God’s Word (Isaiah 46:10)"
+    - video:
+        id: 1076
+        title: "God’s Moral Standards (Isaiah 48:17)"
+    - video:
+        id: 1075
+        title: "God’s Love (John 6:44)"
+
+- paragraph: "11:05 Song No. 37 and Announcements"
+- video:
+    id: 2866
+    title: Serving Jehovah Whole-Souled
+- paragraph: "11:15 DRAMATIC BIBLE READING: Noah​—Faith Moved Him to Obey (Genesis 6:1–8:22; 9:8-16)"
+- video:
+    id: 1029
+    title: "Noah​—Faith Moved Him to Obey"
+- paragraph: "11:45 “Have Faith and Do Not Doubt” (Matthew 21:21, 22)"
+- video:
+    id: 1074
+    title: Kenneth Cook - Have Faith and Do Not Doubt”
+- paragraph: "12:15 Song No. 118 and Intermission"
+- video:
+    id: 2930
+    title: “Give Us More Faith”
+
 
 - subheading: Afternoon
+- paragraph: 1:35 Music-Video Presentation
+- video:
+    id: 1008
+    start: 0
+    end: 632
+- paragraph: "1:45 Song No. 2"
+- video:
+    id: 2835
+    title: "2. Jehovah is Your Name"
+
+- paragraph: "1:50 SYMPOSIUM: Use Creation to Build Your Faith"
+- video_grid:
+    - video:
+        id: 1073
+        title: "Use Creation to Build Your Faith—Stars (Isaiah 40:26)"
+    - video:
+        id: 1072
+        title: "Use Creation to Build Your Faith—Oceans (Psalm 93:4)"
+    - video:
+        id: 1071
+        title: "Use Creation to Build Your Faith—Forests (Psalm 37:10, 11, 29)"
+    - video:
+        id: 1070
+        title: "Use Creation to Build Your Faith—Wind and Water (Psalm 147:17, 18)"
+    - video:
+        id: 1069
+        title: "Use Creation to Build Your Faith—Sea Creatures (Psalm 104:27, 28)"
+    - video:
+        id: 1068
+        title: "Use Creation to Build Your Faith—Our Bodies (Isaiah 33:24)"
+- paragraph: "2:50 Song No. 148 - Jehovah Provides Escape"
+- video:
+    id: 2954
+    title: "148. Jehovah Provides Escape"
+
+- paragraph: "3:00 Jehovah’s Powerful Works Inspire Faith (Isaiah 43:10; Hebrews 11:32-35)"
+- video:
+    id: 1067
+    title: "Jehovah’s Powerful Works Inspire Faith"
+- paragraph: "3:20 SYMPOSIUM: Imitate the Faithful, Not the Faithless"
+- video_grid:
+    - video:
+        id: 1066
+        title: "Abel, Not Cain (Hebrews 11:4)"
+    - video:
+        id: 1065
+        title: "Enoch, Not Lamech (Hebrews 11:5)"
+    - video:
+        id: 1064
+        title: "Noah, Not His Neighbors (Hebrews 11:7)"
+    - video:
+        id: 1063
+        title: "Moses, Not Pharaoh (Hebrews 11:24-26)"
+    - video:
+        id: 1062
+        title: "Jesus’ Disciples, Not the Pharisees (Acts 5:29)"
+- paragraph: "4:15 “Keep Testing Whether You Are in the Faith”​—How? (2 Corinthians 13:5, 11)"
+- video:
+    id: 1061
+    title: "“Keep Testing Whether You Are in the Faith”​—How?"
+- paragraph: "4:50 Song No. 119 and Closing Prayer"
+- video:
+    id: 2931
+    title: "119. We Must Have Faith"
+
 
 ---
 section:
@@ -28,6 +138,60 @@ section:
 - quote: “Put up a hard fight for the faith”​—Jude 3
 
 - subheading: Morning
+- paragraph: 9:20 Music-Video Presentation
+- video:
+    id: 1006
+    start: 0
+    end: 660
+- paragraph: "9:30 Song No. 57 and Prayer"
+- video:
+    id: 2993
+    title: "57. Preaching to All Sorts of People"
+
+- paragraph: "9:40 SYMPOSIUM: Remember​—Faithless People Can Acquire Faith!"
+- video_grid:
+    - video:
+        id: 1060
+        title: "The Ninevites (Jonah 3:5)"
+    - video:
+        id: 1059
+        title: "Jesus’ Fleshly Brothers (1 Corinthians 15:7)"
+    - video:
+        id: 1058
+        title: "Prominent Ones (Philippians 3:7, 8)"
+    - video:
+        id: 1057
+        title: "Nonreligious People (Romans 10:13-15; 1 Corinthians 9:22)"
+
+- paragraph: "10:30 Build Faith Using Enjoy Life Forever! (John 17:3)"
+- video:
+    id: 1056
+    title: "Build Faith Using Enjoy Life Forever!"
+- paragraph: "10:50 Song No. 67 and Announcements"
+- video:
+    id: 2887
+    title: "67. “Preach the Word”"
+
+- paragraph: "911:00 SYMPOSIUM: Successful Fighters for the Faith"
+- video_grid:
+    - video:
+        id: 1055
+        title: "Those With Unbelieving Mates (Philippians 3:17)"
+    - video:
+        id: 1054
+        title: "Those Being Raised by Single Parents (2 Timothy 1:5)"
+    - video:
+        id: 1053
+        title: "Single Christians (1 Corinthians 12:25)"
+
+- paragraph: "11:45 BAPTISM: Exercising Faith Means Everlasting Life! (Matthew 17:20; John 3:16; Hebrews 11:6)"
+- video:
+    id: 1052
+    title: "Exercising Faith Means Everlasting Life!"
+- paragraph: "12:15 Song No. 79 and Intermission"
+- video:
+    id: 2897
+    title: "79. Teach Them to Stand Firm"
 
 - subheading: Afternoon
 
