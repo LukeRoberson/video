@@ -7,9 +7,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# TypeScript compiled output
-static/js/dist/
-
 # Node.js dependencies
 node_modules/
 

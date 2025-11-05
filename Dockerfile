@@ -17,7 +17,7 @@ RUN chown -R appuser:appgroup /app
 RUN chmod -R 755 /app
 
 # Install uWSGI and other dependencies, then clean up in the same layer
-RUN apk add --no-cache gcc musl-dev linux-headers nodejs npm && \
+RUN apk add --no-cache gcc musl-dev linux-headers && \
     pip install --upgrade pip uwsgi && \
     apk del gcc musl-dev linux-headers
 
@@ -33,11 +33,6 @@ USER appuser
 # Copy the requirements file and install dependencies
 COPY pyproject.toml .
 RUN pip install --upgrade pip && pip install .
-
-# Install frontend dependencies and build TypeScript
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install && npm run build
 
 # Copy files (not all at once to minimize layer size)
 COPY robots.txt .
