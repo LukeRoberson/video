@@ -43,10 +43,51 @@ There are two ways to run this application: using Docker or running it directly 
 Running as a Docker container is the recommended method, however it relies on you having a Docker environment set up.
 
 Below are the instructions for both methods.
+
 </br></br>
 
 
-## Using Docker
+## Portainer
+
+The simplest method is to deploy using **portainer**. This is a simple docker management UI which is deployed as a container.
+
+This assumes that you have deployed portainer in your environment.
+
+</br></br>
+
+
+1. Open portainer
+2. Go to *stacks*
+3. Add a stack
+4. Select *Repository*
+5. Enter *https://github.com/LukeRoberson/video* as the repository URL, leave authentication off
+6. Leave *Repository reference* blank
+7. Enter *docker-compose.yaml* as the compose path
+8. Add the six env variables shown below
+9. Deploy the stack
+
+</br></br>
+
+
+There are environment variables which define where certain files are, such as the local database and certificates.
+
+In the examples below, **/path** is used. Update this to whatever path you're using in your docker server.
+
+| Variable Name   | Value             |
+| --------------- | ----------------- |
+| LOCAL_DB_PATH   | /path/local.db    |
+| NGINX_CONF_PATH | /path/nginx.conf  |
+| NGINX_KEY_PATH  | /path/nginx.key   |
+| NGINX_CRT_PATH  | /path/nginx.crt   |
+| DH_PARAM_PATH   | /path/dh-4096.pem |
+| NGINX_LOG_PATH  | /path/nginx       |
+
+</br></br>
+
+
+## Docker Server
+
+Alternatively, you can deploy in docker directly.
 
 Note: This assumes you have a Docker environment set up and ready to use.
 
@@ -55,13 +96,19 @@ Basic steps are:
 2. Run the Docker container
 3. Access the application in your web browser (port 5000 by default)
 
+</br></br>
+
+
 ### Note on Local Database
+
 This requires a local database to be mounted as a volume. This is to store user profiles and watch history. The app will create the contents of the file.
 
 For this to work, you need to:
 1. Create an empty file named `local.db` in the directory where you will run the Docker command.
 2. Mount this file as a volume in the Docker container.
+
 </br></br>
+
 
 ### Docker Scripts
 
@@ -73,7 +120,9 @@ fi
 docker pull lukerobertson19/1320:latest
 docker run -d -p 5000:5000 -v "$(pwd)/local.db:/app/local.db" lukerobertson19/1320:latest
 ```
+
 </br></br>
+
 
 **Windows (Powershell):**
 ```powershell

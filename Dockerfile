@@ -45,6 +45,7 @@ COPY static/vtt/ ./static/vtt/
 COPY static/subtitles/ ./static/subtitles/
 COPY static/themes/ ./static/themes/
 COPY app/ ./app/
+COPY search/ ./search/
 COPY changelog.yaml .
 COPY videos.db .
 
