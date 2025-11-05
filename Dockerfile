@@ -1,8 +1,20 @@
-# Use the official Alpine Python image from the Docker Hub
-# Using Python 3.13 to match the development
-
+# Build Stage
 FROM python:3.13.9-alpine
-LABEL org.opencontainers.image.base.name="python:3.13.7-alpine"
+
+# Copy the requirements file and install dependencies
+COPY pyproject.toml .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --prefix=/opt/venv .
+
+
+# Runtime Stage
+FROM python:3.13.9-alpine
+LABEL org.opencontainers.image.base.name="python:3.13.9-alpine"
+
+# Copy the virtual environment from the build stage
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
+ENV PYTHONPATH="/opt/venv/lib/python3.13/site-packages"
 
 # Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,10 +41,6 @@ RUN apk update && \
 
 # Switch to the non-root user
 USER appuser
-
-# Copy the requirements file and install dependencies
-COPY pyproject.toml .
-RUN pip install --upgrade pip && pip install .
 
 # Copy files (not all at once to minimize layer size)
 COPY robots.txt .

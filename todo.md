@@ -39,7 +39,8 @@
 - [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 
-- [ ] Filter search resulsts by unwatched
+- [ ] Filter search results by unwatched
+- [ ] Add a reindex button to the admin page
 
 </br></br>
 

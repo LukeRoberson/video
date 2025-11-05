@@ -14,8 +14,6 @@ services:
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
     
-    ports:
-      - "5000:5000"
     depends_on:
       - elasticsearch
     restart: unless-stopped
@@ -26,7 +24,7 @@ services:
     image: nginx:alpine
     ports:
       - "8080:8080"
-      - "443:443"
+      - "8443:8443"
     
     # These are files that need to be mounted as volumes at runtime
     volumes:
@@ -56,8 +54,6 @@ services:
         hard: -1
     volumes:
       - esdata:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
     restart: unless-stopped
     networks:
       - video-devel
