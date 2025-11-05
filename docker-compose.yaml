@@ -26,7 +26,7 @@ services:
     image: nginx:alpine
     ports:
       - "8080:8080"
-      - "8443:8443"
+      - "443:443"
     
     # These are files that need to be mounted as volumes at runtime
     volumes:
