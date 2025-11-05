@@ -9,6 +9,11 @@ services:
       # Add this environment variable
       - ${LOCAL_DB_PATH}:/app/local.db
 
+    # To connect to Elasticsearch container
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+    
     depends_on:
       - elasticsearch
     restart: unless-stopped
