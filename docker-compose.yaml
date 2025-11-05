@@ -1,0 +1,39 @@
+services:
+  video-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # local.db is in persistent storage. It still needs to be backed up
+    volumes:
+      # Add this environment variable
+      - ${LOCAL_DB_PATH}:/app/local.db
+
+    restart: unless-stopped
+    networks:
+      - video-devel
+
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+      - "8443:443"
+    
+    # These are files that need to be mounted as volumes at runtime
+    volumes:
+      # Add these environment variables
+      - ${NGINX_CONF_PATH}:/etc/nginx/nginx.conf
+      - ${NGINX_KEY_PATH}:/etc/ssl/certs/nginx.key
+      - ${NGINX_CRT_PATH}:/etc/ssl/certs/nginx.crt
+      - ${DH_PARAM_PATH}:/etc/ssl/certs/dh-4096.pem
+      - ${NGINX_LOG_PATH}:/var/log/nginx
+
+    depends_on:
+      - video-app
+    restart: unless-stopped
+    networks:
+      - video-devel
+
+networks:
+  video-devel:
+    driver: bridge

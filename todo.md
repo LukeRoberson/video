@@ -39,6 +39,8 @@
 - [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 
+- [ ] Filter search resulsts by unwatched
+
 </br></br>
 
 
@@ -140,6 +142,7 @@
   * After TypeScript and React are evaluated
   - [ ] Total videos watched / total videos
   - [ ] Video watch time / total watch time
+- [ ] Admin option to download the local.db database file for backups
 
 </br></br>
 
