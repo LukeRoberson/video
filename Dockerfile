@@ -1,5 +1,5 @@
 # Build Stage
-FROM python:3.13.9-alpine
+FROM python:3.13.9-alpine AS builder
 
 # Copy the requirements file and install dependencies
 COPY pyproject.toml .
