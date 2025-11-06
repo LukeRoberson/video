@@ -18,13 +18,13 @@ services:
       - elasticsearch
     restart: unless-stopped
     networks:
-      - video-devel
+      - video-prod
 
   proxy:
     image: nginx:alpine
     ports:
-      - "8080:8080"
-      - "8443:8443"
+      - "80:80"
+      - "443:443"
     
     # These are files that need to be mounted as volumes at runtime
     volumes:
@@ -39,7 +39,7 @@ services:
       - video-app
     restart: unless-stopped
     networks:
-      - video-devel
+      - video-prod
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
@@ -56,10 +56,10 @@ services:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
     networks:
-      - video-devel
+      - video-prod
 
 networks:
-  video-devel:
+  video-prod:
     driver: bridge
 
 volumes:
