@@ -1,11 +1,13 @@
 - version: "1.3.0"
-  date: TBA
+  date: 2025-11-06
   features:
-    - TBA
+    - Greatly improved search functionality using Elasticsearch
+    - Added a separate Elasticsearch container to the Docker Compose setup
+    - Fallback to basic search if Elasticsearch container is unavailable
   code:
-    - TBA
+    - Added docker-compose.yaml file, so the app can be deployed directly from Github
   fixes:
-    - TBA
+    - None
 
 - version: "1.2.0"
   date: "2025-10-11"

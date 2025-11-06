@@ -2,28 +2,24 @@
 
 ## Architecture
 
-- [ ] Elasticsearch
+- [x] Elasticsearch
     - [x] Add an elasticsearch container
     - [x] Integrate elasticsearch with the app
     - [x] Fallback to basic search if container is unavailable
     - [x] Some results are not returning 'highlights'
     - [x] search_builder.py: adjust fuzziness, so 'green' doesn't match' 'greek' or 'greed'
     - [x] Update 'transcript chunks' to not include timestamps
-    - [ ] Update compose file to include container
-    - [ ] Update all docs
-- [ ] General search
-  - [ ] Add support to search based on video duration
-  - [ ] Add support for date
-  - [ ] Add support to search by scriptures (additional index?)
+    - [x] Update compose file to include container
+    - [x] Update all docs
 
 </br></br>
 
 
 ## UI
 
-- [ ] About Page
-  - [ ] Disclaimer: Subtitles are machine generated
-  - [ ] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
+- [x] About Page
+  - [x] Disclaimer: Subtitles are machine generated
+  - [x] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
 
 </br></br>
 
@@ -39,8 +35,15 @@
 - [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 
-- [ ] Filter search results by unwatched
-- [ ] Add a reindex button to the admin page
+- [ ] Search
+  - [ ] Filter search results by unwatched
+  - [ ] Button to hide extra elasticsearch info on results page
+  - [ ] Add a indexing buttons to admin page (create, delete, reindex)
+- [ ] Scripts
+  - [ ] Setup scripts to run as modules (directly from CLI)
+  - [ ] Add argparsing to scraper
+  - [ ] Create a script for ES indexes (delete, create, reindex)
+  - [ ] Create a script to find videos with no transcript
 
 </br></br>
 
@@ -193,6 +196,9 @@
   - [ ] Tooltip for scriptures: Show the scripture on hover
 - [ ] Scripts
   - [ ] Script to find videos with no subtitles (so we can create them)
+- [ ] Advanced search page (these were difficult to implement previouisly)
+  - [ ] Add support to search based on video duration
+  - [ ] Add support for date
 
 </br></br>
 

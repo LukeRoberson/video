@@ -1,9 +1,5 @@
 # Search
 
-> [!NOTE]
-> This is still in progress
-
-
 ## Overview
 
 The app uses *Elasticsearch* for advanced searching. This runs as a single-node cluster in a separate container.
