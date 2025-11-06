@@ -2,23 +2,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build TypeScript",
-            "type": "shell",
-            "command": "npx",
-            "args": ["tsc"],
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            }
-        },
-        {
             "label": "Build Docker Image",
             "type": "shell",
             "command": "docker",
-            "args": ["build", "-t", "lukerobertson19/1320:latest", "."],
+            "args": ["build", "-t", "lukerobertson19/1320:devel", "."],
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -31,7 +18,7 @@
             "label": "Push Docker Image",
             "type": "shell",
             "command": "docker",
-            "args": ["push", "lukerobertson19/1320:latest"],
+            "args": ["push", "lukerobertson19/1320:devel"],
             "group": "build",
             "dependsOn": "Build Docker Image",
             "presentation": {
