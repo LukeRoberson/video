@@ -454,7 +454,7 @@ def add_video_metadata() -> Response:
 
                     # If the tag does not exist, create it
                     if tag_id is None:
-                        logging.info(f"Creating new tag: {tag}")
+                        logging.warning(f"Creating new tag: {tag}")
                         tag_id = tag_mgr.add(
                             name=tag,
                         )
@@ -493,7 +493,7 @@ def add_video_metadata() -> Response:
 
                     # If the tag does not exist, create it
                     if location_id is None:
-                        logging.info(f"Creating new location: {location}")
+                        logging.warning(f"Creating new location: {location}")
                         location_id = loc_mgr.add(
                             name=location,
                         )
@@ -536,7 +536,7 @@ def add_video_metadata() -> Response:
 
                     # If the speaker does not exist, create it
                     if speaker_id is None:
-                        logging.info(f"Creating new speaker: {speaker}")
+                        logging.warning(f"Creating new speaker: {speaker}")
                         speaker_id = speaker_mgr.add(
                             name=speaker,
                         )
@@ -579,7 +579,7 @@ def add_video_metadata() -> Response:
 
                     # If the character does not exist, create it
                     if character_id is None:
-                        logging.info(f"Creating new character: {character}")
+                        logging.warning(f"Creating new character: {character}")
                         character_id = character_mgr.add(
                             name=character,
                         )
@@ -653,7 +653,7 @@ def add_video_metadata() -> Response:
 
                     # If the scripture does not exist, create it
                     if scripture_id is None:
-                        logging.info(f"Creating new scripture: {scripture}")
+                        logging.warning(f"Creating new scripture: {scripture}")
                         scripture_id = scripture_mgr.add(
                             book=book,
                             chapter=chapter,

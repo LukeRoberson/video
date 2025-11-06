@@ -18,6 +18,11 @@ Blueprints Registered:
     - profile_api_bp: API endpoints for user profile management.
     - search_bp: API endpoints for video search functionality.
 
+Classes:
+    - ColouredFormatter:
+        Custom logging formatter that adds color codes to log messages
+        based on their severity level.
+
 Dependencies:
     - Flask: Web framework.
     - logging: Application logging.
@@ -63,10 +68,75 @@ SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
 LOCAL_DB_PATH = "/local.db"
 
 
+class ColouredFormatter(
+    logging.Formatter
+):
+    """
+    Custom formatter that adds color codes to log messages based on level.
+
+    Attributes:
+        COLORS (dict): Mapping of log levels to ANSI color codes
+        RESET (str): ANSI reset code
+
+    Methods:
+        format:
+            Format log record with appropriate color
+    """
+
+    # ANSI color codes
+    COLORS = {
+        'DEBUG': '\033[36m',    # Cyan
+        'INFO': '\033[32m',     # Green
+        'WARNING': '\033[33m',  # Yellow
+        'ERROR': '\033[31m',    # Red
+        'CRITICAL': '\033[35m'  # Magenta
+    }
+    RESET = '\033[0m'
+
+    def format(
+        self,
+        record: logging.LogRecord
+    ) -> str:
+        """
+        Format log record with appropriate color.
+
+        Args:
+            record (logging.LogRecord): The log record to format
+
+        Returns:
+            str: Formatted log message with color codes
+        """
+
+        log_color = self.COLORS.get(record.levelname, self.RESET)
+        record.levelname = f"{log_color}{record.levelname}{self.RESET}"
+        return super().format(record)
+
+
 # Configure logging
+level = logging.INFO
+
+# Create formatters
+file_formatter = logging.Formatter(
+    '%(asctime)s - %(levelname)s - %(message)s'
+)
+console_formatter = ColouredFormatter(
+    '%(levelname)s - %(message)s'
+)
+
+# Create handlers
+file_handler = logging.FileHandler('app.log')
+file_handler.setFormatter(file_formatter)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(console_formatter)
+
+# Configure root logger
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=level,
+    handlers=[
+        file_handler,
+        stream_handler
+    ]
 )
 logger = logging.getLogger(__name__)
 
