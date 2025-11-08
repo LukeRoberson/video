@@ -172,7 +172,7 @@ section:
     id: 2887
     title: "67. “Preach the Word”"
 
-- paragraph: "911:00 SYMPOSIUM: Successful Fighters for the Faith"
+- paragraph: "11:00 SYMPOSIUM: Successful Fighters for the Faith"
 - video_grid:
     - video:
         id: 1055
@@ -194,6 +194,60 @@ section:
     title: "79. Teach Them to Stand Firm"
 
 - subheading: Afternoon
+
+- paragraph: 1:35 Music-Video Presentation
+- video:
+    id: 1004
+    start: 0
+    end: 630
+- paragraph: "1:45 Song No. 24"
+- video:
+    id: 2854
+    title: "24. Come to Jehovah’s Mountain"
+
+- paragraph: "1:50 SYMPOSIUM: How Our Brothers Are Showing Faith in..."
+- video:
+    id: 1018
+    title: "...Africa, Asia, Eurpoe, North America, Oceanea, South America"
+
+- paragraph: "2:15 SYMPOSIUM: Enter the Door to Activity in Faith"
+- video_grid:
+    - video:
+        id: 1051
+        title: "Learn a New Language (1 Corinthians 16:9)"
+    - video:
+        id: 1050
+        title: "Move to Where the Need Is Greater (Hebrews 11:8-10)"
+    - video:
+        id: 1049
+        title: "Apply for the School for Kingdom Evangelizers (1 Corinthians 4:17)"
+    - video:
+        id: 1048
+        title: "Assist With a Theocratic Building Project (Nehemiah 1:2, 3; 2:5)"
+    - video:
+        id: 1047
+        title: "“Set Something Aside” for Jehovah’s Work (1 Corinthians 16:2)"
+
+- paragraph: "3:15 Song No. 84 and Announcements"
+- video:
+    id: 2999
+    title: "84. Reaching Out"
+
+- paragraph: "3:20 FEATURE BIBLE DRAMA: Daniel: A Lifetime of Faith—Part I (Daniel 1:1–2:49; 4:1-33)"
+- video:
+    id: 2215
+    title: "Daniel: A Lifetime of Faith—Part I"
+
+- paragraph: "4:20 “Put Up a Hard Fight for the Faith”! (Jude 3; Proverbs 14:15; Romans 16:17)"
+- video:
+    id: 1046
+    title: "“Put Up a Hard Fight for the Faith”!"
+
+- paragraph: "4:55 Song No. 38 and Closing Prayer"
+- video:
+    id: 2987
+    title: "38. He Will Make You Strong"
+
 
 ---
 section:
