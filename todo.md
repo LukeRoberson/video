@@ -7,7 +7,7 @@
 - [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 - [ ] [Snippet - Theatre Mode problems](https://github.com/LukeRoberson/video/issues/17)
-- [ ] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
+- [x] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
 - [x] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
 
 </br></br>

@@ -1409,6 +1409,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 customControls.setContextMenu(contextMenu);
             }
             
+            // Initialize theatre mode handler
+            if (playerCore.container) {
+                handleTheatreMode(player, playerCore.container);
+            }
+            
             new UrlTimeHandler(player);
             new ProgressTracker(player, videoId, profileId, currentTime);
             new SubtitleManager(player, videoId);
@@ -1419,7 +1424,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-
 
 /**
  * Form submission handler for marking videos as watched/unwatched.
@@ -1454,5 +1458,103 @@ if (markWatchedForm) {
             }
         })
         .catch(err => console.error('Error updating watched status:', err));
+    });
+}
+
+/**
+ * Handle theatre mode transitions
+ * Manages wrapper positioning when entering/exiting theatre mode
+ * 
+ * @param player - Video.js player instance
+ * @param container - The video wrapper container element
+ */
+function handleTheatreMode(player: VideoJsPlayer, container: HTMLElement): void {
+    const wrapper = container;
+    
+    if (!wrapper) {
+        console.warn('Video wrapper not found for theatre mode handling');
+        return;
+    }
+    
+    // Store original parent and styles
+    let originalParent: HTMLElement | null = null;
+    let originalNextSibling: Node | null = null;
+    
+    /**
+     * Enter theatre mode - move wrapper to document body
+     */
+    function enterTheatreMode(): void {
+        // Store original position in DOM
+        originalParent = wrapper.parentElement as HTMLElement;
+        originalNextSibling = wrapper.nextSibling;
+        
+        // Apply theatre mode styles
+        wrapper.classList.add('theatre-mode-active');
+        document.body.appendChild(wrapper);
+        
+        // Force reflow
+        void wrapper.offsetWidth;
+        
+        // Disable body scroll
+        document.body.style.overflow = 'hidden';
+        
+        console.log('Entered theatre mode');
+    }
+    
+    /**
+     * Exit theatre mode - restore wrapper to original position
+     */
+    function exitTheatreMode(): void {
+        if (!originalParent) return;
+        
+        // Remove theatre mode class
+        wrapper.classList.remove('theatre-mode-active');
+        
+        // Restore original position in DOM
+        if (originalNextSibling) {
+            originalParent.insertBefore(wrapper, originalNextSibling);
+        } else {
+            originalParent.appendChild(wrapper);
+        }
+        
+        // Re-enable body scroll
+        document.body.style.overflow = '';
+        
+        // Clear stored values
+        originalParent = null;
+        originalNextSibling = null;
+        
+        console.log('Exited theatre mode');
+    }
+    
+    // Watch for theatre-mode class changes
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (wrapper.classList.contains('theatre-mode')) {
+                    if (!wrapper.classList.contains('theatre-mode-active')) {
+                        enterTheatreMode();
+                    }
+                } else {
+                    if (wrapper.classList.contains('theatre-mode-active')) {
+                        exitTheatreMode();
+                    }
+                }
+            }
+        });
+    });
+    
+    // Start observing
+    observer.observe(wrapper, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
+    // Clean up on player dispose
+    player.on('dispose', () => {
+        observer.disconnect();
+        if (wrapper.classList.contains('theatre-mode-active')) {
+            exitTheatreMode();
+        }
     });
 }

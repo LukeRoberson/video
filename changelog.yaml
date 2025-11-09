@@ -6,7 +6,8 @@
     - Added threading to similarity script
     - Added metadata caching to similarity calculations to reduce database queries
   fixes:
-    - TBA
+    - Fixed copying video URL at current time in theatre mode (#20)
+    - Fixed theatre mode not working in a theme (#18)
 
 - version: "1.3.0"
   date: 2025-11-06

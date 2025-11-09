@@ -430,6 +430,76 @@
    ========================================================================== */
 
 /**
+ * Theatre Mode Support
+ * Ensures video players can properly expand in theatre mode
+ * without being clipped by parent containers
+ */
+
+/* Theatre mode active state - applied by JavaScript */
+.video-wrapper.theatre-mode-active {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: #000 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Ensure video player fills theatre mode container */
+.video-wrapper.theatre-mode-active .video-player {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ensure video.js player fills available space */
+.video-wrapper.theatre-mode-active .video-js {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+}
+
+/* Remove hover effects in theatre mode */
+.video-wrapper.theatre-mode-active:hover {
+    transform: none !important;
+}
+
+/* Alternative approach using theatre class on wrapper */
+.video-wrapper.theatre-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999;
+    margin: 0;
+    border-radius: 0;
+    background: #000;
+}
+
+.video-wrapper.theatre-mode .video-player {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.video-wrapper.theatre-mode .video-js {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/**
  * Tablet optimizations
  * Adjusted spacing and sizing for medium screens
  */

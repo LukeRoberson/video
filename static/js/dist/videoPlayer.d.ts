@@ -470,4 +470,12 @@ declare class ChaptersMenuPositioner {
  * Form submission handler for marking videos as watched/unwatched.
  */
 declare const markWatchedForm: HTMLFormElement;
+/**
+ * Handle theatre mode transitions
+ * Manages wrapper positioning when entering/exiting theatre mode
+ *
+ * @param player - Video.js player instance
+ * @param container - The video wrapper container element
+ */
+declare function handleTheatreMode(player: VideoJsPlayer, container: HTMLElement): void;
 //# sourceMappingURL=videoPlayer.d.ts.map

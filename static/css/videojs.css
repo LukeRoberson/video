@@ -497,19 +497,6 @@
     }
 }
 
-/* Before multiple @media blocks, add a common selector variable approach
-   or consolidate the selectors */
-
-/* Example consolidation: */
-@media (max-width: 768px) {
-    .video-js .vjs-chapters-button .vjs-menu,
-    .video-js .vjs-menu[aria-labelledby*="chapters"] {
-        /* Combined rules here */
-    }
-    
-    /* Instead of repeating for .vjs-menu-content, .vjs-menu-item, etc. */
-}
-
 .video-js .vjs-chapters-button .vjs-menu,
 .video-js .vjs-chapters-button .vjs-menu *,
 .video-js .vjs-menu[aria-labelledby*="chapters"],
