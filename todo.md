@@ -1,44 +1,40 @@
-# Version 1.3.0
-
-## Architecture
-
-- [x] Elasticsearch
-    - [x] Add an elasticsearch container
-    - [x] Integrate elasticsearch with the app
-    - [x] Fallback to basic search if container is unavailable
-    - [x] Some results are not returning 'highlights'
-    - [x] search_builder.py: adjust fuzziness, so 'green' doesn't match' 'greek' or 'greed'
-    - [x] Update 'transcript chunks' to not include timestamps
-    - [x] Update compose file to include container
-    - [x] Update all docs
-
-</br></br>
-
-
-## UI
-
-- [x] About Page
-  - [x] Disclaimer: Subtitles are machine generated
-  - [x] Disclaimer: Descriptions, tags, locations, etc are custom, not from jw.org
-
-</br></br>
-
-
----
 # Version 1.3.1
 
 ## GitHub Issues
 
-- [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
+### Bugs
+
 - [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
+- [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
+- [ ] [Snippet - Theatre Mode problems](https://github.com/LukeRoberson/video/issues/17)
+- [ ] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
+- [ ] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
+
+</br></br>
+
+
+### Improvements
+
+- [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
 - [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
 - [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
-- [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
+- [ ] [Feature: Transcript](https://github.com/LukeRoberson/video/issues/19)
+
+</br></br>
+
+
+## Searching
 
 - [ ] Search
   - [ ] Filter search results by unwatched
   - [ ] Button to hide extra elasticsearch info on results page
   - [ ] Add a indexing buttons to admin page (create, delete, reindex)
+
+</br></br>
+
+
+## Automation
+
 - [ ] Scripts
   - [ ] Setup scripts to run as modules (directly from CLI)
   - [ ] Add argparsing to scraper
@@ -48,16 +44,22 @@
 </br></br>
 
 
-## Architecture
+## Logging
 
 - [ ] Logging
   - [ ] Create a logger instance with stream and file logging
   - [ ] Expose the file log in the compose file
   - [ ] Convert print statements to logs
   - [ ] Some form of log-rotate, so it doesn't get too big
+
 - [ ] Customise Flask logging
   - [ ] Include colours for log types
   - [ ] Suppress unneeded messages
+
+</br></br>
+
+
+## Testing
 
 - [ ] Testing
   - [ ] Create a basic testing structure/plan; Expand on it later
@@ -84,6 +86,8 @@
 
 ## Architecture
 
+- [ ] Move database code into a separate module
+- [ ] Move API code into a separate module
 - [ ] Separate API and frontend into separate services
 
 
@@ -209,10 +213,12 @@
 - [ ] A timeline of characters
 - [ ] Locations: Links to maps / 'see the good land'
 - [ ] AI
-  - [ ] Model to summarize content (for searching)
   - [ ] Video2vec
     - [ ] Build a vector database representing each video
-    * Similar to word2vec
+      * Similar to word2vec
+      * Summarises content in a vector format
+    - [ ] Integrate into search
+    - [ ] Integrate into similarity
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
 - [ ] Improved scripture management

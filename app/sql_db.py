@@ -3,6 +3,12 @@ Module: db.py
 
 This module provides classes for managing a SQLite database
 
+NOTE: This uses sqlite3, which is a simple file-based database.
+    This is because this app does not use a lot of concurrent connections,
+    and is intended to be lightweight and easy to set up.
+For this reason, asyncronous connections are not supported, as they will
+    add complexity and degrade performance (due to overhead and locking).
+
 classes:
     DatabaseContext:
         A context manager for handling SQLite database connections.

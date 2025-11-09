@@ -20,8 +20,10 @@ Usage:
         The top 10 similarities will be stored in the database.
 
 Dependencies:
-    logging: For logging information and errors.
-    types: For type hinting in the class methods.
+    - heapq
+        For maintaining a min-heap of top similarity scores.
+    - concurrent.futures
+        For parallel execution of similarity calculations (multithreading).
 """
 
 
@@ -31,6 +33,21 @@ import types
 import os
 import sys
 from tqdm import tqdm
+from typing import (
+    Any,
+    Dict,
+    List,
+    Tuple,
+    Optional
+)
+
+# Special imports
+import heapq
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed
+)
+
 # Add the parent directory of 'app' to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -75,6 +92,8 @@ WEIGHTS = {
     "speakers": 0.05,
 }
 
+THREADS = 8
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -87,12 +106,35 @@ class Similarity:
     Args:
         video1_id (int): The ID of the first video.
         video2_id (int): The ID of the second video.
+
+    Methods:
+        __init__:
+            Initialize the Similarity class with two videos.
+        __enter__:
+            Enter the context of the Similarity class.
+        __exit__:
+            Exit the context of the Similarity class.
+        _collect_data_from_cache:
+            Collect video data from the provided metadata cache.
+        _collect_data:
+            Collect data for the two videos (non-cached).
+        _jaccard:
+            Use Jaccard similarity to compare two sets of data.
+        _max_norm:
+            Max Normilization to compare two sets of data.
+        _overlap_coefficient:
+            Overlap Coefficient to compare two sets of data.
+        _hierarchy:
+            Hierarchical similarity to compare two sets of data.
+        weighted:
+            Calculate the weighted similarity score between the two videos.
     """
 
     def __init__(
         self,
         video1_id: int,
         video2_id: int,
+        metadata_cache: Optional[Dict[int, Dict[str, Any]]] = None,
     ) -> None:
         """
         Initialize the Similarity class with two videos.
@@ -100,6 +142,7 @@ class Similarity:
         Args:
             video1_id (int): The ID of the first video.
             video2_id (int): The ID of the second video.
+            metadata_cache (dict, optional): Cached metadata for all videos.
 
         Returns:
             None
@@ -119,7 +162,13 @@ class Similarity:
         self.text_similarity = None
         self.weighted_similarity = None
 
-        self._collect_data()
+        # If a metadata cache is provided, use it
+        if metadata_cache:
+            self._collect_data_from_cache(metadata_cache)
+
+        # Otherwise, collect data from the database
+        else:
+            self._collect_data()
 
     def __enter__(
         self
@@ -169,6 +218,38 @@ class Similarity:
 
         # Do not suppress exceptions; let them propagate
         return None
+
+    def _collect_data_from_cache(
+        self,
+        metadata_cache: Dict[int, Dict[str, Any]]
+    ) -> None:
+        """
+        Collect video data from the provided metadata cache.
+
+        Args:
+            metadata_cache (dict): Cached metadata for all videos.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If one or both videos are not found in the cache.
+        """
+
+        # Loop through both videos and update their data from the cache
+        for video in (
+            self.video1,
+            self.video2
+        ):
+            # Collect data from the cache
+            data = metadata_cache.get(video['id'])
+
+            if not data:
+                raise ValueError(
+                    f"Video with ID {video['id']} not found in cache."
+                )
+
+            video.update(data)
 
     def _collect_data(
         self,
@@ -526,9 +607,24 @@ class SimScraper:
     """
     Class to scrape and calculate similarity between videos.
 
+    Builds a cache of all video metadata in memory
+        to avoid repeated DB queries.
+
     Args:
         video_list (list): A list of video IDs to compare.
             Assumes all videos in the DB if not provided.
+
+    Methods:
+        __init__:
+            Initialize the SimScraper class.
+        _full_list:
+            Fetch all video IDs from the database.
+        _cache_all_metadata:
+            Cache all video metadata in memory.
+        _calculate_similarity:
+            Calculate similarity between two videos.
+        run_comparison:
+            Run the similarity comparison for all video pairs.
     """
 
     def __init__(
@@ -564,6 +660,9 @@ class SimScraper:
         # Store a list of ID's that are done
         self.done_list = []
 
+        # Cache all metadata
+        self.metadata_cache = self._cache_all_metadata()
+
     def _full_list(
         self,
     ) -> list[int]:
@@ -591,6 +690,128 @@ class SimScraper:
 
         return video_list
 
+    def _cache_all_metadata(
+        self
+    ) -> Dict[int, Dict[str, Any]]:
+        """
+        Fetch and cache all video metadata and related entities in memory.
+        Returns a dict keyed by video ID.
+
+        Args:
+            None
+
+        Returns:
+            dict: A dictionary containing metadata for all videos.
+        """
+
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            cat_mgr = CategoryManager(db)
+            tag_mgr = TagManager(db)
+            location_mgr = LocationManager(db)
+            speaker_mgr = SpeakerManager(db)
+            scripture_mgr = ScriptureManager(db)
+            character_mgr = CharacterManager(db)
+
+            # Get all videos
+            video_list = video_mgr.get()
+            if not video_list:
+                logger.warning("No videos found in the database for caching.")
+                return {}
+
+            # Build a dict of videos keyed by ID
+            #   This will be the cache
+            videos = {
+                v['id']: v
+                for v in video_list
+            }
+
+            # Fetch and attach related metadata for each video
+            for vid in videos:
+                # Get categories
+                videos[vid]['categories'] = [
+                    c['name']
+                    for c in cat_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+                # Get tags
+                videos[vid]['tags'] = [
+                    t['name']
+                    for t in tag_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+                # Get location
+                videos[vid]['location'] = [
+                    loc['name']
+                    for loc in location_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+                # Get speakers
+                videos[vid]['speakers'] = [
+                    s['name']
+                    for s in speaker_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+                # Get scriptures
+                videos[vid]['scriptures'] = [
+                    # Ignore 'id' and 'verse_text' fields
+                    {
+                        k: v
+                        for k, v in s.items()
+                        if k not in ('id', 'verse_text')
+                    }
+                    for s in scripture_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+                # Get characters
+                videos[vid]['characters'] = [
+                    c['name']
+                    for c in character_mgr.get_from_video(video_id=vid)
+                    or []
+                ]
+
+        return videos
+
+    def _calculate_similarity(
+        self,
+        video1: int,
+        video2: int
+    ) -> float | None:
+        """
+        Helper method to calculate weighted similarity between two videos.
+
+        Args:
+            video1 (int): ID of the first video.
+            video2 (int): ID of the second video.
+
+        Returns:
+            float | None:
+                Weighted similarity score, or None if calculation fails.
+        """
+
+        try:
+            # Calculate similarity, using cached metadata
+            with Similarity(
+                video1_id=video1,
+                video2_id=video2,
+                metadata_cache=self.metadata_cache,
+            ) as similarity:
+                similarity.weighted()
+                return similarity.weighted_similarity
+
+        except Exception as exc:
+            logger.error(
+                f"Error calculating similarity for {video1} "
+                f"and {video2}: {exc}"
+            )
+
+            return None
+
     def run_comparison(
         self,
     ) -> None:
@@ -598,7 +819,17 @@ class SimScraper:
         Run the similarity comparison for all video pairs.
 
         Compares each video in the list against every other video
-        and stores the results in the comparison list.
+            and stores the results in the comparison list.
+        The list of all videos is obtained from __init__.
+
+        A min-heap is used to efficiently track the top 10 similarities
+            for each video during the comparison process.
+
+        Each video is compared only once against each other video
+            to avoid redundant calculations.
+
+        ThreadPoolExecutor is used to parallelize the similarity
+            calculations for efficiency.
 
         Args:
             None
@@ -607,58 +838,101 @@ class SimScraper:
             None
         """
 
-        # Loop through provided list
+        # Loop through video list
         for video in tqdm(
             self.video_list,
             desc="Total Progress",
             leave=True,
             colour="magenta",
         ):
+            # Track videos which have been compared already
             self.done_list.append(video)
-            top_10 = []
 
-            # Inner loop through comparison list
-            for comparison in tqdm(
-                self.comparison_list,
-                leave=False,
-                colour="green",
-                desc=f"Working on video {video}",
-            ):
-                # Skip if the video is the same or already done
-                if comparison in self.done_list:
-                    continue
+            # Store top 10 similarities for the current video
+            top_10: List[Dict[str, Any]] = []
 
-                with Similarity(
-                    video1_id=video,
-                    video2_id=comparison,
-                ) as similarity:
-                    # Calculate the weighted similarity
-                    similarity.weighted()
-                    if similarity.weighted_similarity is None:
+            # Min-heap to keep track of top 10 similarities
+            heap: List[Tuple[float, Any, Dict[str, Any]]] = []
+
+            # Prepare comparison targets for this video
+            #   Exclude videos that are already done
+            targets = [
+                comparison
+                for comparison in self.comparison_list
+                if comparison not in self.done_list
+            ]
+
+            # Use ThreadPoolExecutor for parallel similarity calculation
+            with ThreadPoolExecutor(
+                max_workers=THREADS
+            ) as executor:
+                # Map futures to comparison IDs
+                future_to_comparison = {
+                    executor.submit(
+                        self._calculate_similarity,
+                        video,
+                        comparison
+                    ):
+                        comparison
+                        for comparison in targets
+                }
+
+                # Iterate over futures
+                for future in as_completed(future_to_comparison):
+                    # Get the comparison ID
+                    comparison = future_to_comparison[future]
+
+                    # Retrieve the similarity score
+                    try:
+                        score = future.result()
+
+                    except Exception as exc:
+                        logger.error(
+                            f"Similarity calculation failed for {video} "
+                            f"and {comparison}: {exc}"
+                        )
                         continue
 
-                    # Log the similarity score (top 10 only)
-                    if len(top_10) < 10:
-                        top_10.append({
-                            'video1': video,
-                            'video2': comparison,
-                            'score': similarity.weighted_similarity,
-                        })
+                    if score is None:
+                        continue
 
-                    # If the list is full, check if the new score is higher
+                    # Use a min-heap to keep top 10 scores efficiently
+                    # Add a tiebreaker (comparison ID) to avoid comparing dicts
+                    item = {
+                        'video1': video,
+                        'video2': comparison,
+                        'score': score
+                    }
+                    heap_entry = (
+                        score,
+                        comparison,
+                        item
+                    )
+
+                    # If heap has less than 10 items, push new entry
+                    if len(heap) < 10:
+                        heapq.heappush(
+                            heap,
+                            heap_entry
+                        )
+
+                    # Check if this result is better than the smallest in heap
+                    #   If it is, push to heap and pop the smallest
+                    #   This means the heap always contains the top 10 scores
                     else:
-                        top_10.sort(key=lambda x: x['score'], reverse=True)
-                        if (
-                            similarity.weighted_similarity >
-                            top_10[-1]['score']
-                        ):
-                            top_10[-1]['score'] = (
-                                similarity.weighted_similarity
-                            )
-                            top_10.sort(
-                                key=lambda x: x['score'],
-                                reverse=True
-                            )
+                        # The first element of the heap is the smallest score
+                        if score > heap[0][0]:
+                            heapq.heappushpop(heap, heap_entry)
+
+            # Extract top 10 from heap and sort descending
+            top_10 = [
+                entry[2]
+                for entry in sorted(
+                    heap,
+                    key=lambda x: x[0],
+                    reverse=True
+                )
+            ]
 
             # Write the top 10 similarities for the current video
             with DatabaseContext() as db:
