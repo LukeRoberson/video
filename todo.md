@@ -8,7 +8,7 @@
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 - [ ] [Snippet - Theatre Mode problems](https://github.com/LukeRoberson/video/issues/17)
 - [ ] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
-- [ ] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
+- [x] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
 
 </br></br>
 
@@ -17,7 +17,7 @@
 
 - [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
 - [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
-- [ ] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
+- [x] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
 - [ ] [Feature: Transcript](https://github.com/LukeRoberson/video/issues/19)
 
 </br></br>

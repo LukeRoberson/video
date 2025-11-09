@@ -276,6 +276,8 @@ class VideoContextMenu {
      * @param player - The video.js player instance
      */
     constructor(player) {
+        /** Flag to prevent theatre mode exit during menu operations */
+        this.isMenuOperation = false;
         this.player = player;
         this.contextMenu = this.createContextMenu();
         this.init();
@@ -317,8 +319,18 @@ class VideoContextMenu {
                 }
             });
         });
-        // Menu item click
-        menuItem.addEventListener('click', (e) => this.handleMenuClick(e));
+        // Menu item click - stop propagation immediately
+        menuItem.addEventListener('click', (e) => {
+            this.isMenuOperation = true;
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            this.handleMenuClick();
+            // Reset flag after a short delay to allow the click to fully process
+            setTimeout(() => {
+                this.isMenuOperation = false;
+            }, 100);
+        }, true);
         // Hide menu when clicking elsewhere
         document.addEventListener('click', (e) => this.hideMenu(e), true);
     }
@@ -329,6 +341,8 @@ class VideoContextMenu {
      */
     showMenu(e) {
         e.preventDefault();
+        // Set flag immediately when menu is shown
+        this.isMenuOperation = true;
         this.player.el().style.pointerEvents = 'none';
         this.contextMenu.style.left = e.pageX + 'px';
         this.contextMenu.style.top = e.pageY + 'px';
@@ -351,11 +365,8 @@ class VideoContextMenu {
     }
     /**
      * Handles menu item click by copying timestamped URL to clipboard.
-     * @param e - The click event on the menu item
      */
-    handleMenuClick(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    handleMenuClick() {
         const timestampedUrl = this.getTimestampedUrl();
         navigator.clipboard.writeText(timestampedUrl)
             .then(() => this.showNotification('Link copied to clipboard!'))
@@ -364,6 +375,10 @@ class VideoContextMenu {
             this.showNotification('Could not copy text!');
         });
         this.hideMenuAndReEnablePlayer();
+        // Keep flag active longer to prevent theatre mode exit
+        setTimeout(() => {
+            this.isMenuOperation = false;
+        }, 200);
     }
     /**
      * Hides the context menu when clicking outside of it.
@@ -375,6 +390,10 @@ class VideoContextMenu {
                 this.hideMenuAndReEnablePlayer();
                 e.preventDefault();
                 e.stopPropagation();
+                // Keep flag active longer to prevent theatre mode exit
+                setTimeout(() => {
+                    this.isMenuOperation = false;
+                }, 200);
             }
         }
     }
@@ -384,6 +403,13 @@ class VideoContextMenu {
     hideMenuAndReEnablePlayer() {
         this.contextMenu.style.display = 'none';
         this.player.el().style.pointerEvents = '';
+    }
+    /**
+     * Checks if a menu operation is currently in progress.
+     * @returns True if menu operation is active
+     */
+    isMenuActive() {
+        return this.isMenuOperation;
     }
     /**
      * Generates a timestamped URL with the current video playback time.
@@ -812,6 +838,8 @@ class CustomControls {
     constructor(player, container) {
         /** Bound click handler for theatre mode exit */
         this.theatreModeClickHandler = null;
+        /** Reference to context menu for checking menu state */
+        this.contextMenu = null;
         this.player = player;
         this.container = container;
         this.isTV = window.tvDetection?.isTV() || false;
@@ -845,6 +873,13 @@ class CustomControls {
         }
     }
     /**
+     * Sets a reference to the context menu for state checking.
+     * @param contextMenu - The VideoContextMenu instance
+     */
+    setContextMenu(contextMenu) {
+        this.contextMenu = contextMenu;
+    }
+    /**
      * Sets up click handler for exiting theatre mode when clicking outside the player.
      */
     setupTheatreModeClickHandler() {
@@ -853,8 +888,18 @@ class CustomControls {
             if (!this.container.classList.contains('theatre-mode')) {
                 return;
             }
+            // Don't exit theatre mode if context menu is active
+            if (this.contextMenu && this.contextMenu.isMenuActive()) {
+                return;
+            }
+            // Check if the click target is the context menu itself
+            const target = e.target;
+            const contextMenuElement = document.querySelector('.video-context-menu');
+            if (contextMenuElement && contextMenuElement.contains(target)) {
+                return;
+            }
             // Check if click is outside the video player container
-            if (!this.container.contains(e.target)) {
+            if (!this.container.contains(target)) {
                 this.exitTheatreMode();
             }
         };
@@ -1081,9 +1126,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const currentTime = parseInt(videoElement.getAttribute('data-current-time') || '0', 10);
         // Initialize all modules when player is ready
         player.ready(() => {
-            new VideoContextMenu(player);
-            if (playerCore.container) {
-                new CustomControls(player, playerCore.container);
+            const contextMenu = new VideoContextMenu(player);
+            const customControls = playerCore.container ? new CustomControls(player, playerCore.container) : null;
+            // Link context menu to custom controls for theatre mode protection
+            if (customControls) {
+                customControls.setContextMenu(contextMenu);
             }
             new UrlTimeHandler(player);
             new ProgressTracker(player, videoId, profileId, currentTime);

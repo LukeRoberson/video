@@ -164,6 +164,8 @@ declare class VideoContextMenu {
     private player;
     /** The context menu DOM element */
     private contextMenu;
+    /** Flag to prevent theatre mode exit during menu operations */
+    private isMenuOperation;
     /**
      * Creates an instance of VideoContextMenu.
      * @param player - The video.js player instance
@@ -195,7 +197,6 @@ declare class VideoContextMenu {
     private adjustMenuPosition;
     /**
      * Handles menu item click by copying timestamped URL to clipboard.
-     * @param e - The click event on the menu item
      */
     private handleMenuClick;
     /**
@@ -207,6 +208,11 @@ declare class VideoContextMenu {
      * Hides the context menu and re-enables player pointer events.
      */
     private hideMenuAndReEnablePlayer;
+    /**
+     * Checks if a menu operation is currently in progress.
+     * @returns True if menu operation is active
+     */
+    isMenuActive(): boolean;
     /**
      * Generates a timestamped URL with the current video playback time.
      * @returns The URL with 't' parameter set to current time in seconds
@@ -365,6 +371,8 @@ declare class CustomControls {
     private isMobile;
     /** Bound click handler for theatre mode exit */
     private theatreModeClickHandler;
+    /** Reference to context menu for checking menu state */
+    private contextMenu;
     /**
      * Creates an instance of CustomControls.
      * @param player - The video.js player instance
@@ -380,6 +388,11 @@ declare class CustomControls {
      * Initializes custom controls by adding buttons and setting up keyboard controls.
      */
     private init;
+    /**
+     * Sets a reference to the context menu for state checking.
+     * @param contextMenu - The VideoContextMenu instance
+     */
+    setContextMenu(contextMenu: VideoContextMenu): void;
     /**
      * Sets up click handler for exiting theatre mode when clicking outside the player.
      */
