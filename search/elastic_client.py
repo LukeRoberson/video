@@ -43,10 +43,15 @@ from elasticsearch import (
 logger = logging.getLogger(__name__)
 
 
+# Suppress verbose Elasticsearch library logging
+logging.getLogger('elastic_transport.transport').setLevel(logging.ERROR)
+logging.getLogger('elasticsearch').setLevel(logging.ERROR)
+
+
 # Elasticsearch client configuration constants
-CLIENT_TIMEOUT = 10
-CLIENT_RETRIES = 3
-CLIENT_RETRY_ON_TIMEOUT = True
+CLIENT_TIMEOUT = 2
+CLIENT_RETRIES = 1
+CLIENT_RETRY_ON_TIMEOUT = False
 
 # Cert verification - Can be off for local dev or protected containers
 CLIENT_VERIFY_CERTS = False

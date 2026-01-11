@@ -199,6 +199,7 @@ def create_app():
             search_service = SearchService()
             app.config['SEARCH_SERVICE'] = search_service
             logger.info("Search service initialized successfully")
+
         except Exception as e:
             logger.error(f"Failed to initialize search service: {e}")
             logger.warning(

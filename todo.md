@@ -19,7 +19,7 @@
 - [ ] Migrate database classes (videos and local)
 - [ ] Migrate theme management
 - [ ] Dockerignore file: Ignore documentation
-- [ ] Don't wait for Elasticsearch on startup (local mode with no ES)
+- [x] Don't wait for Elasticsearch on startup (local mode with no ES)
 
 </br></br>
 

@@ -6,7 +6,7 @@
     * [x] sql_db.py
 2. Migrate Admin endpoints
     * [ ] Add metadata
-    * [ ] Add a scripture
+    * [x] Add a scripture
 3. Clone user DB classes into the API folder
     * [x] local_db.py
 4. Migrate user profile management
