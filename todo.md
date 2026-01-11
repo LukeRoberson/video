@@ -16,9 +16,9 @@
   - [ ] Migrate API endpoints (api.py)
   - [ ] Migrate profile management (api_profile.py)
   - [ ] Migrate search (api_search.py)
-- [ ] Migrate database classes (videos and local)
+- [x] Migrate database classes (videos and local)
 - [ ] Migrate theme management
-- [ ] Dockerignore file: Ignore documentation
+- [x] Dockerignore file: Ignore documentation
 - [x] Don't wait for Elasticsearch on startup (local mode with no ES)
 
 </br></br>

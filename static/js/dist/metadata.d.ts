@@ -7,9 +7,7 @@
  * Configuration constants for metadata management
  */
 declare const MetadataConfig: {
-    /** API base URL for legacy endpoints (still on main server) */
-    readonly LEGACY_API_BASE_URL: "http://localhost:5000";
-    /** API base URL for migrated endpoints (on separate service) */
+    /** API base URL */
     readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint for video metadata */
     readonly VIDEO_METADATA_ENDPOINT: "/api/video/metadata";
@@ -103,7 +101,7 @@ declare abstract class BaseFormHandler {
      * @param payload - Data to send in request body
      * @returns Response data
      */
-    protected sendRequest<T extends ApiResponse>(endpoint: string, payload: unknown, usesMigratedApi?: boolean): Promise<T>;
+    protected sendRequest<T extends ApiResponse>(endpoint: string, payload: unknown): Promise<T>;
     /**
      * Display success message to user
      * @param message - Success message to display

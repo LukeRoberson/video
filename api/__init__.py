@@ -15,7 +15,7 @@ from flask import Flask
 from flask_cors import CORS
 
 # Custom imports
-from api.api import metadata_bp
+from api.api import admin_bp
 
 
 class ColouredFormatter(
@@ -121,6 +121,6 @@ def create_app(
     app.secret_key = key
 
     # Register blueprints
-    app.register_blueprint(metadata_bp)
+    app.register_blueprint(admin_bp)
 
     return app

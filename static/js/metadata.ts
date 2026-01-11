@@ -8,9 +8,7 @@
  * Configuration constants for metadata management
  */
 const MetadataConfig = {
-    /** API base URL for legacy endpoints (still on main server) */
-    LEGACY_API_BASE_URL: 'http://localhost:5000',
-    /** API base URL for migrated endpoints (on separate service) */
+    /** API base URL */
     API_BASE_URL: 'http://localhost:5010',    
     /** API endpoint for video metadata */
     VIDEO_METADATA_ENDPOINT: '/api/video/metadata',
@@ -145,11 +143,9 @@ abstract class BaseFormHandler {
      */
     protected async sendRequest<T extends ApiResponse>(
         endpoint: string,
-        payload: unknown,
-        usesMigratedApi: boolean = false
+        payload: unknown
     ): Promise<T> {
-        const baseUrl = usesMigratedApi ? MetadataConfig.API_BASE_URL : MetadataConfig.LEGACY_API_BASE_URL;
-        const url = `${baseUrl}${endpoint}`;
+        const url = `${MetadataConfig.API_BASE_URL}${endpoint}`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -244,7 +240,7 @@ class VideoMetadataHandler extends BaseFormHandler {
             
             const formData = this.extractFormData<VideoMetadataFormData>(this.fieldIds);
             const payload = this.buildMetadataPayload(formData);
-            
+
             const result = await this.sendRequest<ApiResponse>(
                 MetadataConfig.VIDEO_METADATA_ENDPOINT,
                 payload
@@ -318,8 +314,7 @@ class ScriptureTextHandler extends BaseFormHandler {
             
             const result = await this.sendRequest<ApiResponse>(
                 MetadataConfig.SCRIPTURE_ENDPOINT,
-                payload,
-                true    // Uses migrated API
+                payload
             );
             
             if (result.success) {

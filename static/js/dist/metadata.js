@@ -8,9 +8,7 @@
  * Configuration constants for metadata management
  */
 const MetadataConfig = {
-    /** API base URL for legacy endpoints (still on main server) */
-    LEGACY_API_BASE_URL: 'http://localhost:5000',
-    /** API base URL for migrated endpoints (on separate service) */
+    /** API base URL */
     API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for video metadata */
     VIDEO_METADATA_ENDPOINT: '/api/video/metadata',
@@ -69,10 +67,8 @@ class BaseFormHandler {
      * @param payload - Data to send in request body
      * @returns Response data
      */
-    async sendRequest(endpoint, payload, usesMigratedApi = false) {
-        const baseUrl = usesMigratedApi ? MetadataConfig.API_BASE_URL : MetadataConfig.LEGACY_API_BASE_URL;
-        const url = `${baseUrl}${endpoint}`;
-        console.log(`New API: ${usesMigratedApi}, URL: ${url}, Payload:`, payload);
+    async sendRequest(endpoint, payload) {
+        const url = `${MetadataConfig.API_BASE_URL}${endpoint}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -210,8 +206,7 @@ class ScriptureTextHandler extends BaseFormHandler {
             this.setSubmitting(true);
             const formData = this.extractFormData(this.fieldIds);
             const payload = this.buildScripturePayload(formData);
-            const result = await this.sendRequest(MetadataConfig.SCRIPTURE_ENDPOINT, payload, true // Uses migrated API
-            );
+            const result = await this.sendRequest(MetadataConfig.SCRIPTURE_ENDPOINT, payload);
             if (result.success) {
                 this.showSuccess('Scripture text added successfully!');
                 this.clearScriptureText();

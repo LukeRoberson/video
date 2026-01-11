@@ -5,34 +5,34 @@
 1. Clone main DB classes into the API folder
     * [x] sql_db.py
 2. Migrate Admin endpoints
-    * [ ] Add metadata
+    * [x] Add metadata
     * [x] Add a scripture
 3. Clone user DB classes into the API folder
     * [x] local_db.py
 4. Migrate user profile management
-    * List avatars
-    * Add profile
-    * Update profile
-    * Delete profile
-    * Clear watch history
-    * Mark video as watched
-    * Get active profile
-    * Set active profile
+    * [ ] List avatars
+    * [ ] Add profile
+    * [ ] Update profile
+    * [ ] Delete profile
+    * [ ] Clear watch history
+    * [ ] Mark video as watched
+    * [ ] Get active profile
+    * [ ] Set active profile
 5. Migrate video endpoints
-    * Load videos (title, thumbnail) into categories
-    * Update in progress status
-    * Mark a video as watched
-    * Mark a video as unwatched
+    * [ ] Load videos (title, thumbnail) into categories
+    * [ ] Update in progress status
+    * [ ] Mark a video as watched
+    * [ ] Mark a video as unwatched
 6. Additional pages
-    * Scriptures
-    * Speakers
-    * Characters
-    * Tags
+    * [ ] Scriptures
+    * [ ] Speakers
+    * [ ] Characters
+    * [ ] Tags
 7. Search
-    * Normal search
-    * Advanced search
-    * Reindex
-    * Status
+    * [ ] Normal search
+    * [ ] Advanced search
+    * [ ] Reindex
+    * [ ] Status
 
 
 * Some pages, eg scriptures, do not use an API; They read the DB directly
@@ -117,8 +117,16 @@
 * metadata.ts
     * sendRequest function
     * 'usesMigratedApi' no longer needed
-    * handleSubmit
+    * handleSubmit (scriptures and video classes)
 
+
+``` Javascript
+const result = await this.sendRequest<ApiResponse>(
+    MetadataConfig.SCRIPTURE_ENDPOINT,
+    payload,
+    true    // NOTE: Uses migrated API
+);
+```
 
 
 
