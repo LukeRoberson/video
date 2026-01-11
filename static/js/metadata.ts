@@ -8,6 +8,10 @@
  * Configuration constants for metadata management
  */
 const MetadataConfig = {
+    /** API base URL for legacy endpoints (still on main server) */
+    LEGACY_API_BASE_URL: 'http://localhost:5000',
+    /** API base URL for migrated endpoints (on separate service) */
+    API_BASE_URL: 'http://localhost:5010',    
     /** API endpoint for video metadata */
     VIDEO_METADATA_ENDPOINT: '/api/video/metadata',
     /** API endpoint for scripture data */
@@ -139,8 +143,15 @@ abstract class BaseFormHandler {
      * @param payload - Data to send in request body
      * @returns Response data
      */
-    protected async sendRequest<T extends ApiResponse>(endpoint: string, payload: unknown): Promise<T> {
-        const response = await fetch(endpoint, {
+    protected async sendRequest<T extends ApiResponse>(
+        endpoint: string,
+        payload: unknown,
+        usesMigratedApi: boolean = false
+    ): Promise<T> {
+        const baseUrl = usesMigratedApi ? MetadataConfig.API_BASE_URL : MetadataConfig.LEGACY_API_BASE_URL;
+        const url = `${baseUrl}${endpoint}`;
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': MetadataConfig.JSON_CONTENT_TYPE
@@ -307,7 +318,8 @@ class ScriptureTextHandler extends BaseFormHandler {
             
             const result = await this.sendRequest<ApiResponse>(
                 MetadataConfig.SCRIPTURE_ENDPOINT,
-                payload
+                payload,
+                true    // Uses migrated API
             );
             
             if (result.success) {

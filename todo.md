@@ -1,5 +1,64 @@
 # Version 1.3.1
 
+## Bugs and Improvements
+
+- [x] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
+- [x] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
+- [x] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
+
+</br></br>
+
+
+## Architecture
+
+- [ ] Separate API and frontend into separate services
+  - [x] Create a new directory with basic API framework
+  - [ ] Migrate API endpoints (api.py)
+  - [ ] Migrate profile management (api_profile.py)
+  - [ ] Migrate search (api_search.py)
+- [ ] Migrate database classes (videos and local)
+- [ ] Migrate theme management
+- [ ] Dockerignore file: Ignore documentation
+- [ ] Don't wait for Elasticsearch on startup (local mode with no ES)
+
+</br></br>
+
+
+---
+# Version 1.3.2
+
+## Database
+
+- [ ] Move database code into a separate module
+- [ ] Extend database fields
+  - [ ] Closed captions file
+  - [ ] Doc ID
+- [ ] Update documentation
+
+</br></br>
+
+
+## API
+
+- [ ] Catalogue Updates
+  - [ ] Get the recent catalog
+  - [ ] Check for new videos
+- [ ] Create Transcript (for videos that don't have them)
+- [ ] Update ElasticSearch indexes
+
+
+## Indexes
+
+- [ ] Update indexes button in admin page
+- [ ] Update indexes when videos added
+- [ ] Update indexes when API starts up
+
+
+
+---
+
+# Version 1.3.3
+
 ## GitHub Issues
 
 ### Bugs
@@ -7,8 +66,6 @@
 - [ ] [Video chapters not displaying correctly on a small screen](https://github.com/LukeRoberson/video/issues/11)
 - [ ] [In-progress conflict with snippet](https://github.com/LukeRoberson/video/issues/15)
 - [ ] [Snippet - Theatre Mode problems](https://github.com/LukeRoberson/video/issues/17)
-- [x] [Theatre Mode in a Theme is not working](https://github.com/LukeRoberson/video/issues/18)
-- [x] [Copying video URL at current time in theatre mode](https://github.com/LukeRoberson/video/issues/20)
 
 </br></br>
 
@@ -17,8 +74,9 @@
 
 - [ ] [Investigate non-interactive scraper](https://github.com/LukeRoberson/video/issues/2)
 - [ ] [Search UI improvements](https://github.com/LukeRoberson/video/issues/12)
-- [x] [Improve performance of the similarity script](https://github.com/LukeRoberson/video/issues/14)
 - [ ] [Feature: Transcript](https://github.com/LukeRoberson/video/issues/19)
+- [ ] Dates are in different formats on some videos
+    * This cases the 'Latest Videos' in the home screen to get confused
 
 </br></br>
 
@@ -29,17 +87,14 @@
   - [ ] Filter search results by unwatched
   - [ ] Button to hide extra elasticsearch info on results page
   - [ ] Add a indexing buttons to admin page (create, delete, reindex)
-
-</br></br>
-
-
-## Automation
-
-- [ ] Scripts
-  - [ ] Setup scripts to run as modules (directly from CLI)
-  - [ ] Add argparsing to scraper
-  - [ ] Create a script for ES indexes (delete, create, reindex)
-  - [ ] Create a script to find videos with no transcript
+  - [ ] Filter search by disabling certain parts (eg, don't search title, transcript, etc)
+- [ ] In dev, absense of elastic search container slows app startup and searching
+  * Maybe a CLI arg to start without it
+- [ ] Fuzzy match is a little too loose
+  * 'Isaiah' returns results for 'Sarah'
+  * 'Sprout' > 'proud', 'shout', 'shroud', 'sport', 'spot'
+  * 'twig' > twin
+- [ ] Encase in double quotes to search for the exact phrase
 
 </br></br>
 
@@ -79,18 +134,6 @@
   - [ ] Add video section: Make tags field resizable
 
 </br></br>
-
-
----
-# Version 1.4.0
-
-## Architecture
-
-- [ ] Move database code into a separate module
-- [ ] Move API code into a separate module
-- [ ] Separate API and frontend into separate services
-
-
 
 
 ----
@@ -219,6 +262,8 @@
       * Summarises content in a vector format
     - [ ] Integrate into search
     - [ ] Integrate into similarity
+  - [ ] Search based on concept (return videos, not its own ideas)
+    * eg, 'In what ways did Jesus fulfill prophecies about the Messiah?'
 - [ ] Track bible reading progress
 - [ ] Bible Characters: Links to website articles that are useful
 - [ ] Improved scripture management
