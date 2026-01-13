@@ -16,8 +16,8 @@
     * [ ] Delete profile
     * [ ] Clear watch history
     * [ ] Mark video as watched
-    * [ ] Get active profile
-    * [ ] Set active profile
+    * [x] Get active profile
+    * [x] Set active profile
 5. Migrate video endpoints
     * [ ] Load videos (title, thumbnail) into categories
     * [ ] Update in progress status
@@ -114,19 +114,9 @@
 
 # Cleanup
 
-* metadata.ts
-    * sendRequest function
-    * 'usesMigratedApi' no longer needed
-    * handleSubmit (scriptures and video classes)
-
-
-``` Javascript
-const result = await this.sendRequest<ApiResponse>(
-    MetadataConfig.SCRIPTURE_ENDPOINT,
-    payload,
-    true    // NOTE: Uses migrated API
-);
-```
+* profileMgmt.ts
+    * Base URLs in ProfileMgmtConfig
+    * URL selection in setActiveProfile
 
 
 

@@ -109,4 +109,83 @@ If a scripture already has text, the new text will overwrite the old.
 }
 ```
 
+</br></br>
 
+
+
+---
+### Profiles
+
+
+#### /api/profile/set_active
+
+**Method**:
+POST
+
+
+**Description**:
+Set the active user profile in the current session.
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                         |
+| ---------- | ------- | --------- | ----------------------------- |
+| profile_id | integer | Yes       | The ID of the new active user |
+
+
+
+```json
+{
+    "profile_id": 1
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "data": {
+        "active_profile": 1
+    },
+    "success": true
+}
+```
+
+
+</br></br>
+
+
+
+#### /api/profile/get_active
+
+**Method**:
+GET
+
+
+**Description**:
+Get the active user profile in the current session.
+
+
+Returns:
+
+200 OK
+
+```json
+{
+    "data": {
+        "active_profile": {
+            "id": null,
+            "image": "guest.png",
+            "name": "Guest"
+        }
+    },
+    "success": true
+}
+```
+
+
+</br></br>

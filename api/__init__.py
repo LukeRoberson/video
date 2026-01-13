@@ -16,6 +16,7 @@ from flask_cors import CORS
 
 # Custom imports
 from api.api import admin_bp
+from api.profile import profile_bp
 
 
 class ColouredFormatter(
@@ -114,13 +115,19 @@ def create_app(
         static_folder=static_folder,
     )
 
-    # Allow requests from your frontend
-    CORS(app, origins=['http://localhost:5000'])
+    # Allow requests from the frontend on localhost:5000
+    #   Credentials are needed for session management (session cookies)
+    CORS(
+        app,
+        origins=['http://localhost:5000'],
+        supports_credentials=True
+    )
 
     # Set the secret key for the Flask application
     app.secret_key = key
 
     # Register blueprints
     app.register_blueprint(admin_bp)
+    app.register_blueprint(profile_bp)
 
     return app
