@@ -13,11 +13,9 @@
     * [x] Add profile
     * [x] Delete profile
     * [x] Update profile
-    * [ ] Clear watch history
-    * [ ] Mark video as watched
+    * [x] Clear watch history
     * [x] Get active profile
     * [x] Set active profile
-    * [ ] List avatars
 5. Migrate video endpoints
     * [ ] Load videos (title, thumbnail) into categories
     * [ ] Update in progress status
@@ -33,6 +31,9 @@
     * [ ] Advanced search
     * [ ] Reindex
     * [ ] Status
+8. Other
+    * [ ] Avatar list in profile management; API or frontend?
+
 
 
 * Some pages, eg scriptures, do not use an API; They read the DB directly

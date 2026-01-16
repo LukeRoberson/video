@@ -335,8 +335,6 @@ class ProfileEditApiService {
      * @param profileData - Profile data to update
      */
     static async updateProfile(profileId: number, profileData: ProfileUpdateData): Promise<void> {
-        console.log('Updating profile with data:', profileData);
-
         const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
@@ -358,7 +356,7 @@ class ProfileEditApiService {
      * @param profileId - ID of profile
      */
     static async clearHistory(profileId: number): Promise<void> {
-        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString());
+        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -379,9 +377,10 @@ class ProfileEditApiService {
      * @param videoId - ID of video to remove from history
      */
     static async clearHistoryItem(profileId: number, videoId: number): Promise<void> {
-        const endpoint = ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString());
+        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const requestBody: ClearHistoryItemRequest = { video_id: videoId };
+        console.log('Clearing history item with request body:', requestBody);
         
         const response = await fetch(endpoint, {
             method: 'POST',

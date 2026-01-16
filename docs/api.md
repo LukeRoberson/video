@@ -250,6 +250,59 @@ Notes:
 ```
 
 
+#### /api/profile/clear_history/{id}
+
+**Method**:
+POST
+
+
+**Description**:
+
+Clears a users watch history.
+
+If there is a JSON body, only the specific video will be cleared from history.
+
+If there is no JSON body, clear the entire watch history.
+
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                                      |
+| ---------- | ------- | --------- | ------------------------------------------ |
+| video_id   | integer | Yes       | The ID of the video to remove from history |
+
+
+
+
+
+```json
+{
+    "video_id": 1030
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "message": "Cleared video 1030 from watch history of profile 2.",
+    "success": true
+}
+```
+
+Or, for entire history:
+
+```json
+{
+    "message": "Cleared watch history for profile 2.",
+    "success": true
+}
+```
+
 
 
 

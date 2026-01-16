@@ -31,7 +31,6 @@ from flask import (
     current_app,
     jsonify,
 )
-import logging
 import os
 
 # Custom imports
@@ -321,86 +320,6 @@ def in_progress_videos() -> Response:
         return api_error(
             f"Method {method_used} not allowed for this endpoint",
             405
-        )
-
-
-@profile_api_bp.route(
-    "/api/profile/clear_history/<int:profile_id>",
-    methods=["POST"],
-)
-def clear_watch_history(profile_id: int) -> Response:
-    """
-    Clear the watch history for a user profile by ID.
-        If there's a JSON body, clear only the specified video ID.
-        Otherwise, clear the entire watch history.
-
-    Expected JSON Body:
-        {
-            "video_id": <int>
-        }
-
-    Args:
-        profile_id (int):
-            The ID of the profile whose watch history is to be cleared.
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    logging.info(f"Clearing watch history for profile with ID: {profile_id}")
-
-    data = request.get_json(silent=True) if request.is_json else None
-
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-
-        # Check if the profile exists
-        profile = profile_mgr.read(profile_id)
-        if profile is None:
-            logging.error(f"Profile with ID {profile_id} not found.")
-            return api_error(f"Profile with ID {profile_id} not found", 404)
-
-        # Clear an individual video from the watch history
-        if data and "video_id" in data:
-            result = profile_mgr.remove_history(
-                profile_id=profile_id,
-                video_id=data["video_id"],
-            )
-            if not result:
-                logging.error(
-                    f"Failed to clear watch history for profile {profile_id}."
-                )
-                return api_error(
-                    f"Failed to clear watch history for profile {profile_id}",
-                    500
-                )
-
-            logging.info(
-                f"Cleared video {data["video_id"]} "
-                f"from watch history of profile {profile_id}."
-            )
-            return api_success(
-                message=f"Cleared video {data["video_id"]} "
-                f"from watch history of profile {profile_id}."
-            )
-
-        # Clear the entire watch history
-        else:
-            result = profile_mgr.remove_history(
-                profile_id=profile_id,
-            )
-            if not result:
-                logging.error(
-                    f"Failed to clear watch history for profile {profile_id}."
-                )
-                return api_error(
-                    f"Failed to clear watch history for profile {profile_id}",
-                    500
-                )
-
-        logging.info(f"Cleared watch history for profile {profile_id}.")
-        return api_success(
-            message=f"Cleared watch history for profile {profile_id}."
         )
 
 
