@@ -155,6 +155,64 @@ def delete_profile(profile_id: int) -> Response:
 
 
 @profile_bp.route(
+    "/api/profile/update/<int:profile_id>",
+    methods=["POST"],
+)
+def update_profile(profile_id: int) -> Response:
+    """
+    Update a user profile by ID.
+
+    Expects JSON:
+        {
+            "name": "<new profile name>",
+            "icon": "<new profile icon>"
+        }
+
+    Args:
+        profile_id (int): The ID of the profile to update.
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for updating profile.")
+        return api_error("No data provided", 400)
+
+    name = data.get("name", None)
+    icon = data.get("icon", None)
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Update the profile (should return the profile ID)
+        result = profile_mgr.update(
+            profile_id=profile_id,
+            name=name,
+            image=icon,
+        )
+        if result != profile_id:
+            logging.error(f"Failed to update profile with ID {profile_id}.")
+            return api_error(
+                f"Failed to update profile with ID {profile_id}",
+                500
+            )
+
+    logging.info(f"Successfully updated profile with ID {profile_id}.")
+
+    return api_success(
+        message=f"Profile with ID {profile_id} updated successfully."
+    )
+
+
+@profile_bp.route(
     "/api/profile/set_active",
     methods=["POST"]
 )

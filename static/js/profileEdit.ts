@@ -8,6 +8,10 @@
  * Configuration constants for profile editing
  */
 const ProfileEditConfig = {
+    /** API base URL for new endpoints (separate server) */
+    API_BASE_URL: 'http://localhost:5010',
+    /** API base URL for legacy endpoints */
+    LEGACY_API_BASE_URL: 'http://localhost:5000',
     /** API endpoint for profile pictures */
     PROFILE_PICTURES_ENDPOINT: '/api/profile/pictures',
     /** API endpoint pattern for profile deletion */
@@ -310,7 +314,7 @@ class ProfileEditApiService {
      * @param profileId - ID of profile to delete
      */
     static async deleteProfile(profileId: number): Promise<void> {
-        const endpoint = ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId.toString());
+        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'DELETE',
@@ -331,7 +335,9 @@ class ProfileEditApiService {
      * @param profileData - Profile data to update
      */
     static async updateProfile(profileId: number, profileData: ProfileUpdateData): Promise<void> {
-        const endpoint = ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString());
+        console.log('Updating profile with data:', profileData);
+
+        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'POST',

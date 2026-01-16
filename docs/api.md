@@ -204,6 +204,55 @@ Notes:
 
 
 
+#### /api/profile/update/{id}
+
+**Method**:
+POST
+
+
+**Description**:
+
+Updates an existing user's profile.
+
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                       |
+| ---------- | ------- | --------- | --------------------------- |
+| name       | string  | Yes       | The new name of the profile |
+| icon       | string  | Yes       | Filename of the avatar      |
+
+
+Notes:
+* Profile matching is based on the ID in the URL, not the name in the payload
+* The name in the payload is a new name to set in the database
+
+
+
+```json
+{
+    "name": "Tim2",
+    "icon": "man_4.png"
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "message": "Profile with ID 5 updated successfully.",
+    "success": true
+}
+```
+
+
+
+
+
 #### /api/profile/set_active
 
 **Method**:

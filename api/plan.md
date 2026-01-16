@@ -12,7 +12,7 @@
 4. Migrate user profile management
     * [x] Add profile
     * [x] Delete profile
-    * [ ] Update profile
+    * [x] Update profile
     * [ ] Clear watch history
     * [ ] Mark video as watched
     * [x] Get active profile
@@ -117,6 +117,8 @@
 * profileMgmt.ts
     * Base URLs in ProfileMgmtConfig
     * URL selection in setActiveProfile
+* profileEdit.ts
+    * Base URLs in ProfileEditConfig
 
 
 
@@ -131,6 +133,13 @@
     * /edit_profile/{id}
 * videoPlayer.ts
     * Move API endpoints to a variable
+* Delete profile Endpoint
+    * Used in both profileMgmt.ts and profileEdit.ts
+    * profileMgmt - Delete profile from the profile selection screen
+    * profileEdit - Delete profile from the Edit profile screen
+    * These could be consolidated
+* Updating profiles
+    * When saving a name change, it's not immediately reflected in the edit screen
 
 
 
