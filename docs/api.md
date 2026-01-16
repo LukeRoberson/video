@@ -117,6 +117,93 @@ If a scripture already has text, the new text will overwrite the old.
 ### Profiles
 
 
+#### /api/profile/create
+
+**Method**:
+POST
+
+
+**Description**:
+Create a new profile.
+
+Create a profile with a name, ID, and an avatar image.
+
+Saves to the user database.
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                          |
+| ---------- | ------- | --------- | ------------------------------ |
+| name       | string  | Yes       | The user's name                |
+| image      | string  | Yes       | Filename of the avatar's image |
+
+
+Notes:
+* The avatar filename represents one of the avatars on the web server, not a custom image
+
+
+```json
+{
+    "name": "test2",
+    "image": "ruth_1.png"
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "message": "Created profile with ID: 9",
+    "success": true
+}
+```
+
+
+Notes:
+* Success message includes the profile ID number
+
+
+
+
+#### /api/profile/delete/{id}
+
+**Method**:
+DELETE
+
+
+**Description**:
+Delete an existing profile.
+
+Removes entry from the user database.
+
+
+Notes:
+* No payload is required, just the profile ID in the URL
+
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "message": "Profile with ID 7 deleted successfully.",
+    "success": true
+}
+```
+
+
+Notes:
+* Success message includes the profile ID number that was deleted
+
+
+
+
 #### /api/profile/set_active
 
 **Method**:

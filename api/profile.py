@@ -64,6 +64,97 @@ profile_bp = Blueprint(
 
 
 @profile_bp.route(
+    '/api/profile/create',
+    methods=['POST'],
+)
+def create_profile() -> Response:
+    """
+    Create a new user profile.
+
+    Expected JSON Body:
+        {
+            "name": "<Profile Name>",
+            "image": "<image file name>",
+        }
+
+    Returns:
+        Response: A JSON response indicating that the profile creation
+            endpoint is not yet implemented.
+    """
+
+    # Get the JSON data and validate it
+    data = request.get_json()
+    if not data:
+        logging.error("No data provided for profile creation.")
+        return api_error('No data provided', 400)
+
+    if 'name' not in data or 'image' not in data:
+        logging.error("Missing required fields for profile creation.")
+        return api_error('Missing required fields: name and image', 400)
+
+    # Extract profile name and image from the data
+    profile_name = data['name']
+    profile_image = data['image']
+
+    # Create a new profile in the local database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        id = profile_mgr.create(
+            name=profile_name,
+            image=profile_image,
+        )
+
+    # Handle errors
+    if id is None:
+        logging.error("Failed to create profile in the local database.")
+        return api_error('Failed to create profile', 500)
+
+    # Return the response with the created profile ID
+    return api_success(message=f'Created profile with ID: {id}')
+
+
+@profile_bp.route(
+    "/api/profile/delete/<int:profile_id>",
+    methods=["DELETE"],
+)
+def delete_profile(profile_id: int) -> Response:
+    """
+    Delete a user profile by ID.
+
+    Args:
+        profile_id (int): The ID of the profile to delete.
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    logging.info(f"Deleting profile with ID: {profile_id}")
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+
+        # Check if the profile exists
+        profile = profile_mgr.read(profile_id)
+        if profile is None:
+            logging.error(f"Profile with ID {profile_id} not found.")
+            return api_error(f"Profile with ID {profile_id} not found", 404)
+
+        # Delete the profile (should return the deleted profile ID)
+        result = profile_mgr.delete(profile_id)
+        if result != profile_id:
+            logging.error(f"Failed to delete profile with ID {profile_id}.")
+            return api_error(
+                f"Failed to delete profile with ID {profile_id}",
+                500
+            )
+
+        logging.info(f"Successfully deleted profile with ID {profile_id}.")
+        return api_success(
+            message=f"Profile with ID {profile_id} deleted successfully."
+        )
+
+
+@profile_bp.route(
     "/api/profile/set_active",
     methods=["POST"]
 )

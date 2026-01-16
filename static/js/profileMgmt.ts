@@ -87,13 +87,16 @@ class ProfileApiService {
      * @returns API response data
      */
     static async createProfile(profileData: ProfileCreateData): Promise<ApiResponse> {
-        const response = await fetch(ProfileMgmtConfig.CREATE_PROFILE_ENDPOINT, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE 
-            },
-            body: JSON.stringify(profileData)
-        });
+        const response = await fetch(
+            `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.CREATE_PROFILE_ENDPOINT}`,
+            {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE 
+                },
+                body: JSON.stringify(profileData)
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -155,7 +158,8 @@ class ProfileApiService {
      * @returns API response data
      */
     static async deleteProfile(profileId: string): Promise<ApiResponse> {
-        const endpoint = ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId);
+        console.log('API call to delete profile with ID:', profileId);
+        const endpoint = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId)}`;
         
         const response = await fetch(endpoint, {
             method: 'DELETE',

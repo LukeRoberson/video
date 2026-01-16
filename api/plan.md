@@ -10,14 +10,14 @@
 3. Clone user DB classes into the API folder
     * [x] local_db.py
 4. Migrate user profile management
-    * [ ] List avatars
-    * [ ] Add profile
+    * [x] Add profile
+    * [x] Delete profile
     * [ ] Update profile
-    * [ ] Delete profile
     * [ ] Clear watch history
     * [ ] Mark video as watched
     * [x] Get active profile
     * [x] Set active profile
+    * [ ] List avatars
 5. Migrate video endpoints
     * [ ] Load videos (title, thumbnail) into categories
     * [ ] Update in progress status
