@@ -26,6 +26,8 @@ const ApiConfig = {
     MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
+    /** API endpoint for in-progress videos */
+    IN_PROGRESS_ENDPOINT: '/api/profile/in_progress',
 };
 /**
  * Global video player management for preventing multiple simultaneous playback.
@@ -503,7 +505,6 @@ class ProgressTracker {
      */
     setInitialPosition() {
         if (this.initialTime > 0) {
-            console.log('Setting playback position to:', this.initialTime);
             this.player.currentTime(this.initialTime);
         }
     }
@@ -511,10 +512,16 @@ class ProgressTracker {
      * Removes the progress overlay element from the DOM when playback starts.
      */
     removeProgressOverlay() {
+        // Get the progress overlay element
         const progressOverlay = document.querySelector('.progress-overlay');
         if (progressOverlay) {
+            // Remove the overlay from the DOM
             progressOverlay.remove();
-            console.log('Custom progress bar removed.');
+            // Ensure initial position is set
+            // (if loadedmetadata fired before play)
+            if (this.initialTime > 0 && this.player.currentTime() === 0) {
+                this.setInitialPosition();
+            }
         }
     }
     /**
@@ -542,9 +549,10 @@ class ProgressTracker {
      * @param currentTime - The current playback time in seconds
      */
     updateProgress(currentTime) {
-        fetch('/api/profile/in_progress', {
+        fetch(`${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({
                 video_id: this.videoId,
                 current_time: currentTime
@@ -558,15 +566,17 @@ class ProgressTracker {
     markAsWatched() {
         this.hasMarkedWatched = true;
         // Remove from in-progress
-        fetch('/api/profile/in_progress', {
+        fetch(`${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ video_id: this.videoId })
         }).catch(err => console.error('Error removing from progress:', err));
         // Mark as watched
         fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ video_id: this.videoId })
         }).catch(err => console.error('Error marking video as watched:', err));
     }
@@ -1158,40 +1168,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-/**
- * Form submission handler for marking videos as watched/unwatched.
- */
-// const markWatchedForm = document.getElementById('markWatchedForm') as HTMLFormElement;
-// if (markWatchedForm) {
-//     markWatchedForm.addEventListener('submit', function(e: Event) {
-//         e.preventDefault();
-//         const apiUrl = this.dataset.apiUrl || '';
-//         const videoId = this.dataset.videoId || '';
-//         console.log('Submitting mark watched form to:', apiUrl, 'for video ID:', videoId);
-//         fetch(apiUrl, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'X-Requested-With': 'XMLHttpRequest'
-//             },
-//             body: JSON.stringify({ video_id: videoId })
-//         })
-//         .then(response => response.json())
-//         .then((data: ApiResponse) => {
-//             if (data.success && this.dataset.apiUrl === `${ApiConfig.API_BASE_URL}${ApiConfig.MARK_WATCHED_ENDPOINT}`) {
-//                 const button = this.querySelector('button');
-//                 if (button) button.textContent = 'Watched!';
-//                 this.dataset.apiUrl = `${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`;
-//             }
-//             else if (data.success && this.dataset.apiUrl === `${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`) {
-//                 const button = this.querySelector('button');
-//                 if (button) button.textContent = 'Unwatched!';
-//                 this.dataset.apiUrl = `${ApiConfig.API_BASE_URL}${ApiConfig.MARK_WATCHED_ENDPOINT}`;
-//             }
-//         })
-//         .catch(err => console.error('Error updating watched status:', err));
-//     });
-// }
 /**
  * Handle theatre mode transitions
  * Manages wrapper positioning when entering/exiting theatre mode

@@ -456,6 +456,162 @@ Marks a video as unwatched for a user
 
 
 
+#### /api/profile/in_progress (GET)
+
+**Method**:
+GET
+
+
+**Description**:
+
+Retrieve in-progress videos for the active profile.
+
+May be filtered by a video_id to get a specific video.
+
+Uses the active profile.
+
+
+
+**Parameters**
+
+| Parameter  | Type    | Mandatory | Notes                      |
+| ---------- | ------- | --------- | -------------------------- |
+| video_id   | integer | No        | Filter results by video ID |
+
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+#### /api/profile/in_progress (POST)
+
+**Method**:
+POST
+
+
+**Description**:
+
+Add a video that's in progress to the database.
+
+Uses the active profile.
+
+
+
+**Payload**:
+
+| Field        | Type    | Mandatory | Notes                              |
+| ------------ | ------- | --------- | ---------------------------------- |
+| video_id     | Integer | Yes       | ID of the video that's in progress |
+| current_time | integer | Yes       | Video's current time (in seconds)  |
+
+
+
+```json
+{
+    "video_id": 1,
+    "current_time": 123
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+
+#### /api/profile/in_progress (UPDATE)
+
+**Method**:
+UPDATE
+
+
+**Description**:
+
+Updates the time index of a video that's already marked as being in progress.
+
+Uses the active profile.
+
+
+
+**Payload**:
+
+| Field        | Type    | Mandatory | Notes                              |
+| ------------ | ------- | --------- | ---------------------------------- |
+| video_id     | Integer | Yes       | ID of the video that's in progress |
+| current_time | integer | Yes       | Video's current time (in seconds)  |
+
+
+
+```json
+{
+    "video_id": 1,
+    "current_time": 123
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+
+#### /api/profile/in_progress (DELETE)
+
+**Method**:
+DELETE
+
+
+**Description**:
+
+Removes an in-progress video from the database.
+
+Uses the active user.
+
+
+
+**Parameters**
+
+| Parameter  | Type    | Mandatory | Notes                  |
+| ---------- | ------- | --------- | ---------------------- |
+| video_id   | integer | Yes       | The video ID to remove |
+
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+
+
 </br></br>
 
 

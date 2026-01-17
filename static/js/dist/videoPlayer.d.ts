@@ -26,6 +26,8 @@ declare const ApiConfig: {
     MARK_WATCHED_ENDPOINT: string;
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: string;
+    /** API endpoint for in-progress videos */
+    IN_PROGRESS_ENDPOINT: string;
 };
 /**
  * Interface for video.js player instance
@@ -479,9 +481,6 @@ declare class ChaptersMenuPositioner {
     private hook;
     private apply;
 }
-/**
- * Form submission handler for marking videos as watched/unwatched.
- */
 /**
  * Handle theatre mode transitions
  * Manages wrapper positioning when entering/exiting theatre mode

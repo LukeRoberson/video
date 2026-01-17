@@ -308,6 +308,7 @@ def video_details(
         )
 
     # Check if the video is marked as watched by the user, or in progress
+    logging.info(f"Checking watched status for video {video_id}")
     current_time = 0
     with LocalDbContext() as local_db:
         profile_mgr = ProfileManager(local_db)
@@ -318,14 +319,17 @@ def video_details(
             video_id=video['id']
         )
 
-        # If not watched, check if the video is in progress
-        if not watched:
-            in_progress = progress_mgr.read(
-                profile_id=session.get("active_profile", "guest"),
-                video_id=video['id']
-            )
+        logging.info(f"Video {video['id']} watched status: {watched}")
 
-            current_time = in_progress[0]['current_time'] if in_progress else 0
+        # Check if the video is in progress
+        in_progress = progress_mgr.read(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video['id']
+        )
+
+        current_time = in_progress[0]['current_time'] if in_progress else 0
+
+    logging.info(f"Current time for video {video['id']}: {current_time}")
 
     # Get similar videos
     with DatabaseContext() as db:
@@ -355,6 +359,7 @@ def video_details(
                 video_ids.append(video_details[0])
             else:
                 print(f"Video with ID {id} not found in database.")
+
     # Check for webVTT file for chapters
     vtt_file = os.path.join(
         str(current_app.static_folder),

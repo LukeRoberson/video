@@ -18,7 +18,7 @@
     * [x] Set active profile
 5. Migrate video endpoints
     * [x] Load videos (title, thumbnail) into categories
-    * [ ] Update in progress status
+    * [x] Update in progress status
     * [x] Mark a video as watched
     * [x] Mark a video as unwatched
 6. Additional pages
@@ -54,10 +54,6 @@
 | videoAdd.ts           | Admin page                       | /api/videos/csv                              | Read CSV file                        |
 | videoAdd.ts           | Admin page                       | /api/videos/add                              | Add video                            |
 | profileEdit.ts        | Editing user profiles            | /api/profile/pictures                        | Get a list of avatars                |
-| profileEdit.ts        | Editing user profiles            | /api/profile/mark_watched                    | Mark a video as watched              |
-| videoPlayer.ts        | Play videos                      | /api/profile/in_progress                     | Update the time of video in progress |
-| videoPlayer.ts        | Play videos                      | /api/profile/mark_watched                    | Mark a video as watched              |
-| videoPlayer.ts        | Play videos                      | /api/profile/mark_unwatched                  | Mark a video as unwatched            |
 
 </br></br>
 
@@ -67,9 +63,6 @@
 
 | Endpoint                                       | File           | Blueprint      | Function             |
 | ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/profile/mark_watched                      | api_profile.py | profile_api_bp | mark_watched         |
-| /api/profile/mark_unwatched                    | api_profile.py | profile_api_bp | mark_unwatched       |
-| /api/profile/in_progress                       | api_profile.py | profile_api_bp | in_progress_videos   |
 | /api/profile/pictures                          | api_profile.py | profile_api_bp | get_profile_pictures |
 
 
@@ -130,6 +123,9 @@
     * Would frontend be better, and it passes the ID to the API?
 * videoPlayer.ts
     * Does not have API paths as constants as other files do
+* in progress endpoint
+    * Uses active profile within the API
+    * Better to pass active profile ID from frontend?
 
 
 

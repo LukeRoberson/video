@@ -30,6 +30,8 @@ const ApiConfig = {
     MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
+    /** API endpoint for in-progress videos */
+    IN_PROGRESS_ENDPOINT: '/api/profile/in_progress',
 };
 
 
@@ -665,7 +667,6 @@ class ProgressTracker {
      */
     private setInitialPosition(): void {
         if (this.initialTime > 0) {
-            console.log('Setting playback position to:', this.initialTime);
             this.player.currentTime(this.initialTime);
         }
     }
@@ -674,10 +675,18 @@ class ProgressTracker {
      * Removes the progress overlay element from the DOM when playback starts.
      */
     private removeProgressOverlay(): void {
+        // Get the progress overlay element
         const progressOverlay = document.querySelector('.progress-overlay');
+
         if (progressOverlay) {
+            // Remove the overlay from the DOM
             progressOverlay.remove();
-            console.log('Custom progress bar removed.');
+
+            // Ensure initial position is set
+            // (if loadedmetadata fired before play)
+            if (this.initialTime > 0 && this.player.currentTime() === 0) {
+                this.setInitialPosition();
+            }
         }
     }
 
@@ -709,14 +718,18 @@ class ProgressTracker {
      * @param currentTime - The current playback time in seconds
      */
     private updateProgress(currentTime: number): void {
-        fetch('/api/profile/in_progress', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                video_id: this.videoId,
-                current_time: currentTime
-            })
-        }).catch(err => console.error('Error updating progress:', err));
+        fetch(
+            `${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    video_id: this.videoId,
+                    current_time: currentTime
+                })
+            }
+        ).catch(err => console.error('Error updating progress:', err));
     }
 
     /**
@@ -727,16 +740,21 @@ class ProgressTracker {
         this.hasMarkedWatched = true;
 
         // Remove from in-progress
-        fetch('/api/profile/in_progress', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ video_id: this.videoId })
-        }).catch(err => console.error('Error removing from progress:', err));
+        fetch(
+            `${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`,
+            {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ video_id: this.videoId })
+            }
+        ).catch(err => console.error('Error removing from progress:', err));
 
         // Mark as watched
         fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ video_id: this.videoId })
         }).catch(err => console.error('Error marking video as watched:', err));
     }
