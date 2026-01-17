@@ -8,16 +8,20 @@ API endpoints that the browser will use to fetch additional information
 Functions:
     - api_success: Returns a standardized success response.
     - api_error: Returns a standardized error response.
+    - seconds_to_hhmmss: Converts seconds to HH:MM:SS format.
 
 Blueprints:
     - api_admin: Blueprint for admin API endpoints.
         For example, adding metadata to videos.
+    - api_video: Blueprint for video-related API endpoints.
 
 Routes:
     - /api/video/metadata
         - add_video_metadata: Adds metadata to a video.
     - /api/scripture
         - add_scripture_text: Adds text to a scripture.
+    - /api/categories/<int>/<int>
+        - category_filter: Fetches videos by category and subcategory IDs.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -41,6 +45,7 @@ from flask import (
     Blueprint,
     Response,
     request,
+    session,
     jsonify,
     make_response,
 )
@@ -60,11 +65,21 @@ from api.sql_db import (
     VideoManager,
     CategoryManager,
 )
+from api.local_db import (
+    LocalDbContext,
+    ProfileManager,
+)
 
 
 # Blueprint for admin API endpoints
 admin_bp = Blueprint(
     'api_admin',
+    __name__,
+)
+
+# Blueprint for videos API endpoints
+video_bp = Blueprint(
+    'api_video',
     __name__,
 )
 
@@ -118,6 +133,34 @@ def api_error(
     resp = {"success": False, "error": error}
 
     return make_response(jsonify(resp), status)
+
+
+def seconds_to_hhmmss(
+    seconds: int,
+) -> str:
+    """
+    Convert seconds to HH:MM:SS format.
+        Shows hours only if greater than zero.
+
+    Args:
+        seconds (int): Duration in seconds.
+
+    Returns:
+        str: Duration in HH:MM:SS or MM:SS format.
+    """
+
+    # Handle None or non-positive values
+    if seconds is None or seconds <= 0:
+        seconds = 1
+
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+
+    # Format the output based on whether hours are present
+    if hours > 0:
+        return f"{hours}:{minutes:02}:{seconds:02}"
+    return f"{minutes}:{seconds:02}"
 
 
 @admin_bp.route(
@@ -800,4 +843,85 @@ def add_scripture_text() -> Response:
 
     return api_success(
         message=f"Added scripture text for '{scr_name}'"
+    )
+
+
+@video_bp.route(
+    "/api/categories/<int:category_id>/<int:subcategory_id>",
+    methods=["GET"],
+)
+def category_filter(
+    category_id: int,
+    subcategory_id: int,
+) -> Response:
+    """
+    Fetch videos in a category.
+
+    Uses the given major category ID and subcategory ID.
+    This is used to populate carousels with videos.
+
+    Process:
+        1. Select all videos with the given category ID and subcategory ID.
+        2. If no videos are found, return a 404 error.
+        3. Convert the duration from seconds to HH:MM:SS format.
+        4. Return a JSON response with the list of videos.
+
+    Args:
+        category_id (int): The ID of the major category to filter videos by.
+        subcategory_id (int): The ID of the subcategory to filter videos by.
+
+    Returns:
+        Response: A JSON response containing the list of videos
+            in the specified category and subcategory.
+        If no videos are found, an empty list is returned.
+    """
+
+    logging.info(
+        f"Fetching videos for Category ID: {category_id}, "
+        f"Subcategory ID: {subcategory_id}"
+    )
+
+    # Select all videos with the given category ID and subcategory ID
+    cat_list = [category_id, subcategory_id]
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = video_mgr.get_filter(
+            category_id=cat_list,
+        )
+
+    if videos:
+        logging.info(
+            f"Found {len(videos)} videos for Category ID: {category_id}, "
+            f"Subcategory ID: {subcategory_id}"
+        )
+
+    # If no videos are found, return a 404 error
+    if not videos:
+        videos = []
+
+    # Convert duration from seconds to HH:MM:SS format
+    for video in videos:
+        video['duration'] = seconds_to_hhmmss(video['duration'])
+
+    # Get watch status for the active profile
+    active_profile = session.get("active_profile", None)
+    if active_profile is not None and active_profile != "guest":
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+
+            for video in videos:
+                watched = profile_mgr.check_watched(
+                    video_id=video['id'],
+                    profile_id=active_profile,
+                )
+                video['watched'] = watched
+
+    # Sort videos by 'date_added' (newest first)
+    videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
+
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
     )

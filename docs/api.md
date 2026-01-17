@@ -378,3 +378,52 @@ Returns:
 
 
 </br></br>
+
+
+
+
+---
+### Videos
+
+
+#### /api/categories/{category_id}/{subcategory_id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of videos in a particular category/subcategory combination.
+
+
+Returns:
+
+200 OK
+
+
+Notes:
+* Returns a list of entries
+
+
+```json
+[
+    {
+        "date_added": "2025-11-04 00:00:00",
+        "description": "A talk about taking in spiritual food, by Geoffrey Jackson.\nHighlights from the dedication of the new Britain branch.\nThe experience of Nigel Baker.\nMorning worship with John Ekrann.\nDig for Treasures - Obadiah.\nThe experience of Domenic Alessia.\nMusic Video - Hearer of Prayer.\nVideo Postcard from Brussels.",
+        "duration": "57:56",
+        "id": 3011,
+        "name": "JW Broadcasting—November 2025",
+        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
+        "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
+        "url_1080": null,
+        "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4"
+    }
+]
+```
+
+
+

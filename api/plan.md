@@ -17,7 +17,7 @@
     * [x] Get active profile
     * [x] Set active profile
 5. Migrate video endpoints
-    * [ ] Load videos (title, thumbnail) into categories
+    * [x] Load videos (title, thumbnail) into categories
     * [ ] Update in progress status
     * [ ] Mark a video as watched
     * [ ] Mark a video as unwatched

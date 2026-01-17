@@ -15,7 +15,10 @@ from flask import Flask
 from flask_cors import CORS
 
 # Custom imports
-from api.api import admin_bp
+from api.api import (
+    admin_bp,
+    video_bp
+)
 from api.profile import profile_bp
 
 
@@ -128,6 +131,7 @@ def create_app(
 
     # Register blueprints
     app.register_blueprint(admin_bp)
+    app.register_blueprint(video_bp)
     app.register_blueprint(profile_bp)
 
     return app

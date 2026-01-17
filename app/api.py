@@ -19,23 +19,15 @@ Routes:
         - search_videos: Searches for videos by name or description.
     - /api/search/advanced
         - advanced_search: Performs an advanced search for videos.
-    - /api/categories/<int>/<int>
-        - category_filter: Fetches videos by category and subcategory IDs.
 
 Dependencies:
     - Flask: For creating the API endpoints.
     - logging: For logging API requests and responses.
-    - re: For regular expression operations.
 
 Custom Dependencies:
     - DatabaseContext: Context manager for database connections.
     - VideoManager: Manages video-related database operations.
-    - TagManager: Manages tag-related database operations.
-    - SpeakerManager: Manages speaker-related database operations.
-    - CharacterManager: Manages character-related database operations.
-    - ScriptureManager: Manages scripture-related database operations.
-    - LocalDbContext: Context manager for local database connections.
-    - ProfileManager: Manages user profile-related operations in the local db.
+    - CategoryManager: Manages category-related database operations.
 """
 
 
@@ -44,7 +36,6 @@ from flask import (
     Blueprint,
     Response,
     request,
-    session,
     jsonify,
     make_response,
 )
@@ -58,10 +49,6 @@ from app.sql_db import (
     DatabaseContext,
     VideoManager,
     CategoryManager,
-)
-from app.local_db import (
-    LocalDbContext,
-    ProfileManager,
 )
 
 
@@ -460,84 +447,3 @@ def advanced_search() -> Response:
             video['duration'] = seconds_to_hhmmss(video['duration'])
 
     return api_success(data=videos)
-
-
-@api_bp.route(
-    "/api/categories/<int:category_id>/<int:subcategory_id>",
-    methods=["GET"],
-)
-def category_filter(
-    category_id: int,
-    subcategory_id: int,
-) -> Response:
-    """
-    Fetch videos in a category.
-
-    Uses the given major category ID and subcategory ID.
-    This is used to populate carousels with videos.
-
-    Process:
-        1. Select all videos with the given category ID and subcategory ID.
-        2. If no videos are found, return a 404 error.
-        3. Convert the duration from seconds to HH:MM:SS format.
-        4. Return a JSON response with the list of videos.
-
-    Args:
-        category_id (int): The ID of the major category to filter videos by.
-        subcategory_id (int): The ID of the subcategory to filter videos by.
-
-    Returns:
-        Response: A JSON response containing the list of videos
-            in the specified category and subcategory.
-        If no videos are found, an empty list is returned.
-    """
-
-    logging.info(
-        f"Fetching videos for Category ID: {category_id}, "
-        f"Subcategory ID: {subcategory_id}"
-    )
-
-    # Select all videos with the given category ID and subcategory ID
-    cat_list = [category_id, subcategory_id]
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        videos = video_mgr.get_filter(
-            category_id=cat_list,
-        )
-
-    if videos:
-        logging.info(
-            f"Found {len(videos)} videos for Category ID: {category_id}, "
-            f"Subcategory ID: {subcategory_id}"
-        )
-
-    # If no videos are found, return a 404 error
-    if not videos:
-        videos = []
-
-    # Convert duration from seconds to HH:MM:SS format
-    for video in videos:
-        video['duration'] = seconds_to_hhmmss(video['duration'])
-
-    # Get watch status for the active profile
-    active_profile = session.get("active_profile", None)
-    if active_profile is not None and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-
-            for video in videos:
-                watched = profile_mgr.check_watched(
-                    video_id=video['id'],
-                    profile_id=active_profile,
-                )
-                video['watched'] = watched
-
-    # Sort videos by 'date_added' (newest first)
-    videos.sort(key=lambda v: v.get('date_added', ''), reverse=True)
-
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
-    )
