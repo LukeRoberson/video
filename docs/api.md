@@ -80,6 +80,108 @@ Notes:
 </br></br>
 
 
+#### /api/videos/csv
+
+**Method**:
+GET
+
+
+**Description**:
+
+Load videos from a CSV file in preparation to enter them into the database.
+
+CSV is not selectable, it is set in code using a constant.
+
+
+**returns**
+
+200 OK
+
+Returns the contents of the CSV file.
+
+Each entry includes an index, starting at zero.
+
+
+```json
+{
+    "0": {
+        "video_name": "JW Broadcasting—January 2026: Annual Meeting 2025, Part 1",
+        "video_url": "https://www.jw.org/en/library/videos/#en/mediaitems/StudioMonthlyPrograms/pub-jwb-134_1_VIDEO",
+        "main_cat_name": "JW Broadcasting",
+        "sub_cat_name": "Monthly Programs",
+        "url_1080": null,
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r720P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/99bdbd/1/o/jwb-134_E_01_r480P.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/fcc2dd/1/o/jwb-134_E_01_r360P.mp4",
+        "url_240": "https://akamd1.jw-cdn.org/sg2/p/485b9ed/1/o/jwb-134_E_01_r240P.mp4",
+        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-134/univ/art/jwb-134_univ_wss_01_lg.jpg",
+        "duration": "1:43:33"
+    }
+}
+```
+
+
+#### /api/videos/add
+
+**Method**:
+POST
+
+
+**Description**:
+
+Add videos to the database. Used on the admin page.
+
+
+
+**Payload**:
+
+| Field          | Type   | Mandatory | Notes                                                    |
+| -------------- | ------ | --------- | -------------------------------------------------------- |
+| video_name     | String | Yes       | The name of the video to add                             |
+| video_url      | String | Yes       | The URL on jw.org                                        |
+| main_cat_name  | String | Yes       | The video's main category                                |
+| sub_cat_name   | String | Yes       | The video's subcategory                                  |
+| url_1080       | String | Yes       | URL to 1080p video                                       |
+| url_720        | String | Yes       | URL to 720p video                                        |
+| url_480        | String | Yes       | URL to 480p video                                        |
+| url_360        | String | Yes       | URL to 360p video                                        |
+| url_240        | String | Yes       | URL to 240p video                                        |
+| thumbnail      | String | Yes       | URL to the thumbnail's image                             |
+| duration       | String | Yes       | Duration in the format HH:MM:SS                          |
+
+
+
+
+```json
+{
+    "video_name": "Jehovah Is a Real Person",
+    "video_url": "https://www.jw.org/en/library/videos/#en/mediaitems/BJF/pub-pk_59_VIDEO",
+    "main_cat_name": "Children",
+    "sub_cat_name": "Video Lessons",
+    "url_1080": null,
+    "url_720": "https://akdd1.jw-cdn.org/sg2/p/bf8814/1/o/pk_E_059_r720P.mp4",
+    "url_480": "https://akamd1.jw-cdn.org/sg2/p/0fc60b/1/o/pk_E_059_r480P.mp4",
+    "url_360": "https://akamd1.jw-cdn.org/sg2/p/1bfe852/1/o/pk_E_059_r360P.mp4",
+    "url_240": "https://akamd1.jw-cdn.org/sg2/p/513517a/1/o/pk_E_059_r240P.mp4",
+    "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/501600168/univ/art/501600168_univ_wss_lg.jpg",
+    "duration": "10:35",
+    "date_added": "2026-01-17 19:40:48"
+}
+```
+
+
+**returns**
+
+200 OK
+
+
+```json
+{
+}
+```
+
+
+
 #### /api/scripture
 
 **Method**:
@@ -108,6 +210,8 @@ If a scripture already has text, the new text will overwrite the old.
     "scr_text": "Text"
 }
 ```
+
+
 
 </br></br>
 

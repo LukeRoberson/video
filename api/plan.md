@@ -51,8 +51,6 @@
 
 | File                  | File Usage                       | Endpoint                                     | Description                          |
 | --------------------- | -------------------------------- | -------------------------------------------- | ------------------------------------ |
-| videoAdd.ts           | Admin page                       | /api/videos/csv                              | Read CSV file                        |
-| videoAdd.ts           | Admin page                       | /api/videos/add                              | Add video                            |
 | profileEdit.ts        | Editing user profiles            | /api/profile/pictures                        | Get a list of avatars                |
 
 </br></br>
@@ -72,14 +70,9 @@
 | /api/search/reindex                            | api_search.py  | search_bp      | reindex_all_videos   |
 | /api/search/status                             | api_search.py  | search_bp      | search_status        |
 | /api/search/advanced                           | api_search.py  | search_bp      | advanced_search      |
-
-
-| Endpoint                                       | File           | Blueprint      | Function             |
-| ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/videos/csv                                | api.py         | api_bp         | get_videos_csv       |
-| /api/videos/add                                | api.py         | api_bp         | add_videos           |
 | /api/search/videos                             | api.py         | api_bp         | search_videos        |
 | /api/search/advanced                           | api.py         | api_bp         | advanced_search      |
+
 
 </br></br>
 
@@ -94,6 +87,8 @@
     * Base URLs in ProfileEditConfig
 * populateCategories.ts
     * Base URLs in CategoryConfig
+* videoAdd.ts
+    * Base URLs in VideoAddConfig
 
 
 

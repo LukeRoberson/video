@@ -8,6 +8,10 @@
  * Configuration constants for video addition
  */
 const VideoAddConfig = {
+    /** API base URL for new endpoints (separate server) */
+    API_BASE_URL: 'http://localhost:5010',
+    /** API base URL for legacy endpoints */
+    LEGACY_API_BASE_URL: 'http://localhost:5000',
     /** API endpoint for fetching CSV video data */
     CSV_ENDPOINT: '/api/videos/csv',
     /** API endpoint for adding videos to database */
@@ -31,7 +35,7 @@ class VideoApiService {
      * @throws Error if API call fails
      */
     static async fetchVideosFromCSV() {
-        const response = await fetch(VideoAddConfig.CSV_ENDPOINT);
+        const response = await fetch(`${VideoAddConfig.API_BASE_URL}${VideoAddConfig.CSV_ENDPOINT}`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -46,7 +50,8 @@ class VideoApiService {
      * @throws Error if API call fails
      */
     static async addVideoToDatabase(videoData) {
-        const response = await fetch(VideoAddConfig.ADD_ENDPOINT, {
+        console.log('Adding video with data:', videoData);
+        const response = await fetch(`${VideoAddConfig.API_BASE_URL}${VideoAddConfig.ADD_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Content-Type': VideoAddConfig.JSON_CONTENT_TYPE
