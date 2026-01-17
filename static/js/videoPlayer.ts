@@ -17,6 +17,22 @@
 // Declare videojs as a global variable
 declare const videojs: any;
 
+
+/**
+ * Configuration constants API endpoints and settings.
+ */
+const ApiConfig = {
+    /** API base URL for new endpoints (separate server) */
+    API_BASE_URL: 'http://localhost:5010',
+    /** API base URL for legacy endpoints */
+    LEGACY_API_BASE_URL: 'http://localhost:5000',
+    /** API endpoint for marking videos as watched */
+    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
+    /** API endpoint for marking videos as unwatched */
+    MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
+};
+
+
 /**
  * Interface for video.js player instance
  */
@@ -718,7 +734,7 @@ class ProgressTracker {
         }).catch(err => console.error('Error removing from progress:', err));
 
         // Mark as watched
-        fetch('/api/profile/mark_watched', {
+        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ video_id: this.videoId })
@@ -1425,41 +1441,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-/**
- * Form submission handler for marking videos as watched/unwatched.
- */
-const markWatchedForm = document.getElementById('markWatchedForm') as HTMLFormElement;
-if (markWatchedForm) {
-    markWatchedForm.addEventListener('submit', function(e: Event) {
-        e.preventDefault();
-
-        const apiUrl = this.dataset.apiUrl || '';
-        const videoId = this.dataset.videoId || '';
-
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ video_id: videoId })
-        })
-        .then(response => response.json())
-        .then((data: ApiResponse) => {
-            if (data.success && this.dataset.apiUrl === '/api/profile/mark_watched') {
-                const button = this.querySelector('button');
-                if (button) button.textContent = 'Watched!';
-                this.dataset.apiUrl = '/api/profile/mark_unwatched';
-            }
-            else if (data.success && this.dataset.apiUrl === '/api/profile/mark_unwatched') {
-                const button = this.querySelector('button');
-                if (button) button.textContent = 'Unwatched!';
-                this.dataset.apiUrl = '/api/profile/mark_watched';
-            }
-        })
-        .catch(err => console.error('Error updating watched status:', err));
-    });
-}
 
 /**
  * Handle theatre mode transitions

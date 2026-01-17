@@ -5,19 +5,16 @@ API endpoints that the browser will use to fetch additional information
     Specifically, for user profiles and their management.
 
 Routes:
-    - /api/profile/mark_watched
-        - mark_watched: Marks a video as watched for the acve profile.
-    - /api/profile/mark_unwatched
-        - mark_unwatched: Marks a video as unwatched for the profile.
     - /api/profile/in_progress
         - in_progress_videos: Manages in-progress videos for the profile.
+    - /api/profile/pictures
+        - get_profile_pictures: Retrieves available profile pictures.
 
 Dependencies:
     - Flask: For creating the API endpoints.
 
 Custom Dependencies:
     - LocalDbContext: Context manager for local database connections.
-    - ProfileManager: Manages user profile-related operations in the local db.
     - ProgressManager: Manages in-progress video tracking for user profiles.
 """
 
@@ -40,7 +37,6 @@ from app.api import (
 )
 from app.local_db import (
     LocalDbContext,
-    ProfileManager,
     ProgressManager,
 )
 
@@ -49,95 +45,6 @@ profile_api_bp = Blueprint(
     'profile_api',
     __name__,
 )
-
-
-@profile_api_bp.route(
-    "/api/profile/mark_watched",
-    methods=["POST"]
-)
-def mark_watched() -> Response:
-    """
-    Mark a video as watched for the active profile.
-
-    Expects JSON:
-        {
-            "video_id": <int>
-        }
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    data = request.get_json()
-    video_id = data.get("video_id", None)
-
-    if not video_id:
-        return api_error(error="Missing 'video_id' in request data")
-
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        progress_mgr = ProgressManager(db)
-
-        # Mark the video as watched for the active profile
-        result = profile_mgr.mark_watched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
-        )
-
-        if not result:
-            return api_error(
-                error=f"Failed to mark video {video_id} as watched",
-                status=500
-            )
-
-        # Remove from in progress list if needed
-        result = progress_mgr.delete(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
-        )
-
-    return api_success(
-        message=f"Marked video {video_id} as watched"
-    )
-
-
-@profile_api_bp.route(
-    "/api/profile/mark_unwatched",
-    methods=["POST"]
-)
-def mark_unwatched() -> Response:
-    """
-    Mark a video as unwatched for the active profile.
-
-    Expects JSON:
-        {
-            "video_id": <int>
-        }
-
-    Returns:
-        Response: A JSON response indicating success or failure.
-    """
-
-    data = request.get_json()
-    video_id = data.get("video_id", None)
-
-    if not video_id:
-        return api_error(error="Missing 'video_id' in request data")
-
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        result = profile_mgr.mark_unwatched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
-        )
-
-    if not result:
-        return api_error(
-            error=f"Failed to mark video {video_id} as unwatched",
-            status=500
-        )
-
-    return api_success(message=f"Marked video {video_id} as unwatched")
 
 
 @profile_api_bp.route(
@@ -323,7 +230,9 @@ def in_progress_videos() -> Response:
         )
 
 
-@profile_api_bp.route('/api/profile/pictures')
+@profile_api_bp.route(
+    '/api/profile/pictures'
+)
 def get_profile_pictures():
     """Get list of available profile pictures"""
     try:

@@ -53,6 +53,7 @@ from api.api import (
 from api.local_db import (
     LocalDbContext,
     ProfileManager,
+    ProgressManager,
 )
 
 
@@ -258,6 +259,51 @@ def set_active_profile() -> Response:
 
 
 @profile_bp.route(
+    "/api/profile/get_active",
+    methods=["GET"]
+)
+def get_active_profile() -> Response:
+    """
+    Get the active profile for the session.
+
+    Returns:
+        Response: A JSON response with the active profile ID.
+    """
+
+    # Retrieve the active profile from the session
+    active_profile = session.get("active_profile", None)
+
+    # If no active profile is set, return a default value
+    if active_profile is None or active_profile == "guest":
+        logging.info("No active profile set, returning guest profile.")
+        profile = {
+            "id": None,
+            "name": "Guest",
+            "image": "guest.png"
+        }
+
+    else:
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+            profile = profile_mgr.read(
+                profile_id=active_profile
+            )
+
+            profile = profile[0] if profile else {
+                "id": None,
+                "name": "Guest",
+                "image": "guest.png"
+            }
+
+    logging.info(f"Active profile returned: {profile}")
+
+    # Return a JSON response with the active profile ID
+    return api_success(
+        data={"active_profile": profile}
+    )
+
+
+@profile_bp.route(
     "/api/profile/clear_history/<int:profile_id>",
     methods=["POST"],
 )
@@ -338,45 +384,96 @@ def clear_watch_history(profile_id: int) -> Response:
 
 
 @profile_bp.route(
-    "/api/profile/get_active",
-    methods=["GET"]
+    "/api/profile/mark_watched",
+    methods=["POST"]
 )
-def get_active_profile() -> Response:
+def mark_watched() -> Response:
     """
-    Get the active profile for the session.
+    Mark a video as watched for the active profile.
 
-    Returns:
-        Response: A JSON response with the active profile ID.
-    """
-
-    # Retrieve the active profile from the session
-    active_profile = session.get("active_profile", None)
-
-    # If no active profile is set, return a default value
-    if active_profile is None or active_profile == "guest":
-        logging.info("No active profile set, returning guest profile.")
-        profile = {
-            "id": None,
-            "name": "Guest",
-            "image": "guest.png"
+    Expects JSON:
+        {
+            "video_id": <int>
         }
 
-    else:
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            profile = profile_mgr.read(
-                profile_id=active_profile
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return api_error(error="Missing 'video_id' in request data")
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        progress_mgr = ProgressManager(db)
+
+        # Mark the video as watched for the active profile
+        result = profile_mgr.mark_watched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+        if not result:
+            return api_error(
+                error=f"Failed to mark video {video_id} as watched",
+                status=500
             )
 
-            profile = profile[0] if profile else {
-                "id": None,
-                "name": "Guest",
-                "image": "guest.png"
-            }
+        # Remove from in progress list if needed
+        result = progress_mgr.delete(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
 
-    logging.info(f"Active profile returned: {profile}")
-
-    # Return a JSON response with the active profile ID
     return api_success(
-        data={"active_profile": profile}
+        message=f"Marked video {video_id} as watched"
     )
+
+
+@profile_bp.route(
+    "/api/profile/mark_unwatched",
+    methods=["POST"]
+)
+def mark_unwatched() -> Response:
+    """
+    Mark a video as unwatched for the active profile.
+
+    Expects JSON:
+        {
+            "video_id": <int>
+        }
+
+    Returns:
+        Response: A JSON response indicating success or failure.
+    """
+
+    logging.info("Received request to mark video as unwatched")
+
+    data = request.get_json()
+    video_id = data.get("video_id", None)
+
+    if not video_id:
+        return api_error(error="Missing 'video_id' in request data")
+
+    logging.info(
+        f"Marking video {video_id} as unwatched "
+        f"for profile {session.get('active_profile', 'guest')}"
+    )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        result = profile_mgr.mark_unwatched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video_id
+        )
+
+    if not result:
+        return api_error(
+            error=f"Failed to mark video {video_id} as unwatched",
+            status=500
+        )
+
+    return api_success(message=f"Marked video {video_id} as unwatched")

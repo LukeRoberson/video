@@ -15,6 +15,19 @@
  */
 declare const videojs: any;
 /**
+ * Configuration constants API endpoints and settings.
+ */
+declare const ApiConfig: {
+    /** API base URL for new endpoints (separate server) */
+    API_BASE_URL: string;
+    /** API base URL for legacy endpoints */
+    LEGACY_API_BASE_URL: string;
+    /** API endpoint for marking videos as watched */
+    MARK_WATCHED_ENDPOINT: string;
+    /** API endpoint for marking videos as unwatched */
+    MARK_UNWATCHED_ENDPOINT: string;
+};
+/**
  * Interface for video.js player instance
  */
 interface VideoJsPlayer {
@@ -469,7 +482,6 @@ declare class ChaptersMenuPositioner {
 /**
  * Form submission handler for marking videos as watched/unwatched.
  */
-declare const markWatchedForm: HTMLFormElement;
 /**
  * Handle theatre mode transitions
  * Manages wrapper positioning when entering/exiting theatre mode

@@ -131,7 +131,7 @@ def ensure_profile_selected() -> None | Response:
     # Allow static and profile API routes
     if request.endpoint in ('static',):
         return
-    if request.blueprint == 'profile_api':
+    if request.blueprint == 'profile_bp':
         return
 
     # Allow the profile selection/creation pages

@@ -403,13 +403,17 @@ class ProfileEditApiService {
     static async markWatched(videoId: number): Promise<void> {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
         
-        const response = await fetch(ProfileEditConfig.MARK_WATCHED_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
-            },
-            body: JSON.stringify(requestBody)
-        });
+        const response = await fetch(
+            `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
+                },
+                credentials: 'include',
+                body: JSON.stringify(requestBody)
+            }
+        );
 
         if (!response.ok) {
             const data: ApiResponse = await response.json();

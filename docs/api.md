@@ -377,6 +377,85 @@ Returns:
 ```
 
 
+
+#### /api/profile/mark_watched
+
+**Method**:
+POST
+
+
+**Description**:
+Marks a video as watched for a user
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                              |
+| ---------- | ------- | --------- | ---------------------------------- |
+| video_id   | integer | Yes       | ID of the video to mark as watched |
+
+
+Notes:
+* Uses the active profile ID
+
+
+```json
+{
+    "video_id": 123
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+
+
+#### /api/profile/mark_unwatched
+
+**Method**:
+POST
+
+
+**Description**:
+Marks a video as unwatched for a user
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                                |
+| ---------- | ------- | --------- | ------------------------------------ |
+| video_id   | integer | Yes       | ID of the video to mark as unwatched |
+
+
+
+```json
+{
+    "video_id": 123
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+
+}
+```
+
+
+
 </br></br>
 
 

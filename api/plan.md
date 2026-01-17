@@ -19,8 +19,8 @@
 5. Migrate video endpoints
     * [x] Load videos (title, thumbnail) into categories
     * [ ] Update in progress status
-    * [ ] Mark a video as watched
-    * [ ] Mark a video as unwatched
+    * [x] Mark a video as watched
+    * [x] Mark a video as unwatched
 6. Additional pages
     * [ ] Scriptures
     * [ ] Speakers
@@ -38,8 +38,7 @@
 
 * Some pages, eg scriptures, do not use an API; They read the DB directly
     * Will need to add an endpoint in these cases
-* Where is the port set?
-    * Using tcp/5010 for the new API
+
 
 </br></br>
 
@@ -52,21 +51,10 @@
 
 | File                  | File Usage                       | Endpoint                                     | Description                          |
 | --------------------- | -------------------------------- | -------------------------------------------- | ------------------------------------ |
-| metadata.ts           | Admin page                       | /api/video/metadata                          | Add metadata to videos               |
-| metadata.ts           | Admin page                       | /api/scripture                               | Add a scripture                      |
 | videoAdd.ts           | Admin page                       | /api/videos/csv                              | Read CSV file                        |
 | videoAdd.ts           | Admin page                       | /api/videos/add                              | Add video                            |
-| populateCategories.ts | Load videos into categories page | /api/categories/{categoryId}/{subcategoryId} | Get a list of videos                 |
 | profileEdit.ts        | Editing user profiles            | /api/profile/pictures                        | Get a list of avatars                |
-| profileEdit.ts        | Editing user profiles            | /api/profile/delete/{id}                     | Delete a profile                     |
-| profileEdit.ts        | Editing user profiles            | /api/profile/update/{id}                     | Update a profile                     |
-| profileEdit.ts        | Editing user profiles            | /api/profile/clear_history/{id}              | Clear profile watch history          |
 | profileEdit.ts        | Editing user profiles            | /api/profile/mark_watched                    | Mark a video as watched              |
-| profileMgmt.ts        | Profile management               | /api/profile/create                          | Create a profile                     |
-| profileMgmt.ts        | Profile management               | /api/profile/get_active                      | Get the active profile               |
-| profileMgmt.ts        | Profile management               | /api/profile/set_active                      | Set the active profile               |
-| profileMgmt.ts        | Profile management               | /api/profile/delete/{id}                     | Delete a profile                     |
-| profileMgmt.ts        | Profile management               | /edit_profile/{id}                           | Edit a profile                       |
 | videoPlayer.ts        | Play videos                      | /api/profile/in_progress                     | Update the time of video in progress |
 | videoPlayer.ts        | Play videos                      | /api/profile/mark_watched                    | Mark a video as watched              |
 | videoPlayer.ts        | Play videos                      | /api/profile/mark_unwatched                  | Mark a video as unwatched            |
@@ -79,15 +67,9 @@
 
 | Endpoint                                       | File           | Blueprint      | Function             |
 | ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/profile/create                            | api_profile.py | profile_api_bp | create_profile       |
-| /api/profile/set_active                        | api_profile.py | profile_api_bp | set_active_profile   |
-| /api/profile/get_active                        | api_profile.py | profile_api_bp | get_active_profile   |
 | /api/profile/mark_watched                      | api_profile.py | profile_api_bp | mark_watched         |
 | /api/profile/mark_unwatched                    | api_profile.py | profile_api_bp | mark_unwatched       |
 | /api/profile/in_progress                       | api_profile.py | profile_api_bp | in_progress_videos   |
-| /api/profile/delete/<profile_id>               | api_profile.py | profile_api_bp | delete_profile       |
-| /api/profile/update/<profile_id>               | api_profile.py | profile_api_bp | update_profile       |
-| /api/profile/clear_history/<profile_id>        | api_profile.py | profile_api_bp | clear_watch_history  |
 | /api/profile/pictures                          | api_profile.py | profile_api_bp | get_profile_pictures |
 
 
@@ -101,13 +83,10 @@
 
 | Endpoint                                       | File           | Blueprint      | Function             |
 | ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/video/metadata                            | api.py         | api_bp         | add_video_metadata   |
 | /api/videos/csv                                | api.py         | api_bp         | get_videos_csv       |
 | /api/videos/add                                | api.py         | api_bp         | add_videos           |
 | /api/search/videos                             | api.py         | api_bp         | search_videos        |
 | /api/search/advanced                           | api.py         | api_bp         | advanced_search      |
-| /api/scripture                                 | api.py         | api_bp         | add_scripture_text   |
-| /api/categories/<category_id>/<subcategory_id> | api.py         | api_bp         | category_filter      |
 
 </br></br>
 
@@ -120,6 +99,8 @@
     * URL selection in setActiveProfile
 * profileEdit.ts
     * Base URLs in ProfileEditConfig
+* populateCategories.ts
+    * Base URLs in CategoryConfig
 
 
 
@@ -141,6 +122,15 @@
     * These could be consolidated
 * Updating profiles
     * When saving a name change, it's not immediately reflected in the edit screen
+* Enpoints to mark as watched/unwatched
+    * This uses stateful information; Gets the active user
+    * Would be better to pass the active user in the request
+* Active user
+    * Should this be tracked by the API?
+    * Would frontend be better, and it passes the ID to the API?
+* videoPlayer.ts
+    * Does not have API paths as constants as other files do
+
 
 
 
