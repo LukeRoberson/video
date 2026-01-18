@@ -45,11 +45,6 @@ Custom Dependencies:
         ScriptureManager: Manages scriptures.
         SimilarityManager: Manages video similarity.
 
-    app.local_db:
-        LocalDbContext: Context manager for local database operations.
-        ProfileManager: Manages user profiles.
-        ProgressManager: Manages video progress.
-
     app.theme:
         ThemeManager: Manages theme-related operations.
 
@@ -83,10 +78,6 @@ from app.sql_db import (
     CharacterManager,
     ScriptureManager,
     SimilarityManager,
-)
-from app.local_db import (
-    LocalDbContext,
-    ProfileManager,
 )
 from app.theme import ThemeManager
 from search import SearchService
@@ -185,18 +176,17 @@ def get_videos_by_filter(
 def set_watched_status(
     videos: list,
     profile_id: int,
-    profile_mgr: ProfileManager,
 ) -> None:
     """
-    Set the watched status for each video in the list for the current user.
+    Check each video in the list to see if it has been watched by the user.
+    If it has, mark it as watched by adding a 'watched' key with value True.
+    This is used to display a watched badge on the video thumbnails.
 
     Args:
         videos (list):
             A list of video dictionaries to update with watched status.
         profile_id (int):
             The ID of the user profile to check watched status against.
-        profile_mgr (ProfileManager):
-            The profile manager instance to use for checking watched status.
 
     Returns:
         None: The function modifies the videos list in place.
@@ -204,13 +194,17 @@ def set_watched_status(
 
     # Loop through each video and check if it has been watched
     for video in videos:
-        watched = profile_mgr.check_watched(
-            video_id=video['id'],
-            profile_id=profile_id,
+        # API: Check if video is marked as watched
+        response = requests.get(
+            'http://localhost:5010/api/profile/mark_watched',
+            params={
+                'video_id': video['id'],
+                'profile': profile_id
+            },
         )
 
-        # Set the 'watched' key to True
-        video['watched'] = watched
+        # Set the 'watched' key to True or False
+        video['watched'] = response.json()['data'].get('watched', False)
 
 
 def get_search_service() -> SearchService:
@@ -310,7 +304,10 @@ def video_details(
     # API: Check if video is marked as watched
     response = requests.get(
         'http://localhost:5010/api/profile/mark_watched',
-        params={'video_id': video_id}
+        params={
+            'video_id': video_id,
+            'profile': session.get("active_profile", "guest")
+        }
     )
     watched = response.json()['data'].get('watched', False)
 
@@ -474,9 +471,7 @@ def tag_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            set_watched_status(videos, active_profile, profile_mgr)
+        set_watched_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -527,9 +522,7 @@ def location_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            set_watched_status(videos, active_profile, profile_mgr)
+        set_watched_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -579,9 +572,7 @@ def speaker_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            set_watched_status(videos, active_profile, profile_mgr)
+        set_watched_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -635,9 +626,7 @@ def character_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            set_watched_status(videos, active_profile, profile_mgr)
+        set_watched_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -692,9 +681,7 @@ def scripture_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        with LocalDbContext() as db:
-            profile_mgr = ProfileManager(db)
-            set_watched_status(videos, active_profile, profile_mgr)
+        set_watched_status(videos, active_profile)
 
     return make_response(
         render_template(

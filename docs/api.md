@@ -541,10 +541,11 @@ Marks a video as watched for a user
 | Field      | Type    | Mandatory | Notes                              |
 | ---------- | ------- | --------- | ---------------------------------- |
 | video_id   | integer | Yes       | ID of the video to mark as watched |
+| profile    | integer | No        | The profile to check               |
 
 
 Notes:
-* Uses the active profile ID
+* Uses the active profile ID if the profile is not set
 
 
 ```json

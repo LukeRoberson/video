@@ -394,10 +394,31 @@ def get_watched() -> Response:
     Request Args:
         video_id (int):
             The ID of the video to check watched status for.
+        profile (int):
+            The ID of the profile to check watched status for.
 
     Returns:
         Response: A JSON response with the list of watched videos.
     """
+
+    # Get the active profile from the parameter
+    active_profile = request.args.get("profile", None)
+
+    # If not provided, get from the session
+    if not active_profile:
+        logging.info(
+            "No active_profile parameter provided, "
+            "retrieving from session"
+        )
+        active_profile = session.get("active_profile", "guest")
+
+    # If no active profile is set, return empty response
+    if active_profile is None or active_profile == "guest":
+        return api_success(
+            message="No in progress videos for guest profile"
+        )
+
+    logging.info(f"Active profile for watched videos: {active_profile}")
 
     video = request.args.get("video_id", None)
     if not video:
@@ -408,10 +429,9 @@ def get_watched() -> Response:
         profile_mgr = ProfileManager(local_db)
 
         watched = profile_mgr.check_watched(
-            profile_id=session.get("active_profile", "guest"),
+            profile_id=int(active_profile),
             video_id=video
         )
-        logging.info(f"Video {video} watched status: {watched}")
 
     return api_success(
         data={"video_id": video, "watched": watched}

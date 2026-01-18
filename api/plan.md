@@ -123,6 +123,12 @@
     * Better to pass active profile ID from frontend?
 * Investigate using 'MethodView' in Flask
     * Uses a class to separate method functions for endpoints
+* profile.py
+    * Some endpoints check for a profile ID and fallback to the session
+    * This results in a lot of code reuse
+* Poor performance
+    * When loading a page with a lot of video entries, such as locations, tags, speakers, it takes a long time to load
+    * This is because it is checking the watch status on all videos one at a time
 
 
 
