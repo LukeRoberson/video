@@ -87,10 +87,10 @@ from app.sql_db import (
 from app.local_db import (
     LocalDbContext,
     ProfileManager,
-    ProgressManager,
 )
 from app.theme import ThemeManager
 from search import SearchService
+import requests
 
 
 logger = logging.getLogger(__name__)
@@ -307,29 +307,27 @@ def video_details(
             video_id=video_id
         )
 
-    # Check if the video is marked as watched by the user, or in progress
-    logging.info(f"Checking watched status for video {video_id}")
-    current_time = 0
-    with LocalDbContext() as local_db:
-        profile_mgr = ProfileManager(local_db)
-        progress_mgr = ProgressManager(local_db)
+    # API: Check if video is marked as watched
+    response = requests.get(
+        'http://localhost:5010/api/profile/mark_watched',
+        params={'video_id': video_id}
+    )
+    watched = response.json()['data'].get('watched', False)
 
-        watched = profile_mgr.check_watched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video['id']
-        )
+    # API: Check if video is in progress
+    response = requests.get(
+        'http://localhost:5010/api/profile/in_progress',
+        params={
+            'video_id': video_id,
+            'profile': session.get("active_profile", "guest")
+        }
+    )
+    payload = response.json().get('data', [])
 
-        logging.info(f"Video {video['id']} watched status: {watched}")
-
-        # Check if the video is in progress
-        in_progress = progress_mgr.read(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video['id']
-        )
-
-        current_time = in_progress[0]['current_time'] if in_progress else 0
-
-    logging.info(f"Current time for video {video['id']}: {current_time}")
+    if payload:
+        current_time = response.json()['data'][0].get('current_time', 0)
+    else:
+        current_time = 0
 
     # Get similar videos
     with DatabaseContext() as db:

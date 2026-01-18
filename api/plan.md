@@ -121,6 +121,8 @@
 * in progress endpoint
     * Uses active profile within the API
     * Better to pass active profile ID from frontend?
+* Investigate using 'MethodView' in Flask
+    * Uses a class to separate method functions for endpoints
 
 
 

@@ -482,7 +482,51 @@ Returns:
 
 
 
-#### /api/profile/mark_watched
+#### /api/profile/mark_watched (GET)
+
+**Method**:
+GET
+
+
+**Description**:
+Find if a video has been marked as watched.
+
+
+**Parameters**:
+
+| Parameter  | Type    | Mandatory | Notes                    |
+| ---------- | ------- | --------- | ------------------------ |
+| video_id   | integer | Yes       | ID of the video to check |
+
+
+Notes:
+* Uses the active profile ID
+
+
+```json
+{
+    "video_id": 123
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "data": {
+        "video_id": 3011,
+        "watched": true
+    },
+    "success": true
+}
+```
+
+
+
+#### /api/profile/mark_watched (POST)
 
 **Method**:
 POST
@@ -581,18 +625,71 @@ Uses the active profile.
 | Parameter  | Type    | Mandatory | Notes                      |
 | ---------- | ------- | --------- | -------------------------- |
 | video_id   | integer | No        | Filter results by video ID |
+| profile    | integer | No        | Profile to use for search  |
 
+
+Notes:
+* The profile ID is optional, will fall back to checking the local session if it is not present
+* Does not check if the profile ID exists
+    * If this is not a real ID, then an empty list of videos is returned
 
 
 **returns**
 
 200 OK
 
+
+When checking for all videos:
+
 ```json
 {
-
+    "data": [
+        {
+            "current_time": 8,
+            "profile_id": 2,
+            "updated_at": "2026-01-17 07:14:08",
+            "video_id": 2834
+        },
+        {
+            "current_time": 900,
+            "profile_id": 2,
+            "updated_at": "2026-01-18 01:27:07",
+            "video_id": 3011
+        }
+    ],
+    "message": "Retrieved in-progress videos successfully",
+    "success": true
 }
 ```
+
+
+When checking a specific video:
+
+```json
+{
+    "data": [
+        {
+            "current_time": 900,
+            "profile_id": 2,
+            "updated_at": "2026-01-18 01:27:07",
+            "video_id": 3011
+        }
+    ],
+    "message": "Retrieved in-progress videos successfully",
+    "success": true
+}
+```
+
+
+If the video is not in progress:
+
+```json
+{
+    "message": "Retrieved in-progress videos successfully",
+    "success": true
+}
+```
+
 
 
 #### /api/profile/in_progress (POST)

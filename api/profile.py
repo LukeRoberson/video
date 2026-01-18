@@ -385,6 +385,41 @@ def clear_watch_history(profile_id: int) -> Response:
 
 @profile_bp.route(
     "/api/profile/mark_watched",
+    methods=["GET"]
+)
+def get_watched() -> Response:
+    """
+    Get videos that are marked as watched for the active profile.
+
+    Request Args:
+        video_id (int):
+            The ID of the video to check watched status for.
+
+    Returns:
+        Response: A JSON response with the list of watched videos.
+    """
+
+    video = request.args.get("video_id", None)
+    if not video:
+        return api_error(error="Missing 'video_id' in request data")
+    video = int(video)
+
+    with LocalDbContext() as local_db:
+        profile_mgr = ProfileManager(local_db)
+
+        watched = profile_mgr.check_watched(
+            profile_id=session.get("active_profile", "guest"),
+            video_id=video
+        )
+        logging.info(f"Video {video} watched status: {watched}")
+
+    return api_success(
+        data={"video_id": video, "watched": watched}
+    )
+
+
+@profile_bp.route(
+    "/api/profile/mark_watched",
     methods=["POST"]
 )
 def mark_watched() -> Response:
@@ -507,12 +542,24 @@ def in_progress_videos() -> Response:
 
     method_used = request.method
 
-    # Get the active profile from the session
-    active_profile = session.get("active_profile", "guest")
+    # Get the active profile from the parameter
+    active_profile = request.args.get("profile", None)
+
+    # If not provided, get from the session
+    if not active_profile:
+        logging.info(
+            "No active_profile parameter provided, "
+            "retrieving from session"
+        )
+        active_profile = session.get("active_profile", "guest")
+
+    # If no active profile is set, return empty response
     if active_profile is None or active_profile == "guest":
         return api_success(
             message="No in progress videos for guest profile"
         )
+
+    logging.info(f"Active profile for in-progress videos: {active_profile}")
 
     # Ensure active_profile is an integer
     try:
