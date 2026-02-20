@@ -58,15 +58,13 @@ from flask import (
 )
 import logging
 
+import requests
+
 # Custom imports
 from app.sql_db import (
     DatabaseContext,
     VideoManager,
     CategoryManager,
-)
-from app.local_db import (
-    LocalDbContext,
-    ProfileManager,
 )
 
 
@@ -94,7 +92,7 @@ def render_category_page(
             a 404 error page is returned.
     """
 
-    logging.debug(
+    logging.info(
         f"Category: {category_name}. Subcategories: {sub_category_list}"
     )
 
@@ -113,7 +111,6 @@ def render_category_page(
 
     # Get the active profile from the session
     active_profile = session.get("active_profile", None)
-    print(f"Active profile: {active_profile}")
 
     # Get a list of subcategory IDs
     watch_status = []
@@ -129,7 +126,7 @@ def render_category_page(
             entry['name'] = sub_cat
             sub_cat_id = cat_mgr.name_to_id(name=sub_cat)
 
-            # Add it to the list if found
+            # Get the list of videos for the subcategory and count them
             if sub_cat_id is not None:
                 video_list = video_mgr.get_filter(
                     category_id=[sub_cat_id],
@@ -143,33 +140,35 @@ def render_category_page(
                     f"Subcategory '{sub_cat}' (Videos: {video_list}) "
                 )
 
-                with LocalDbContext() as local_db:
-                    profile_mgr = ProfileManager(local_db)
+                # Get the watch status for the active profile
+                if (
+                    active_profile is not None and
+                    active_profile != "guest" and
+                    video_list is not None
+                ):
+                    watch_count = 0
 
-                    # Get the watch status for the active profile
-                    if (
-                        active_profile is not None and
-                        active_profile != "guest" and
-                        video_list is not None
-                    ):
-                        watch_count = 0
-                        for video in video_list:
-                            watched = profile_mgr.check_watched(
-                                video_id=video['id'],
-                                profile_id=active_profile,
-                            )
-                            if watched:
-                                watch_count += 1
+                    # Bulk API call
+                    response = requests.post(
+                        'http://localhost:5010/api/profile/mark_watched_bulk',
+                        params={'profile': active_profile},
+                        json={
+                            'video_ids': [video['id'] for video in video_list]
+                        }
+                    )
 
+                    # Collect the watch status from the API response
+                    if response.status_code == 200:
+                        data = response.json().get('data', {})
+                        watch_count = sum(
+                            1 for video_id in data if data[video_id]
+                        )
                         entry['watched'] = watch_count
 
-                    else:
-                        entry['watched'] = 0
+                else:
+                    entry['watched'] = 0
 
                 watch_status.append(entry)
-
-    logging.debug(f"Main category ID: {main_cat_id}")
-    logging.debug(f"Watch status: {watch_status}")
 
     return make_response(
         render_template(
@@ -195,8 +194,12 @@ def broadcasting():
     """
 
     return render_category_page(
-        "JW Broadcasting",
-        ["Monthly Programs", "Talks", "News and Announcements"]
+        category_name="JW Broadcasting",
+        sub_category_list=[
+            "Monthly Programs",
+            "Talks",
+            "News and Announcements"
+        ]
     )
 
 

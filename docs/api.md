@@ -491,6 +491,8 @@ GET
 **Description**:
 Find if a video has been marked as watched.
 
+Checks a single video only.
+
 
 **Parameters**:
 
@@ -565,6 +567,48 @@ Notes:
 }
 ```
 
+
+
+
+#### /api/profile/mark_watched_bulk (POST)
+
+**Method**:
+POST
+
+
+**Description**:
+Check the watch status of a list of videos at once
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                         |
+| ---------- | ------- | --------- | ----------------------------- |
+| video_ids  | list    | Yes       | A list of video ID's to check |
+
+
+Notes:
+* Uses the active profile ID if the profile is not set
+
+
+```json
+{
+    "video_ids": [123, 124, 125]
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "123": true,
+    "124": false,
+    "125": true
+}
+```
 
 
 

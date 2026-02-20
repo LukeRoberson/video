@@ -16,7 +16,10 @@ Routes:
     - /api/profile/get_active
         - get_active_profile: Retrieves the profile for the session.
     - /api/profile/mark_watched
-        - mark_watched: Marks a video as watched for the acve profile.
+        - mark_watched: Marks a video as watched for the active profile.
+    - /api/profile/mark_watched_bulk
+        - check_watched_bulk:
+            Checks watched status for multiple videos at once.
     - /api/profile/mark_unwatched
         - mark_unwatched: Marks a video as unwatched for the profile.
     - /api/profile/in_progress
@@ -436,6 +439,58 @@ def get_watched() -> Response:
     return api_success(
         data={"video_id": video, "watched": watched}
     )
+
+
+@profile_bp.route(
+    "/api/profile/mark_watched_bulk",
+    methods=["POST"]
+)
+def check_watched_bulk() -> Response:
+    """
+    Check watched status for multiple videos at once.
+
+    Expects JSON:
+        {
+            "video_ids": [<int>, <int>, ...]
+        }
+
+    Returns:
+        Response: A JSON response with watched status for each video.
+            Example: {"1": true, "2": false, "3": true}
+    """
+
+    # Check the active profile from the parameter
+    active_profile = request.args.get("profile", None)
+
+    # Handle the guest profile
+    if not active_profile:
+        active_profile = session.get("active_profile", "guest")
+    if active_profile is None or active_profile == "guest":
+        return api_success(message="No watched videos for guest profile")
+
+    # Get the body of the request and validate it
+    data = request.get_json()
+    if not data or "video_ids" not in data:
+        return api_error(error="Missing 'video_ids' in request data")
+
+    # Get the list of video IDs and validate it
+    video_ids = data.get("video_ids", [])
+    if not isinstance(video_ids, list):
+        return api_error(error="'video_ids' must be a list")
+
+    # Check the watched status for each video ID
+    with LocalDbContext() as local_db:
+        profile_mgr = ProfileManager(local_db)
+        watched_status = {}
+
+        for video_id in video_ids:
+            watched = profile_mgr.check_watched(
+                profile_id=int(active_profile),
+                video_id=int(video_id)
+            )
+            watched_status[str(video_id)] = watched
+
+    return api_success(data=watched_status)
 
 
 @profile_bp.route(
