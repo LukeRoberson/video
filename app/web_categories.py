@@ -45,7 +45,6 @@ Dependancies:
 
 Custom Dependencies:
     DatabaseContext: Context manager for database operations.
-    CategoryManager: Manages category-related database operations.
 """
 
 # Standard library imports
@@ -59,13 +58,6 @@ from flask import (
 import logging
 
 import requests
-
-# Custom imports
-from app.sql_db import (
-    DatabaseContext,
-    VideoManager,
-    CategoryManager,
-)
 
 
 category_bp = Blueprint(
@@ -96,79 +88,82 @@ def render_category_page(
         f"Category: {category_name}. Subcategories: {sub_category_list}"
     )
 
-    # Get an ID for the main category
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        main_cat_id = cat_mgr.name_to_id(name=category_name)
+    # Resolve main category name to ID
+    response = requests.get(
+        f'http://localhost:5010/api/category/{category_name}'
+    )
+    main_id = response.json().get('category_id', None)
 
-        if not main_cat_id:
-            logging.error(f"Category '{category_name}' not found.")
-            return make_response(
-                render_template("404.html", message="Category not found"), 404
-            )
+    if not main_id:
+        logging.error(f"Category '{category_name}' not found.")
+        return make_response(
+            render_template("404.html", message="Category not found"), 404
+        )
 
-        main_cat = {"id": main_cat_id, "name": category_name}
+    main_cat = {"id": main_id, "name": category_name}
 
     # Get the active profile from the session
     active_profile = session.get("active_profile", None)
 
     # Get a list of subcategory IDs
     watch_status = []
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
-        video_mgr = VideoManager(db)
 
-        # Loop through each subcategory name
-        for sub_cat in sub_category_list:
-            entry = {}
+    # Loop through each subcategory name
+    for sub_cat in sub_category_list:
+        entry = {}
 
-            # Get the subcategory ID from the database
-            entry['name'] = sub_cat
-            sub_cat_id = cat_mgr.name_to_id(name=sub_cat)
+        # Resolve the subcategory name to ID
+        response = requests.get(
+            f'http://localhost:5010/api/category/{sub_cat}'
+        )
+        sub_cat_id = response.json().get('category_id', None)
 
-            # Get the list of videos for the subcategory and count them
-            if sub_cat_id is not None:
-                video_list = video_mgr.get_filter(
-                    category_id=[sub_cat_id],
+        # Get the list of videos for the subcategory and count them
+        entry['name'] = sub_cat
+        if sub_cat_id is not None:
+            # Get the list of videos for the subcategory
+            response = requests.get(
+                f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}'
+            )
+            video_list = response.json()
+
+            entry['id'] = sub_cat_id
+            entry['count'] = (
+                len(video_list) if video_list else 0
+            )
+            logging.debug(
+                f"Subcategory '{sub_cat}' (Videos: {video_list}) "
+            )
+
+            # Get the watch status for the active profile
+            if (
+                active_profile is not None and
+                active_profile != "guest" and
+                video_list is not None
+            ):
+                watch_count = 0
+
+                # Bulk API call
+                response = requests.post(
+                    'http://localhost:5010/api/profile/mark_watched_bulk',
+                    params={'profile': active_profile},
+                    json={
+                        'video_ids': [video['id'] for video in video_list]
+                    }
                 )
 
-                entry['id'] = sub_cat_id
-                entry['count'] = (
-                    len(video_list) if video_list else 0
-                )
-                logging.debug(
-                    f"Subcategory '{sub_cat}' (Videos: {video_list}) "
-                )
-
-                # Get the watch status for the active profile
-                if (
-                    active_profile is not None and
-                    active_profile != "guest" and
-                    video_list is not None
-                ):
-                    watch_count = 0
-
-                    # Bulk API call
-                    response = requests.post(
-                        'http://localhost:5010/api/profile/mark_watched_bulk',
-                        params={'profile': active_profile},
-                        json={
-                            'video_ids': [video['id'] for video in video_list]
-                        }
+                # Collect the watch status from the API response
+                if response.status_code == 200:
+                    data = response.json().get('data', {})
+                    watch_count = sum(
+                        1 for video_id in data if data[video_id]
                     )
+                    entry['watched'] = watch_count
 
-                    # Collect the watch status from the API response
-                    if response.status_code == 200:
-                        data = response.json().get('data', {})
-                        watch_count = sum(
-                            1 for video_id in data if data[video_id]
-                        )
-                        entry['watched'] = watch_count
+            else:
+                entry['watched'] = 0
 
-                else:
-                    entry['watched'] = 0
-
-                watch_status.append(entry)
+            watch_status.append(entry)
 
     return make_response(
         render_template(
@@ -217,8 +212,8 @@ def children():
     """
 
     return render_category_page(
-        "Children",
-        [
+        category_name="Children",
+        sub_category_list=[
             "Video Lessons",
             "Songs",
             "Animated"
@@ -240,8 +235,8 @@ def teens():
     """
 
     return render_category_page(
-        "Teenagers",
-        [
+        category_name="Teenagers",
+        sub_category_list=[
             "Spiritual Growth",
             "Social Life",
             "Goals",
@@ -265,8 +260,8 @@ def family():
     """
 
     return render_category_page(
-        "Family",
-        [
+        category_name="Family",
+        sub_category_list=[
             "Family Challenges",
             "Dating and Marriage",
             "Family Worship",
@@ -289,8 +284,8 @@ def programs_events():
     """
 
     return render_category_page(
-        "Programs and Events",
-        [
+        category_name="Programs and Events",
+        sub_category_list=[
             "Morning Worship",
             "Special Programs",
             "Gilead Graduations",
@@ -325,8 +320,8 @@ def our_activities():
     """
 
     return render_category_page(
-        "Our Activities",
-        [
+        category_name="Our Activities",
+        sub_category_list=[
             "Translation",
             "Audio and Video Production",
             "Publishing and Distribution",
@@ -352,8 +347,8 @@ def meetings_ministry():
     """
 
     return render_category_page(
-        "Our Meetings and Ministry",
-        [
+        category_name="Our Meetings and Ministry",
+        sub_category_list=[
             "Tools for the Ministry",
             "Essential Bible Teachings",
             "Improving Our Skills",
@@ -378,8 +373,8 @@ def organization():
     """
 
     return render_category_page(
-        "Our Organization",
-        [
+        category_name="Our Organization",
+        sub_category_list=[
             "Reports From Around the World",
             "Bethel",
             "Organized to Accomplish Our Ministry",
@@ -404,8 +399,8 @@ def bible():
     """
 
     return render_category_page(
-        "The Bible",
-        [
+        category_name="The Bible",
+        sub_category_list=[
             "Books of the Bible",
             "Bible Teachings",
             "Bible Accounts",
@@ -431,8 +426,8 @@ def dramas():
     """
 
     return render_category_page(
-        "Dramas",
-        [
+        category_name="Dramas",
+        sub_category_list=[
             "The Good News According to Jesus",
             "Bible Times",
             "Modern Day",
@@ -456,8 +451,8 @@ def series():
     """
 
     return render_category_page(
-        "Series",
-        [
+        category_name="Series",
+        sub_category_list=[
             "Apply Yourself to Reading and Teaching",
             "Become Jehovah's Friend—Songs",
             "Become Jehovah's Friend—Video Lessons",
@@ -501,8 +496,8 @@ def music():
     """
 
     return render_category_page(
-        "Music",
-        [
+        category_name="Music",
+        sub_category_list=[
             "Original Songs",
             "Children’s Songs",
             "Convention Music Presentations",
@@ -527,8 +522,8 @@ def interviews():
     """
 
     return render_category_page(
-        "Interviews and Experiences",
-        [
+        category_name="Interviews and Experiences",
+        sub_category_list=[
             "Truth Transforms Lives",
             "Blessings of Sacred Service",
             "Enduring Trials",

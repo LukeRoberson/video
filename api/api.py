@@ -1109,3 +1109,44 @@ def category_filter(
         ),
         200
     )
+
+
+@video_bp.route(
+    "/api/category/<string:category_name>",
+    methods=["GET"],
+)
+def get_category_id(
+    category_name: str
+) -> Response:
+    """
+    Get the ID of a category by its name.
+
+    Args:
+        category_name (str): The name of the category to look up.
+
+    Returns:
+        Response: A JSON response containing the category ID if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        cat_mgr = CategoryManager(db)
+        category_id = cat_mgr.name_to_id(name=category_name)
+
+    if category_id is None:
+        logging.error(f"Category '{category_name}' not found.")
+        return api_error(
+            f"Category '{category_name}' not found",
+            404
+        )
+
+    logging.info(
+        f"Found category ID {category_id} for category name: '{category_name}'"
+    )
+
+    return make_response(
+        jsonify(
+            {"category_id": category_id}
+        ),
+        200
+    )

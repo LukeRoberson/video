@@ -33,6 +33,7 @@
     * [ ] Status
 8. Other
     * [ ] Avatar list in profile management; API or frontend?
+    * [ ] Get similar videos
 
 
 
@@ -126,9 +127,8 @@
 * profile.py
     * Some endpoints check for a profile ID and fallback to the session
     * This results in a lot of code reuse
-* Poor performance
-    * When loading a page with a lot of video entries, such as locations, tags, speakers, it takes a long time to load
-    * This is because it is checking the watch status on all videos one at a time
+* Categories
+    * Watch status on individual videos is not showing
 
 
 

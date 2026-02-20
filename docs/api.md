@@ -908,3 +908,27 @@ Notes:
 
 
 
+#### /api/categories/{category_name}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Resolve a category name to an ID.
+
+
+Returns:
+
+200 OK
+
+
+```json
+{
+    "category_id": 123
+}
+```
+
+
+
