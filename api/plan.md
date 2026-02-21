@@ -32,8 +32,8 @@
     * [ ] Reindex
     * [ ] Status
 8. Other
-    * [ ] Avatar list in profile management; API or frontend?
-    * [ ] Get similar videos
+    * [ ] Avatar list in profile management; API or frontend? (api_profile.py)
+    * [x] Get similar videos
 
 
 
@@ -136,6 +136,8 @@
     * searching by filter options only does not work
     * Tested locally, no elasticsearch
     * Displays a unicode error
+* Update blueprints to use a url_prefix
+    * As in api_search.py
 
 
 

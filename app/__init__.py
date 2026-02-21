@@ -13,7 +13,6 @@ Blueprints Registered:
     - category_bp: Routes for category-related pages.
     - dynamic_bp: Routes for dynamic pages
         (tags, speakers, characters, scriptures).
-    - api_bp: API endpoints for video data.
     - error_bp: Custom error pages (e.g., 403 Forbidden).
     - profile_api_bp: API endpoints for user profile management.
     - search_bp: API endpoints for video search functionality.
@@ -36,7 +35,6 @@ Custom Imports:
     - app.web_dynamic: Blueprint for dynamic web routes.
     - app.web: Main web blueprint.
     - app.web_errors: Blueprint and handlers for error pages.
-    - app.api: Blueprint for API endpoints.
     - app.api_profile: Blueprint for user profile API endpoints.
     - app.api_search: Blueprint for video search API endpoints.
     - search: Module providing the SearchService class.
@@ -54,10 +52,6 @@ from app.web_errors import (
     error_bp,
     forbidden,
     not_found,
-)
-from app.api import (
-    api_bp,
-    seconds_to_hhmmss,
 )
 from app.api_profile import profile_api_bp
 from app.api_search import search_bp
@@ -141,7 +135,36 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Define the custom filter
+# Jinja filter - Convert seconds to HH:MM:SS format
+def seconds_to_hhmmss(
+    seconds: int,
+) -> str:
+    """
+    Convert seconds to HH:MM:SS format.
+        Shows hours only if greater than zero.
+
+    Args:
+        seconds (int): Duration in seconds.
+
+    Returns:
+        str: Duration in HH:MM:SS or MM:SS format.
+    """
+
+    # Handle None or non-positive values
+    if seconds is None or seconds <= 0:
+        seconds = 1
+
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+
+    # Format the output based on whether hours are present
+    if hours > 0:
+        return f"{hours}:{minutes:02}:{seconds:02}"
+    return f"{minutes}:{seconds:02}"
+
+
+# Jinja filter - Convert newlines to <br> tags
 def nl2br(
     value
 ) -> str:
@@ -176,7 +199,6 @@ def create_app():
     app.secret_key = SECRET_KEY
 
     # Import and register blueprints
-    app.register_blueprint(api_bp)
     app.register_blueprint(profile_api_bp)
     app.register_blueprint(web_bp)
     app.register_blueprint(category_bp)
