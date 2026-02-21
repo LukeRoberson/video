@@ -20,8 +20,52 @@ Routes:
         - add_video_metadata: Adds metadata to a video.
     - /api/scripture
         - add_scripture_text: Adds text to a scripture.
+    - /api/videos/csv
+        - get_videos_csv: Returns a CSV of all videos in the database.
+    - /api/videos/add
+        - add_videos: Adds a video to the database.
     - /api/categories/<int>/<int>
         - category_filter: Fetches videos by category and subcategory IDs.
+    - /api/category/<string>
+        - category_name_filter: Fetches videos by category name.
+    - /api/videos/<int>
+        - video_details: Fetches detailed information about a video by ID.
+    - /api/videos/filter
+        - filter_videos: Fetches videos based on multiple optional filters.
+    - /api/categories/video/<int>
+        - video_categories: Fetches categories for a given video ID.
+    - /api/tags
+        - all_tags: Fetches all tags in the database.
+    - /api/tags/<int>
+        - tag_details: Fetches details about a specific tag by ID.
+    - /api/tags/video/<int>
+        - video_tags: Fetches tags for a given video ID.
+    - /api/locations
+        - all_locations: Fetches all locations in the database.
+    - /api/locations/<int>
+        - location_details: Fetches details about a specific location by ID.
+    - /api/locations/video/<int>
+        - video_locations: Fetches locations for a given video ID.
+    - /api/speakers
+        - all_speakers: Fetches all speakers in the database.
+    - /api/speakers/<int>
+        - speaker_details: Fetches details about a specific speaker by ID.
+    - /api/speakers/video/<int>
+        - video_speakers: Fetches speakers for a given video ID.
+    - /api/characters
+        - all_characters: Fetches all characters in the database.
+    - /api/characters/<int>
+        - character_details: Fetches details about a specific character by ID.
+    - /api/characters/video/<int>
+        - video_characters: Fetches characters for a given video ID.
+    - /api/scriptures
+        - all_scriptures: Fetches all scriptures in the database.
+    - /api/scriptures/<int>
+        - scripture_details: Fetches details about a specific scripture by ID.
+    - /api/scriptures/video/<int>
+        - video_scriptures: Fetches scriptures for a given video ID.
+    - /api/videos/similar/<int>
+        - similar_videos: Fetches videos similar to a given video ID.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -37,6 +81,7 @@ Custom Dependencies:
     - SpeakerManager: Manages speaker-related database operations.
     - CharacterManager: Manages character-related database operations.
     - ScriptureManager: Manages scripture-related database operations.
+    - SimilarityManager: Manages video similarity operations.
     - LocalDbContext: Context manager for local database connections.
     - ProfileManager: Manages user profile-related operations in the local db.
 """
@@ -68,6 +113,7 @@ from api.sql_db import (
     LocationManager,
     VideoManager,
     CategoryManager,
+    SimilarityManager,
 )
 from api.local_db import (
     LocalDbContext,
@@ -1305,6 +1351,36 @@ def get_video_categories(
 
 
 @video_bp.route(
+    "/api/tags",
+    methods=["GET"],
+)
+def get_tags() -> Response:
+    """
+    Get a list of all tags.
+
+    Returns:
+        Response: A JSON response containing a list of all tags.
+    """
+
+    with DatabaseContext() as db:
+        tag_mgr = TagManager(db)
+
+        tags = tag_mgr.get() or []
+
+    # Sort tags alphabetically by name (case-insensitive)
+    tags = sorted(
+        tags, key=lambda tag: tag.get('name', '').lower()
+    )
+
+    return make_response(
+        jsonify(
+            tags,
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/tags/<int:tag_id>",
     methods=["GET"],
 )
@@ -1381,6 +1457,36 @@ def get_video_tags(
             ),
             200
         )
+
+
+@video_bp.route(
+    "/api/locations",
+    methods=["GET"],
+)
+def get_locations() -> Response:
+    """
+    Get a list of all locations.
+
+    Returns:
+        Response: A JSON response containing a list of all locations.
+    """
+
+    with DatabaseContext() as db:
+        loc_mgr = LocationManager(db)
+
+        locations = loc_mgr.get() or []
+
+    # Sort locations alphabetically by name (case-insensitive)
+    locations = sorted(
+        locations, key=lambda loc: loc.get('name', '').lower()
+    )
+
+    return make_response(
+        jsonify(
+            locations,
+        ),
+        200
+    )
 
 
 @video_bp.route(
@@ -1463,6 +1569,36 @@ def get_video_locations(
 
 
 @video_bp.route(
+    "/api/speakers",
+    methods=["GET"],
+)
+def get_speakers() -> Response:
+    """
+    Get a list of all speakers.
+
+    Returns:
+        Response: A JSON response containing a list of all speakers.
+    """
+
+    with DatabaseContext() as db:
+        speaker_mgr = SpeakerManager(db)
+
+        speakers = speaker_mgr.get() or []
+
+    # Sort speakers alphabetically by name (case-insensitive)
+    speakers = sorted(
+        speakers, key=lambda spk: spk.get('name', '').lower()
+    )
+
+    return make_response(
+        jsonify(
+            speakers,
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/speakers/<int:speaker_id>",
     methods=["GET"],
 )
@@ -1539,6 +1675,36 @@ def get_video_speakers(
             ),
             200
         )
+
+
+@video_bp.route(
+    "/api/characters",
+    methods=["GET"],
+)
+def get_characters() -> Response:
+    """
+    Get a list of all characters.
+
+    Returns:
+        Response: A JSON response containing a list of all characters.
+    """
+
+    with DatabaseContext() as db:
+        character_mgr = CharacterManager(db)
+
+        characters = character_mgr.get() or []
+
+    # Sort characters alphabetically by name (case-insensitive)
+    characters = sorted(
+        characters, key=lambda char: char.get('name', '').lower()
+    )
+
+    return make_response(
+        jsonify(
+            characters,
+        ),
+        200
+    )
 
 
 @video_bp.route(
@@ -1694,6 +1860,49 @@ def get_video_scriptures(
         return make_response(
             jsonify(
                 scriptures,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/similarity/<int:video_id>",
+    methods=["GET"],
+)
+def get_similar_videos(
+    video_id: int
+) -> Response:
+    """
+    Get a list of similar videos for a given video ID.
+
+    Args:
+        video_id (int): The ID of the video to find similar videos for.
+
+    Returns:
+        Response: A JSON response containing a list of similar videos,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        similarity_mgr = SimilarityManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get similar videos for the video
+        similar_videos = similarity_mgr.get(
+            video1_id=video_id,
+        )
+
+        return make_response(
+            jsonify(
+                similar_videos,
             ),
             200
         )

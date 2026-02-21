@@ -1041,6 +1041,28 @@ Get a list of categories associated with a video ID
 ----
 ### Tags
 
+#### /api/tags/
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of all tags
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
+
 #### /api/tags/{id}
 
 **Method**:
@@ -1098,6 +1120,28 @@ Get a list of tags associated with a video ID
 ----
 ### Locations
 
+#### /api/locations/
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of all locations
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
+
 #### /api/locations/{id}
 
 **Method**:
@@ -1154,6 +1198,28 @@ Get a list of locations associated with a video ID
 
 ----
 ### Speakers
+
+#### /api/speakers/
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of all speakers
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
 
 #### /api/speakers/{id}
 
@@ -1213,6 +1279,28 @@ Get a list of speakers associated with a video ID
 
 ----
 ### Characters
+
+#### /api/characters/
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of all characters
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
 
 #### /api/characters/{id}
 
@@ -1307,4 +1395,34 @@ Get a list of scriptures associated with a video ID
 ```
 
 </br></br>
+
+
+
+----
+### Similarity
+
+#### /api/similarity/{video_id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of similar videos for a given video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+{
+}
+```
+
+
+
+</br></br>
+
 

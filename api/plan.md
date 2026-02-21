@@ -22,10 +22,10 @@
     * [x] Mark a video as watched
     * [x] Mark a video as unwatched
 6. Additional pages
-    * [ ] Scriptures
-    * [ ] Speakers
-    * [ ] Characters
-    * [ ] Tags
+    * [x] Scriptures
+    * [x] Speakers
+    * [x] Characters
+    * [x] Tags
 7. Search
     * [ ] Normal search
     * [ ] Advanced search
@@ -132,6 +132,10 @@
 * Speakers
     * Unicode error for one speaker (500-Marija_Golubiček.png)
     * Not API specific error
+* Search
+    * searching by filter options only does not work
+    * Tested locally, no elasticsearch
+    * Displays a unicode error
 
 
 

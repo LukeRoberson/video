@@ -30,15 +30,6 @@ Dependancies:
     logging: For logging debug information.
 
 Custom Dependencies:
-    app.sql_db:
-        DatabaseContext: Context manager for database operations.
-        TagManager: Manages tags.
-        LocationManager: Manages locations.
-        SpeakerManager: Manages speakers.
-        CharacterManager: Manages Bible characters.
-        ScriptureManager: Manages scriptures.
-        SimilarityManager: Manages video similarity.
-
     app.theme:
         ThemeManager: Manages theme-related operations.
 
@@ -61,14 +52,6 @@ import os
 import logging
 
 # Custom imports
-from app.sql_db import (
-    DatabaseContext,
-    TagManager,
-    LocationManager,
-    SpeakerManager,
-    CharacterManager,
-    SimilarityManager,
-)
 from app.theme import ThemeManager
 from search import SearchService
 import requests
@@ -221,13 +204,16 @@ def video_details(
     else:
         current_time = 0
 
-    # Get similar videos
-    with DatabaseContext() as db:
-        similarity_mgr = SimilarityManager(db)
-        similar_videos = similarity_mgr.get(
-            video1_id=video_id,
-        )
+    # API: Get a list of similar videos
+    response = requests.get(
+        f'http://localhost:5010/api/similarity/{video_id}',
+    )
+    if response.status_code == 200:
+        similar_videos = response.json()
+    else:
+        similar_videos = None
 
+    # Randomly select up to 3 similar videos to display
     if similar_videos:
         similar_videos = random.sample(
             similar_videos, min(3, len(similar_videos))
@@ -854,34 +840,45 @@ def advanced_search() -> Response:
         Rendered advanced search template with metadata options and results.
     """
 
-    with DatabaseContext() as db:
-        # Get speakers
-        speaker_mgr = SpeakerManager(db)
-        speakers = speaker_mgr.get() or []
-        speakers = sorted(
-            speakers, key=lambda spkr: spkr.get('name', '').lower()
-        )
+    # API: Get speakers
+    response = requests.get(
+        'http://localhost:5010/api/speakers',
+    )
+    if response.status_code == 200:
+        speakers = response.json()
+    else:
+        logger.error("Failed to fetch speakers from API")
+        speakers = []
 
-        # Get characters
-        character_mgr = CharacterManager(db)
-        characters = character_mgr.get() or []
-        characters = sorted(
-            characters, key=lambda char: char.get('name', '').lower()
-        )
+    # API: Get characters
+    response = requests.get(
+        'http://localhost:5010/api/characters',
+    )
+    if response.status_code == 200:
+        characters = response.json()
+    else:
+        logger.error("Failed to fetch characters from API")
+        characters = []
 
-        # Get locations
-        loc_mgr = LocationManager(db)
-        locations = loc_mgr.get() or []
-        locations = sorted(
-            locations, key=lambda location: location.get('name', '').lower()
-        )
+    # API: Get locations
+    response = requests.get(
+        'http://localhost:5010/api/locations',
+    )
+    if response.status_code == 200:
+        locations = response.json()
+    else:
+        logger.error("Failed to fetch locations from API")
+        locations = []
 
-        # Get tags
-        tag_mgr = TagManager(db)
-        tags = tag_mgr.get() or []
-        tags = sorted(
-            tags, key=lambda tag: tag.get('name', '').lower()
-        )
+    # API: Get tags
+    response = requests.get(
+        'http://localhost:5010/api/tags',
+    )
+    if response.status_code == 200:
+        tags = response.json()
+    else:
+        logger.error("Failed to fetch tags from API")
+        tags = []
 
     # Check if a search was performed
     query = request.args.get("q", "").strip()
