@@ -129,6 +129,9 @@
     * This results in a lot of code reuse
 * Categories
     * Watch status on individual videos is not showing
+* Speakers
+    * Unicode error for one speaker (500-Marija_Golubiček.png)
+    * Not API specific error
 
 
 

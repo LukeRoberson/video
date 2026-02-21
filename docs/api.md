@@ -1041,8 +1041,29 @@ Get a list of categories associated with a video ID
 ----
 ### Tags
 
-#### /api/tags/video/{id}
+#### /api/tags/{id}
 
+**Method**:
+GET
+
+
+**Description**:
+Get a tag's details, by its ID.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
+
+#### /api/tags/video/{id}
 
 **Method**:
 GET
@@ -1073,8 +1094,31 @@ Get a list of tags associated with a video ID
 </br></br>
 
 
+
 ----
 ### Locations
+
+#### /api/locations/{id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get a location's details, by its ID.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
 
 #### /api/locations/video/{id}
 
@@ -1110,6 +1154,28 @@ Get a list of locations associated with a video ID
 
 ----
 ### Speakers
+
+#### /api/speakers/{id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get a speakers details, by its ID.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
 
 #### /api/speakers/video/{id}
 
@@ -1148,6 +1214,28 @@ Get a list of speakers associated with a video ID
 ----
 ### Characters
 
+#### /api/characters/{id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get a character's details, by its ID.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
+
 #### /api/characters/video/{id}
 
 
@@ -1174,6 +1262,28 @@ Get a list of characters associated with a video ID
 
 ----
 ### Scriptures
+
+#### /api/scriptures/{id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get a scriptures's details, by its ID.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
+
 
 #### /api/scriptures/video/{id}
 

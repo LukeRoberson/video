@@ -1305,6 +1305,42 @@ def get_video_categories(
 
 
 @video_bp.route(
+    "/api/tags/<int:tag_id>",
+    methods=["GET"],
+)
+def get_tag(
+    tag_id: int
+) -> Response:
+    """
+    Get a tag by its ID.
+
+    Args:
+        tag_id (int): The ID of the tag to retrieve.
+
+    Returns:
+        Response: A JSON response containing the tag details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        tag_mgr = TagManager(db)
+
+        tag_list = tag_mgr.get(id=tag_id)
+        if not tag_list:
+            return api_error(
+                f"Tag with ID {tag_id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            tag_list[0],
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/tags/video/<int:video_id>",
     methods=["GET"],
 )
@@ -1345,6 +1381,42 @@ def get_video_tags(
             ),
             200
         )
+
+
+@video_bp.route(
+    "/api/locations/<int:location_id>",
+    methods=["GET"],
+)
+def get_location(
+    location_id: int
+) -> Response:
+    """
+    Get a location by its ID.
+
+    Args:
+        location_id (int): The ID of the location to retrieve.
+
+    Returns:
+        Response: A JSON response containing the location details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        loc_mgr = LocationManager(db)
+
+        loc_list = loc_mgr.get(id=location_id)
+        if not loc_list:
+            return api_error(
+                f"Location with ID {location_id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            loc_list[0],
+        ),
+        200
+    )
 
 
 @video_bp.route(
@@ -1391,6 +1463,42 @@ def get_video_locations(
 
 
 @video_bp.route(
+    "/api/speakers/<int:speaker_id>",
+    methods=["GET"],
+)
+def get_speaker(
+    speaker_id: int
+) -> Response:
+    """
+    Get a speaker by its ID.
+
+    Args:
+        speaker_id (int): The ID of the speaker to retrieve.
+
+    Returns:
+        Response: A JSON response containing the speaker details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        speaker_mgr = SpeakerManager(db)
+
+        speaker_list = speaker_mgr.get(id=speaker_id)
+        if not speaker_list:
+            return api_error(
+                f"Speaker with ID {speaker_id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            speaker_list[0],
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/speakers/video/<int:video_id>",
     methods=["GET"],
 )
@@ -1434,6 +1542,42 @@ def get_video_speakers(
 
 
 @video_bp.route(
+    "/api/characters/<int:character_id>",
+    methods=["GET"],
+)
+def get_character(
+    character_id: int
+) -> Response:
+    """
+    Get a character by its ID.
+
+    Args:
+        character_id (int): The ID of the character to retrieve.
+
+    Returns:
+        Response: A JSON response containing the character details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        character_mgr = CharacterManager(db)
+
+        character_list = character_mgr.get(id=character_id)
+        if not character_list:
+            return api_error(
+                f"Character with ID {character_id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            character_list[0],
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/characters/video/<int:video_id>",
     methods=["GET"],
 )
@@ -1474,6 +1618,42 @@ def get_video_characters(
             ),
             200
         )
+
+
+@video_bp.route(
+    "/api/scriptures/<int:scripture_id>",
+    methods=["GET"],
+)
+def get_scripture(
+    scripture_id: int
+) -> Response:
+    """
+    Get a scripture by its ID.
+
+    Args:
+        scripture_id (int): The ID of the scripture to retrieve.
+
+    Returns:
+        Response: A JSON response containing the scripture details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+
+        scripture_list = scripture_mgr.get(id=scripture_id)
+        if not scripture_list:
+            return api_error(
+                f"Scripture with ID {scripture_id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            scripture_list[0],
+        ),
+        200
+    )
 
 
 @video_bp.route(

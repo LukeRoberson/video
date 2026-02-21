@@ -67,7 +67,6 @@ from app.sql_db import (
     LocationManager,
     SpeakerManager,
     CharacterManager,
-    ScriptureManager,
     SimilarityManager,
 )
 from app.theme import ThemeManager
@@ -351,22 +350,20 @@ def tag_details(
         If the tag is not found, a 404 error is returned.
     """
 
-    with DatabaseContext() as db:
-        tag_mgr = TagManager(db)
-
-        # Get the tag details from the tag ID
-        video = tag_mgr.get(id=tag_id)
-
-        if video:
-            tag = video[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Tag not found"
-                ),
-                404
-            )
+    # API: Get tag details
+    response = requests.get(
+        f'http://localhost:5010/api/tags/{tag_id}',
+    )
+    if response.status_code == 200:
+        tag = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Tag not found in API"
+            ),
+            404
+        )
 
     # API: Fetch videos for the tag
     response = requests.get(
@@ -375,7 +372,16 @@ def tag_details(
             'tag': tag_id
         },
     )
-    videos = response.json()
+    if response.status_code == 200:
+        videos = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="No videos found for this tag"
+            ),
+            404
+        )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -410,21 +416,20 @@ def location_details(
         If the location is not found, a 404 error is returned.
     """
 
-    with DatabaseContext() as db:
-        loc_mgr = LocationManager(db)
-
-        # Get the location name from the location ID
-        video = loc_mgr.get(id=location_id)
-        if video:
-            location = video[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Location not found"
-                ),
-                404
-            )
+    # API: Get locations
+    response = requests.get(
+        f'http://localhost:5010/api/locations/{location_id}',
+    )
+    if response.status_code == 200:
+        location = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Location not found in API"
+            ),
+            404
+        )
 
     # API: Fetch videos for the location
     response = requests.get(
@@ -433,7 +438,16 @@ def location_details(
             'loc': location_id
         },
     )
-    videos = response.json()
+    if response.status_code == 200:
+        videos = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="No videos found for this location"
+            ),
+            404
+        )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -467,33 +481,31 @@ def speaker_details(
         If the speaker is not found, a 404 error is returned.
     """
 
-    with DatabaseContext() as db:
-        speaker_mgr = SpeakerManager(db)
+    # API: Get speaker
+    response = requests.get(
+        f'http://localhost:5010/api/speakers/{speaker_id}',
+    )
+    if response.status_code == 200:
+        speaker = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Speaker not found in API"
+            ),
+            404
+        )
 
-        # Get speaker details
-        video = speaker_mgr.get(id=speaker_id)
-
-        if video:
-            speaker = video[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Speaker not found"
-                ),
-                404
-            )
-
-    # Fetch videos associated with the speaker
+    # API: Fetch videos associated with the speaker
     response = requests.get(
         'http://localhost:5010/api/videos/filter',
         params={
             'speak': speaker_id
         },
     )
-    videos = response.json()
-
-    if not videos:
+    if response.status_code == 200:
+        videos = response.json()
+    else:
         return make_response(
             render_template(
                 "404.html",
@@ -536,25 +548,24 @@ def character_details(
 
     PIC_PATH = "/static/img/characters/"
 
-    with DatabaseContext() as db:
-        character_mgr = CharacterManager(db)
+    # API: Get character details
+    response = requests.get(
+        f'http://localhost:5010/api/characters/{character_id}',
+    )
+    if response.status_code == 200:
+        character = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Character not found in API"
+            ),
+            404
+        )
 
-        # Get character details
-        video = character_mgr.get(id=character_id)
-        if video:
-            character = video[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Character not found"
-                ),
-                404
-            )
-
-        # If the character has a profile picture, add the path to it
-        if character.get('profile_pic'):
-            character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
+    # If the character has a profile picture, add the path to it
+    if character.get('profile_pic'):
+        character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
 
     # API: Fetch videos for the character
     response = requests.get(
@@ -563,9 +574,9 @@ def character_details(
             'char': character_id
         },
     )
-    videos = response.json()
-
-    if not videos:
+    if response.status_code == 200:
+        videos = response.json()
+    else:
         return make_response(
             render_template(
                 "404.html",
@@ -606,26 +617,25 @@ def scripture_details(
         If the scripture is not found, a 404 error is returned.
     """
 
-    with DatabaseContext() as db:
-        scripture_mgr = ScriptureManager(db)
-
-        # Get scripture details
-        video = scripture_mgr.get(id=scripture_id)
-        if video:
-            scripture = video[0]
-        else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Scripture not found"
-                ),
-                404
-            )
-
-        # Build a name for the scripture
-        scripture['name'] = (
-            f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
+    # API: Get the scripture
+    response = requests.get(
+        f'http://localhost:5010/api/scriptures/{scripture_id}',
+    )
+    if response.status_code == 200:
+        scripture = response.json()
+    else:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Scripture not found in API"
+            ),
+            404
         )
+
+    # Build a name for the scripture
+    scripture['name'] = (
+        f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
+    )
 
     # API: Fetch videos for the scripture
     response = requests.get(
@@ -634,9 +644,9 @@ def scripture_details(
             'scrip': scripture_id
         },
     )
-    videos = response.json()
-
-    if not videos:
+    if response.status_code == 200:
+        videos = response.json()
+    else:
         return make_response(
             render_template(
                 "404.html",
