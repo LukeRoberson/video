@@ -1150,3 +1150,112 @@ def get_category_id(
         ),
         200
     )
+
+
+@video_bp.route(
+    "/api/videos/<int:id>",
+    methods=["GET"],
+)
+def get_video(
+    id: int
+) -> Response:
+    """
+    Get a video by its ID, and return details.
+
+    Args:
+        id (int): The ID of the video to retrieve.
+
+    Returns:
+        Response: A JSON response containing the video details if found,
+            or an error message if not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+
+        video_list = video_mgr.get(id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {id} not found",
+                404
+            )
+
+    return make_response(
+        jsonify(
+            video_list[0],
+        ),
+        200
+    )
+
+
+@video_bp.route(
+    "/api/videos/filter",
+    methods=["GET"],
+)
+def filter_videos() -> Response:
+    """
+    Filter videos based on query parameters.
+
+    Query parameters can include:
+        - category_id: Filter by category ID.
+        - tag_id: Filter by tag ID.
+        - location_id: Filter by location ID.
+        - speaker_id: Filter by speaker ID.
+        - character_id: Filter by character ID.
+        - scripture_id: Filter by scripture ID.
+
+    Returns:
+        Response: A JSON response containing the list of videos that match
+            the filter criteria.
+        If no videos are found, an empty list is returned.
+    """
+
+    # Get the query parameters (as strings or None)
+    category_id = request.args.get("cat", None)
+    tag_id = request.args.get("tag", None)
+    location_id = request.args.get("loc", None)
+    speaker_id = request.args.get("speak", None)
+    character_id = request.args.get("char", None)
+    scripture_id = request.args.get("scrip", None)
+
+    # Validate that at least one filter was provided
+    if all(
+        value is None
+        for value in [
+            category_id,
+            tag_id,
+            location_id,
+            speaker_id,
+            character_id,
+            scripture_id,
+        ]
+    ):
+        return api_error(
+            "At least one filter query parameter is required",
+            400
+        )
+
+    # Convert category ID's to a list (if provided)
+    if category_id:
+        category_id = [int(cid) for cid in category_id.split(",")]
+
+    # Fetch videos based on the provided filters
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+
+        # Fetch a filtered list of videos
+        videos = video_mgr.get_filter(
+            category_id=category_id if category_id else None,
+            tag_id=int(tag_id) if tag_id else None,
+            location_id=int(location_id) if location_id else None,
+            speaker_id=int(speaker_id) if speaker_id else None,
+            character_id=int(character_id) if character_id else None,
+            scripture_id=int(scripture_id) if scripture_id else None,
+        )
+
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
+    )

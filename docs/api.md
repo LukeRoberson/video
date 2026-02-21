@@ -932,3 +932,73 @@ Returns:
 
 
 
+#### /api/videos/{video_id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a video by it's ID, and return details of the video.
+
+
+Returns:
+
+200 OK
+
+
+```json
+{
+    "date_added": "2025-11-04 00:00:00",
+    "description": "A description",
+    "duration": 3476,
+    "id": 3011,
+    "name": "JW Broadcasting—November 2025",
+    "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
+    "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
+    "url_1080": null,
+    "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
+    "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
+    "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
+    "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4"
+}
+```
+
+
+
+#### /api/videos/filter
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of videos, but filter by given parameters
+
+
+**Parameters**
+
+| Parameter  | Type    | Mandatory | Notes        |
+| ---------- | ------- | --------- | ------------ |
+| cat        | integer | No        | Category ID  |
+| tag        | integer | No        | Tag ID       |
+| loc        | integer | No        | Location ID  |
+| speak      | integer | No        | Speaker ID   |
+| char       | integer | No        | Character ID |
+| scrip      | integer | No        | Scripture ID |
+
+
+**Returns**
+
+200 OK
+
+
+```json
+{
+}
+```
+
+
+

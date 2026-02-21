@@ -58,7 +58,6 @@ from flask import (
     session,
     current_app
 )
-from typing import Union
 import random
 import os
 import logging
@@ -66,7 +65,6 @@ import logging
 # Custom imports
 from app.sql_db import (
     DatabaseContext,
-    VideoManager,
     CategoryManager,
     TagManager,
     LocationManager,
@@ -81,17 +79,6 @@ import requests
 
 
 logger = logging.getLogger(__name__)
-
-
-# Setup type variables for manager types
-ManagerType = Union[
-    VideoManager,
-    TagManager,
-    LocationManager,
-    SpeakerManager,
-    CharacterManager,
-    ScriptureManager,
-]
 
 
 def set_watched_status(
@@ -171,21 +158,14 @@ def video_details(
         If the video is not found, a 404 error is returned.
     """
 
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        cat_mgr = CategoryManager(db)
+    # API: Fetch video details
+    response = requests.get(
+        f'http://localhost:5010/api/videos/{video_id}',
+    )
+    video = response.json()
 
-        # Fetch the video details (returned as a list)
-        video_list = video_mgr.get(video_id)
-        if not video_list:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Video not found"
-                ),
-                404
-            )
-        video = video_list[0]
+    with DatabaseContext() as db:
+        cat_mgr = CategoryManager(db)
 
         # Fetch the category name for the video
         cat_list = cat_mgr.get_from_video(
@@ -268,13 +248,17 @@ def video_details(
         else:
             id = similar['video_1_id']
 
-        with DatabaseContext() as db:
-            video_mgr = VideoManager(db)
-            video_details = video_mgr.get(id)
-            if video_details:
-                video_ids.append(video_details[0])
-            else:
-                print(f"Video with ID {id} not found in database.")
+        # Get details for the similar video
+        response = requests.get(
+            f'http://localhost:5010/api/videos/{id}',
+        )
+
+        if response.status_code == 200:
+            video_details = response.json()
+            video_ids.append(video_details)
+
+        else:
+            print(f"Video with ID {id} not found in API.")
 
     # Check for webVTT file for chapters
     vtt_file = os.path.join(
@@ -374,7 +358,6 @@ def tag_details(
 
     with DatabaseContext() as db:
         tag_mgr = TagManager(db)
-        video_mgr = VideoManager(db)
 
         # Get the tag name from the tag ID
         video = tag_mgr.get(id=tag_id)
@@ -389,19 +372,14 @@ def tag_details(
                 404
             )
 
-        # Fetch videos associated with the tag
-        videos = video_mgr.get_filter(
-            tag_id=tag_id
-        )
-
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this tag"
-                ),
-                404
-            )
+    # API: Fetch videos for the tag
+    response = requests.get(
+        'http://localhost:5010/api/videos/filter',
+        params={
+            'tag': tag_id
+        },
+    )
+    videos = response.json()
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -438,7 +416,6 @@ def location_details(
 
     with DatabaseContext() as db:
         loc_mgr = LocationManager(db)
-        video_mgr = VideoManager(db)
 
         # Get the tag name from the tag ID
         video = loc_mgr.get(id=location_id)
@@ -453,19 +430,14 @@ def location_details(
                 404
             )
 
-        # Fetch videos associated with the location
-        videos = video_mgr.get_filter(
-            location_id=location_id
-        )
-
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this location"
-                ),
-                404
-            )
+    # API: Fetch videos for the location
+    response = requests.get(
+        'http://localhost:5010/api/videos/filter',
+        params={
+            'loc': location_id
+        },
+    )
+    videos = response.json()
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -501,7 +473,6 @@ def speaker_details(
 
     with DatabaseContext() as db:
         speaker_mgr = SpeakerManager(db)
-        video_mgr = VideoManager(db)
 
         # Get speaker details
         video = speaker_mgr.get(id=speaker_id)
@@ -516,19 +487,23 @@ def speaker_details(
                 404
             )
 
-        # Fetch videos associated with the speaker
-        videos = video_mgr.get_filter(
-            speaker_id=speaker_id
-        )
+    # Fetch videos associated with the speaker
+    response = requests.get(
+        'http://localhost:5010/api/videos/filter',
+        params={
+            'speak': speaker_id
+        },
+    )
+    videos = response.json()
 
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this speaker"
-                ),
-                404
-            )
+    if not videos:
+        return make_response(
+            render_template(
+                "404.html",
+                message="No videos found for this speaker"
+            ),
+            404
+        )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -566,7 +541,6 @@ def character_details(
 
     with DatabaseContext() as db:
         character_mgr = CharacterManager(db)
-        video_mgr = VideoManager(db)
 
         # Get character details
         video = character_mgr.get(id=character_id)
@@ -585,19 +559,23 @@ def character_details(
         if character.get('profile_pic'):
             character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
 
-        # Fetch videos associated with the character
-        videos = video_mgr.get_filter(
-            character_id=character_id
-        )
+    # API: Fetch videos for the character
+    response = requests.get(
+        'http://localhost:5010/api/videos/filter',
+        params={
+            'char': character_id
+        },
+    )
+    videos = response.json()
 
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this character"
-                ),
-                404
-            )
+    if not videos:
+        return make_response(
+            render_template(
+                "404.html",
+                message="No videos found for this character"
+            ),
+            404
+        )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -633,7 +611,6 @@ def scripture_details(
 
     with DatabaseContext() as db:
         scripture_mgr = ScriptureManager(db)
-        video_mgr = VideoManager(db)
 
         # Get scripture details
         video = scripture_mgr.get(id=scripture_id)
@@ -648,23 +625,27 @@ def scripture_details(
                 404
             )
 
-        # Fetch videos associated with the scripture
-        videos = video_mgr.get_filter(
-            scripture_id=scripture_id
-        )
-
-        if not videos:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="No videos found for this scripture"
-                ),
-                404
-            )
-
         # Build a name for the scripture
         scripture['name'] = (
             f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
+        )
+
+    # API: Fetch videos for the scripture
+    response = requests.get(
+        'http://localhost:5010/api/videos/filter',
+        params={
+            'scrip': scripture_id
+        },
+    )
+    videos = response.json()
+
+    if not videos:
+        return make_response(
+            render_template(
+                "404.html",
+                message="No videos found for this scripture"
+            ),
+            404
         )
 
     # Check watched status for the videos
