@@ -855,9 +855,6 @@ Uses the active user.
 }
 ```
 
-
-
-
 </br></br>
 
 
@@ -1000,5 +997,204 @@ Get a list of videos, but filter by given parameters
 }
 ```
 
+</br></br>
 
+
+
+----
+### Categories
+
+#### /api/categories/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of categories associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+[
+    {
+        "id": 1,
+        "name": "Monthly Programs"
+    },
+    {
+        "id": 1340,
+        "name": "JW Broadcasting"
+    }
+]
+```
+
+
+
+</br></br>
+
+
+----
+### Tags
+
+#### /api/tags/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of tags associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+[
+    {
+        "id": 2,
+        "name": "bethel"
+    },
+    {
+        "id": 4,
+        "name": "prayer"
+    },
+]
+```
+
+</br></br>
+
+
+----
+### Locations
+
+#### /api/locations/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of locations associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+[
+    {
+        "id": 52,
+        "name": "Australia"
+    },
+    {
+        "id": 122,
+        "name": "Belgium"
+    }
+]
+```
+
+</br></br>
+
+
+----
+### Speakers
+
+#### /api/speakers/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of speakers associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+[
+    {
+        "id": 10,
+        "name": "Geoffrey Jackson",
+        "profile_pic": "10-Geoffrey_Jackson.png"
+    },
+    {
+        "id": 92,
+        "name": "Robert Luccioni",
+        "profile_pic": "92-Robert_Luccioni.png"
+    }
+]
+```
+
+</br></br>
+
+
+----
+### Characters
+
+#### /api/characters/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of characters associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+{
+}
+```
+
+</br></br>
+
+
+----
+### Scriptures
+
+#### /api/scriptures/video/{id}
+
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of scriptures associated with a video ID
+
+
+**Returns**
+
+200 OK
+
+
+```json
+{
+}
+```
+
+</br></br>
 

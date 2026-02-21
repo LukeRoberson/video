@@ -1259,3 +1259,261 @@ def filter_videos() -> Response:
         ),
         200
     )
+
+
+@video_bp.route(
+    "/api/categories/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_categories(
+    video_id: int
+) -> Response:
+    """
+    Get the categories for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve categories for.
+
+    Returns:
+        Response: A JSON response containing the list of categories,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        category_mgr = CategoryManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the categories for the video
+        categories = category_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                categories,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/tags/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_tags(
+    video_id: int
+) -> Response:
+    """
+    Get the tags for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve tags for.
+
+    Returns:
+        Response: A JSON response containing the list of tags,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        tag_mgr = TagManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the tags for the video
+        tags = tag_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                tags,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/locations/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_locations(
+    video_id: int
+) -> Response:
+    """
+    Get the locations for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve locations for.
+
+    Returns:
+        Response: A JSON response containing the list of locations,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        location_mgr = LocationManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the locations for the video
+        locations = location_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                locations,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/speakers/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_speakers(
+    video_id: int
+) -> Response:
+    """
+    Get the speakers for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve speakers for.
+
+    Returns:
+        Response: A JSON response containing the list of speakers,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        speaker_mgr = SpeakerManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the speakers for the video
+        speakers = speaker_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                speakers,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/characters/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_characters(
+    video_id: int
+) -> Response:
+    """
+    Get the characters for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve characters for.
+
+    Returns:
+        Response: A JSON response containing the list of characters,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        character_mgr = CharacterManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the characters for the video
+        characters = character_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                characters,
+            ),
+            200
+        )
+
+
+@video_bp.route(
+    "/api/scriptures/video/<int:video_id>",
+    methods=["GET"],
+)
+def get_video_scriptures(
+    video_id: int
+) -> Response:
+    """
+    Get the scriptures for a video by its ID.
+
+    Args:
+        video_id (int): The ID of the video to retrieve scriptures for.
+
+    Returns:
+        Response: A JSON response containing the list of scriptures,
+            or an error message if the video is not found.
+    """
+
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        scripture_mgr = ScriptureManager(db)
+
+        # Check if the video exists
+        video_list = video_mgr.get(id=video_id)
+        if not video_list:
+            return api_error(
+                f"Video with ID {video_id} not found",
+                404
+            )
+
+        # Get the scriptures for the video
+        scriptures = scripture_mgr.get_from_video(
+            video_id=video_id
+        )
+
+        return make_response(
+            jsonify(
+                scriptures,
+            ),
+            200
+        )

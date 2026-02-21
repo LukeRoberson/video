@@ -32,8 +32,6 @@ Dependancies:
 Custom Dependencies:
     app.sql_db:
         DatabaseContext: Context manager for database operations.
-        VideoManager: Manages videos.
-        CategoryManager: Manages categories.
         TagManager: Manages tags.
         LocationManager: Manages locations.
         SpeakerManager: Manages speakers.
@@ -65,7 +63,6 @@ import logging
 # Custom imports
 from app.sql_db import (
     DatabaseContext,
-    CategoryManager,
     TagManager,
     LocationManager,
     SpeakerManager,
@@ -164,43 +161,41 @@ def video_details(
     )
     video = response.json()
 
-    with DatabaseContext() as db:
-        cat_mgr = CategoryManager(db)
+    # API: Get categories for the video
+    response = requests.get(
+        f'http://localhost:5010/api/categories/video/{video_id}',
+    )
+    cat_list = response.json()
 
-        # Fetch the category name for the video
-        cat_list = cat_mgr.get_from_video(
-            video_id=video_id
-        )
+    # API: Get tags for the video
+    response = requests.get(
+        f'http://localhost:5010/api/tags/video/{video_id}',
+    )
+    tags = response.json()
 
-        # Fetch tags for the video
-        tag_mgr = TagManager(db)
-        tags = tag_mgr.get_from_video(
-            video_id=video_id
-        )
+    # API: Get locations for the video
+    response = requests.get(
+        f'http://localhost:5010/api/locations/video/{video_id}',
+    )
+    locations = response.json()
 
-        # Fetch locations for the video
-        loc_mgr = LocationManager(db)
-        locations = loc_mgr.get_from_video(
-            video_id=video_id
-        )
+    # API: Get speakers for the video
+    response = requests.get(
+        f'http://localhost:5010/api/speakers/video/{video_id}',
+    )
+    speakers = response.json()
 
-        # Fetch speakers for the video
-        speaker_mgr = SpeakerManager(db)
-        speakers = speaker_mgr.get_from_video(
-            video_id=video_id
-        )
+    # API: Get characters for the video
+    response = requests.get(
+        f'http://localhost:5010/api/characters/video/{video_id}',
+    )
+    characters = response.json()
 
-        # Fetch characters for the video
-        character_mgr = CharacterManager(db)
-        characters = character_mgr.get_from_video(
-            video_id=video_id
-        )
-
-        # Fetch scriptures for the video
-        scripture_mgr = ScriptureManager(db)
-        scriptures = scripture_mgr.get_from_video(
-            video_id=video_id
-        )
+    # API: Get scriptures for the video
+    response = requests.get(
+        f'http://localhost:5010/api/scriptures/video/{video_id}',
+    )
+    scriptures = response.json()
 
     # API: Check if video is marked as watched
     response = requests.get(
@@ -359,8 +354,9 @@ def tag_details(
     with DatabaseContext() as db:
         tag_mgr = TagManager(db)
 
-        # Get the tag name from the tag ID
+        # Get the tag details from the tag ID
         video = tag_mgr.get(id=tag_id)
+
         if video:
             tag = video[0]
         else:
@@ -417,7 +413,7 @@ def location_details(
     with DatabaseContext() as db:
         loc_mgr = LocationManager(db)
 
-        # Get the tag name from the tag ID
+        # Get the location name from the location ID
         video = loc_mgr.get(id=location_id)
         if video:
             location = video[0]
@@ -476,6 +472,7 @@ def speaker_details(
 
         # Get speaker details
         video = speaker_mgr.get(id=speaker_id)
+
         if video:
             speaker = video[0]
         else:
