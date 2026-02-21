@@ -6,10 +6,6 @@ Defines a Flask blueprint for dynamic web routes.
     bible chapter, or scripture.
 
 Functions:
-    - get_one_video:
-        Fetches a single video or item from the database by ID.
-    - get_videos_by_filter:
-        Fetches videos based on filter criteria.
     - set_watched_status:
         Sets the watched status for each video in a list.
     - get_search_service:
@@ -96,81 +92,6 @@ ManagerType = Union[
     CharacterManager,
     ScriptureManager,
 ]
-
-
-def get_one_video(
-    manager: ManagerType,
-    id: int,
-    item_name: str = "Item",
-) -> Response | dict:
-    """
-    Fetch a single item from the database by its ID.
-
-    Args:
-        manager (ManagerType):
-            The manager instance to use for fetching the item.
-        id (int):
-            The ID of the item to fetch.
-        item_name (str):
-            The name of the item for error messages.
-
-    Returns:
-        Response | dict: The item if found, or a 404 response if not found.
-    """
-
-    # User the manager to get the video by ID
-    video = manager.get(id=id)
-
-    # If the video is found, return the first item in the list
-    if video:
-        return video[0]
-
-    # If the video is not found, return a 404 response
-    else:
-        return make_response(
-            render_template(
-                "404.html",
-                message=f"{item_name} not found"
-            ),
-            404
-        )
-
-
-def get_videos_by_filter(
-    video_mgr: VideoManager,
-    filter_kwargs: dict,
-    message: str,
-) -> list | Response:
-    """
-    Fetch videos from the database based on filter criteria.
-
-    Args:
-        video_mgr (VideoManager):
-            The video manager instance to use for fetching videos.
-        filter_kwargs (dict):
-            The filter criteria to apply when fetching videos.
-        message (str):
-            The message to display if no videos are found.
-
-    Returns:
-        list | Response: A list of videos if found, or a 404 response if no
-    """
-
-    # Get a list of videos based on the filter criteria
-    videos = video_mgr.get_filter(**filter_kwargs)
-
-    # If no videos are found, return a 404 response with the provided message
-    if not videos:
-        return make_response(
-            render_template(
-                "404.html",
-                message=message
-            ),
-            404
-        )
-
-    # If videos are found, return the list of videos
-    return videos
 
 
 def set_watched_status(
@@ -456,17 +377,31 @@ def tag_details(
         video_mgr = VideoManager(db)
 
         # Get the tag name from the tag ID
-        tag = get_one_video(tag_mgr, tag_id, "Tag")
-        print(f"Tag details for tag_id {tag_id}: {tag}")
-        if isinstance(tag, Response):
-            return tag
+        video = tag_mgr.get(id=tag_id)
+        if video:
+            tag = video[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Tag not found"
+                ),
+                404
+            )
 
         # Fetch videos associated with the tag
-        videos = get_videos_by_filter(
-            video_mgr, {"tag_id": tag_id}, "No videos found for this tag"
+        videos = video_mgr.get_filter(
+            tag_id=tag_id
         )
-        if isinstance(videos, Response):
-            return videos
+
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this tag"
+                ),
+                404
+            )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -506,18 +441,31 @@ def location_details(
         video_mgr = VideoManager(db)
 
         # Get the tag name from the tag ID
-        location = get_one_video(loc_mgr, location_id, "Location")
-        if isinstance(location, Response):
-            return location
+        video = loc_mgr.get(id=location_id)
+        if video:
+            location = video[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Location not found"
+                ),
+                404
+            )
 
-        # Fetch videos associated with the tag
-        videos = get_videos_by_filter(
-            video_mgr,
-            {"location_id": location_id},
-            "No videos found for this location"
+        # Fetch videos associated with the location
+        videos = video_mgr.get_filter(
+            location_id=location_id
         )
-        if isinstance(videos, Response):
-            return videos
+
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this location"
+                ),
+                404
+            )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -556,18 +504,31 @@ def speaker_details(
         video_mgr = VideoManager(db)
 
         # Get speaker details
-        speaker = get_one_video(speaker_mgr, speaker_id, "Speaker")
-        if isinstance(speaker, Response):
-            return speaker
+        video = speaker_mgr.get(id=speaker_id)
+        if video:
+            speaker = video[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Speaker not found"
+                ),
+                404
+            )
 
         # Fetch videos associated with the speaker
-        videos = get_videos_by_filter(
-            video_mgr,
-            {"speaker_id": speaker_id},
-            "No videos found for this speaker"
+        videos = video_mgr.get_filter(
+            speaker_id=speaker_id
         )
-        if isinstance(videos, Response):
-            return videos
+
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this speaker"
+                ),
+                404
+            )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -608,20 +569,35 @@ def character_details(
         video_mgr = VideoManager(db)
 
         # Get character details
-        character = get_one_video(character_mgr, character_id, "Character")
-        if isinstance(character, Response):
-            return character
+        video = character_mgr.get(id=character_id)
+        if video:
+            character = video[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Character not found"
+                ),
+                404
+            )
+
+        # If the character has a profile picture, add the path to it
         if character.get('profile_pic'):
             character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
 
         # Fetch videos associated with the character
-        videos = get_videos_by_filter(
-            video_mgr,
-            {"character_id": character_id},
-            "No videos found for this character"
+        videos = video_mgr.get_filter(
+            character_id=character_id
         )
-        if isinstance(videos, Response):
-            return videos
+
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this character"
+                ),
+                404
+            )
 
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
@@ -660,18 +636,31 @@ def scripture_details(
         video_mgr = VideoManager(db)
 
         # Get scripture details
-        scripture = get_one_video(scripture_mgr, scripture_id, "Scripture")
-        if isinstance(scripture, Response):
-            return scripture
+        video = scripture_mgr.get(id=scripture_id)
+        if video:
+            scripture = video[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Scripture not found"
+                ),
+                404
+            )
 
         # Fetch videos associated with the scripture
-        videos = get_videos_by_filter(
-            video_mgr,
-            {"scripture_id": scripture_id},
-            "No videos found for this scripture"
+        videos = video_mgr.get_filter(
+            scripture_id=scripture_id
         )
-        if isinstance(videos, Response):
-            return videos
+
+        if not videos:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="No videos found for this scripture"
+                ),
+                404
+            )
 
         # Build a name for the scripture
         scripture['name'] = (
