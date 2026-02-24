@@ -33,9 +33,9 @@ from typing import (
 )
 
 # Local imports
-from search.elastic_client import ElasticsearchClient
-from search.search_builder import SearchQueryBuilder
-from app.sql_db import (
+from api.search.elastic_client import ElasticsearchClient
+from api.search.search_builder import SearchQueryBuilder
+from api.sql_db import (
     DatabaseContext,
     VideoManager
 )

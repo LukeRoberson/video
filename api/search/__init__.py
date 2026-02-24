@@ -15,10 +15,10 @@ Exported Classes:
         Builder for constructing complex search queries.
 """
 
-from search.elastic_client import ElasticsearchClient
-from search.indexer import ElasticsearchIndexer
-from search.search_service import SearchService
-from search.search_builder import SearchQueryBuilder
+from api.search.elastic_client import ElasticsearchClient
+from api.search.indexer import ElasticsearchIndexer
+from api.search.search_service import SearchService
+from api.search.search_builder import SearchQueryBuilder
 
 __all__ = [
     'ElasticsearchClient',

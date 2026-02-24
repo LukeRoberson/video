@@ -53,11 +53,13 @@ import logging
 
 # Custom imports
 from app.theme import ThemeManager
-from search import SearchService
 import requests
 
 
 logger = logging.getLogger(__name__)
+
+# Configuration for search API
+SEARCH_API_BASE_URL = 'http://localhost:5010'
 
 
 def set_watched_status(
@@ -92,23 +94,6 @@ def set_watched_status(
 
         # Set the 'watched' key to True or False
         video['watched'] = response.json()['data'].get('watched', False)
-
-
-def get_search_service() -> SearchService:
-    """
-    Get or create SearchService instance from application context.
-
-    Args:
-        None
-
-    Returns:
-        SearchService: Configured search service instance.
-    """
-
-    if 'SEARCH_SERVICE' not in current_app.config:
-        current_app.config['SEARCH_SERVICE'] = SearchService()
-
-    return current_app.config['SEARCH_SERVICE']
 
 
 dynamic_bp = Blueprint(
@@ -727,20 +712,29 @@ def search_results() -> Response:
 
     if query:
         try:
-            # Use SearchService for unified search
-            search_service = get_search_service()
-            (results, total), using_elasticsearch = search_service.search(
-                query=query,
-                page=page,
-                per_page=per_page,
-                filters=filters if filters else None
-            )
+            # Make API call to search endpoint
+            api_url = f'{SEARCH_API_BASE_URL}/api/search/'
+            params = {
+                'q': query,
+                'page': page,
+                'per_page': per_page
+            }
 
-            # Calculate pagination
-            pages = (total + per_page - 1) // per_page
+            # Add filters if they exist
+            if filters:
+                for filter_type, filter_values in filters.items():
+                    params[filter_type] = filter_values
 
-            # Convert results to video format for template
-            videos = results
+            logger.info(f"Calling search API: {api_url} with params: {params}")
+
+            response = requests.get(api_url, params=params)
+
+            if response.status_code == 200:
+                data = response.json()
+                videos = data.get('results', [])
+                total = data.get('total', 0)
+                pages = data.get('pages', 0)
+                using_elasticsearch = data.get('using_elasticsearch', False)
 
             # Add a badge to show which search method was used (ES or DB)
             if total > 0:
@@ -794,6 +788,10 @@ def search_results() -> Response:
                     f"⚠ Database fallback search for '{query}': "
                     f"{total} results, page {page}/{pages}"
                 )
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error calling search API: {e}", exc_info=True)
+            message = "Unable to connect to search service. Please try again."
 
         except Exception as e:
             logger.error(
@@ -990,20 +988,34 @@ def advanced_search() -> Response:
         per_page = 20
 
         try:
-            # Use SearchService for unified search
-            search_service = get_search_service()
-            (results, total), using_elasticsearch = search_service.search(
-                query=search_query,
-                page=page,
-                per_page=per_page,
-                filters=filters if filters else None
-            )
+            # Make API call to advanced search endpoint
+            api_url = f'{SEARCH_API_BASE_URL}/api/search/advanced'
+            params = {
+                'query': search_query,
+                'page': page,
+                'per_page': per_page
+            }
 
-            # Calculate pagination
-            pages = (total + per_page - 1) // per_page
+            # Add filters if they exist
+            if filters:
+                for filter_type, filter_values in filters.items():
+                    params[filter_type] = filter_values
 
-            # Convert results to video format for template
-            videos = results
+            response = requests.get(api_url, params=params)
+
+            if response.status_code == 200:
+                data = response.json()
+                videos = data.get('results', [])
+                total = data.get('total', 0)
+                pages = data.get('pages', 0)
+                using_elasticsearch = data.get('using_elasticsearch', False)
+
+            else:
+                logger.error(f"Error during API call: {response.status_code}")
+                videos = []
+                total = 0
+                pages = 0
+                using_elasticsearch = False
 
             # Build message
             if total > 0:

@@ -372,7 +372,6 @@ The only exception to this is the advanced search will also return a `filters` v
 
 
 ---
----
 ## Sample Results
 
 Show current status: http://localhost:5000/api/search/status

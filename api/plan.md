@@ -27,10 +27,10 @@
     * [x] Characters
     * [x] Tags
 7. Search
-    * [ ] Normal search
-    * [ ] Advanced search
-    * [ ] Reindex
-    * [ ] Status
+    * [x] Normal search
+    * [x] Advanced search
+    * [x] Reindex
+    * [x] Status
 8. Other
     * [ ] Avatar list in profile management; API or frontend? (api_profile.py)
     * [x] Get similar videos
@@ -133,9 +133,8 @@
     * Unicode error for one speaker (500-Marija_Golubiček.png)
     * Not API specific error
 * Search
-    * searching by filter options only does not work
-    * Tested locally, no elasticsearch
-    * Displays a unicode error
+    * Throws some benign errors in the console
+    * Seems to be unicode related
 * Update blueprints to use a url_prefix
     * As in api_search.py
 

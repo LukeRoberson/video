@@ -49,7 +49,7 @@ from flask import (
 )
 
 # Local Application Imports
-from search import (
+from api.search import (
     SearchService,
     ElasticsearchClient,
     ElasticsearchIndexer

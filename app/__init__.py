@@ -15,7 +15,6 @@ Blueprints Registered:
         (tags, speakers, characters, scriptures).
     - error_bp: Custom error pages (e.g., 403 Forbidden).
     - profile_api_bp: API endpoints for user profile management.
-    - search_bp: API endpoints for video search functionality.
 
 Classes:
     - ColouredFormatter:
@@ -36,8 +35,6 @@ Custom Imports:
     - app.web: Main web blueprint.
     - app.web_errors: Blueprint and handlers for error pages.
     - app.api_profile: Blueprint for user profile API endpoints.
-    - app.api_search: Blueprint for video search API endpoints.
-    - search: Module providing the SearchService class.
 """
 
 # Standard library imports
@@ -54,8 +51,6 @@ from app.web_errors import (
     not_found,
 )
 from app.api_profile import profile_api_bp
-from app.api_search import search_bp
-from search import SearchService
 
 
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
@@ -204,7 +199,6 @@ def create_app():
     app.register_blueprint(category_bp)
     app.register_blueprint(dynamic_bp)
     app.register_blueprint(error_bp)
-    app.register_blueprint(search_bp)
 
     # Add jinja filters
     app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss
@@ -213,19 +207,5 @@ def create_app():
     # Register the 4xx error handlers globally
     app.register_error_handler(403, forbidden)
     app.register_error_handler(404, not_found)
-
-    # Initialize search service with app context
-    with app.app_context():
-        try:
-            # SearchService uses DatabaseContext internally, no params needed
-            search_service = SearchService()
-            app.config['SEARCH_SERVICE'] = search_service
-            logger.info("Search service initialized successfully")
-
-        except Exception as e:
-            logger.error(f"Failed to initialize search service: {e}")
-            logger.warning(
-                "Application will continue with database fallback only"
-            )
 
     return app

@@ -77,6 +77,9 @@
 - [ ] [Feature: Transcript](https://github.com/LukeRoberson/video/issues/19)
 - [ ] Dates are in different formats on some videos
     * This cases the 'Latest Videos' in the home screen to get confused
+- [ ] Themes: 'quote' is not respecting block mapping
+    * It is ignoring new lines, placing everything on one line
+    * the 'paragraph' tag is fine
 
 </br></br>
 

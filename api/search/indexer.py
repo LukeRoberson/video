@@ -52,9 +52,9 @@ from elasticsearch import exceptions
 from elasticsearch.helpers import bulk
 
 # Local imports
-from search.elastic_client import ElasticsearchClient
-from search.vtt_parser import VTTParser
-from app.sql_db import (
+from api.search.elastic_client import ElasticsearchClient
+from api.search.vtt_parser import VTTParser
+from api.sql_db import (
     DatabaseContext,
     VideoManager,
     TagManager,

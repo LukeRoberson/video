@@ -2,11 +2,33 @@
 Flask Application Initialization
 
 This module initializes the Flask application, configures logging,
-    registers blueprints, and sets up custom Jinja filters.
+    registers blueprints, and initializes the search service.
 
 Usage:
     From the base directory of the project, run the application using:
-        python -m app.main
+        python -m api.main
+
+Blueprints Registered:
+    - admin_bp: API endpoints for admin functionalities.
+    - video_bp: API endpoints for video functionalities.
+    - profile_bp: API endpoints for user profile functionalities.
+    - search_bp: API endpoints for search functionalities.
+
+Classes:
+    - ColouredFormatter:
+        Custom logging formatter that adds color codes to log messages
+        based on their severity level.
+
+Dependencies:
+    - Flask: Web framework.
+    - logging: Application logging.
+    - flask_cors: For handling Cross-Origin Resource Sharing (CORS).
+    - SearchService: Service for handling search functionalities.
+
+Custom Imports:
+    - api.api: Blueprints for admin and video API endpoints.
+    - api.profile: Blueprint for user profile API endpoints.
+    - api.api_search: Blueprint for search API endpoints.
 """
 
 # Standard library imports
@@ -20,6 +42,8 @@ from api.api import (
     video_bp
 )
 from api.profile import profile_bp
+from api.api_search import search_bp
+from api.search import SearchService
 
 
 class ColouredFormatter(
@@ -133,5 +157,20 @@ def create_app(
     app.register_blueprint(admin_bp)
     app.register_blueprint(video_bp)
     app.register_blueprint(profile_bp)
+    app.register_blueprint(search_bp)
+
+    # Initialize search service with app context
+    with app.app_context():
+        try:
+            # SearchService uses DatabaseContext internally, no params needed
+            search_service = SearchService()
+            app.config['SEARCH_SERVICE'] = search_service
+            logger.info("Search service initialized successfully")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize search service: {e}")
+            logger.warning(
+                "Application will continue with database fallback only"
+            )
 
     return app
