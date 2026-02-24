@@ -42,9 +42,6 @@ Routes:
 Dependancies:
     Flask: To define the blueprint for web pages.
     logging: For logging debug information.
-
-Custom Dependencies:
-    DatabaseContext: Context manager for database operations.
 """
 
 # Standard library imports

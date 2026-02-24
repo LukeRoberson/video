@@ -1235,6 +1235,67 @@ def get_video(
 
 
 @video_bp.route(
+    "/api/videos/get_bulk",
+    methods=["POST"],
+)
+def get_videos_bulk() -> Response:
+    """
+    Get multiple videos by their IDs.
+
+    Expects a JSON body with a list of video IDs:
+        {
+            "video_ids": [1, 2, 3]
+        }
+
+    Args:
+        None
+
+    Returns:
+        Response: A JSON response containing a list of video details for the
+            requested video IDs. If any video ID is not found, it will be
+            skipped and not included in the response.
+    """
+
+    # Get the list of video IDs from the request body
+    data = request.get_json()
+    if not data or "video_ids" not in data:
+        logging.error("Missing 'video_ids' in request data.")
+        return api_error("Missing 'video_ids' in request data", 400)
+
+    # Validate that 'video_ids' is a list of integers
+    video_ids = data["video_ids"]
+    if (
+        not isinstance(video_ids, list)
+        or not all(isinstance(vid, int) for vid in video_ids)
+    ):
+        logging.error("'video_ids' must be a list of integers.")
+        return api_error("'video_ids' must be a list of integers", 400)
+
+    # Fetch video details for each ID
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        videos = []
+
+        for video in video_ids:
+            video_list = video_mgr.get(video)
+
+            # Add the video details to the response list if found
+            if video_list:
+                videos.append(video_list[0])
+
+            # Skip any video IDs that are not found, but log a warning
+            else:
+                logging.warning(f"Video with ID {video} not found. Skipping.")
+
+    return make_response(
+        jsonify(
+            videos,
+        ),
+        200
+    )
+
+
+@video_bp.route(
     "/api/videos/filter",
     methods=["GET"],
 )
@@ -1784,6 +1845,31 @@ def get_video_characters(
             ),
             200
         )
+
+
+@video_bp.route(
+    "/api/scriptures",
+    methods=["GET"],
+)
+def get_scriptures() -> Response:
+    """
+    Get a list of all scriptures.
+
+    Returns:
+        Response: A JSON response containing a list of all scriptures.
+    """
+
+    with DatabaseContext() as db:
+        scripture_mgr = ScriptureManager(db)
+
+        scriptures = scripture_mgr.get() or []
+
+    return make_response(
+        jsonify(
+            scriptures,
+        ),
+        200
+    )
 
 
 @video_bp.route(

@@ -221,6 +221,72 @@ If a scripture already has text, the new text will overwrite the old.
 ### Profiles
 
 
+#### /api/profile
+
+**Method**:
+GET
+
+
+**Description**:
+Get a list of all profiles and their details
+
+
+Returns:
+
+200 OK
+
+```json
+{
+    "data": [
+        {
+            "admin": 1,
+            "created_at": "2025-06-30 01:24:03",
+            "id": 2,
+            "image": "amos_1.png",
+            "name": "Luke"
+        },
+        {
+            "admin": null,
+            "created_at": "2025-07-03 04:35:22",
+            "id": 3,
+            "image": "girl_1.png",
+            "name": "Bec"
+        }
+    ],
+    "success": true
+}
+```
+
+#### /api/profile/{id}
+
+**Method**:
+GET
+
+
+**Description**:
+Get the details for a specific profile
+
+
+Returns:
+
+200 OK
+
+```json
+{
+    "data": [
+        {
+            "admin": 1,
+            "created_at": "2025-06-30 01:24:03",
+            "id": 2,
+            "image": "amos_1.png",
+            "name": "Luke"
+        }
+    ],
+    "success": true
+}
+```
+
+
 #### /api/profile/create
 
 **Method**:
@@ -649,6 +715,60 @@ Marks a video as unwatched for a user
 
 
 
+
+#### /api/profile/watch_history (GET)
+
+**Method**:
+GET
+
+
+**Description**:
+Get the watch history for a given profile
+
+
+**Parameters**:
+
+| Parameter  | Type    | Mandatory | Notes             |
+| ---------- | ------- | --------- | ----------------- |
+| profile    | integer | Yes       | ID of the profile |
+
+
+
+```json
+{
+    "profile_id": 1
+}
+```
+
+
+**returns**
+
+200 OK
+
+```json
+{
+    "data": [
+        {
+            "current_time": 0,
+            "id": 476,
+            "profile_id": 2,
+            "video_id": 1871,
+            "watched_at": "2026-01-18 12:51:26.409769"
+        },
+        {
+            "current_time": 0,
+            "id": 477,
+            "profile_id": 2,
+            "video_id": 22,
+            "watched_at": "2026-01-18 13:09:47.205452"
+        }
+    ],
+    "message": "Retrieved watch history successfully",
+    "success": true
+}
+```
+
+
 #### /api/profile/in_progress (GET)
 
 **Method**:
@@ -940,7 +1060,7 @@ GET
 Get a video by it's ID, and return details of the video.
 
 
-Returns:
+**Returns**:
 
 200 OK
 
@@ -962,6 +1082,55 @@ Returns:
 }
 ```
 
+
+#### /api/videos/get_bulk
+
+
+**Method**:
+POST
+
+
+**Description**:
+Get the details for a list of videos, all in one request.
+
+
+**Payload**:
+
+| Field      | Type    | Mandatory | Notes                         |
+| ---------- | ------- | --------- | ----------------------------- |
+| video_ids  | list    | Yes       | A list of video ID's to check |
+
+
+```json
+{
+    "video_ids": [123, 124, 125]
+}
+```
+
+
+**Returns**:
+
+200 OK
+
+
+```json
+[
+    {
+        "date_added": "2025-11-04 00:00:00",
+        "description": "A description",
+        "duration": 3476,
+        "id": 3011,
+        "name": "JW Broadcasting—November 2025",
+        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
+        "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
+        "url_1080": null,
+        "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4"
+    }
+]
+```
 
 
 #### /api/videos/filter
@@ -1350,6 +1519,29 @@ Get a list of characters associated with a video ID
 
 ----
 ### Scriptures
+
+#### /api/scriptures
+
+**Method**:
+GET
+
+
+**Description**:
+Get all scriptures.
+
+Not sorted into any order before its returned.
+
+
+**Returns**
+
+200 OK
+
+
+```json
+```
+
+</br></br>
+
 
 #### /api/scriptures/{id}
 

@@ -75,9 +75,9 @@ from tqdm import tqdm
 import os
 import sys
 
-# Add the parent directory of 'app' to the Python path
+# Add the parent directory of 'api' to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app.sql_db import (    # noqa: E402
+from api.sql_db import (    # noqa: E402
     DatabaseContext,
     CategoryManager,
     VideoManager,

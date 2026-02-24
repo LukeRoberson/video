@@ -16,16 +16,20 @@
     * [x] Clear watch history
     * [x] Get active profile
     * [x] Set active profile
+    * [x] Edit profile (web.py)
+    * [x] Select profile (web.py)
 5. Migrate video endpoints
     * [x] Load videos (title, thumbnail) into categories
     * [x] Update in progress status
     * [x] Mark a video as watched
     * [x] Mark a video as unwatched
 6. Additional pages
-    * [x] Scriptures
-    * [x] Speakers
-    * [x] Characters
-    * [x] Tags
+    * [ ] Scriptures
+    * [ ] Speakers
+    * [ ] Characters
+    * [ ] Tags
+    * [ ] Location
+    * [ ] Home Page (web.py)
 7. Search
     * [x] Normal search
     * [x] Advanced search
@@ -34,6 +38,13 @@
 8. Other
     * [ ] Avatar list in profile management; API or frontend? (api_profile.py)
     * [x] Get similar videos
+    * [ ] Test scraper script
+    * [x] Test similarity script
+9. Clean up
+    * [ ] Split out api.py into smaller files
+    * [ ] Add asynchronous requests for performance
+    * [ ] Check all returns are in a consistent JSON format
+    * [ ] Update all documentation
 
 
 

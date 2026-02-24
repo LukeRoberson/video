@@ -68,6 +68,58 @@ profile_bp = Blueprint(
 
 
 @profile_bp.route(
+    '/api/profile',
+    methods=['GET'],
+)
+def get_profile_list() -> Response:
+    """
+    Get all user profiles.
+
+    Args:
+        None
+
+    Returns:
+        Response: A JSON response with the list of user profiles.
+    """
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile_list = profile_mgr.read()
+
+    return api_success(
+        profile_list
+    )
+
+
+@profile_bp.route(
+    '/api/profile/<int:profile_id>',
+    methods=['GET'],
+)
+def get_profile(profile_id: int) -> Response:
+    """
+    Get a user profile by ID.
+
+    Args:
+        profile_id (int): The ID of the profile to retrieve.
+
+    Returns:
+        Response: A JSON response with the user profile data.
+    """
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile = profile_mgr.read(profile_id)
+
+    if not profile:
+        logging.error(f"Profile with ID {profile_id} not found.")
+        return api_error(f"Profile with ID {profile_id} not found", 404)
+
+    return api_success(
+        data=profile[0]
+    )
+
+
+@profile_bp.route(
     '/api/profile/create',
     methods=['POST'],
 )
@@ -587,6 +639,42 @@ def mark_unwatched() -> Response:
         )
 
     return api_success(message=f"Marked video {video_id} as unwatched")
+
+
+@profile_bp.route(
+    "/api/profile/watch_history",
+    methods=["GET"]
+)
+def get_watch_history() -> Response:
+    """
+    Get the watch history for the active profile.
+
+    Returns:
+        Response: JSON; The watch history for the active profile.
+    """
+
+    # Get the active profile from the parameter
+    active_profile = request.args.get(
+        "profile",
+        None
+    )
+
+    # If no active profile is set, return empty response
+    if active_profile is None or active_profile == "guest":
+        return api_success(
+            message="No watch history for guest profile"
+        )
+
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        watch_history = profile_mgr.read_watch_history(
+            profile_id=int(active_profile)
+        )
+
+    return api_success(
+        data=watch_history,
+        message="Retrieved watch history successfully"
+    )
 
 
 @profile_bp.route(

@@ -72,6 +72,7 @@ from collections import defaultdict
 from functools import wraps
 from typing import Callable
 import yaml
+import requests
 
 # Custom imports
 from app.sql_db import (
@@ -81,13 +82,6 @@ from app.sql_db import (
     CharacterManager,
     TagManager,
     LocationManager,
-    SpeakerManager,
-    ScriptureManager,
-)
-from app.local_db import (
-    LocalDbContext,
-    ProfileManager,
-    ProgressManager,
 )
 
 
@@ -272,37 +266,48 @@ def home() -> Response:
         profile_id = (
             int(profile_id) if isinstance(profile_id, str) else profile_id
         )
-        with LocalDbContext() as db:
-            progress_mgr = ProgressManager(db)
 
-            in_progress_videos = progress_mgr.read(
-                profile_id=profile_id,
-            )
-
-            # Make sure it's a list
-            in_progress_videos = (
-                [] if not in_progress_videos else in_progress_videos
-            )
-
-    # Get details for each in-progress video
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-
-        for video in in_progress_videos:
-            video_details = video_mgr.get(
-                id=video['video_id']
-            )
-            if video_details:
-                video['id'] = video_details[0].get('id')
-                video['name'] = video_details[0].get('name')
-                video['thumbnail'] = video_details[0].get('thumbnail')
-                video['duration'] = video_details[0].get('duration')
-
-        # Sort, so the most recently updated videos are first
-        in_progress_videos.sort(
-            key=lambda v: v.get('updated_at', ''),
-            reverse=True
+        # Get in-progress videos from the API
+        response = requests.get(
+            url='http://localhost:5010/api/profile/in_progress',
+            params={
+                'profile': profile_id
+            },
         )
+        in_progress_videos = response.json().get('data', [])
+
+    # API: Get the details for each in-progress video
+    response = requests.post(
+        url='http://localhost:5010/api/videos/get_bulk',
+        json={'video_ids': [v['video_id'] for v in in_progress_videos]}
+    )
+    data = response.json()
+
+    # Merge the in-progress video data with the API video details
+    updated_list = []
+    for video in in_progress_videos:
+        entry = {}
+        entry['current_time'] = video['current_time']
+        entry['profile_id'] = video['profile_id']
+        entry['updated_at'] = video['updated_at']
+        entry['video_id'] = video['video_id']
+
+        for i in data:
+            if i['id'] == video['video_id']:
+                entry['name'] = i.get('name')
+                entry['thumbnail'] = i.get('thumbnail')
+                entry['duration'] = i.get('duration')
+                break
+
+        updated_list.append(entry)
+
+    # print(f"API videos: {updated_list}")
+
+    # Sort, so the most recently updated videos are first
+    updated_list.sort(
+        key=lambda v: v.get('updated_at', ''),
+        reverse=True
+    )
 
     # Get latest Monthly Programs video
     monthly = None
@@ -351,7 +356,7 @@ def home() -> Response:
         render_template(
             "home.html",
             banners=banners,
-            in_progress_videos=in_progress_videos,
+            in_progress_videos=updated_list,
             latest_monthly=latest_monthly,
             latest_news=latest_news,
             latest_videos=latest,
@@ -418,11 +423,11 @@ def select_profile() -> Response:
         Response: A rendered HTML page for selecting a profile.
     """
 
-    # Get all profiles from the local database
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        profile_list = profile_mgr.read()
-        print(f"{profile_list=}")
+    # API: Get all profiles
+    response = requests.get(
+        url='http://localhost:5010/api/profile',
+    )
+    profile_list = response.json().get('data', [])
 
     return make_response(
         render_template(
@@ -476,55 +481,47 @@ def edit_profile(profile_id: int) -> Response:
         Response: A rendered HTML page for editing the specified profile.
     """
 
-    # Get the profile details from the local database
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
+    # API: Get profile details
+    response = requests.get(
+        url=f'http://localhost:5010/api/profile/{profile_id}',
+    )
+    profile = response.json().get('data', {})
 
-        # Get the user's profile
-        profile = profile_mgr.read(profile_id=profile_id)
+    # API: Get watch history for the profile
+    response = requests.get(
+        url='http://localhost:5010/api/profile/watch_history',
+        params={'profile': profile_id}
+    )
+    history = response.json().get('data', [])
 
-        if not profile:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Profile not found"
-                ),
-                404
-            )
-
-        profile = profile[0]
-
-        # Get watch history
-        history = profile_mgr.read_watch_history(profile_id=profile_id)
-
-        # Sort from newest to oldest, stripping fractional seconds
-        if history:
-            # Strip fractional seconds from all timestamps
-            for item in history:
-                item['watched_at'] = item['watched_at'].split('.')[0]
-
-            # Sort by cleaned timestamps
-            history.sort(key=lambda x: x['watched_at'], reverse=True)
-
-        # Count items in history
-        history_count = len(history) if history else 0
-
-    # Get video name and thumbnail for each history item
+    # Sort from newest to oldest, stripping fractional seconds
     if history:
-        with DatabaseContext() as db:
-            video_mgr = VideoManager(db)
+        # Strip fractional seconds from all timestamps
+        for item in history:
+            item['watched_at'] = item['watched_at'].split('.')[0]
 
-            for item in history:
-                video_details = video_mgr.get(id=item['video_id'])
-                if video_details:
-                    item['video_name'] = video_details[0].get('name')
-                    item['video_thumbnail'] = video_details[0].get('thumbnail')
-                    item['duration'] = video_details[0].get('duration')
+        # Sort by cleaned timestamps
+        history.sort(key=lambda x: x['watched_at'], reverse=True)
 
-                else:
-                    item['video_name'] = 'Unknown Video'
-                    item['video_thumbnail'] = 'default-thumbnail.jpg'
-                    item['duration'] = 0
+    # Count items in history
+    history_count = len(history) if history else 0
+
+    # API: Get the video details for each history item
+    if history:
+        video_ids = [item['video_id'] for item in history]
+        response = requests.post(
+            url='http://localhost:5010/api/videos/get_bulk',
+            json={'video_ids': video_ids}
+        )
+
+        # Merge the video details into the history items
+        for item in history:
+            for video in response.json():
+                if video['id'] == item['video_id']:
+                    item['video_name'] = video.get('name')
+                    item['video_thumbnail'] = video.get('thumbnail')
+                    item['duration'] = video.get('duration')
+                    break
 
     else:
         history = []
@@ -680,13 +677,14 @@ def speakers() -> Response:
         Response: A rendered HTML page with speaker details.
     """
 
-    with DatabaseContext() as db:
-        speaker_mgr = SpeakerManager(db)
-        video_mgr = VideoManager(db)
-        speakers = speaker_mgr.get()
+    # API: Get a list of speakers
+    response = requests.get(
+        url='http://localhost:5010/api/speakers',
+    )
+    speakers = response.json()
 
-        if not speakers:
-            speakers = []
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
 
         # Get the video count for each speaker
         for speaker in speakers:
@@ -742,9 +740,11 @@ def scriptures() -> Response:
         Response: A rendered HTML page with scripture details.
     """
 
-    with DatabaseContext() as db:
-        scripture_mgr = ScriptureManager(db)
-        scriptures: List[Dict[str, Any]] = scripture_mgr.get() or []
+    # API: Get all scriptures (unsorted)
+    response = requests.get(
+        url='http://localhost:5010/api/scriptures',
+    )
+    scriptures = response.json()
 
     # Group scriptures by book and then by chapter
     scriptures_by_book = defaultdict(lambda: defaultdict(list))
