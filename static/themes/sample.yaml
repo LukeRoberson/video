@@ -32,7 +32,7 @@ section:
     end: 60
 
 # A quote, similar to how scriptures are formatted
-- quote: This is a quote, and is formattted differently.
+- quote: This is a quote, and is formatted differently.
 
 # A link, containing the URL and the text to display
 - link:
