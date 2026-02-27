@@ -40,6 +40,7 @@
     * [x] Get similar videos
     * [ ] Test scraper script
     * [x] Test similarity script
+    * [x] Themes
 9. Clean up
     * [ ] Split out api.py into smaller files
     * [ ] Add asynchronous requests for performance
@@ -151,6 +152,8 @@
 * Endpoints can include a parameter to filter the results they return
     * They don't need to return everything all the time
     * Keep the payload to a minimum
+* Themes
+    * Very slow to load, due to multiple API calls
 
 
 

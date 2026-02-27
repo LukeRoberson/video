@@ -15,11 +15,6 @@ Classes:
 
 Dependancies:
     Cerberus: Data validation library for Python.
-
-Custom Dependencies:
-    app.sql_db:
-        DatabaseContext: Context manager for database operations.
-        VideoManager: Manages videos.
 """
 
 # Standard dependencies
@@ -28,12 +23,7 @@ import yaml
 import os
 from typing import Tuple
 import logging
-
-# Custom dependencies
-from app.sql_db import (
-    DatabaseContext,
-    VideoManager
-)
+import requests
 
 
 class ThemeManager:
@@ -322,20 +312,21 @@ class ThemeManager:
                 if 'video' in item:
                     video_id = item['video'].get('id')
 
-                    # Get video details from the database
-                    with DatabaseContext() as db:
-                        video_mgr = VideoManager(db)
-                        details = video_mgr.get(video_id)
+                    # API: Get video details
+                    response = requests.get(
+                        f"http://localhost:5010/api/videos/{video_id}"
+                    )
+                    details = response.json()
 
-                        if not details:
-                            logging.warning(
-                                f"Video ID {video_id} not found in database."
-                            )
-                            continue
+                    # Check if video details were found
+                    if not details:
+                        logging.warning(
+                            f"Video ID {video_id} not found in database."
+                        )
+                        continue
 
-                        # Update the video info with fetched details
-                        details = details[0]
-                        item['video'].update(details)
+                    # Update the video info with fetched details
+                    item['video'].update(details)
 
                 # Handle video grid
                 elif 'video_grid' in item:
@@ -343,21 +334,22 @@ class ThemeManager:
                         if 'video' in grid_item:
                             video_id = grid_item['video'].get('id')
 
-                            # Get video details from the database
-                            with DatabaseContext() as db:
-                                video_mgr = VideoManager(db)
-                                details = video_mgr.get(video_id)
+                            # API: Get video details
+                            response = requests.get(
+                                f"http://localhost:5010/api/videos/{video_id}"
+                            )
+                            details = response.json()
 
-                                if not details:
-                                    logging.warning(
-                                        f"Video ID {video_id} "
-                                        f"not found in database."
-                                    )
-                                    continue
+                            # Check if video details were found
+                            if not details:
+                                logging.warning(
+                                    f"Video ID {video_id} "
+                                    f"not found in database."
+                                )
+                                continue
 
-                                # Update the video info with fetched details
-                                details = details[0]
-                                grid_item['video'].update(details)
+                            # Update the video info with fetched details
+                            grid_item['video'].update(details)
 
     def load_theme(
         self,
