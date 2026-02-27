@@ -39,17 +39,8 @@ Dependencies:
     - os: For building file paths.
     - functools: For creating decorators.
     - typing: For type hinting.
-
-Custom Dependencies:
-    - DatabaseContext: For managing database connections.
-    - VideoManager: For managing video data.
-    - CharacterManager: For managing character data.
-    - TagManager: For managing tag data.
-    - SpeakerManager: For managing speaker data.
-    - ScriptureManager: For managing scripture data.
-    - LocalDbContext: For managing local database connections.
-    - ProfileManager: For managing user profiles.
-    - ProgressManager: For managing user progress in videos.
+    - yaml: For parsing YAML files.
+    - requests: For making HTTP requests.
 """
 
 # Standard library imports
@@ -67,22 +58,12 @@ from flask import (
 
 import random
 import os
-from typing import List, Dict, Any
+from typing import Dict, Any
 from collections import defaultdict
 from functools import wraps
 from typing import Callable
 import yaml
 import requests
-
-# Custom imports
-from app.sql_db import (
-    DatabaseContext,
-    VideoManager,
-    CategoryManager,
-    CharacterManager,
-    TagManager,
-    LocationManager,
-)
 
 
 web_bp = Blueprint(
@@ -301,64 +282,56 @@ def home() -> Response:
 
         updated_list.append(entry)
 
-    # print(f"API videos: {updated_list}")
-
     # Sort, so the most recently updated videos are first
     updated_list.sort(
         key=lambda v: v.get('updated_at', ''),
         reverse=True
     )
 
-    # Get latest Monthly Programs video
+    # API: Convert category names to IDs
+    monthly_cat = requests.get(
+        url='http://localhost:5010/api/category/Monthly Programs',
+    ).json().get('category_id', None)
+
+    news_cat = requests.get(
+        url='http://localhost:5010/api/category/News and Announcements',
+    ).json().get('category_id', None)
+
+    # API: Get the latest monthly programs video
     monthly = None
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        cat_mgr = CategoryManager(db)
+    monthly = requests.get(
+        url='http://localhost:5010/api/videos/filter',
+        params={
+            'cat': monthly_cat,
+            'latest': 1
+        }
+    ).json()
 
-        # Get the category ID for 'Monthly Programs'
-        monthly_cat = cat_mgr.name_to_id(name='Monthly Programs')
-
-        if monthly_cat is not None:
-            monthly = video_mgr.get_filter(
-                category_id=[monthly_cat],
-                latest=1,
-            )
-
-    # Get the latest News video
+    # API: Get the latest news video
     news = None
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        cat_mgr = CategoryManager(db)
+    news = requests.get(
+        url='http://localhost:5010/api/videos/filter',
+        params={
+            'cat': news_cat,
+            'latest': 1
+        }
+    ).json()
 
-        # Get the category ID for 'News and Announcements'
-        news_cat = cat_mgr.name_to_id(name='News and Announcements')
-
-        if news_cat is not None:
-            news = video_mgr.get_filter(
-                category_id=[news_cat],
-                latest=1,
-            )
-
-    latest_monthly = monthly[0] if monthly else None
-    latest_news = news[0] if news else None
-
-    # Get the latest videos in general
-    latest = None
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-
-        # Get the latest 9 videos
-        latest = video_mgr.get_filter(
-            latest=9,
-        )
+    # API: Get the latest videos
+    latest = requests.get(
+        url='http://localhost:5010/api/videos/filter',
+        params={
+            'latest': 9
+        }
+    ).json()
 
     return make_response(
         render_template(
             "home.html",
             banners=banners,
             in_progress_videos=updated_list,
-            latest_monthly=latest_monthly,
-            latest_news=latest_news,
+            latest_monthly=monthly[0] if monthly else None,
+            latest_news=news[0] if news else None,
             latest_videos=latest,
         )
     )
@@ -562,15 +535,13 @@ def characters() -> Response:
         Response: A rendered HTML page with character details.
     """
 
-    with DatabaseContext() as db:
-        character_mgr = CharacterManager(db)
-        characters: List[Dict[str, Any]] = character_mgr.get() or []
-
-    # Sort characters by name in a case-insensitive manner
-    characters = sorted(
-        characters, key=lambda character: character.get('name', '').lower()
+    # API: Get all characters
+    response = requests.get(
+        url='http://localhost:5010/api/characters',
     )
+    characters = response.json()
 
+    # Set default profile picture if not provided
     for character in characters:
         if not character.get('profile_pic'):
             character['profile_pic'] = 'profile-icon.jpg'
@@ -599,18 +570,11 @@ def tags() -> Response:
         Response: A rendered HTML page with tag details.
     """
 
-    with DatabaseContext() as db:
-        tag_mgr = TagManager(db)
-        video_mgr = VideoManager(db)
-        tags: List[Dict[str, Any]] = tag_mgr.get() or []
-
-        # Get the video count for each tag
-        for tag in tags:
-            videos = video_mgr.get_filter(tag_id=tag['id'])
-            tag['video_count'] = len(videos) if videos else 0
-
-    # Sort tags by name in a case-insensitive manner
-    tags = sorted(tags, key=lambda tag: tag.get('name', '').lower())
+    # API: Get all tags
+    response = requests.get(
+        url='http://localhost:5010/api/tags',
+    )
+    tags = response.json()
 
     # Strip 'bcast_' prefix from tag names (special handling)
     tags = [
@@ -643,15 +607,11 @@ def location() -> Response:
         Response: A rendered HTML page with location details.
     """
 
-    with DatabaseContext() as db:
-        loc_mgr = LocationManager(db)
-        locations: List[Dict[str, Any]] = loc_mgr.get() or []
-
-    # Sort locations by name in a case-insensitive manner
-    locations = sorted(
-        locations,
-        key=lambda location: location.get('name', '').lower()
+    # API: Get all locations
+    response = requests.get(
+        url='http://localhost:5010/api/locations',
     )
+    locations = response.json()
 
     return make_response(
         render_template(
@@ -682,27 +642,6 @@ def speakers() -> Response:
         url='http://localhost:5010/api/speakers',
     )
     speakers = response.json()
-
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-
-        # Get the video count for each speaker
-        for speaker in speakers:
-            videos = video_mgr.get_filter(
-                speaker_id=speaker['id']
-            )
-            if not videos:
-                return make_response(
-                    render_template(
-                        "404.html",
-                        message="No videos found for this speaker"
-                    ),
-                    404
-                )
-            speaker['video_count'] = len(videos)
-
-    # Sort speakers by name in a case-insensitive manner
-    speakers = sorted(speakers, key=lambda s: s.get('name', '').lower())
 
     # Set default profile picture if not provided
     for speaker in speakers:
@@ -794,7 +733,9 @@ def scriptures() -> Response:
     )
 
 
-@web_bp.route('/.well-known/appspecific/com.chrome.devtools.json')
+@web_bp.route(
+    '/.well-known/appspecific/com.chrome.devtools.json'
+)
 def devtools_discovery():
     """
     Suppress 404 errors for Chrome DevTools discovery requests.

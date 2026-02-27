@@ -24,12 +24,12 @@
     * [x] Mark a video as watched
     * [x] Mark a video as unwatched
 6. Additional pages
-    * [ ] Scriptures
-    * [ ] Speakers
-    * [ ] Characters
-    * [ ] Tags
-    * [ ] Location
-    * [ ] Home Page (web.py)
+    * [x] Scriptures
+    * [x] Speakers
+    * [x] Characters
+    * [x] Tags
+    * [x] Location
+    * [x] Home Page (web.py)
 7. Search
     * [x] Normal search
     * [x] Advanced search
@@ -148,6 +148,9 @@
     * Seems to be unicode related
 * Update blueprints to use a url_prefix
     * As in api_search.py
+* Endpoints can include a parameter to filter the results they return
+    * They don't need to return everything all the time
+    * Keep the payload to a minimum
 
 
 

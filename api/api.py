@@ -1310,6 +1310,7 @@ def filter_videos() -> Response:
         - speaker_id: Filter by speaker ID.
         - character_id: Filter by character ID.
         - scripture_id: Filter by scripture ID.
+        - latest: Return only this many of the latest videos.
 
     Returns:
         Response: A JSON response containing the list of videos that match
@@ -1324,6 +1325,7 @@ def filter_videos() -> Response:
     speaker_id = request.args.get("speak", None)
     character_id = request.args.get("char", None)
     scripture_id = request.args.get("scrip", None)
+    latest = request.args.get("latest", None)
 
     # Validate that at least one filter was provided
     if all(
@@ -1335,6 +1337,7 @@ def filter_videos() -> Response:
             speaker_id,
             character_id,
             scripture_id,
+            latest,
         ]
     ):
         return api_error(
@@ -1358,6 +1361,7 @@ def filter_videos() -> Response:
             speaker_id=int(speaker_id) if speaker_id else None,
             character_id=int(character_id) if character_id else None,
             scripture_id=int(scripture_id) if scripture_id else None,
+            latest=int(latest) if latest else 0,
         )
 
     return make_response(
@@ -1425,8 +1429,15 @@ def get_tags() -> Response:
 
     with DatabaseContext() as db:
         tag_mgr = TagManager(db)
+        video_mgr = VideoManager(db)
 
+        # Get all tags
         tags = tag_mgr.get() or []
+
+        # Get the video count for each tag
+        for tag in tags:
+            videos = video_mgr.get_filter(tag_id=tag['id'])
+            tag['video_count'] = len(videos) if videos else 0
 
     # Sort tags alphabetically by name (case-insensitive)
     tags = sorted(
@@ -1643,8 +1654,19 @@ def get_speakers() -> Response:
 
     with DatabaseContext() as db:
         speaker_mgr = SpeakerManager(db)
+        video_mgr = VideoManager(db)
 
+        # Get a list of all speakers
         speakers = speaker_mgr.get() or []
+
+        # Get the video count for each speaker
+        for speaker in speakers:
+            videos = video_mgr.get_filter(
+                speaker_id=speaker['id']
+            )
+            if not videos:
+                videos = []
+            speaker['video_count'] = len(videos)
 
     # Sort speakers alphabetically by name (case-insensitive)
     speakers = sorted(

@@ -1025,7 +1025,7 @@ Notes:
 
 
 
-#### /api/categories/{category_name}
+#### /api/category/{category_name}
 
 
 **Method**:
@@ -1141,19 +1141,22 @@ GET
 
 
 **Description**:
-Get a list of videos, but filter by given parameters
+Get a list of videos, but filter by given parameters.
+
+Returns details of each video.
 
 
 **Parameters**
 
-| Parameter  | Type    | Mandatory | Notes        |
-| ---------- | ------- | --------- | ------------ |
-| cat        | integer | No        | Category ID  |
-| tag        | integer | No        | Tag ID       |
-| loc        | integer | No        | Location ID  |
-| speak      | integer | No        | Speaker ID   |
-| char       | integer | No        | Character ID |
-| scrip      | integer | No        | Scripture ID |
+| Parameter  | Type    | Mandatory | Notes                              |
+| ---------- | ------- | --------- | ---------------------------------- |
+| cat        | integer | No        | Category ID                        |
+| tag        | integer | No        | Tag ID                             |
+| loc        | integer | No        | Location ID                        |
+| speak      | integer | No        | Speaker ID                         |
+| char       | integer | No        | Character ID                       |
+| scrip      | integer | No        | Scripture ID                       |
+| latest     | integer | No        | Number of latest entries to return |
 
 
 **Returns**
@@ -1162,8 +1165,36 @@ Get a list of videos, but filter by given parameters
 
 
 ```json
-{
-}
+[
+    {
+        "date_added": "2014-10-01 00:00:00",
+        "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
+        "duration": 3305,
+        "id": 1,
+        "name": "JW Broadcasting—October 2014",
+        "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
+        "url": null,
+        "url_1080": "",
+        "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
+    },
+    {
+        "date_added": "2014-11-01 00:00:00",
+        "description": "A tour of the new SKE school in Florida\nA look at why publications are translated into so many languages\nTake a tour of the correspondence department\nHear from Lloyd Barry, as he talks about his early days as a missionary in Japan\nThe Gournon's tell about their 40+ years of service\nMorning worship; Curbing wrongful desire before it becomes a problem\nKeep improving your family worship\nMusic video - We won't forget you",
+        "duration": 3553,
+        "id": 2,
+        "name": "JW Broadcasting​—November 2014",
+        "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201411/art/jwb_univ_201411_lss_01_lg.jpg",
+        "url": null,
+        "url_1080": "",
+        "url_240": "https://akamd1.jw-cdn.org/sg2/p/c907e6/1/o/jwb_E_201411_01_r240P.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/fcc6f84/1/o/jwb_E_201411_01_r360P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/85baf5f/1/o/jwb_E_201411_01_r480P.mp4",
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/722c72/1/o/jwb_E_201411_01_r720P.mp4"
+    }
+]
 ```
 
 </br></br>
@@ -1217,7 +1248,9 @@ GET
 
 
 **Description**:
-Get a list of all tags
+Get a list of all tags and the video count associated with them.
+
+Repsonse is sorted by name alphabetically.
 
 
 **Returns**
@@ -1226,6 +1259,18 @@ Get a list of all tags
 
 
 ```json
+[
+    {
+        "id": 933,
+        "name": "1914",
+        "video_count": 123
+    },
+    {
+        "id": 1620,
+        "name": "1919",
+        "video_count": 123
+    }
+]
 ```
 
 </br></br>
@@ -1296,7 +1341,9 @@ GET
 
 
 **Description**:
-Get a list of all locations
+Get a list of all locations.
+
+Results are sorted alphabetically by name.
 
 
 **Returns**
@@ -1305,6 +1352,16 @@ Get a list of all locations
 
 
 ```json
+[
+    {
+        "id": 260,
+        "name": "Addis Ababa"
+    },
+    {
+        "id": 15,
+        "name": "Africa"
+    }
+]
 ```
 
 </br></br>
@@ -1375,7 +1432,9 @@ GET
 
 
 **Description**:
-Get a list of all speakers
+Get a list of all speakers in the database, along with a video count for each.
+
+Results are sorted by name alphabetically.
 
 
 **Returns**
@@ -1384,6 +1443,20 @@ Get a list of all speakers
 
 
 ```json
+[
+    {
+        "id": 321,
+        "name": "Person-1",
+        "profile_pic": "imagefile.png",
+        "video_count": 123
+    },
+    {
+        "id": 434,
+        "name": "Person-2",
+        "profile_pic": "imagefile.png",
+        "video_count": 123
+    }
+]
 ```
 
 </br></br>
@@ -1456,7 +1529,9 @@ GET
 
 
 **Description**:
-Get a list of all characters
+Get a list of all characters.
+
+Results are sorted by name alphabetically.
 
 
 **Returns**
@@ -1465,6 +1540,21 @@ Get a list of all characters
 
 
 ```json
+[
+    {
+        "date_range": "1597-1474 B.C.E.",
+        "description": "Aaron was the courageous spokesman for his brother, Moses, when they appeared before Pharaoh.\nJehovah later appointed Aaron to be Israel’s ﬁrst high priest.\nAlthough he served God loyally for many years, Aaron did not honor God at Meribah.\nTherefore, he was not allowed to enter the Promised Land.",
+        "id": 230,
+        "name": "Aaron",
+        "profile_pic": "230-Aaron.png"
+    },
+    {
+        "date_range": "About 3900's B.C.E.",
+        "description": "The second son of Adam and Eve and the first man of faith listed in the Bible.\nAbel proved that he wanted God’s favor by offering an acceptable sacrifice.\nAlthough the Bible does not record anything Abel said, his example and faith set a pattern for us.",
+        "id": 176,
+        "name": "Abel",
+        "profile_pic": "176-Abel.png"
+    }
 ```
 
 </br></br>
