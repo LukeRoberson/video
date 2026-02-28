@@ -2,96 +2,61 @@
 
 # Plan
 
-1. Clone main DB classes into the API folder
-    * [x] sql_db.py
-2. Migrate Admin endpoints
-    * [x] Add metadata
-    * [x] Add a scripture
-3. Clone user DB classes into the API folder
-    * [x] local_db.py
-4. Migrate user profile management
-    * [x] Add profile
-    * [x] Delete profile
-    * [x] Update profile
-    * [x] Clear watch history
-    * [x] Get active profile
-    * [x] Set active profile
-    * [x] Edit profile (web.py)
-    * [x] Select profile (web.py)
-5. Migrate video endpoints
-    * [x] Load videos (title, thumbnail) into categories
-    * [x] Update in progress status
-    * [x] Mark a video as watched
-    * [x] Mark a video as unwatched
-6. Additional pages
-    * [x] Scriptures
-    * [x] Speakers
-    * [x] Characters
-    * [x] Tags
-    * [x] Location
-    * [x] Home Page (web.py)
-7. Search
-    * [x] Normal search
-    * [x] Advanced search
-    * [x] Reindex
-    * [x] Status
-8. Other
-    * [ ] Avatar list in profile management; API or frontend? (api_profile.py)
-    * [x] Get similar videos
-    * [ ] Test scraper script
-    * [x] Test similarity script
-    * [x] Themes
-9. Clean up
-    * [ ] Split out api.py into smaller files
-    * [ ] Add asynchronous requests for performance
-    * [ ] Check all returns are in a consistent JSON format
-    * [ ] Update all documentation
-
-
-
-* Some pages, eg scriptures, do not use an API; They read the DB directly
-    * Will need to add an endpoint in these cases
+1. General clean up
+    * [x] Split out api.py into smaller files
+    * [x] Update docstrings in API files
+    * [ ] Cleanup API calls in TS files
+    * [ ] Cleanup API URLs in python files
+2. Documentation
+    * [ ] Clean up api.md; Possible split into multiple files
+    * [ ] Update other documentation files with changes
+3. Create standard response formats
+    * Some include 'data' and 'message', others don't
+    * [ ] `api_category.py`: 3x endpoints
+4. Logging and Testing
+    * [ ] Add better logging to API files
+    * [ ] Add a debug mode when starting the API (flask debug + logging level)
+    * [ ] Create and organize postman files for API testing
+    * [ ] Create a doc defining tests and their expected outcomes
+5. Clean up API Calls
+    * [ ] Set video base URL to /api/videos
+    * [ ] Set category base URL to /api/category
+    * [ ] Set scripture base URL to /api/scriptures
+    * [ ] Set video base URL to /api/videos
+    * [ ] TypeScript files (below)
+    * [ ] Duplicate API calls (profileEdit vs profileMgmt)
+6. Consolidate endpoints
+    * [ ] Combine get_video, get_videos_bulk, and filter_videos (api_video.py)
+    * [ ] Resolve duplicate endpoints
+7. Clean up bugs
+    * [ ] In categories, watch status on individual videos is not showing
+    * [ ] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
+    * [ ] Searches sometimes throw unicode errors in the terminal
+    * [ ] When saving a profile name change, this is not immediately reflected in the edit screen
+    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
+8. Coding improvements
+    * [ ] Investigate using 'MethodView' in Flask
+    * [ ] Update blueprints to use a URL prefix (as is done in api_search.py)
+    * [ ] Investigate whether avatars should be stored in the frontend or backend
+9. Performance
+    * [ ] Some endpoints should have a filter, so they don't return all information if it's not needed (minimal payload size)
+    * [ ] Fix themes.py - It makes many calls to the API instead of just one or two
+10. Active user redesign
+    * [ ] Get the frontend to track the active user, not the API (eg, mark as watched/unwatched, in progress videos)
+        * [ ] `api_category.py` - Category filter
+    * [ ] API calls from the frontend should include the active user if needed
+    * [ ] Clean up profile.py, as there's some code reuse around active profiles
 
 
 </br></br>
 
 
----
-# Endpoints
-
-## Frontend Usage
-
-
-| File                  | File Usage                       | Endpoint                                     | Description                          |
-| --------------------- | -------------------------------- | -------------------------------------------- | ------------------------------------ |
-| profileEdit.ts        | Editing user profiles            | /api/profile/pictures                        | Get a list of avatars                |
-
-</br></br>
-
-
-
-## Backend Mapping
-
-| Endpoint                                       | File           | Blueprint      | Function             |
-| ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/profile/pictures                          | api_profile.py | profile_api_bp | get_profile_pictures |
-
-
-| Endpoint                                       | File           | Blueprint      | Function             |
-| ---------------------------------------------- | -------------- | -------------- | -------------------- |
-| /api/search                                    | api_search.py  | search_bp      | search_videos        |
-| /api/search/reindex                            | api_search.py  | search_bp      | reindex_all_videos   |
-| /api/search/status                             | api_search.py  | search_bp      | search_status        |
-| /api/search/advanced                           | api_search.py  | search_bp      | advanced_search      |
-| /api/search/videos                             | api.py         | api_bp         | search_videos        |
-| /api/search/advanced                           | api.py         | api_bp         | advanced_search      |
-
-
-</br></br>
 
 
 
 # Cleanup
+
+## TypeScript Files
 
 * profileMgmt.ts
     * Base URLs in ProfileMgmtConfig
@@ -102,60 +67,15 @@
     * Base URLs in CategoryConfig
 * videoAdd.ts
     * Base URLs in VideoAddConfig
-
-
-
----
-# Notes
-
-* Why do we need profileEdit.ts and profileMgmt.ts?
-    * Overlapping functionality?
-    * Consolidate them?
-* Duplicate endpoints?
-    * /api/profile/update/{id}
-    * /edit_profile/{id}
 * videoPlayer.ts
     * Move API endpoints to a variable
-* Delete profile Endpoint
-    * Used in both profileMgmt.ts and profileEdit.ts
-    * profileMgmt - Delete profile from the profile selection screen
-    * profileEdit - Delete profile from the Edit profile screen
-    * These could be consolidated
-* Updating profiles
-    * When saving a name change, it's not immediately reflected in the edit screen
-* Enpoints to mark as watched/unwatched
-    * This uses stateful information; Gets the active user
-    * Would be better to pass the active user in the request
-* Active user
-    * Should this be tracked by the API?
-    * Would frontend be better, and it passes the ID to the API?
-* videoPlayer.ts
-    * Does not have API paths as constants as other files do
-* in progress endpoint
-    * Uses active profile within the API
-    * Better to pass active profile ID from frontend?
-* Investigate using 'MethodView' in Flask
-    * Uses a class to separate method functions for endpoints
-* profile.py
-    * Some endpoints check for a profile ID and fallback to the session
-    * This results in a lot of code reuse
-* Categories
-    * Watch status on individual videos is not showing
-* Speakers
-    * Unicode error for one speaker (500-Marija_Golubiček.png)
-    * Not API specific error
-* Search
-    * Throws some benign errors in the console
-    * Seems to be unicode related
-* Update blueprints to use a url_prefix
-    * As in api_search.py
-* Endpoints can include a parameter to filter the results they return
-    * They don't need to return everything all the time
-    * Keep the payload to a minimum
-* Themes
-    * Very slow to load, due to multiple API calls
 
 
+## Overlapping API calls and endpoints
 
+* profileEdit.ts and profileMgmt.ts
+    * These appear to do the same thing
+    * Can they be consolidated?
+* Duplicate endpoints
+    * /api/profile/update/{id} and /edit_profile/{id} appear to be the same thing
 
-</br></br>

@@ -5,29 +5,37 @@ API endpoints that the browser will use to fetch additional information
     Specifically, for user profiles and their management.
 
 Blueprints:
-    - api_profile: Blueprint for user profile API endpoints.
-        For example, managing user profiles and their related data.
+    api_profile
 
-Routes:
-    - /api/profile/create
-        - create_profile: Creates a new user profile.
-    - /api/profile/set_active
-        - set_active_profile: Sets the profile for the session.
-    - /api/profile/get_active
-        - get_active_profile: Retrieves the profile for the session.
-    - /api/profile/mark_watched
-        - mark_watched: Marks a video as watched for the active profile.
-    - /api/profile/mark_watched_bulk
-        - check_watched_bulk:
-            Checks watched status for multiple videos at once.
-    - /api/profile/mark_unwatched
-        - mark_unwatched: Marks a video as unwatched for the profile.
-    - /api/profile/in_progress
-        - in_progress_videos: Manages in-progress videos for the profile.
-    - /api/profile/delete/<int:profile_id>
-        - delete_profile: Deletes a user profile by ID.
-    - /api/profile/update/<int:profile_id>
-        - update_profile: Updates a user profile by ID.
+Endpoints:
+    GET /api/profile
+        Retrieves a list of all user profiles.
+    GET /api/profile/<profile_id>
+        Retrieves a specific user profile by ID.
+    POST /api/profile/create
+        Creates a new user profile with the provided name and image.
+    DELETE /api/profile/delete/<profile_id>
+        Deletes a user profile by ID.
+    POST /api/profile/update/<profile_id>
+        Updates a user profile's name and/or image by ID.
+    POST /api/profile/set_active
+        Sets the active profile for the session.
+    GET /api/profile/get_active
+        Retrieves the active profile for the session.
+    POST /api/profile/clear_history/<profile_id>
+        Clears the watch history for a user profile by ID.
+    GET /api/profile/mark_watched
+        Checks if a video is marked as watched for the active profile.
+    POST /api/profile/mark_watched_bulk
+        Checks watched status for multiple videos for the active profile.
+    POST /api/profile/mark_watched
+        Marks a video as watched for the active profile.
+    POST /api/profile/mark_unwatched
+        Marks a video as unwatched for the active profile.
+    GET /api/profile/watch_history
+        Retrieves the watch history for the active profile.
+    GET/POST/UPDATE/DELETE /api/profile/in_progress
+        Manages in-progress video tracking for user profiles.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -59,6 +67,8 @@ from api.local_db import (
     ProgressManager,
 )
 
+
+logger = logging.getLogger(__name__)
 
 # Blueprint for user profile API endpoints
 profile_bp = Blueprint(

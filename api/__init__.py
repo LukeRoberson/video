@@ -26,9 +26,17 @@ Dependencies:
     - SearchService: Service for handling search functionalities.
 
 Custom Imports:
-    - api.api: Blueprints for admin and video API endpoints.
     - api.profile: Blueprint for user profile API endpoints.
     - api.api_search: Blueprint for search API endpoints.
+    - api.api_video: Blueprint for video-related API endpoints.
+    - api.api_category: Blueprint for category-related API endpoints.
+    - api.api_tag: Blueprint for tag-related API endpoints.
+    - api.api_scripture: Blueprint for scripture-related API endpoints.
+    - api.api_location: Blueprint for location-related API endpoints.
+    - api.api_speaker: Blueprint for speaker-related API endpoints.
+    - api.api_character: Blueprint for character-related API endpoints.
+    - api.api_similarity: Blueprint for similarity-related API endpoints.
+    - api.search: SearchService class for handling search functionalities.
 """
 
 # Standard library imports
@@ -37,13 +45,21 @@ from flask import Flask
 from flask_cors import CORS
 
 # Custom imports
-from api.api import (
-    admin_bp,
-    video_bp
-)
-from api.profile import profile_bp
+from api.api_profile import profile_bp
 from api.api_search import search_bp
+from api.api_video import video_endpoint
+from api.api_category import category_endpoint
+from api.api_tag import tag_endpoint
+from api.api_scripture import scripture_endpoint
+from api.api_location import location_endpoint
+from api.api_speaker import speaker_endpoint
+from api.api_character import character_endpoint
+from api.api_similarity import similarity_endpoint
 from api.search import SearchService
+
+
+# CORS, for running locally with the frontend on localhost:5000
+FRONTEND_ORIGIN = 'http://localhost:5000'
 
 
 class ColouredFormatter(
@@ -146,7 +162,7 @@ def create_app(
     #   Credentials are needed for session management (session cookies)
     CORS(
         app,
-        origins=['http://localhost:5000'],
+        origins=[FRONTEND_ORIGIN],
         supports_credentials=True
     )
 
@@ -154,10 +170,16 @@ def create_app(
     app.secret_key = key
 
     # Register blueprints
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(video_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(search_bp)
+    app.register_blueprint(video_endpoint)
+    app.register_blueprint(category_endpoint)
+    app.register_blueprint(tag_endpoint)
+    app.register_blueprint(scripture_endpoint)
+    app.register_blueprint(location_endpoint)
+    app.register_blueprint(speaker_endpoint)
+    app.register_blueprint(character_endpoint)
+    app.register_blueprint(similarity_endpoint)
 
     # Initialize search service with app context
     with app.app_context():

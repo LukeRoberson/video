@@ -26,10 +26,12 @@ External Dependencies:
         make_response - to create custom responses
 
 Local Dependencies:
-    search
-        SearchService - Main search service handling search logic
-        ElasticsearchClient - Client for interacting with Elasticsearch
-        ElasticsearchIndexer - Indexer for managing Elasticsearch indices
+    api.search.SearchService
+        Main search service handling search logic
+    api.search.ElasticsearchClient
+        Client for interacting with Elasticsearch
+    api.search.ElasticsearchIndexer
+        Indexer for managing Elasticsearch indices
 """
 
 # Standard Library Imports
@@ -48,7 +50,7 @@ from flask import (
     make_response
 )
 
-# Local Application Imports
+# Local Imports
 from api.search import (
     SearchService,
     ElasticsearchClient,

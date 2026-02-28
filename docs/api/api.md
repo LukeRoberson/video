@@ -1,8 +1,73 @@
 # API
 
+## Endpoint Types
+
+Endpoints are categorised into these types:
+
+| Type             | Doc File      |
+| ---------------- | ------------- |
+| Categories       | categories.md |
+| Bible Characters | characters.md |
+| Profiles         | profiles.md   |
+| Scriptures       | scriptures.md |
+| Search           | search.md     |
+| Similarity       | similarity.md |
+| Speakers         | speakers.md   |
+| Tags             | tags.md       |
+| Videos           | videos.md     |
+</br></br>
 
 
----
+----
+## Standard Responses
+
+### Success
+
+On success, an API call will typically respond with a `200 OK` message.
+
+It will also include a JSON body with a format like this:
+</br></br>
+
+
+```json
+{
+    "data": [],
+    "message": "success message",
+    "success": true
+}
+```
+</br></br>
+
+
+The `data` field will contain whatever information was requested from this endpoint. This will vary for each endpoint.
+
+The `message` field is a simple user-friendly message indicating the success of the API call.
+
+The `success` field is a boolean, indicating success or failure.
+</br></br>
+
+
+
+### Failure
+
+On failure, the API will respond with a `4xx` or `5xx` error code. `404 NOT FOUND` is common when querying something (such as a video) that does not exist.
+
+This will also include a JSON body in this format:
+</br></br>
+
+
+```json
+{
+    "error": "An error message describing the problem",
+    "success": false
+}
+```
+</br></br>
+
+
+
+
+----
 ## Endpoints
 
 ### Admin
@@ -984,71 +1049,6 @@ Uses the active user.
 ### Videos
 
 
-#### /api/categories/{category_id}/{subcategory_id}
-
-
-**Method**:
-GET
-
-
-**Description**:
-Get a list of videos in a particular category/subcategory combination.
-
-
-Returns:
-
-200 OK
-
-
-Notes:
-* Returns a list of entries
-
-
-```json
-[
-    {
-        "date_added": "2025-11-04 00:00:00",
-        "description": "A talk about taking in spiritual food, by Geoffrey Jackson.\nHighlights from the dedication of the new Britain branch.\nThe experience of Nigel Baker.\nMorning worship with John Ekrann.\nDig for Treasures - Obadiah.\nThe experience of Domenic Alessia.\nMusic Video - Hearer of Prayer.\nVideo Postcard from Brussels.",
-        "duration": "57:56",
-        "id": 3011,
-        "name": "JW Broadcasting—November 2025",
-        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
-        "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
-        "url_1080": null,
-        "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
-        "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
-        "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
-        "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4"
-    }
-]
-```
-
-
-
-#### /api/category/{category_name}
-
-
-**Method**:
-GET
-
-
-**Description**:
-Resolve a category name to an ID.
-
-
-Returns:
-
-200 OK
-
-
-```json
-{
-    "category_id": 123
-}
-```
-
-
-
 #### /api/videos/{video_id}
 
 
@@ -1202,40 +1202,6 @@ Returns details of each video.
 
 
 ----
-### Categories
-
-#### /api/categories/video/{id}
-
-
-**Method**:
-GET
-
-
-**Description**:
-Get a list of categories associated with a video ID
-
-
-**Returns**
-
-200 OK
-
-
-```json
-[
-    {
-        "id": 1,
-        "name": "Monthly Programs"
-    },
-    {
-        "id": 1340,
-        "name": "JW Broadcasting"
-    }
-]
-```
-
-
-
-</br></br>
 
 
 ----
