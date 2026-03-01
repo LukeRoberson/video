@@ -12,6 +12,10 @@
     * Some include 'data' and 'message', others don't
     * [ ] `api_category.py`: 3x endpoints
     * [ ] `api_character.py`: 3x endpoints
+    * [ ] `api_similarity.py`: 1x endpoint
+    * [ ] `api_tag.py`: 3x endpoints
+    * [ ] `api_scripture.py`: 3x endpoints
+    * [ ] `api_location.py`: 3x endpoints
 4. Logging and Testing
     * [ ] Add better logging to API files
     * [ ] Add a debug mode when starting the API (flask debug + logging level)
@@ -20,14 +24,14 @@
 5. Clean up API Calls
     * [ ] Set video base URL to /api/videos
     * [x] Set category base URL to /api/category
-    * [ ] Set scripture base URL to /api/scriptures
-    * [ ] Set video base URL to /api/videos
+    * [x] Set scripture base URL to /api/scriptures
     * [ ] TypeScript files (below)
     * [ ] Duplicate API calls (profileEdit vs profileMgmt)
 6. Consolidate endpoints
     * [ ] Combine get_video, get_videos_bulk, and filter_videos (api_video.py)
     * [ ] Combine endpoints to get all characters and get one specific character (api_character.py)
-    * [ ] Resolve duplicate endpoints
+    * [ ] Combine 'get all speakers' with 'get specific speaker' (api_speaker.py)
+    * [ ] Combine 'get all tags' with 'get specific tag' (api_tags.py)
 7. Clean up bugs
     * [ ] In categories, watch status on individual videos is not showing
     * [ ] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode

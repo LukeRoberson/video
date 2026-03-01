@@ -6,12 +6,12 @@ API endpoints related to scriptures.
 Endpoints:
     GET /api/scriptures
         Get a list of all scriptures.
-    POST /api/scripture
-        Add text to a scripture.
     GET /api/scriptures/video/<int:video_id>
         Get the scriptures for a video by its ID.
     GET /api/scriptures/<int:scripture_id>
         Get a scripture by its ID.
+    POST /api/scriptures
+        Add text to a scripture.
 
 Blueprints:
     scripture_endpoint
@@ -68,12 +68,13 @@ logger = logging.getLogger(__name__)
 # Create a blueprint for scripture-related endpoints
 scripture_endpoint = Blueprint(
     'scripture_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/scriptures'
 )
 
 
 @scripture_endpoint.route(
-    "/api/scriptures",
+    "",
     methods=["GET"],
 )
 def get_scriptures() -> Response:
@@ -98,7 +99,7 @@ def get_scriptures() -> Response:
 
 
 @scripture_endpoint.route(
-    "/api/scriptures/<int:scripture_id>",
+    "/<int:scripture_id>",
     methods=["GET"],
 )
 def get_scripture(
@@ -134,7 +135,7 @@ def get_scripture(
 
 
 @scripture_endpoint.route(
-    "/api/scriptures/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_scriptures(
@@ -177,7 +178,7 @@ def get_video_scriptures(
 
 
 @scripture_endpoint.route(
-    "/api/scripture",
+    "",
     methods=["POST"],
 )
 def add_scripture_text() -> Response:
@@ -252,9 +253,9 @@ def add_scripture_text() -> Response:
 
     if scr_id is None:
         logging.error(
-            f"Failed to create scripture: {scr_name}"
+            f"Failed to add scripture text: {scr_name}"
         )
-        return api_error(f"Failed to create scripture: {scr_name}", 500)
+        return api_error(f"Failed to add scripture text: {scr_name}", 500)
 
     # Add the scripture text to the database
     logging.info(

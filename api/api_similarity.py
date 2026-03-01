@@ -52,12 +52,13 @@ from api.sql_db import (
 # Create a blueprint for similarity-related endpoints
 similarity_endpoint = Blueprint(
     'similarity_endpoint',
-    __name__
+    __name__,
+    url_prefix="/api/similarity"
 )
 
 
 @similarity_endpoint.route(
-    "/api/similarity/<int:video_id>",
+    "/<int:video_id>",
     methods=["GET"],
 )
 def get_similar_videos(

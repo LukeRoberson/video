@@ -23,6 +23,10 @@ Fixtures:
         Provides a valid character ID for testing.
     invalid_character_id
         Provides an invalid character ID for testing.
+    valid_speaker_id
+        Provides a valid speaker ID for testing.
+    invalid_speaker_id
+        Provides an invalid speaker ID for testing.
 """
 
 
@@ -109,6 +113,104 @@ def invalid_character_id() -> int:
     Fixture to provide an invalid character ID for testing.
 
     '9999' is assumed to be a non-existent character ID
+    """
+
+    return 9999
+
+
+@pytest.fixture
+def valid_speaker_id() -> int:
+    """
+    Fixture to provide a valid speaker ID for testing.
+
+    '1' is assumed to be an existing speaker ID
+    """
+
+    return 1
+
+
+@pytest.fixture
+def invalid_speaker_id() -> int:
+    """
+    Fixture to provide an invalid speaker ID for testing.
+
+    '9999' is assumed to be a non-existent speaker ID
+    """
+
+    return 9999
+
+
+@pytest.fixture
+def valid_tag_id() -> int:
+    """
+    Fixture to provide a valid tag ID for testing.
+
+    '1' is assumed to be an existing tag ID
+    """
+
+    return 1
+
+
+@pytest.fixture
+def invalid_tag_id() -> int:
+    """
+    Fixture to provide an invalid tag ID for testing.
+
+    '9999' is assumed to be a non-existent tag ID
+    """
+
+    return 9999
+
+
+@pytest.fixture
+def valid_scripture_name() -> str:
+    """
+    Fixture to provide a valid scripture name for testing.
+    """
+
+    return "John 1:1"
+
+
+@pytest.fixture
+def invalid_scripture_name() -> str:
+    """
+    Fixture to provide an invalid scripture name for testing.
+    """
+
+    return "John 9999:9999"
+
+
+@pytest.fixture
+def valid_scripture_id() -> int:
+    """
+    Fixture to provide a valid scripture ID for testing.
+    """
+
+    return 2
+
+
+@pytest.fixture
+def invalid_scripture_id() -> int:
+    """
+    Fixture to provide an invalid scripture ID for testing.
+    """
+
+    return 9999
+
+
+@pytest.fixture
+def valid_location_id() -> int:
+    """
+    Fixture to provide a valid location ID for testing.
+    """
+
+    return 1
+
+
+@pytest.fixture
+def invalid_location_id() -> int:
+    """
+    Fixture to provide an invalid location ID for testing.
     """
 
     return 9999

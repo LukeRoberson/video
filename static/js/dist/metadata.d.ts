@@ -12,7 +12,7 @@ declare const MetadataConfig: {
     /** API endpoint for video metadata */
     readonly VIDEO_METADATA_ENDPOINT: "/api/video/metadata";
     /** API endpoint for scripture data */
-    readonly SCRIPTURE_ENDPOINT: "/api/scripture";
+    readonly SCRIPTURE_ENDPOINT: "/api/scriptures";
     /** Content type for JSON requests */
     readonly JSON_CONTENT_TYPE: "application/json";
 };

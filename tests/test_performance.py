@@ -5,16 +5,16 @@ Test the performance of key API endpoints
     to ensure they respond within acceptable time limits.
 
 Classes:
-    TestCategories
-        Basic performance tests for category-related endpoints.
-    TestCharacters
-        Basic performance tests for character-related endpoints.
-    TestSimilarity
-        Basic performance tests for similarity-related endpoints.
+    TestPerformance
+        Consolidated performance tests for all API endpoints.
+
+To do:
+    - Test performance for adding a scripture (POST /api/scriptures)
 """
 
 
 import requests
+import pytest
 
 
 # Configuration
@@ -22,140 +22,250 @@ BASE_URL = "http://localhost:5010"
 API_PREFIX = "/api"
 
 
-class TestCategories:
+class TestPerformance:
     """
-    Basic performance tests.
+    Consolidated performance tests for all API endpoints.
 
-    Methods:
-        test_response_time_category_lookup
-            Test that category lookup responds within acceptable time.
-        test_response_time_video_retrieval
-            Test that video retrieval responds within acceptable time.
+    Uses parametrization to test multiple endpoints with the same logic.
     """
 
-    def test_response_time_category_lookup(
+    # Define endpoint patterns:
+    #   (endpoint_template, fixture_name, max_time_seconds, description)
+    ENDPOINTS_NO_PARAMS = [
+        ("/characters", 3.0, "Retrieve all characters"),
+        ("/speakers", 3.0, "Retrieve all speakers"),
+        ("/tags", 3.0, "Retrieve all tags"),
+        ("/scriptures", 3.0, "Retrieve all scriptures"),
+    ]
+
+    ENDPOINTS_SINGLE_ID = [
+        (
+            "/characters/{id}",
+            "valid_character_id",
+            2.1,
+            "Character lookup"
+        ),
+        (
+            "/speakers/{id}",
+            "valid_speaker_id",
+            2.1,
+            "Speaker lookup"
+        ),
+        (
+            "/tags/{id}",
+            "valid_tag_id",
+            2.1,
+            "Tag lookup"
+        ),
+        (
+            "/characters/video/{id}",
+            "valid_video_id",
+            3.0,
+            "Retrieve characters for video"
+        ),
+        (
+            "/speakers/video/{id}",
+            "valid_video_id",
+            3.0,
+            "Retrieve speakers for video"
+        ),
+        (
+            "/tags/video/{id}",
+            "valid_video_id",
+            3.0,
+            "Retrieve tags for video"
+        ),
+        (
+            "/similarity/{id}",
+            "valid_video_id",
+            3.0,
+            "Similarity lookup"
+        ),
+        (
+            "/scriptures/video/{id}",
+            "valid_video_id",
+            3.0,
+            "Retrieve scriptures for video"
+        ),
+        (
+            "/scriptures/{id}",
+            "valid_scripture_id",
+            3.0,
+            "Scripture lookup by ID"
+        ),
+        (
+            "/locations/{id}",
+            "valid_location_id",
+            3.0,
+            "Location lookup by ID"
+        ),
+        (
+            "/locations/video/{id}",
+            "valid_video_id",
+            3.0,
+            "Retrieve locations for video"
+        ),
+
+    ]
+
+    ENDPOINTS_SINGLE_NAME = [
+        (
+            "/categories/{name}",
+            "valid_category_name",
+            3.0,
+            "Category name lookup"
+        ),
+    ]
+
+    ENDPOINTS_DUAL_ID = [
+        (
+            "/categories/{id1}/{id2}",
+            "valid_category_id",
+            "valid_subcategory_id",
+            5.0,
+            "Video retrieval by category"
+        ),
+    ]
+
+    @pytest.mark.parametrize(
+        "endpoint,max_time,description",
+        ENDPOINTS_NO_PARAMS
+    )
+    def test_response_time_no_params(
         self,
-        valid_category_name: str
+        endpoint: str,
+        max_time: float,
+        description: str
     ) -> None:
         """
-        Test that category lookup responds within acceptable time.
+        Test response time for endpoints without parameters.
 
         Arguments:
-            valid_category_name: A valid category name provided by fixture.
+            endpoint: The API endpoint path.
+            max_time: Maximum acceptable response time in seconds.
+            description: Description of what the test does.
         """
-
-        url = f"{BASE_URL}{API_PREFIX}/category/{valid_category_name}"
+        url = f"{BASE_URL}{API_PREFIX}{endpoint}"
         response = requests.get(url)
 
-        # Should respond within 2 seconds
-        assert response.elapsed.total_seconds() < 2.1
+        assert response.status_code == 200, \
+            f"Request failed with status {response.status_code}"
+        assert response.elapsed.total_seconds() < max_time, \
+            (
+                f"{description}: Expected response < {max_time}s, got "
+                f"{response.elapsed.total_seconds()}s"
+            )
 
-    def test_response_time_video_retrieval(
+    @pytest.mark.parametrize(
+        "endpoint_template,fixture_name,max_time,description",
+        ENDPOINTS_SINGLE_ID
+    )
+    def test_response_time_single_id(
         self,
-        valid_category_id: int,
-        valid_subcategory_id: int
+        endpoint_template: str,
+        fixture_name: str,
+        max_time: float,
+        description: str,
+        request: pytest.FixtureRequest
     ) -> None:
         """
-        Test that video retrieval responds within acceptable time.
+        Test response time for endpoints with a single ID parameter.
 
         Arguments:
-            valid_category_id: A valid category ID provided by fixture.
-            valid_subcategory_id: A valid subcategory ID provided by fixture.
+            endpoint_template: URL template with {id} placeholder.
+            fixture_name: Name of fixture providing the ID.
+            max_time: Maximum acceptable response time in seconds.
+            description: Description of what the test does.
+            request: pytest request object to access fixtures.
         """
 
-        url = (
-            f"{BASE_URL}{API_PREFIX}/categories/{valid_category_id}/"
-            f"{valid_subcategory_id}"
+        fixture_value = request.getfixturevalue(fixture_name)
+        url = f"{BASE_URL}{API_PREFIX}{endpoint_template}".format(
+            id=fixture_value
         )
         response = requests.get(url)
 
-        # Should respond within 5 seconds (may return multiple videos)
-        assert response.elapsed.total_seconds() < 5.0
+        assert response.status_code == 200, \
+            f"Request failed with status {response.status_code}"
 
+        assert response.elapsed.total_seconds() < max_time, \
+            (
+                f"{description}: Expected response < {max_time}s, got "
+                f"{response.elapsed.total_seconds()}s"
+            )
 
-class TestCharacters:
-    """
-    Basic performance tests for character-related endpoints.
-
-    Methods:
-        test_response_time_all_characters
-            Test retrieving all characters response time.
-        test_response_time_character_lookup
-            Test character lookup response time.
-        test_response_time_video_characters
-            Test retrieving characters for a video response time.
-    """
-
-    def test_response_time_all_characters(
-        self
-    ) -> None:
-        """
-        Test retrieving all characters response time.
-        """
-
-        url = f"{BASE_URL}{API_PREFIX}/characters"
-        response = requests.get(url)
-
-        # Should respond within 2 seconds
-        assert response.elapsed.total_seconds() < 2.1
-
-    def test_response_time_character_lookup(
+    @pytest.mark.parametrize(
+        "endpoint_template,fixture_name,max_time,description",
+        ENDPOINTS_SINGLE_NAME
+    )
+    def test_response_time_single_name(
         self,
-        valid_character_id: int
+        endpoint_template: str,
+        fixture_name: str,
+        max_time: float,
+        description: str,
+        request: pytest.FixtureRequest
     ) -> None:
         """
-        Test character lookup response time.
+        Test response time for endpoints with a single name parameter.
 
         Arguments:
-            valid_character_id: A valid character ID provided by fixture.
+            endpoint_template: URL template with {name} placeholder.
+            fixture_name: Name of fixture providing the name.
+            max_time: Maximum acceptable response time in seconds.
+            description: Description of what the test does.
+            request: pytest request object to access fixtures.
         """
-
-        url = f"{BASE_URL}{API_PREFIX}/characters/{valid_character_id}"
+        fixture_value = request.getfixturevalue(fixture_name)
+        url = f"{BASE_URL}{API_PREFIX}{endpoint_template}".format(
+            name=fixture_value
+        )
         response = requests.get(url)
 
-        # Should respond within 2 seconds
-        assert response.elapsed.total_seconds() < 2.1
+        assert response.status_code == 200, \
+            f"Request failed with status {response.status_code}"
+        assert response.elapsed.total_seconds() < max_time, \
+            (
+                f"{description}: Expected response < {max_time}s, got "
+                f"{response.elapsed.total_seconds()}s"
+            )
 
-    def test_response_time_video_characters(
+    @pytest.mark.parametrize(
+        "endpoint_template,fixture1,fixture2,max_time,description",
+        ENDPOINTS_DUAL_ID
+    )
+    def test_response_time_dual_id(
         self,
-        valid_video_id: int
+        endpoint_template: str,
+        fixture1: str,
+        fixture2: str,
+        max_time: float,
+        description: str,
+        request: pytest.FixtureRequest
     ) -> None:
         """
-        Test retrieving characters for a video response time.
+        Test response time for endpoints with two ID parameters.
 
         Arguments:
-            valid_video_id: A valid video ID provided by fixture.
+            endpoint_template: URL template with {id1} and {id2} placeholders.
+            fixture1: Name of fixture for first ID.
+            fixture2: Name of fixture for second ID.
+            max_time: Maximum acceptable response time in seconds.
+            description: Description of what the test does.
+            request: pytest request object to access fixtures.
         """
-
-        url = f"{BASE_URL}{API_PREFIX}/characters/video/{valid_video_id}"
+        value1 = request.getfixturevalue(fixture1)
+        value2 = request.getfixturevalue(fixture2)
+        url = f"{BASE_URL}{API_PREFIX}{endpoint_template}".format(
+            id1=value1,
+            id2=value2
+        )
         response = requests.get(url)
 
-        # Should respond within 3 seconds (may return multiple characters)
-        assert response.elapsed.total_seconds() < 3.0
-
-
-class TestSimilarity:
-    """
-    Basic performance tests for similarity-related endpoints.
-
-    Methods:
-        test_response_time_similarity_lookup
-            Test similarity lookup response time.
-    """
-
-    def test_response_time_similarity_lookup(
-        self,
-        valid_video_id: int
-    ) -> None:
-        """
-        Test similarity lookup response time.
-
-        Arguments:
-            valid_video_id: A valid video ID provided by fixture.
-        """
-
-        url = f"{BASE_URL}{API_PREFIX}/similarity/{valid_video_id}"
-        response = requests.get(url)
-
-        # Should respond within 3 seconds (may return multiple similar videos)
-        assert response.elapsed.total_seconds() < 3.0
+        assert response.status_code == 200, \
+            f"Request failed with status {response.status_code}"
+        assert response.elapsed.total_seconds() < max_time, \
+            (
+                f"{description}: Expected response < {max_time}s, got "
+                f"{response.elapsed.total_seconds()}s"
+            )

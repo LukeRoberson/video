@@ -86,7 +86,7 @@ def get_search_service() -> SearchService:
 
 
 @search_bp.route(
-    '/',
+    '',
     methods=['GET']
 )
 def search_videos():

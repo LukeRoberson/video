@@ -47,19 +47,29 @@ GET
 
 **Parameters**
 
-TBA
+| Parameter | Type    | Mandatory | Default | Range | Description                      |
+| --------- | ------- | --------- | ------- | ----- | -------------------------------- |
+| q         | string  | Yes       | N/A     | N/A   | The search query                 |
+| page      | integer | No        | 1       | N/A   | Page number for pagination       |
+| per_page  | integer | No        | 20      | 1-100 | Results per page in the response |
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`400 BAD REQUEST` if the query parameter is not included.
+
+`400 BAD REQUEST` if invalid pagination parameters are given.
+
+`500 INTERNAL SERVER ERROR` If there was a problem performing the search.
 </br></br>
 
 

@@ -13,7 +13,7 @@ const MetadataConfig = {
     /** API endpoint for video metadata */
     VIDEO_METADATA_ENDPOINT: '/api/video/metadata',
     /** API endpoint for scripture data */
-    SCRIPTURE_ENDPOINT: '/api/scripture',
+    SCRIPTURE_ENDPOINT: '/api/scriptures',
     /** Content type for JSON requests */
     JSON_CONTENT_TYPE: 'application/json'
 } as const;

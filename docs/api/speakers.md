@@ -34,7 +34,9 @@ API endpoints that relate to video speakers and interviewees.
 
 **Description**
 
-Get a list of all speakers
+Get a list of all speakers.
+
+List is sorted alphabetically by speaker name.
 </br></br>
 
 
@@ -46,13 +48,13 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
@@ -64,17 +66,28 @@ TBA
 
 **Response Body**
 
-TBA
+A list of speakers, with each entry describing the speaker.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                |
+| ----------- | ------- | ------------------------------------------ |
+| id          | integer | The speaker's ID                           |
+| name        | string  | The speaker's name                         |
+| profile_pic | string  | The filename for the speaker's profile pic |
+| video_count | integer | The number of videos they appear in        |
 </br></br>
 
 
 ```json
+[
+    {
+        "id": 321,
+        "name": "Adolf Denk",
+        "profile_pic": "321-Adolph_Denk.png",
+        "video_count": 2
+    }
+]
 ```
 </br></br>
 
@@ -98,38 +111,57 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`404 NOT FOUND` If the speaker does not exist
 </br></br>
 
 
 **Response Body**
 
-TBA
+Returns one specific speaker's details.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                            |
+| ----------- | ------- | -------------------------------------- |
+| id          | integer | The speaker's ID                       |
+| name        | string  | The speaker's name                     |
+| profile_pic | string  | Filename for the speaker's profile pic |
 </br></br>
 
 
 ```json
+{
+    "id": 321,
+    "name": "Adolf Denk",
+    "profile_pic": "321-Adolph_Denk.png"
+}
 ```
 </br></br>
 
+
+If there is an error:
+
+```json
+{
+    "error": "Speaker with ID 3 not found",
+    "success": false
+}
+```
+</br></br>
 
 
 
@@ -150,34 +182,56 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`404 NOT FOUND` if the video is not found
 </br></br>
 
 
 **Response Body**
 
-TBA
+Returns a list, where each entry contains a speaker's details
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                |
+| ----------- | ------- | ------------------------------------------ |
+| id          | integer | The speaker's ID                           |
+| name        | string  | The speaker's name                         |
+| profile_pic | string  | The filename for the speaker's profile pic |
 </br></br>
 
 
 ```json
+[
+    {
+        "id": 1,
+        "name": "Stephen Lett",
+        "profile_pic": "1-Stephen_Lett.png"
+    }
+]
+```
+</br></br>
+
+
+If the video is not found:
+
+```json
+{
+    "error": "Video with ID 6 not found",
+    "success": false
+}
 ```
 </br></br>

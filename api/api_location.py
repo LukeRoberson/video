@@ -56,12 +56,13 @@ from api.sql_db import (
 # Create a blueprint for location-related endpoints
 location_endpoint = Blueprint(
     'location_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/locations'
 )
 
 
 @location_endpoint.route(
-    "/api/locations",
+    "",
     methods=["GET"],
 )
 def get_locations() -> Response:
@@ -91,7 +92,7 @@ def get_locations() -> Response:
 
 
 @location_endpoint.route(
-    "/api/locations/<int:location_id>",
+    "/<int:location_id>",
     methods=["GET"],
 )
 def get_location(
@@ -127,7 +128,7 @@ def get_location(
 
 
 @location_endpoint.route(
-    "/api/locations/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_locations(

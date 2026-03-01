@@ -62,7 +62,7 @@ character_endpoint = Blueprint(
 
 
 @character_endpoint.route(
-    "/",
+    "",
     methods=["GET"],
 )
 def get_characters() -> Response:

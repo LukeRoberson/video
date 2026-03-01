@@ -56,12 +56,13 @@ from api.sql_db import (
 # Create a blueprint for speaker-related endpoints
 speaker_endpoint = Blueprint(
     'speaker_endpoint',
-    __name__
+    __name__,
+    url_prefix="/api/speakers"
 )
 
 
 @speaker_endpoint.route(
-    "/api/speakers",
+    "",
     methods=["GET"],
 )
 def get_speakers() -> Response:
@@ -102,7 +103,7 @@ def get_speakers() -> Response:
 
 
 @speaker_endpoint.route(
-    "/api/speakers/<int:speaker_id>",
+    "/<int:speaker_id>",
     methods=["GET"],
 )
 def get_speaker(
@@ -138,7 +139,7 @@ def get_speaker(
 
 
 @speaker_endpoint.route(
-    "/api/speakers/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_speakers(
