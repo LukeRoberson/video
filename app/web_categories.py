@@ -87,7 +87,7 @@ def render_category_page(
 
     # Resolve main category name to ID
     response = requests.get(
-        f'http://localhost:5010/api/category/{category_name}'
+        f'http://localhost:5010/api/categories/{category_name}'
     )
     main_id = response.json().get('category_id', None)
 
@@ -111,7 +111,7 @@ def render_category_page(
 
         # Resolve the subcategory name to ID
         response = requests.get(
-            f'http://localhost:5010/api/category/{sub_cat}'
+            f'http://localhost:5010/api/categories/{sub_cat}'
         )
         sub_cat_id = response.json().get('category_id', None)
 

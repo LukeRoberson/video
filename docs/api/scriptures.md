@@ -20,9 +20,10 @@ TBA
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /                                   | Get all scriptures                           |
+| /                                   | Add text to a scripture                      |
+| /video/{{video_id}}                 | Get scriptures for a video                   |
+| {{scripture_id}}                    | Get a scripture                              |
 </br></br>
 
 
@@ -34,13 +35,13 @@ TBA
 
 **Description**
 
-TBA
+Get a list of all scriptures.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -86,13 +87,13 @@ TBA
 
 **Description**
 
-TBA
+Add text to a scripture
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -134,17 +135,17 @@ TBA
 
 
 ----
-## /api/scriptures/video/{video_id}
+## /api/scriptures/video/{{video_id}}
 
 **Description**
 
-TBA
+Get all scriptures associated with a specific video.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -186,17 +187,17 @@ TBA
 
 
 ----
-## /api/scriptures/{scripture_id}
+## /api/scriptures/{{scripture_id}}
 
 **Description**
 
-TBA
+Get a single scripture by its ID
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 

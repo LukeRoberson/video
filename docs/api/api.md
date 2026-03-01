@@ -66,6 +66,11 @@ This will also include a JSON body in this format:
 
 
 
+### Invalid Method
+
+If an invalid method is used, a `405 METHOD NOT ALLOWED` code is returned.
+
+
 
 ----
 ## Endpoints
@@ -1486,70 +1491,7 @@ Get a list of speakers associated with a video ID
 
 
 ----
-### Characters
 
-#### /api/characters/
-
-**Method**:
-GET
-
-
-**Description**:
-Get a list of all characters.
-
-Results are sorted by name alphabetically.
-
-
-**Returns**
-
-200 OK
-
-
-```json
-[
-    {
-        "date_range": "1597-1474 B.C.E.",
-        "description": "Aaron was the courageous spokesman for his brother, Moses, when they appeared before Pharaoh.\nJehovah later appointed Aaron to be Israel’s ﬁrst high priest.\nAlthough he served God loyally for many years, Aaron did not honor God at Meribah.\nTherefore, he was not allowed to enter the Promised Land.",
-        "id": 230,
-        "name": "Aaron",
-        "profile_pic": "230-Aaron.png"
-    },
-    {
-        "date_range": "About 3900's B.C.E.",
-        "description": "The second son of Adam and Eve and the first man of faith listed in the Bible.\nAbel proved that he wanted God’s favor by offering an acceptable sacrifice.\nAlthough the Bible does not record anything Abel said, his example and faith set a pattern for us.",
-        "id": 176,
-        "name": "Abel",
-        "profile_pic": "176-Abel.png"
-    }
-```
-
-</br></br>
-
-
-
-#### /api/characters/{id}
-
-**Method**:
-GET
-
-
-**Description**:
-Get a character's details, by its ID.
-
-
-**Returns**
-
-200 OK
-
-
-```json
-```
-
-</br></br>
-
-
-
-#### /api/characters/video/{id}
 
 
 **Method**:
@@ -1647,30 +1589,3 @@ Get a list of scriptures associated with a video ID
 
 
 ----
-### Similarity
-
-#### /api/similarity/{video_id}
-
-**Method**:
-GET
-
-
-**Description**:
-Get a list of similar videos for a given video ID
-
-
-**Returns**
-
-200 OK
-
-
-```json
-{
-}
-```
-
-
-
-</br></br>
-
-

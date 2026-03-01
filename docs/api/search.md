@@ -20,9 +20,10 @@ API endpoints that relate to searching and the elasticsearch service.
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /                                   | Search through videos                        |
+| /reindex                            | Reindex videos                               |
+| /status                             | Check search service status                  |
+| /advanced                           | Perform an advanced search                   |
 </br></br>
 
 
@@ -34,13 +35,13 @@ API endpoints that relate to searching and the elasticsearch service.
 
 **Description**
 
-TBA
+Search through all videos using query parameters.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -86,13 +87,13 @@ TBA
 
 **Description**
 
-TBA
+Request Elasticsearch to reindex all videos.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -138,13 +139,13 @@ TBA
 
 **Description**
 
-TBA
+Check the search service status.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -190,13 +191,13 @@ TBA
 
 **Description**
 
-TBA
+Perform an advanced search of all videos using advanced parameters.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 

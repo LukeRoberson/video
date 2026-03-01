@@ -20,9 +20,9 @@ API endpoints for tag management.
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /                                   | Get all tags                                 |
+| /{{tag_id}}                         | Get a tag                                    |
+| /video/{{video_id}}                 | Get tags on a video                          |
 </br></br>
 
 
@@ -34,13 +34,13 @@ API endpoints for tag management.
 
 **Description**
 
-TBA
+Get a list of all tags
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -82,17 +82,17 @@ TBA
 
 
 ----
-## /api/tags/{tag_id}
+## /api/tags/{{tag_id}}
 
 **Description**
 
-TBA
+Get a specific tag by its ID.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -134,17 +134,17 @@ TBA
 
 
 ----
-## /api/tags/video/{video_id}
+## /api/tags/video/{{video_id}}
 
 **Description**
 
-TBA
+Get all tags associated with a specific video.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 

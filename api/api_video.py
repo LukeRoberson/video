@@ -11,11 +11,11 @@ Endpoints:
     GET /api/videos/filter
         Filter videos based on query parameters.
     GET /api/video/metadata
-        Map video names to IDs, and other metadata mappings.
+        Get metadata for a video.
     POST /api/video/metadata
         Add metadata to a video, or update existing metadata.
     GET /api/videos/csv
-        Get a CSV file of all videos in the database.
+        Read a CSV file of videos.
     POST /api/videos/add
         Add a video to the database.
 

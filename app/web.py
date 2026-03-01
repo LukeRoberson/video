@@ -290,11 +290,11 @@ def home() -> Response:
 
     # API: Convert category names to IDs
     monthly_cat = requests.get(
-        url='http://localhost:5010/api/category/Monthly Programs',
+        url='http://localhost:5010/api/categories/Monthly Programs',
     ).json().get('category_id', None)
 
     news_cat = requests.get(
-        url='http://localhost:5010/api/category/News and Announcements',
+        url='http://localhost:5010/api/categories/News and Announcements',
     ).json().get('category_id', None)
 
     # API: Get the latest monthly programs video

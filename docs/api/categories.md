@@ -13,7 +13,7 @@ API endpoints that relate to video categories.
 
 **Base URL**
 
-TBA
+/api/categories
 </br></br>
 
 
@@ -30,7 +30,7 @@ TBA
 ----
 # Endpoints
 
-## /api/category/{{category_name}}
+## /api/categories/{{category_name}}
 
 **Description**
 

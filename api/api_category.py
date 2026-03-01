@@ -4,7 +4,7 @@ Module: api_category.py
 API endpoints related to categories.
 
 Endpoints:
-    GET /api/category/<string:category_name>
+    GET /api/categories/<string:category_name>
         Get the ID of a category by its name.
     GET /api/categories/<int:category_id>/<int:subcategory_id>
         Fetch videos using the given major category ID and subcategory ID.
@@ -72,12 +72,13 @@ logger = logging.getLogger(__name__)
 # Create a blueprint for category-related endpoints
 category_endpoint = Blueprint(
     'category_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/categories',
 )
 
 
 @category_endpoint.route(
-    "/api/category/<string:category_name>",
+    "/<string:category_name>",
     methods=["GET"],
 )
 def get_category_id(
@@ -114,7 +115,7 @@ def get_category_id(
 
 
 @category_endpoint.route(
-    "/api/categories/<int:category_id>/<int:subcategory_id>",
+    "/<int:category_id>/<int:subcategory_id>",
     methods=["GET"],
 )
 def category_filter(
@@ -187,7 +188,7 @@ def category_filter(
 
 
 @category_endpoint.route(
-    "/api/categories/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_categories(

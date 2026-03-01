@@ -20,9 +20,20 @@ API endpoints that relate to profile management
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /                                   | Get all profiles                             |
+| /{{profile_id}}                     | Get a specific profile                       |
+| /create                             | Create a profile                             |
+| /delete{{profile_id}}               | Delete a profile                             |
+| /update/{{profile_id}}              | Update a profile                             |
+| set_active                          | Set the active profile*                      |
+| get_active                          | Get the active profile*                      |
+| clear_history/{{profile_id}}        | Clear a user's watch history                 |
+| mark_watched                        | Checks watch status for a video*             |
+| mark_watched_bulk                   | Check watch status on multiple videos*       |
+| mark_watched                        | Mark a video as watched*                     |
+| mark_unwatched                      | Mark a video as unwatched*                   |
+| watch_history                       | Check watch history for a profile*           |
+| in_progress                         | Manage in-progress status for a video        |
 </br></br>
 
 
@@ -34,13 +45,13 @@ API endpoints that relate to profile management
 
 **Description**
 
-TBA
+Get a list of all user profiles
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -83,17 +94,17 @@ TBA
 
 
 ----
-## /api/profile/{profile_id}
+## /api/profile/{{profile_id}}
 
 **Description**
 
-TBA
+Get a specific user profile by its ID
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -140,13 +151,15 @@ TBA
 
 **Description**
 
-TBA
+Create a new user profile.
+
+Adds a name, and selects an avatar filename.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -188,17 +201,17 @@ TBA
 
 
 ----
-## /api/profile/delete/{profile_id}
+## /api/profile/delete/{{profile_id}}
 
 **Description**
 
-TBA
+Delete a profile, identified by its ID.
 </br></br>
 
 
 **Method**
 
-TBA
+DELETE
 </br></br>
 
 
@@ -241,17 +254,17 @@ TBA
 
 
 ----
-## /api/profile/update/{profile_id}
+## /api/profile/update/{{profile_id}}
 
 **Description**
 
-TBA
+Update the name or avatar filename for a profile.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -298,13 +311,15 @@ TBA
 
 **Description**
 
-TBA
+Set the active profile for this session.
+
+Note: This will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -351,13 +366,15 @@ TBA
 
 **Description**
 
-TBA
+Get the active profile for the current session.
+
+Note: This will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -400,17 +417,17 @@ TBA
 
 
 ----
-## /api/profile/clear_history/{profile_id}
+## /api/profile/clear_history/{{profile_id}}
 
 **Description**
 
-TBA
+Clears the watch history in a user's profile.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -457,13 +474,17 @@ TBA
 
 **Description**
 
-TBA
+Check if a video has been marked as watched.
+
+This checks against the active profile for this session.
+
+Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -510,13 +531,17 @@ TBA
 
 **Description**
 
-TBA
+Check multiple videos to see if they have been marked as watched.
+
+This checks against the active profile for this session.
+
+Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -562,13 +587,17 @@ TBA
 
 **Description**
 
-TBA
+Mark a video as watched.
+
+This is performed on the active profile for this session.
+
+Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -614,13 +643,17 @@ TBA
 
 **Description**
 
-TBA
+Mark a video as unwatched.
+
+This is performed on the active profile for this session.
+
+Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -666,13 +699,15 @@ TBA
 
 **Description**
 
-TBA
+Gets the watch history for the current active profile.
+
+Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -718,13 +753,15 @@ TBA
 
 **Description**
 
-TBA
+Manages in-progress video tracking for user profiles.
+
+This is to track where a video is up to, so it can be resumed there in future.
 </br></br>
 
 
 **Method**
 
-TBA
+GET, POST, UPDATE, DELETE
 </br></br>
 
 

@@ -5,28 +5,28 @@
 1. General clean up
     * [x] Split out api.py into smaller files
     * [x] Update docstrings in API files
-    * [ ] Cleanup API calls in TS files
-    * [ ] Cleanup API URLs in python files
 2. Documentation
     * [ ] Clean up api.md; Possible split into multiple files
     * [ ] Update other documentation files with changes
 3. Create standard response formats
     * Some include 'data' and 'message', others don't
     * [ ] `api_category.py`: 3x endpoints
+    * [ ] `api_character.py`: 3x endpoints
 4. Logging and Testing
     * [ ] Add better logging to API files
     * [ ] Add a debug mode when starting the API (flask debug + logging level)
     * [ ] Create and organize postman files for API testing
-    * [ ] Create a doc defining tests and their expected outcomes
+    * [ ] Create pytest structure for automated testing
 5. Clean up API Calls
     * [ ] Set video base URL to /api/videos
-    * [ ] Set category base URL to /api/category
+    * [x] Set category base URL to /api/category
     * [ ] Set scripture base URL to /api/scriptures
     * [ ] Set video base URL to /api/videos
     * [ ] TypeScript files (below)
     * [ ] Duplicate API calls (profileEdit vs profileMgmt)
 6. Consolidate endpoints
     * [ ] Combine get_video, get_videos_bulk, and filter_videos (api_video.py)
+    * [ ] Combine endpoints to get all characters and get one specific character (api_character.py)
     * [ ] Resolve duplicate endpoints
 7. Clean up bugs
     * [ ] In categories, watch status on individual videos is not showing

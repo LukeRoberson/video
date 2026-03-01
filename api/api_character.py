@@ -56,12 +56,13 @@ from api.sql_db import (
 # Create a blueprint for character-related endpoints
 character_endpoint = Blueprint(
     'character_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/characters'
 )
 
 
 @character_endpoint.route(
-    "/api/characters",
+    "/",
     methods=["GET"],
 )
 def get_characters() -> Response:
@@ -91,7 +92,7 @@ def get_characters() -> Response:
 
 
 @character_endpoint.route(
-    "/api/characters/<int:character_id>",
+    "/<int:character_id>",
     methods=["GET"],
 )
 def get_character(
@@ -127,7 +128,7 @@ def get_character(
 
 
 @character_endpoint.route(
-    "/api/characters/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_characters(

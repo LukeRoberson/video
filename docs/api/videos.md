@@ -20,9 +20,13 @@ TBA
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /{{video_id}}                       | Get details for a video                      |
+| /get_bulk                           | Get details for multiple videos              |
+| /filter                             | Get a filtered list of videos                |
+| /metadata                           | Get metadata for a video                     |
+| /metadata                           | Add or update metadata on a video            |
+| /csv                                | Read a CSV file of videos                    |
+| /add                                | Add a new video to the database              |
 </br></br>
 
 
@@ -30,17 +34,17 @@ TBA
 ----
 # Endpoints
 
-## /api/videos/{video_id}
+## /api/videos/{{video_id}}
 
 **Description**
 
-TBA
+Get a video by its ID, and return all its details.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -86,13 +90,13 @@ TBA
 
 **Description**
 
-TBA
+Get details for multiple videos at once.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -138,13 +142,13 @@ TBA
 
 **Description**
 
-TBA
+Get a filtered list of videos, based on query parameters.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -191,13 +195,15 @@ TBA
 
 **Description**
 
-TBA
+Get metadata for a video.
+
+This includes tags, categories, etc.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -243,13 +249,13 @@ TBA
 
 **Description**
 
-TBA
+Add metadata to a video, or update existing metadata.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 
@@ -295,13 +301,13 @@ TBA
 
 **Description**
 
-TBA
+Read a CSV file containing a list of videos and metadata.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -347,13 +353,13 @@ TBA
 
 **Description**
 
-TBA
+Add a new video to the database.
 </br></br>
 
 
 **Method**
 
-TBA
+POST
 </br></br>
 
 

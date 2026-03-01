@@ -20,9 +20,9 @@ API endpoints that relate to video speakers and interviewees.
 
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
-|                                     |                                              |
-|                                     |                                              |
-|                                     |                                              |
+| /                                   | Get all speakers                             |
+| /{{speaker_id}}                     | Get one speaker                              |
+| /video/{{video_id}}                 | Get speakers on a video                      |
 </br></br>
 
 
@@ -34,13 +34,13 @@ API endpoints that relate to video speakers and interviewees.
 
 **Description**
 
-TBA
+Get a list of all speakers
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -82,17 +82,17 @@ TBA
 
 
 ----
-## /api/speakers/{speaker_id}
+## /api/speakers/{{speaker_id}}
 
 **Description**
 
-TBA
+Get a specific speaker.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
@@ -134,17 +134,17 @@ TBA
 
 
 ----
-## /api/speakers/video/{video_id}
+## /api/speakers/video/{{video_id}}
 
 **Description**
 
-TBA
+Get all speakers associated with a specific video.
 </br></br>
 
 
 **Method**
 
-TBA
+GET
 </br></br>
 
 
