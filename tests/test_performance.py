@@ -10,6 +10,7 @@ Classes:
 
 To do:
     - Test performance for adding a scripture (POST /api/scriptures)
+    - Test performance for search reindexing (POST /api/search/reindex)
 """
 
 
@@ -32,10 +33,46 @@ class TestPerformance:
     # Define endpoint patterns:
     #   (endpoint_template, fixture_name, max_time_seconds, description)
     ENDPOINTS_NO_PARAMS = [
-        ("/characters", 3.0, "Retrieve all characters"),
-        ("/speakers", 3.0, "Retrieve all speakers"),
-        ("/tags", 3.0, "Retrieve all tags"),
-        ("/scriptures", 3.0, "Retrieve all scriptures"),
+        (
+            "/characters",
+            3.0,
+            "Retrieve all characters"
+        ),
+        (
+            "/speakers",
+            3.0,
+            "Retrieve all speakers"
+        ),
+        (
+            "/tags",
+            3.0,
+            "Retrieve all tags"
+        ),
+        (
+            "/scriptures",
+            3.0,
+            "Retrieve all scriptures"
+        ),
+        (
+            "/search/status",
+            3.0,
+            "Check search index status"
+        ),
+        (
+            "/search?q=bible",
+            3.0,
+            "Search for 'bible'"
+        ),
+        (
+            "/search/advanced?"
+            "query=generosity&"
+            "speakers=Stephen Lett&"
+            "characters=David&"
+            "locations=Samaria&"
+            "tags=prayer",
+            3.0,
+            "Advanced search with multiple parameters"
+        ),
     ]
 
     ENDPOINTS_SINGLE_ID = [

@@ -252,7 +252,6 @@ Add videos to the database. Used on the admin page.
 
 
 
-#### /api/scripture
 
 **Method**:
 POST

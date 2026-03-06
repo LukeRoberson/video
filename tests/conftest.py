@@ -214,3 +214,66 @@ def invalid_location_id() -> int:
     """
 
     return 9999
+
+
+@pytest.fixture
+def search_query() -> str:
+    """
+    Fixture to provide a search query for testing.
+    """
+
+    return "bible"
+
+
+@pytest.fixture
+def page_number() -> int:
+    """
+    Fixture to provide a page number for testing pagination.
+    """
+
+    return 1
+
+
+@pytest.fixture
+def per_page() -> int:
+    """
+    Fixture to provide the number of results per page for testing pagination.
+    """
+
+    return 10
+
+
+@pytest.fixture
+def valid_speaker_name() -> str:
+    """
+    Fixture to provide a valid speaker name for testing.
+    """
+
+    return "Stephen Lett"
+
+
+@pytest.fixture
+def valid_character_name() -> str:
+    """
+    Fixture to provide a valid character name for testing.
+    """
+
+    return "David"
+
+
+@pytest.fixture
+def valid_location_name() -> str:
+    """
+    Fixture to provide a valid location name for testing.
+    """
+
+    return "Samaria"
+
+
+@pytest.fixture
+def valid_tag_name() -> str:
+    """
+    Fixture to provide a valid tag name for testing.
+    """
+
+    return "prayer"

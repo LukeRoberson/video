@@ -16,6 +16,7 @@
     * [ ] `api_tag.py`: 3x endpoints
     * [ ] `api_scripture.py`: 3x endpoints
     * [ ] `api_location.py`: 3x endpoints
+    * [ ] `api_search.py`: 4x endpoints
 4. Logging and Testing
     * [ ] Add better logging to API files
     * [ ] Add a debug mode when starting the API (flask debug + logging level)
@@ -38,6 +39,7 @@
     * [ ] Searches sometimes throw unicode errors in the terminal
     * [ ] When saving a profile name change, this is not immediately reflected in the edit screen
     * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
+    * [ ] 'Logging Error' at terminal when searching with ElasticSearch
 8. Coding improvements
     * [ ] Investigate using 'MethodView' in Flask
     * [ ] Update blueprints to use a URL prefix (as is done in api_search.py)

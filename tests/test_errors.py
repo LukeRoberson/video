@@ -11,6 +11,7 @@ To Do:
     - Test the /api/categories/<main_category>/<sub_category> endpoint
     - Test the /api/scriptures POST endpoint with invalid data
     - Test the /api/scriptures for invalid methods (POST and GET are fine)
+    - Test the /api/search/reindex endpoint with invalid methods (POST is fine)
 """
 
 import requests
@@ -47,6 +48,9 @@ class TestInvalidMethods:
         "/characters",
         "/tags",
         "/locations",
+        "/search",
+        "/search/status",
+        "/search/advanced",
     ]
 
     @pytest.mark.parametrize(
