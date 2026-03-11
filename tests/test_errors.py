@@ -12,6 +12,12 @@ To Do:
     - Test the /api/scriptures POST endpoint with invalid data
     - Test the /api/scriptures for invalid methods (POST and GET are fine)
     - Test the /api/search/reindex endpoint with invalid methods (POST is fine)
+    - Test the /api/videos/get_bulk endpoint with invalid methods
+        (POST is fine)
+    - Test the /api/videos/filter endpoint with invalid methods
+        (GET is fine, uses params)
+    - Test the /api/videos/metadata endpoint with invalid methods
+        (GET is fine, uses params)
 """
 
 import requests
@@ -42,6 +48,7 @@ class TestInvalidMethods:
         ("/scriptures/video/{id}", "valid_video_id"),
         ("/locations/{id}", "valid_location_id"),
         ("/locations/video/{id}", "valid_video_id"),
+        ("/videos/{id}", "valid_video_id"),
     ]
     GET_ONLY_ENDPOINTS = [
         "/speakers",

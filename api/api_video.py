@@ -10,9 +10,9 @@ Endpoints:
         Get multiple videos by their IDs.
     GET /api/videos/filter
         Filter videos based on query parameters.
-    GET /api/video/metadata
+    GET /api/videos/metadata
         Get metadata for a video.
-    POST /api/video/metadata
+    POST /api/videos/metadata
         Add metadata to a video, or update existing metadata.
     GET /api/videos/csv
         Read a CSV file of videos.
@@ -101,19 +101,20 @@ local_dir = os.path.dirname(os.path.abspath(__file__))
 csv_folder = os.path.normpath(os.path.join(local_dir, "../scripts/csv"))
 MISSING_VIDEOS_CSV = os.path.join(
     csv_folder,
-    "missing_videos.csv"
+    "missing_videos.csv",
 )
 
 
 # Create a blueprint for video-related endpoints
 video_endpoint = Blueprint(
     'video_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/videos',
 )
 
 
 @video_endpoint.route(
-    "/api/videos/<int:id>",
+    "/<int:id>",
     methods=["GET"],
 )
 def get_video(
@@ -149,7 +150,7 @@ def get_video(
 
 
 @video_endpoint.route(
-    "/api/videos/get_bulk",
+    "/get_bulk",
     methods=["POST"],
 )
 def get_videos_bulk() -> Response:
@@ -210,7 +211,7 @@ def get_videos_bulk() -> Response:
 
 
 @video_endpoint.route(
-    "/api/videos/filter",
+    "/filter",
     methods=["GET"],
 )
 def filter_videos() -> Response:
@@ -259,6 +260,42 @@ def filter_videos() -> Response:
             400
         )
 
+    # Confirm that any give parameters are valid integers
+    for param_name, param_value in [
+        ("category_id", category_id),
+        ("tag_id", tag_id),
+        ("location_id", location_id),
+        ("speaker_id", speaker_id),
+        ("character_id", character_id),
+        ("scripture_id", scripture_id),
+        ("latest", latest),
+    ]:
+        if param_value is not None:
+            # If the parameter is a comma-separated list, validate each value
+            if "," in param_value:
+                values = param_value.split(",")
+                if not all(value.strip().isdigit() for value in values):
+                    logging.error(
+                        f"Invalid value for {param_name}: {param_value}. "
+                        "All values must be integers."
+                    )
+                    return api_error(
+                        f"Invalid value for {param_name}: {param_value}. "
+                        "All values must be integers.",
+                        400
+                    )
+            # If it's a single value, validate it
+            elif not param_value.isdigit():
+                logging.error(
+                    f"Invalid value for {param_name}: {param_value}. "
+                    "Must be an integer."
+                )
+                return api_error(
+                    f"Invalid value for {param_name}: {param_value}. "
+                    "Must be an integer.",
+                    400
+                )
+
     # Convert category ID's to a list (if provided)
     if category_id:
         category_id = [int(cid) for cid in category_id.split(",")]
@@ -287,12 +324,13 @@ def filter_videos() -> Response:
 
 
 @video_endpoint.route(
-    "/api/video/metadata",
+    "/metadata",
     methods=["GET", "POST"]
 )
 def add_video_metadata() -> Response:
     """
-    Add metadata to a video, or update existing metadata.
+    Add or update metadata on a video (POST)
+    Resolve metadata names to IDs (GET)
 
     GET:
         Map video names to IDs
@@ -300,7 +338,6 @@ def add_video_metadata() -> Response:
         Map Locations to IDs
         Map Speakers to IDs
         Map Characters to IDs
-        Map Scriptures to IDs
 
     POST:
         Add metadata to a video.
@@ -867,15 +904,15 @@ def add_video_metadata() -> Response:
 
 
 @video_endpoint.route(
-    "/api/videos/csv",
+    "/csv",
     methods=["GET"]
 )
 def get_videos_csv() -> Response:
     """
-    Get a CSV file of all videos in the database.
+    Get a CSV file of videos athat are missing from the database.
 
     Returns:
-        Response: A CSV file containing all video data.
+        Response: A CSV file containing video data.
     """
 
     # Check the CSV exists
@@ -901,7 +938,7 @@ def get_videos_csv() -> Response:
 
 
 @video_endpoint.route(
-    "/api/videos/add",
+    "/add",
     methods=["POST"]
 )
 def add_videos() -> Response:

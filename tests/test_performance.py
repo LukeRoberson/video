@@ -11,6 +11,9 @@ Classes:
 To do:
     - Test performance for adding a scripture (POST /api/scriptures)
     - Test performance for search reindexing (POST /api/search/reindex)
+    - Test /api/videos/get_bulk (uses POST)
+    - Test /api/videos/filter (uses GET with params)
+    - Test /api/videos/metadata (uses GET with params)
 """
 
 
@@ -142,7 +145,12 @@ class TestPerformance:
             3.0,
             "Retrieve locations for video"
         ),
-
+        (
+            "/videos/{id}",
+            "valid_video_id",
+            3.0,
+            "Video lookup by ID"
+        ),
     ]
 
     ENDPOINTS_SINGLE_NAME = [

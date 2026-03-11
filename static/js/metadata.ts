@@ -11,7 +11,7 @@ const MetadataConfig = {
     /** API base URL */
     API_BASE_URL: 'http://localhost:5010',    
     /** API endpoint for video metadata */
-    VIDEO_METADATA_ENDPOINT: '/api/video/metadata',
+    VIDEO_METADATA_ENDPOINT: '/api/videos/metadata',
     /** API endpoint for scripture data */
     SCRIPTURE_ENDPOINT: '/api/scriptures',
     /** Content type for JSON requests */

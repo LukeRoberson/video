@@ -253,7 +253,7 @@ If the video is not found:
 
 
 ----
-## /api/scripture
+## /api/scriptures
 
 **Description**
 

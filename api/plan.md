@@ -17,13 +17,14 @@
     * [ ] `api_scripture.py`: 3x endpoints
     * [ ] `api_location.py`: 3x endpoints
     * [ ] `api_search.py`: 4x endpoints
+    * [ ] `api_video.py`: Multiple endpoints
 4. Logging and Testing
     * [ ] Add better logging to API files
     * [ ] Add a debug mode when starting the API (flask debug + logging level)
     * [ ] Create and organize postman files for API testing
     * [ ] Create pytest structure for automated testing
 5. Clean up API Calls
-    * [ ] Set video base URL to /api/videos
+    * [x] Set video base URL to /api/videos
     * [x] Set category base URL to /api/category
     * [x] Set scripture base URL to /api/scriptures
     * [ ] TypeScript files (below)
@@ -85,3 +86,9 @@
 * Duplicate endpoints
     * /api/profile/update/{id} and /edit_profile/{id} appear to be the same thing
 
+
+# Notes
+
+* Not yet testing endpoints that update the database
+    * POST /api/videos/metadata
+    * POST /api/videos/add

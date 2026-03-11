@@ -10,7 +10,7 @@ declare const MetadataConfig: {
     /** API base URL */
     readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint for video metadata */
-    readonly VIDEO_METADATA_ENDPOINT: "/api/video/metadata";
+    readonly VIDEO_METADATA_ENDPOINT: "/api/videos/metadata";
     /** API endpoint for scripture data */
     readonly SCRIPTURE_ENDPOINT: "/api/scriptures";
     /** Content type for JSON requests */

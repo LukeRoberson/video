@@ -27,6 +27,36 @@ Fixtures:
         Provides a valid speaker ID for testing.
     invalid_speaker_id
         Provides an invalid speaker ID for testing.
+    valid_tag_id
+        Provides a valid tag ID for testing.
+    invalid_tag_id
+        Provides an invalid tag ID for testing.
+    valid_scripture_name
+        Provides a valid scripture name for testing.
+    invalid_scripture_name
+        Provides an invalid scripture name for testing.
+    valid_scripture_id
+        Provides a valid scripture ID for testing.
+    invalid_scripture_id
+        Provides an invalid scripture ID for testing.
+    valid_location_id
+        Provides a valid location ID for testing.
+    invalid_location_id
+        Provides an invalid location ID for testing.
+    search_query
+        Provides a search query for testing.
+    page_number
+        Provides a page number for testing pagination.
+    per_page
+        Provides the number of results per page for testing pagination.
+    valid_speaker_name
+        Provides a valid speaker name for testing.
+    valid_character_name
+        Provides a valid character name for testing.
+    valid_location_name
+        Provides a valid location name for testing.
+    valid_tag_name
+        Provides a valid tag name for testing.
 """
 
 
