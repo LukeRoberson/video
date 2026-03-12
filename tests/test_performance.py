@@ -14,6 +14,7 @@ To do:
     - Test /api/videos/get_bulk (uses POST)
     - Test /api/videos/filter (uses GET with params)
     - Test /api/videos/metadata (uses GET with params)
+    - Add profile endpoints (they will be updated in the near future)
 """
 
 

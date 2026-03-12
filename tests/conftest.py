@@ -307,3 +307,21 @@ def valid_tag_name() -> str:
     """
 
     return "prayer"
+
+
+@pytest.fixture
+def valid_profile_id() -> int:
+    """
+    Fixture to provide a valid profile ID for testing.
+    """
+
+    return 2
+
+
+@pytest.fixture
+def invalid_profile_id() -> int:
+    """
+    Fixture to provide an invalid profile ID for testing.
+    """
+
+    return 9999

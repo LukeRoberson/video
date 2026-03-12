@@ -1,6 +1,8 @@
 # Database Management Classes
 
-This document describes the usage of the database management classes found in `sql_db.py`. These classes provide a structured way to interact with the SQLite database for videos, categories, tags, speakers, Bible characters, and scriptures.
+This document describes the usage of the database management classes found in `sql_db.py` within the API.
+
+These classes provide a structured way to interact with the SQLite database for videos, categories, tags, speakers, Bible characters, and scriptures.
 </br></br>
 
 

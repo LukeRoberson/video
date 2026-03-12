@@ -6,8 +6,8 @@
     * [x] Split out api.py into smaller files
     * [x] Update docstrings in API files
 2. Documentation
-    * [ ] Clean up api.md; Possible split into multiple files
-    * [ ] Update other documentation files with changes
+    * [x] Clean up api.md; Possible split into multiple files
+    * [x] Update other documentation files with changes
 3. Create standard response formats
     * Some include 'data' and 'message', others don't
     * [ ] `api_category.py`: 3x endpoints
@@ -18,6 +18,7 @@
     * [ ] `api_location.py`: 3x endpoints
     * [ ] `api_search.py`: 4x endpoints
     * [ ] `api_video.py`: Multiple endpoints
+    * [ ] `api_profile.py`: Many endpoints
 4. Logging and Testing
     * [ ] Add better logging to API files
     * [ ] Add a debug mode when starting the API (flask debug + logging level)
@@ -92,3 +93,7 @@
 * Not yet testing endpoints that update the database
     * POST /api/videos/metadata
     * POST /api/videos/add
+    * POST /api/profile/create
+    * DELETE /api/profile/delete/{{id}}
+    * POST /api/profile/update/{{id}}
+* The 'set active profile' endpoint happily will set a non-existant profile as active

@@ -57,13 +57,13 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
@@ -75,17 +75,35 @@ TBA
 
 **Response Body**
 
-TBA
+Returns in 'data' and 'success' format.
+
+'data' include a list of profiles, each describing that profile.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field      | Type    | Description                                           |
+| ---------- | ------- | ----------------------------------------------------- |
+| id         | integer | The profile ID                                        |
+| name       | string  | The profile name                                      |
+| image      | string  | A filename for the profile's avatar                   |
+| admin      | integer | Whether the user is an admin (1 for yes, null for no) |
+| created_at | string  | When the profile was created                          |
 </br></br>
 
 
 ```json
+{
+    "data": [
+        {
+            "admin": 1,
+            "created_at": "2025-06-30 01:24:03",
+            "id": 2,
+            "image": "amos_1.png",
+            "name": "Luke"
+        }
+    ],
+    "success": true
+}
 ```
 </br></br>
 
@@ -110,35 +128,66 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`404 NOT FOUND` if the profile does not exist.
 </br></br>
 
 
 **Response Body**
 
-TBA
+Response in 'data' and 'success' format.
+
+The single entry in 'data' describes the profile.
+
+This is effectively returning one single entry from the entire list (as found in `/api/profile`)
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field      | Type    | Description                                           |
+| ---------- | ------- | ----------------------------------------------------- |
+| id         | integer | The profile ID                                        |
+| name       | string  | The profile name                                      |
+| image      | string  | A filename for the profile's avatar                   |
+| admin      | integer | Whether the user is an admin (1 for yes, null for no) |
+| created_at | string  | When the profile was created                          |
 </br></br>
 
 
 ```json
+{
+    "data": {
+        "admin": 1,
+        "created_at": "2025-06-30 01:24:03",
+        "id": 2,
+        "image": "amos_1.png",
+        "name": "Luke"
+    },
+    "success": true
+}
+```
+</br></br>
+
+
+If a profile is not found:
+
+```json
+{
+    "error": "Profile with ID 1 not found",
+    "success": false
+}
 ```
 </br></br>
 
@@ -154,6 +203,8 @@ TBA
 Create a new user profile.
 
 Adds a name, and selects an avatar filename.
+
+The avatar filenames exist on the server itself, not locally. Uploading new avatar images is not supported.
 </br></br>
 
 
@@ -165,35 +216,60 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+```json
+{
+    "name": "<Profile Name>",
+    "image": "<image file name>",
+}
+```
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`400 BAD REQUEST` if the body is not included, or fields are missing
+
+`500 INTERNAL SERVER ERROR` if the create operation was unsuccessful
 </br></br>
 
 
 **Response Body**
 
-TBA
+A simple response to determine if this was successful.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                     |
+| ----------- | ------- | ----------------------------------------------- |
+| message     | string  | A successor fail message                        |
+| success     | boolean | True means the profile was created successfully |
 </br></br>
 
 
 ```json
+{
+    "message": "Created profile with ID: 10",
+    "success": true
+}
+```
+</br></br>
+
+
+When fields are missing:
+
+```json
+{
+    "error": "Missing required fields: name and image",
+    "success": false
+}
 ```
 </br></br>
 
@@ -217,35 +293,55 @@ DELETE
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`404 NOT FOUND` if the profile ID does not exist
+
+`500 INTERNAL SERVER ERROR` if the delete operation failed
 </br></br>
 
 
 **Response Body**
 
-TBA
+A simple response to determine if this was successful.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                     |
+| ----------- | ------- | ----------------------------------------------- |
+| message     | string  | A successor fail message                        |
+| success     | boolean | True means the profile was created successfully |
 </br></br>
 
 
 ```json
+{
+    "message": "Profile with ID 10 deleted successfully.",
+    "success": true
+}
+```
+</br></br>
+
+
+If the profile is not found:
+
+```json
+{
+    "error": "Profile with ID 99999 not found",
+    "success": false
+}
 ```
 </br></br>
 
@@ -270,38 +366,80 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+| Field       | Type    | Description                   |
+| ----------- | ------- | ----------------------------- |
+| name        | string  | The profile name              |
+| icon        | string  | The filename for their avatar |
+
+```json
+{
+    "name": "<new profile name>",
+    "icon": "<new profile icon>"
+}
+```
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`400 BAD REQUEST` if fields are missing
+
+`404 NOT FOUND` if the profile does not exist
+
+`500 INTERNAL SERVER ERROR` if the operation was unsuccessful
 </br></br>
 
 
 **Response Body**
 
-TBA
+A simple response to determine if this was successful.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                     |
+| ----------- | ------- | ----------------------------------------------- |
+| message     | string  | A successor fail message                        |
+| success     | boolean | True means the profile was created successfully |
 </br></br>
 
 
 ```json
+{
+    "message": "Profile with ID 5 updated successfully.",
+    "success": true
+}
 ```
 </br></br>
 
+
+If bad fields are provided in the request body:
+
+```json
+{
+    "error": "Failed to update profile with ID 5",
+    "success": false
+}
+```
+</br></br>
+
+
+If the profile does not exist:
+
+```json
+{
+    "error": "Profile with ID 99999 not found",
+    "success": false
+}
+```
+</br></br>
 
 
 
@@ -313,7 +451,12 @@ TBA
 
 Set the active profile for this session.
 
-Note: This will be migrated to the frontend in future.
+This can be an existing profile, identified by the profile ID, or "guest" for guest access.
+
+> [!NOTE]
+> This will be migrated to the frontend in future.
+
+Also sets the profile as an admin or regular user, depending on the value of the profile's 'admin' field.
 </br></br>
 
 
@@ -325,35 +468,66 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+| Field       | Type    | Description                           |
+| ----------- | ------- | ------------------------------------- |
+| profile_id  | integer | The profile to set active, or "guest" |
+</br></br>
+
+
+```json
+{
+    "profile_id": "{{int}} or {{guest}}"
+}
+```
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`400 INVALID REQUEST` if the body is missing or invalid.
 </br></br>
 
 
 **Response Body**
 
-TBA
+Standard 'data'/'success' response.
+
+The 'data' field contains the active profile.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field          | Type    | Description              |
+| -------------- | ------- | ------------------------ |
+| active_profile | integer | The profile that was set |
 </br></br>
 
 
 ```json
+{
+    "data": {
+        "active_profile": 2
+    },
+    "success": true
+}
+```
+</br></br>
+
+
+If fields are missing from the request:
+
+```json
+{
+    "error": "Missing 'profile_id' in request data",
+    "success": false
+}
 ```
 </br></br>
 
@@ -368,7 +542,10 @@ TBA
 
 Get the active profile for the current session.
 
-Note: This will be migrated to the frontend in future.
+If there is no active profile, this will return "guest".
+
+> [!NOTE]
+> This will be migrated to the frontend in future.
 </br></br>
 
 
@@ -380,13 +557,13 @@ GET
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
@@ -398,20 +575,145 @@ TBA
 
 **Response Body**
 
-TBA
+A data/success message, where 'data/active_profile' describes the active profile
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                  |
+| ----------- | ------- | -------------------------------------------- |
+| id          | integer | The profile's ID                             |
+| name        | string  | The profile's name                           |
+| image       | string  | The filename for the avatar                  |
+| admin       | integer | Admin status ('1' for admin, null otherwise) |
+| created_at  | string  | Date/time this profile was created           |
 </br></br>
 
 
 ```json
+{
+    "data": {
+        "active_profile": {
+            "admin": 1,
+            "created_at": "2025-06-30 01:24:03",
+            "id": 2,
+            "image": "amos_1.png",
+            "name": "Luke"
+        }
+    },
+    "success": true
+}
 ```
 </br></br>
 
+
+If the guest profile is returned:
+
+```json
+{
+    "data": {
+        "active_profile": {
+            "id": null,
+            "image": "guest.png",
+            "name": "Guest"
+        }
+    },
+    "success": true
+}
+```
+</br></br>
+
+
+
+
+
+----
+
+## /api/profile/watch_history
+
+**Description**
+
+Gets the watch history for the current active profile.
+
+Note: The active profile will be migrated to the frontend in future.
+</br></br>
+
+
+**Method**
+
+GET
+</br></br>
+
+
+**Parameters**
+
+Pass the active profile to the endpoint.
+
+If the parameter is missing, the active profile is assumed to be "guest", which doesn't have a watch history.
+</br></br>
+
+
+| Field       | Type    | Description       |
+| ----------- | ------- | ----------------- |
+| profile     | integer | The profile's ID. |
+</br></br>
+
+
+**Body**
+
+None
+</br></br>
+
+
+**Response Code**
+
+`200 OK` on success
+</br></br>
+
+
+**Response Body**
+
+The response contains 'data', 'message', and the 'success' status.
+
+'data' is a list of entries, where each entry describes a video in the watch history.
+</br></br>
+
+
+| Field        | Type    | Description                                                   |
+| ------------ | ------- | ------------------------------------------------------------- |
+| profile_id   | integer | The ID of the profile used for the request                    |
+| video_id     | integer | The ID of the video                                           |
+| current_time | integer | The timestamp this profile is up to in the video (in seconds) |
+| watched_at   | string  | Date/time the video was watched                               |
+</br></br>
+
+
+```json
+{
+    "data": [
+        {
+            "current_time": 0,
+            "id": 476,
+            "profile_id": 2,
+            "video_id": 1871,
+            "watched_at": "2026-01-18 12:51:26.409769"
+        }
+    ],
+    "message": "Retrieved watch history successfully",
+    "success": true
+}
+```
+</br></br>
+
+
+If the guest profile is active:
+
+```json
+{
+    "message": "No watch history for guest profile",
+    "success": true
+}
+```
+</br></br>
 
 
 
@@ -433,43 +735,168 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+The body of the request contains the ID of the video to remove from the watch history.
+
+This is an optional field. If it is not present, all history is cleared.
+</br></br>
+
+
+| Field       | Type    | Description                            |
+| ----------- | ------- | -------------------------------------- |
+| video_id    | integer | The video to remove from watch history |
+</br></br>
+
+
+```json
+{
+    "video_id": "{{int}}"
+}
+```
 </br></br>
 
 
 **Response Code**
 
 `200 OK` on success
+
+`404 NOT FOUND` If the profile is not found
+
+`500 INTERNAL SERVER ERROR` if there was a problem with clearing the video
 </br></br>
 
 
 **Response Body**
 
-TBA
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+The response is simply 'message' and 'success' fields.
 </br></br>
 
 
 ```json
+{
+    "message": "Cleared video 1871 from watch history of profile 2.",
+    "success": true
+}
 ```
 </br></br>
 
 
 
 
+----
+## /api/profile/in_progress
+
+**Description**
+
+Manages in-progress video tracking for user profiles.
+
+This is to track where a video is up to, so it can be resumed there in future.
+
+Primary operations:
+* GET - Retrieve in progress videos for the active profile
+* POST - Add a video to the in progress list
+* UPDATE - Update the playback position of an in-progress video
+* DELETE - Remove a video from the in-progress list
+</br></br>
+
+
+**Method**
+
+GET, POST, UPDATE, DELETE
+</br></br>
+
+
+**Parameters**
+
+| Field       | Type    | Description              |
+| ----------- | ------- | ------------------------ |
+| profile     | integer | The profile to check for |
+</br></br>
+
+> [!NOTE]
+> If the profile ID is not included as a parameter, the API will look in the location session.
+> This will change in future, as the API shouldn't be tracking the session.
+
+
+**Body**
+
+For POST and UPDATE methods, a body is included with information to update the current playback time of a video.
+</br></br>
+
+
+| Field        | Type    | Description                                         |
+| ------------ | ------- | --------------------------------------------------- |
+| video_id     | integer | The ID of the video to update                       |
+| current_time | integer | The current playback time, in seconds, of the video |
+</br></br>
+
+
+```json
+{
+    "video_id": "<int>",
+    "current_time": "<int>"
+}
+```
+</br></br>
+
+
+**Response Code**
+
+`200 OK` on success
+
+`400 BAD REQUEST` If a JSON body was required, but none provided (eg, POST and UPDATE)
+
+`400 BAD REQUEST` If fields in the body are invalid
+
+`500 INTERNAL SERVER ERROR` If a video could not be processed. For example, during an UPDATE
+</br></br>
+
+
+**Response Body**
+
+The GET response is made up of the usual 'data', 'message', and 'success' fields.
+
+The 'data' field is a list of videos in progress, where each entry describes the status of the video.
+
+Responses for other methods (POST, UPDATE, DELETE) contain simple fields to indicate success or failure.
+</br></br>
+
+
+| Field        | Type    | Description                                           |
+| ------------ | ------- | ----------------------------------------------------- |
+| profile_id   | integer | The profile ID that was requested                     |
+| video_id     | integer | The ID of the video in progress                       |
+| current_time | integer | The playback position, in seconds                     |
+| updated_at   | string  | Date/time when the playback position was last updated |
+</br></br>
+
+
+```json
+{
+    "data": [
+        {
+            "current_time": 8,
+            "profile_id": 2,
+            "updated_at": "2026-01-17 07:14:08",
+            "video_id": 2834
+        }
+    ],
+    "message": "Retrieved in-progress videos successfully",
+    "success": true
+}
+```
+</br></br>
+
+
+
 
 ----
+
 ## /api/profile/mark_watched
 
 **Description**
@@ -490,13 +917,21 @@ GET
 
 **Parameters**
 
-TBA
+| Field       | Type    | Description                           |
+| ----------- | ------- | ------------------------------------- |
+| profile     | integer | The profile to check watch status for |
+| video_id    | integer | The video to check status for         |
 </br></br>
+
+
+> [!NOTE]
+> If the profile is not included as a parameter, the API will get it from the active session.
+> This will change in future, as the API shouldn't track the active session.
 
 
 **Body**
 
-TBA
+None
 </br></br>
 
 
@@ -508,17 +943,25 @@ TBA
 
 **Response Body**
 
-TBA
+'data' and 'success' fields, where 'data' describes the watch status of a video.
 </br></br>
 
 
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+| Field       | Type    | Description                                       |
+| ----------- | ------- | ------------------------------------------------- |
+| video_id    | integer | Video that was checked                            |
+| watched     | boolean | true or false, to indicate if it has been watched |
 </br></br>
 
 
 ```json
+{
+    "data": {
+        "video_id": 1871,
+        "watched": false
+    },
+    "success": true
+}
 ```
 </br></br>
 
@@ -547,13 +990,31 @@ POST
 
 **Parameters**
 
-TBA
+| Field       | Type    | Description                           |
+| ----------- | ------- | ------------------------------------- |
+| profile     | integer | The profile to check watch status for |
+</br></br>
+
+
+> [!NOTE]
+> If the profile is not included as a parameter, the API will get it from the active session.
+> This will change in future, as the API shouldn't track the active session.
 </br></br>
 
 
 **Body**
 
-TBA
+| Field       | Type             | Description                  |
+| ----------- | ---------------- | ---------------------------- |
+| video_ids   | list of integers | A list of video IDs to check |
+</br></br>
+
+
+```json
+{
+    "video_ids": [1, 2, 3]
+}
+```
 </br></br>
 
 
@@ -565,17 +1026,21 @@ TBA
 
 **Response Body**
 
-TBA
-</br></br>
+Includes 'data' and 'success' fields.
 
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
+The 'data' field is an object, where each entry represents a video ID and its watch status.
 </br></br>
 
 
 ```json
+{
+    "data": {
+        "1": false,
+        "2": false,
+        "3": false
+    },
+    "success": true
+}
 ```
 </br></br>
 
@@ -603,13 +1068,23 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+| Field       | Type    | Description                     |
+| ----------- | ------- | ------------------------------- |
+| video_id    | integer | The video ID to mark as watched |
+</br></br>
+
+
+```json
+{
+    "video_id": 1
+}
+```
 </br></br>
 
 
@@ -621,18 +1096,7 @@ TBA
 
 **Response Body**
 
-TBA
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
-</br></br>
-
-
-```json
-```
+Returns a simple message indicating success or failure.
 </br></br>
 
 
@@ -659,14 +1123,21 @@ POST
 
 **Parameters**
 
-TBA
+None
 </br></br>
 
 
 **Body**
 
-TBA
+The video to mark as unwatched.
 </br></br>
+
+
+| Field       | Type    | Description                    |
+| ----------- | ------- | ------------------------------ |
+| video_id    | integer | The video to mark as unwatched |
+</br></br>
+
 
 
 **Response Code**
@@ -677,124 +1148,8 @@ TBA
 
 **Response Body**
 
-TBA
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
-</br></br>
-
-
-```json
-```
+A simple message to indicate the success or failure of the operation.
 </br></br>
 
 
 
-
-----
-## /api/profile/watch_history
-
-**Description**
-
-Gets the watch history for the current active profile.
-
-Note: The active profile will be migrated to the frontend in future.
-</br></br>
-
-
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-TBA
-</br></br>
-
-
-**Body**
-
-TBA
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-TBA
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
-</br></br>
-
-
-```json
-```
-</br></br>
-
-
-
-
-----
-## /api/profile/in_progress
-
-**Description**
-
-Manages in-progress video tracking for user profiles.
-
-This is to track where a video is up to, so it can be resumed there in future.
-</br></br>
-
-
-**Method**
-
-GET, POST, UPDATE, DELETE
-</br></br>
-
-
-**Parameters**
-
-TBA
-</br></br>
-
-
-**Body**
-
-TBA
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-TBA
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-|             |         |                 |
-</br></br>
-
-
-```json
-```
-</br></br>
