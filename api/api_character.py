@@ -38,13 +38,12 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    make_response,
-    jsonify,
 )
 
 # Local imports
 from api.api import (
     api_error,
+    api_success,
 )
 from api.sql_db import (
     DatabaseContext,
@@ -83,11 +82,10 @@ def get_characters() -> Response:
         characters, key=lambda char: char.get('name', '').lower()
     )
 
-    return make_response(
-        jsonify(
-            characters,
-        ),
-        200
+    return api_success(
+        data=characters,
+        message=f"Retrieved {len(characters)} characters",
+        status=200
     )
 
 
@@ -119,11 +117,10 @@ def get_character(
                 404
             )
 
-    return make_response(
-        jsonify(
-            character_list[0],
-        ),
-        200
+    return api_success(
+        data=character_list[0],
+        message=f"Retrieved character with ID {character_id}",
+        status=200
     )
 
 
@@ -162,9 +159,8 @@ def get_video_characters(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                characters,
-            ),
-            200
+        return api_success(
+            data=characters,
+            message=f"Retrieved characters for video ID {video_id}",
+            status=200
         )

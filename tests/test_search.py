@@ -53,9 +53,75 @@ class TestSearch:
         url = f"{BASE_URL}{API_PREFIX}/search"
         params = {"q": search_query}
         response = requests.get(url, params=params)
-
         assert response.status_code == 200
-        assert "results" in response.json()
+
+        # Validate the response
+        data = response.json().get("data", {})
+        assert "results" in data
+        assert isinstance(data['results'], list)
+        assert "query" in data
+        assert isinstance(data['query'], str)
+        assert "total" in data
+        assert isinstance(data['total'], int)
+        assert "using_elasticsearch" in data
+        assert isinstance(data['using_elasticsearch'], bool)
+
+        # Validate results structure and type
+        if len(data['results']) > 0:
+            assert all(
+                ("highlights" in result) and
+                ("speaker" in result) and
+                ("tags" in result) and
+                (
+                    "bible_character" in result and
+                    isinstance(result["bible_character"], str)
+                ) and
+                (
+                    "chapter_markers" in result and
+                    isinstance(result["chapter_markers"], str)
+                ) and
+                (
+                    "description" in result and
+                    isinstance(result["description"], str)
+                ) and
+                (
+                    "duration" in result and
+                    isinstance(result["duration"], int)
+                ) and
+                (
+                    "id" in result and
+                    isinstance(result["id"], int)
+                ) and
+                (
+                    "location" in result and
+                    isinstance(result["location"], str)
+                ) and
+                (
+                    "name" in result and
+                    isinstance(result["name"], str)
+                ) and
+                (
+                    "score" in result and
+                    isinstance(result["score"], float)
+                ) and
+                (
+                    "scriptures" in result and
+                    isinstance(result["scriptures"], str)
+                ) and
+                (
+                    "thumbnail" in result and
+                    isinstance(result["thumbnail"], str)
+                ) and
+                (
+                    "title" in result and
+                    isinstance(result["title"], str)
+                ) and
+                (
+                    "video_id" in result and
+                    isinstance(result["video_id"], int)
+                )
+                for result in data['results']
+            )
 
     def test_search_with_pages(
         self,
@@ -78,9 +144,14 @@ class TestSearch:
             "per_page": per_page
         }
         response = requests.get(url, params=params)
-
         assert response.status_code == 200
-        assert "results" in response.json()
+
+        # Validate response
+        data = response.json().get("data", {})
+        assert "results" in data
+        assert "page" in data
+        assert "pages" in data
+        assert "per_page" in data
 
 
 class TestSearchStatus:
@@ -103,9 +174,17 @@ class TestSearchStatus:
 
         url = f"{BASE_URL}{API_PREFIX}/search/status"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert "elasticsearch_available" in response.json()
+
+        data = response.json().get("data", {})
+        assert "elasticsearch_available" in data
+        assert isinstance(data['elasticsearch_available'], bool)
+        assert "fallback_active" in data
+        assert isinstance(data['fallback_active'], bool)
+        assert "index_exists" in data
+        assert isinstance(data['index_exists'], bool)
+        assert "timestamp" in data
+        assert isinstance(data['timestamp'], str)
 
 
 class TestAdvancedSearch:
@@ -134,9 +213,77 @@ class TestAdvancedSearch:
             "query": search_query
         }
         response = requests.get(url, params=params)
-
         assert response.status_code == 200
-        assert "results" in response.json()
+
+        # Validate response
+        data = response.json().get("data", {})
+        assert "results" in data
+        assert isinstance(data['results'], list)
+        assert "query" in data
+        assert isinstance(data['query'], str)
+        assert "total" in data
+        assert isinstance(data['total'], int)
+        assert "using_elasticsearch" in data
+        assert isinstance(data['using_elasticsearch'], bool)
+        assert "filters" in data
+        assert isinstance(data['filters'], dict)
+
+        # Validate results structure and type
+        if len(data['results']) > 0:
+            assert all(
+                ("highlights" in result) and
+                ("speaker" in result) and
+                ("tags" in result) and
+                (
+                    "bible_character" in result and
+                    isinstance(result["bible_character"], str)
+                ) and
+                (
+                    "chapter_markers" in result and
+                    isinstance(result["chapter_markers"], str)
+                ) and
+                (
+                    "description" in result and
+                    isinstance(result["description"], str)
+                ) and
+                (
+                    "duration" in result and
+                    isinstance(result["duration"], int)
+                ) and
+                (
+                    "id" in result and
+                    isinstance(result["id"], int)
+                ) and
+                (
+                    "location" in result and
+                    isinstance(result["location"], str)
+                ) and
+                (
+                    "name" in result and
+                    isinstance(result["name"], str)
+                ) and
+                (
+                    "score" in result and
+                    isinstance(result["score"], float)
+                ) and
+                (
+                    "scriptures" in result and
+                    isinstance(result["scriptures"], str)
+                ) and
+                (
+                    "thumbnail" in result and
+                    isinstance(result["thumbnail"], str)
+                ) and
+                (
+                    "title" in result and
+                    isinstance(result["title"], str)
+                ) and
+                (
+                    "video_id" in result and
+                    isinstance(result["video_id"], int)
+                )
+                for result in data['results']
+            )
 
     def test_advanced_search_with_filters(
         self,
@@ -163,9 +310,31 @@ class TestAdvancedSearch:
             "tags": valid_tag_name
         }
         response = requests.get(url, params=params)
-
         assert response.status_code == 200
-        assert "results" in response.json()
+
+        # Validate response
+        data = response.json().get("data", {})
+        assert "results" in data
+        assert isinstance(data['results'], list)
+        assert "query" in data
+        assert isinstance(data['query'], str)
+        assert "total" in data
+        assert isinstance(data['total'], int)
+        assert "using_elasticsearch" in data
+        assert isinstance(data['using_elasticsearch'], bool)
+        assert "filters" in data
+        assert isinstance(data['filters'], dict)
+
+        # Validate filters
+        filters = data['filters']
+        assert "speakers" in filters
+        assert isinstance(filters['speakers'], list)
+        assert "characters" in filters
+        assert isinstance(filters['characters'], list)
+        assert "locations" in filters
+        assert isinstance(filters['locations'], list)
+        assert "tags" in filters
+        assert isinstance(filters['tags'], list)
 
 
 class TestSearchReindex:
@@ -188,6 +357,13 @@ class TestSearchReindex:
 
         url = f"{BASE_URL}{API_PREFIX}/search/reindex"
         response = requests.post(url)
-
         assert response.status_code == 200
-        assert "message" in response.json()
+
+        # Validate response
+        data = response.json().get("data", {})
+        assert "failed" in data
+        assert isinstance(data['failed'], int)
+        assert "total" in data
+        assert isinstance(data['total'], int)
+        assert "success" in data
+        assert isinstance(data['success'], int)

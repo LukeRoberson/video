@@ -126,43 +126,44 @@ def video_details(
     response = requests.get(
         f'http://localhost:5010/api/videos/{video_id}',
     )
-    video = response.json()
+    video = response.json().get('data', {})
 
     # API: Get categories for the video
     response = requests.get(
         f'http://localhost:5010/api/categories/video/{video_id}',
     )
-    cat_list = response.json()
+    data = response.json().get('data', {})
+    cat_list = data.get('categories', [])
 
     # API: Get tags for the video
     response = requests.get(
         f'http://localhost:5010/api/tags/video/{video_id}',
     )
-    tags = response.json()
+    tags = response.json().get('data', {})
 
     # API: Get locations for the video
     response = requests.get(
         f'http://localhost:5010/api/locations/video/{video_id}',
     )
-    locations = response.json()
+    locations = response.json().get('data', [])
 
     # API: Get speakers for the video
     response = requests.get(
         f'http://localhost:5010/api/speakers/video/{video_id}',
     )
-    speakers = response.json()
+    speakers = response.json().get('data', [])
 
     # API: Get characters for the video
     response = requests.get(
         f'http://localhost:5010/api/characters/video/{video_id}',
     )
-    characters = response.json()
+    characters = response.json().get('data', {})
 
     # API: Get scriptures for the video
     response = requests.get(
         f'http://localhost:5010/api/scriptures/video/{video_id}',
     )
-    scriptures = response.json()
+    scriptures = response.json().get('data', [])
 
     # API: Check if video is marked as watched
     response = requests.get(
@@ -194,7 +195,7 @@ def video_details(
         f'http://localhost:5010/api/similarity/{video_id}',
     )
     if response.status_code == 200:
-        similar_videos = response.json()
+        similar_videos = response.json().get('data', [])
     else:
         similar_videos = None
 
@@ -219,7 +220,7 @@ def video_details(
         )
 
         if response.status_code == 200:
-            video_details = response.json()
+            video_details = response.json().get('data', {})
             video_ids.append(video_details)
 
         else:
@@ -326,7 +327,7 @@ def tag_details(
         f'http://localhost:5010/api/tags/{tag_id}',
     )
     if response.status_code == 200:
-        tag = response.json()
+        tag = response.json().get('data', {})
     else:
         return make_response(
             render_template(
@@ -344,7 +345,7 @@ def tag_details(
         },
     )
     if response.status_code == 200:
-        videos = response.json()
+        videos = response.json().get('data', [])
     else:
         return make_response(
             render_template(
@@ -392,7 +393,7 @@ def location_details(
         f'http://localhost:5010/api/locations/{location_id}',
     )
     if response.status_code == 200:
-        location = response.json()
+        location = response.json().get('data', {})
     else:
         return make_response(
             render_template(
@@ -410,7 +411,7 @@ def location_details(
         },
     )
     if response.status_code == 200:
-        videos = response.json()
+        videos = response.json().get('data', [])
     else:
         return make_response(
             render_template(
@@ -457,7 +458,7 @@ def speaker_details(
         f'http://localhost:5010/api/speakers/{speaker_id}',
     )
     if response.status_code == 200:
-        speaker = response.json()
+        speaker = response.json().get('data', {})
     else:
         return make_response(
             render_template(
@@ -475,7 +476,7 @@ def speaker_details(
         },
     )
     if response.status_code == 200:
-        videos = response.json()
+        videos = response.json().get('data', [])
     else:
         return make_response(
             render_template(
@@ -524,7 +525,7 @@ def character_details(
         f'http://localhost:5010/api/characters/{character_id}',
     )
     if response.status_code == 200:
-        character = response.json()
+        character = response.json().get('data', {})
     else:
         return make_response(
             render_template(
@@ -546,7 +547,7 @@ def character_details(
         },
     )
     if response.status_code == 200:
-        videos = response.json()
+        videos = response.json().get('data', [])
     else:
         return make_response(
             render_template(
@@ -593,7 +594,7 @@ def scripture_details(
         f'http://localhost:5010/api/scriptures/{scripture_id}',
     )
     if response.status_code == 200:
-        scripture = response.json()
+        scripture = response.json().get('data', {})
     else:
         return make_response(
             render_template(
@@ -616,7 +617,7 @@ def scripture_details(
         },
     )
     if response.status_code == 200:
-        videos = response.json()
+        videos = response.json().get('data', [])
     else:
         return make_response(
             render_template(
@@ -713,7 +714,7 @@ def search_results() -> Response:
     if query:
         try:
             # Make API call to search endpoint
-            api_url = f'{SEARCH_API_BASE_URL}/api/search/'
+            api_url = f'{SEARCH_API_BASE_URL}/api/search'
             params = {
                 'q': query,
                 'page': page,
@@ -730,11 +731,16 @@ def search_results() -> Response:
             response = requests.get(api_url, params=params)
 
             if response.status_code == 200:
-                data = response.json()
+                data = response.json().get('data', {})
                 videos = data.get('results', [])
                 total = data.get('total', 0)
                 pages = data.get('pages', 0)
                 using_elasticsearch = data.get('using_elasticsearch', False)
+
+            else:
+                logger.warning(
+                    f"Search API returned error: {response.status_code}"
+                )
 
             # Add a badge to show which search method was used (ES or DB)
             if total > 0:
@@ -843,7 +849,7 @@ def advanced_search() -> Response:
         'http://localhost:5010/api/speakers',
     )
     if response.status_code == 200:
-        speakers = response.json()
+        speakers = response.json().get('data', [])
     else:
         logger.error("Failed to fetch speakers from API")
         speakers = []
@@ -853,7 +859,7 @@ def advanced_search() -> Response:
         'http://localhost:5010/api/characters',
     )
     if response.status_code == 200:
-        characters = response.json()
+        characters = response.json().get('data', [])
     else:
         logger.error("Failed to fetch characters from API")
         characters = []
@@ -863,7 +869,7 @@ def advanced_search() -> Response:
         'http://localhost:5010/api/locations',
     )
     if response.status_code == 200:
-        locations = response.json()
+        locations = response.json().get('data', [])
     else:
         logger.error("Failed to fetch locations from API")
         locations = []
@@ -873,7 +879,7 @@ def advanced_search() -> Response:
         'http://localhost:5010/api/tags',
     )
     if response.status_code == 200:
-        tags = response.json()
+        tags = response.json().get('data', [])
     else:
         logger.error("Failed to fetch tags from API")
         tags = []
@@ -1004,7 +1010,7 @@ def advanced_search() -> Response:
             response = requests.get(api_url, params=params)
 
             if response.status_code == 200:
-                data = response.json()
+                data = response.json().get('data', {})
                 videos = data.get('results', [])
                 total = data.get('total', 0)
                 pages = data.get('pages', 0)

@@ -38,13 +38,12 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    make_response,
-    jsonify,
 )
 
 # Local imports
 from api.api import (
     api_error,
+    api_success,
 )
 from api.sql_db import (
     DatabaseContext,
@@ -83,11 +82,10 @@ def get_locations() -> Response:
         locations, key=lambda loc: loc.get('name', '').lower()
     )
 
-    return make_response(
-        jsonify(
-            locations,
-        ),
-        200
+    return api_success(
+        data=locations,
+        message="Locations retrieved successfully",
+        status=200
     )
 
 
@@ -119,11 +117,10 @@ def get_location(
                 404
             )
 
-    return make_response(
-        jsonify(
-            loc_list[0],
-        ),
-        200
+    return api_success(
+        data=loc_list[0],
+        message="Location retrieved successfully",
+        status=200
     )
 
 
@@ -162,9 +159,8 @@ def get_video_locations(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                locations,
-            ),
-            200
+        return api_success(
+            data=locations,
+            message="Locations retrieved successfully",
+            status=200
         )

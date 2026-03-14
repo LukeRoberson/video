@@ -46,15 +46,28 @@ class TestAllCharacters:
             - Endpoint returns status code 200
             - Response is a list
             - List is not empty
+            - Each item in the list has the expected structure
         """
 
         url = f"{BASE_URL}{API_PREFIX}/characters"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate response structure
+        data = response.json().get("data", [])
         assert isinstance(data, list)
         assert len(data) > 0
+
+        # Validate that each item in the list has the expected structure
+        assert all(isinstance(item, dict) for item in data)
+        assert all(
+            "id" in item and
+            "name" in item and
+            "description" in item and
+            "profile_pic" in item and
+            "date_range" in item
+            for item in data
+        )
 
 
 class TestCharacters:
@@ -85,10 +98,20 @@ class TestCharacters:
 
         url = f"{BASE_URL}{API_PREFIX}/characters/{valid_character_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
-        assert data["id"] == valid_character_id
+
+        # Validate response structure and content
+        data = response.json().get("data", {})
+        assert "date_range" in data
+        assert isinstance(data["date_range"], str)
+        assert "description" in data
+        assert isinstance(data["description"], str)
+        assert "id" in data
+        assert isinstance(data["id"], int)
+        assert "name" in data
+        assert isinstance(data["name"], str)
+        assert "profile_pic" in data
+        assert isinstance(data["profile_pic"], str)
 
     def test_get_character_by_invalid_id(
         self,
@@ -140,8 +163,19 @@ class TestVideoCharacters:
         response = requests.get(url)
 
         assert response.status_code == 200
-        data = response.json()
+        data = response.json().get("data", [])
+
         assert isinstance(data, list)
+        if len(data) > 0:
+            assert all(isinstance(item, dict) for item in data)
+            assert all(
+                "id" in item and
+                "name" in item and
+                "description" in item and
+                "profile_pic" in item and
+                "date_range" in item
+                for item in data
+            )
 
     def test_get_characters_by_invalid_video_id(
         self,

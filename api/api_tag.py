@@ -35,13 +35,12 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    jsonify,
-    make_response,
 )
 
 # Custom imports
 from api.api import (
     api_error,
+    api_success,
 )
 from api.sql_db import (
     DatabaseContext,
@@ -86,11 +85,10 @@ def get_tags() -> Response:
         tags, key=lambda tag: tag.get('name', '').lower()
     )
 
-    return make_response(
-        jsonify(
-            tags,
-        ),
-        200
+    return api_success(
+        data=tags,
+        message="Tags retrieved successfully",
+        status=200
     )
 
 
@@ -122,11 +120,10 @@ def get_tag(
                 404
             )
 
-    return make_response(
-        jsonify(
-            tag_list[0],
-        ),
-        200
+    return api_success(
+        data=tag_list[0],
+        message="Tag retrieved successfully",
+        status=200
     )
 
 
@@ -165,9 +162,8 @@ def get_video_tags(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                tags,
-            ),
-            200
+        return api_success(
+            data=tags,
+            message="Tags retrieved successfully",
+            status=200
         )

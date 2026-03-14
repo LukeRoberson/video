@@ -68,7 +68,9 @@ None
 
 **Response Body**
 
-A single entry, representing the category.
+Standard 'data', 'message', and 'success' fields.
+
+The 'data' entry contains the resolved category ID
 </br></br>
 
 
@@ -80,7 +82,11 @@ A single entry, representing the category.
 
 ```json
 {
-    "category_id": 1
+    "data": {
+        "category_id": 1
+    },
+    "message": "Retrieved category successfully",
+    "success": true
 }
 ```
 </br></br>
@@ -126,7 +132,9 @@ None
 
 **Response Body**
 
-A list of entries, with each item in the list containing details about a video.
+Standard 'data', 'message', and 'success' fields.
+
+The 'data' field contains 'videos', which is list of entries, with each item in the list containing details about a video.
 </br></br>
 
 
@@ -148,22 +156,28 @@ A list of entries, with each item in the list containing details about a video.
 
 
 ```json
-[
-    {
-        "date_added": "2025-11-04 00:00:00",
-        "description": "A talk about taking in spiritual food, by Geoffrey Jackson.\nHighlights from the dedication of the new Britain branch.\nThe experience of Nigel Baker.\nMorning worship with John Ekrann.\nDig for Treasures - Obadiah.\nThe experience of Domenic Alessia.\nMusic Video - Hearer of Prayer.\nVideo Postcard from Brussels.",
-        "duration": "57:56",
-        "id": 3011,
-        "name": "JW Broadcasting—November 2025",
-        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
-        "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
-        "url_1080": null,
-        "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
-        "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
-        "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
-        "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4"
-    }
-]
+{
+    "data": {
+        "videos": [
+            {
+                "date_added": "2025-11-04 00:00:00",
+                "description": "A talk about taking in spiritual food, by Geoffrey Jackson.\nHighlights from the dedication of the new Britain branch.\nThe experience of Nigel Baker.\nMorning worship with John Ekrann.\nDig for Treasures - Obadiah.\nThe experience of Domenic Alessia.\nMusic Video - Hearer of Prayer.\nVideo Postcard from Brussels.",
+                "duration": "57:56",
+                "id": 3011,
+                "name": "JW Broadcasting—November 2025",
+                "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg",
+                "url": "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO",
+                "url_1080": null,
+                "url_240": "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4",
+                "url_360": "https://akdd1.jw-cdn.org/sg2/p/30a4cf1/1/o/jwb-132_E_01_r360P.mp4",
+                "url_480": "https://akdd1.jw-cdn.org/sg2/p/d320c0/1/o/jwb-132_E_01_r480P.mp4",
+                "url_720": "https://akdd1.jw-cdn.org/sg2/p/781121/1/o/jwb-132_E_01_r720P.mp4",
+                "watched": true
+            }
+        ],
+    "message": "Retrieved videos successfully",
+    "success": true
+}
 ```
 </br></br>
 
@@ -210,7 +224,9 @@ None
 
 **Response Body**
 
-A list of categories that a video belongs to.
+'data', 'message', and 'success' fields
+
+The 'data' field contains list of categories that a video belongs to.
 </br></br>
 
 
@@ -222,16 +238,20 @@ A list of categories that a video belongs to.
 
 
 ```json
-[
-    {
-        "id": 1,
-        "name": "Monthly Programs"
-    },
-    {
-        "id": 1340,
-        "name": "JW Broadcasting"
-    }
-]
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Monthly Programs"
+        },
+        {
+            "id": 1340,
+            "name": "JW Broadcasting"
+        }
+    ],
+    "message": "Retrieved categories successfully",
+    "success": true
+}
 ```
 </br></br>
 

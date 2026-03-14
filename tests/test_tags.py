@@ -43,13 +43,25 @@ class TestTagList:
         Test:
             - Endpoint returns status code 200
             - Response is a list
+            - Each tag in the list has 'id', 'name', and 'video_count' fields
+            - Each field has the correct data type
         """
 
         url = f"{BASE_URL}{API_PREFIX}/tags"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        if len(data) > 0:
+            assert all(isinstance(tag, dict) for tag in data)
+            assert all(
+                ("id" in tag and isinstance(tag["id"], int)) and
+                ("name" in tag and isinstance(tag["name"], str)) and
+                ("video_count" in tag and isinstance(tag["video_count"], int))
+                for tag in data
+            )
 
 
 class TestGetTag:
@@ -72,14 +84,20 @@ class TestGetTag:
 
         Test:
             - Endpoint returns status code 200 for valid ID
+            - Response contains 'id' and 'name' fields
+            - Each field has the correct data type
         """
 
         # Test with a valid tag ID (assuming 1 is valid)
         valid_url = f"{BASE_URL}{API_PREFIX}/tags/{valid_tag_id}"
-        valid_response = requests.get(valid_url)
+        response = requests.get(valid_url)
+        assert response.status_code == 200
 
-        assert valid_response.status_code == 200
-        assert isinstance(valid_response.json(), dict)
+        # Validate the response structure and data types
+        data = response.json().get("data", {})
+        assert isinstance(data, dict)
+        assert "id" in data and isinstance(data["id"], int)
+        assert "name" in data and isinstance(data["name"], str)
 
     def test_get_tag_by_invalid_id(
         self,
@@ -120,13 +138,26 @@ class TestVideoTags:
         Test:
             - Endpoint returns status code 200 for valid video ID
             - Response is a list
+            - Structure is correct
+            - Data types are correct
         """
 
         url = f"{BASE_URL}{API_PREFIX}/tags/video/{valid_video_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        # Validate the response structure
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Validate the structure and data types
+        if len(data) > 0:
+            assert all(isinstance(tag, dict) for tag in data)
+            assert all(
+                ("id" in tag and isinstance(tag["id"], int)) and
+                ("name" in tag and isinstance(tag["name"], str))
+                for tag in data
+            )
 
     def test_get_video_tags_by_invalid_video_id(
         self,

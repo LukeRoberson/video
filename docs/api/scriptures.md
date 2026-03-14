@@ -65,7 +65,9 @@ None
 
 **Response Body**
 
-A list of scripture entries.
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field is a list of scripture entries.
 </br></br>
 
 
@@ -80,15 +82,19 @@ A list of scripture entries.
 
 
 ```json
-[
-    {
-        "book": "Matthew",
-        "chapter": 19,
-        "id": 2,
-        "verse": 13,
-        "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
-    }
-]
+{
+    "data": [
+        {
+            "book": "Matthew",
+            "chapter": 19,
+            "id": 2,
+            "verse": 13,
+            "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+        }
+    ],
+    "message": "Retrieved 2606 scriptures",
+    "success": true
+}
 ```
 </br></br>
 
@@ -126,13 +132,15 @@ None
 
 `200 OK` on success
 
-`404 NOUT FOUND` if the scripture does not exist.
+`404 NOT FOUND` if the scripture does not exist.
 </br></br>
 
 
 **Response Body**
 
-Returns the details for an individual scripture
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field contains the details for an individual scripture
 </br></br>
 
 
@@ -148,11 +156,15 @@ Returns the details for an individual scripture
 
 ```json
 {
-    "book": "Matthew",
-    "chapter": 19,
-    "id": 2,
-    "verse": 13,
-    "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+    "data": {
+        "book": "Matthew",
+        "chapter": 19,
+        "id": 2,
+        "verse": 13,
+        "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+    },
+    "message": "Retrieved scripture with ID 2",
+    "success": true
 }
 ```
 </br></br>
@@ -211,7 +223,9 @@ None
 
 **Response Body**
 
-A list of entries, where each entry is a scripture.
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field is a list of entries, where each entry describes a scripture.
 </br></br>
 
 
@@ -226,15 +240,19 @@ A list of entries, where each entry is a scripture.
 
 
 ```json
-[
-    {
-        "book": "Matthew",
-        "chapter": 19,
-        "id": 2,
-        "verse": 13,
-        "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
-    }
-]
+{
+    "data": [
+        {
+            "book": "Matthew",
+            "chapter": 19,
+            "id": 2,
+            "verse": 13,
+            "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+        }
+    ],
+    "message": "Retrieved scriptures for video ID 1",
+    "success": true
+}
 ```
 </br></br>
 

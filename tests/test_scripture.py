@@ -46,13 +46,43 @@ class TestScriptureList:
         Test:
             - Endpoint returns status code 200
             - Response is a list
+            - Response is structured correctly
+            - Each field has the expected type
         """
 
         url = f"{BASE_URL}{API_PREFIX}/scriptures"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        # Verify that the response contains a list of scriptures
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Verify the structure and types of fields in each scripture
+        if len(data) > 0:
+            # Verify that each scripture in the list has the expected fields
+            assert all(
+                (
+                    "id" in scripture and
+                    isinstance(scripture["id"], int)
+                ) and
+                (
+                    "book" in scripture and
+                    isinstance(scripture["book"], str)
+                ) and
+                (
+                    "chapter" in scripture and
+                    isinstance(scripture["chapter"], int)
+                ) and
+                (
+                    "verse" in scripture and
+                    isinstance(scripture["verse"], int)
+                ) and
+                (
+                    "verse_text" in scripture
+                )
+                for scripture in data
+            )
 
 
 class TestGetScripture:
@@ -81,9 +111,18 @@ class TestGetScripture:
         # Test with a valid scripture ID
         valid_url = f"{BASE_URL}{API_PREFIX}/scriptures/{valid_scripture_id}"
         valid_response = requests.get(valid_url)
-
         assert valid_response.status_code == 200
-        assert isinstance(valid_response.json(), dict)
+
+        # Validate the response structure
+        data = valid_response.json().get("data", {})
+        assert isinstance(data, dict)
+
+        # Validate the contents
+        assert "id" in data and isinstance(data["id"], int)
+        assert "book" in data and isinstance(data["book"], str)
+        assert "chapter" in data and isinstance(data["chapter"], int)
+        assert "verse" in data and isinstance(data["verse"], int)
+        assert "verse_text" in data
 
     def test_get_scripture_by_invalid_id(
         self,
@@ -126,14 +165,43 @@ class TestVideoScriptures:
         Test:
             - Endpoint returns status code 200 for valid video ID
             - Response is a list
+            - Response is structured correctly
+            - Each field has the expected type
         """
 
         # Test with a valid video ID (assuming 1 is valid)
         valid_url = f"{BASE_URL}{API_PREFIX}/scriptures/video/{valid_video_id}"
-        valid_response = requests.get(valid_url)
+        response = requests.get(valid_url)
+        assert response.status_code == 200
 
-        assert valid_response.status_code == 200
-        assert isinstance(valid_response.json(), list)
+        # Validate response structure
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Validate the contents of the response
+        if len(data) > 0:
+            assert all(
+                (
+                    "id" in scripture and
+                    isinstance(scripture["id"], int)
+                ) and
+                (
+                    "book" in scripture and
+                    isinstance(scripture["book"], str)
+                ) and
+                (
+                    "chapter" in scripture and
+                    isinstance(scripture["chapter"], int)
+                ) and
+                (
+                    "verse" in scripture and
+                    isinstance(scripture["verse"], int)
+                ) and
+                (
+                    "verse_text" in scripture
+                )
+                for scripture in data
+            )
 
     def test_get_video_scriptures_by_invalid_video_id(
         self,

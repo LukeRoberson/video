@@ -80,7 +80,9 @@ None
 
 **Response Body**
 
-Returns some metadata, as well as a list of entries in the 'results' key.
+Returns 'data', 'message' and 'success' fields.
+
+Returns some metadata, as well as a list of entries in the 'results' key. This is all in the 'data' field.
 
 Each entry, in 'results' contains search results. Some fields in here are from the database, while others are from the Elastic Search service.
 
@@ -163,42 +165,46 @@ Highlights fields include:
 
 ```json
 {
-    "page": 1,
-    "pages": 85,
-    "per_page": 20,
-    "query": "bible",
-    "total": 1687,
-    "using_elasticsearch": true,
-    "results": [
-        {
-            "bible_character": "",
-            "chapter_markers": "",
-            "description": "",
-            "duration": 125,
-            "highlights": {
-                "title": [
-                    "<em>Bible</em> Reading"
-                ],
-                "transcript": [
-                    "I think <em>Bible</em> readings made me a better person. It gives me a little push for the day.",
-                    "For young people, they can go through JW.org and get the <em>Bible</em> several different copies of the <em>Bible</em> right there.",
-                    "Another thing I'm loving is the new videos, an introduction to this book of the <em>Bible</em>."
-                ]
-            },
-            "id": 2546,
-            "location": "",
-            "name": "Bible Reading",
-            "score": 15.84233,
-            "scriptures": "",
-            "speaker": null,
-            "tags": null,
-            "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/502017181/univ/art/502017181_univ_wss_lg.jpg",
-            "title": "Bible Reading",
-            "video_id": 2546,
-            "watched": false
-        }
-    ]
-]
+    "data": {
+        "page": 2,
+        "pages": 169,
+        "per_page": 10,
+        "query": "bible",
+        "results": [
+            {
+                "bible_character": "",
+                "chapter_markers": "",
+                "description": "",
+                "duration": 165,
+                "highlights": {
+                    "title": [
+                        "Welcome to Your <em>Bible</em> Study"
+                    ],
+                    "transcript": [
+                        "Welcome to your <em>Bible</em> study. Millions around the world enjoy this interactive <em>Bible</em> course. And we hope you will too. What will you learn?",
+                        "Before reading the next, most paragraphs have key <em>Bible</em> verses highlighted.",
+                        "The <em>Bible</em> is the world's best guide to a happy life. Discover how it can help you in this interactive <em>Bible</em> course."
+                    ]
+                },
+                "id": 1300,
+                "location": "",
+                "name": "Welcome to Your Bible Study",
+                "score": 12.70991,
+                "scriptures": "",
+                "speaker": null,
+                "tags": null,
+                "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/lffv/univ/art/lffv_univ_wss_001_lg.jpg",
+                "title": "Welcome to Your Bible Study",
+                "video_id": 1300,
+                "watched": false
+            }
+        ],
+        "total": 1687,
+        "using_elasticsearch": true
+    },
+    "message": "Search completed for query",
+    "success": true
+}
 ```
 </br></br>
 
@@ -242,7 +248,9 @@ None
 
 **Response Body**
 
-TBA
+Returns 'data', 'message' and 'success' fields.
+
+The 'data' field contains information about the search results.
 </br></br>
 
 
@@ -257,10 +265,14 @@ TBA
 
 ```json
 {
-    "elasticsearch_available": true,
-    "fallback_active": false,
-    "index_exists": true,
-    "timestamp": "2026-03-05T23:01:27.181525+00:00"
+    "data": {
+        "elasticsearch_available": true,
+        "fallback_active": false,
+        "index_exists": true,
+        "timestamp": "2026-03-13T23:19:48.940795+00:00"
+    },
+    "message": "Search service status retrieved",
+    "success": true
 }
 ```
 </br></br>
@@ -331,7 +343,9 @@ None
 
 **Response Body**
 
-The response contains some metadata about the search, such as search terms and filters.
+Returns 'data', 'message' and 'success' fields.
+
+The 'data' field contains some metadata about the search, such as search terms and filters.
 
 It also contains a list of results, with each entry containing information about the video.
 </br></br>
@@ -376,71 +390,75 @@ Results:
 
 ```json
 {
-    "filters": {
-        "characters": [
-            "David"
+    "data": {
+        "filters": {
+            "characters": [
+                "David"
+            ],
+            "locations": [
+                "Samaria"
+            ],
+            "speakers": [
+                "Stephen Lett"
+            ],
+            "tags": [
+                "prayer"
+            ]
+        },
+        "page": 1,
+        "pages": 1,
+        "per_page": 20,
+        "query": "generosity",
+        "results": [
+            {
+                "bible_character": "David, Jesus, Daniel, Mephibosheth, Hosea, Gomer (Wife of Hosea), Jeroboam II, Zechariah (King of Israel), Shallum (King of Israel), Pekahiah, Pekah",
+                "chapter_markers": "Introduction Imitate Jehovah’s Generosity Hospitality—An Opportunity to Build Deep Friendships The Otalora Sisters: Build Faith That Endures Tragedy See Yourself in Paradise Dig for Treasures - Hosea Jehovah Focuses on the Good You Do Music Video - We See You, Sister Conclusion",
+                "description": "Theme: Imitate Jehovah’s Generosity\nLessons From the Watchtower - The Delightful Course of Hospitality-So Needed!\nMaythe, Jacky, and Marcela, three sisters, discuss their experiences with unexpected tragedy with the sudden and violent loss of their father.\nInterviews - Children talk about what they look forward to about paradise.\nDig for Treasures - Hosea\nJohn Ekrann: Morning Worship (Pr 15:3)\nMusic Video - Our sisters are an example of faith\n\nVideo post card from French Guiana in South America. 90% of the land is covered by forests.\nThere is great diversity in the people and the languages they speak.\nIt is even the site for the European Space Agency.\nThe kingdom message first arrived when Olga Laland, from Guadaloup, arrived in 1945. He shared the good news in villages, gold mines, and trading posts, over the next two years.\nXavier and Sarah Knoll arrived after graduating from Gilead in 1978, by supporting a group in Cayenne.\nToday there is an average of 3000 publishers, including a peak of 700 regular pioneers, and 11500 at the memorial.\nPublishers often travel by boat to distant territories, as there’s no other way to get to many areas.",
+                "duration": 3673,
+                "highlights": {
+                    "bible_character": [
+                        "<em>David</em>, Jesus, Daniel, Mephibosheth, Hosea, Gomer (Wife of Hosea), Jeroboam II, Zechariah (King of Israel), Shallum (King of Israel), Pekahiah, Pekah"
+                    ],
+                    "chapter_markers": [
+                        "Introduction Imitate Jehovah’s <em>Generosity</em> Hospitality—An Opportunity to Build Deep Friendships The Otalora Sisters: Build Faith That Endures Tragedy See"
+                    ],
+                    "description": [
+                        "Theme: Imitate Jehovah’s <em>Generosity</em>\nLessons From the Watchtower - The Delightful Course of Hospitality-So Needed!"
+                    ],
+                    "location": [
+                        "<em>Samaria</em>, Philippines, Japan, Israel, Austria, Switzerland, Croatia, Columbia, Bangladesh, French Guiana, South America, Guadaloup, Cayenne"
+                    ],
+                    "speaker": [
+                        "<em>Stephen</em> <em>Lett</em>, John Ekrann, Stefanie Karapatsios, Barbara Ilg, Sergio Ilg, Marija Golubiček, Maythe Otalora, Jacky Otalora, Marcela Lagno, Prithibi, Nanato"
+                    ],
+                    "tags": [
+                        "<em>prayer</em>, language, translation, construction, friends, preaching, encouragement, volunteer, prison, disaster relief, children, hospitality, peace, love,",
+                        "family, prophecy, bible, kingdom, donation, happiness, creator, comfort, <em>generosity</em>, commendation, motive, caleb, sophia, meeting, personal study, sign"
+                    ],
+                    "transcript": [
+                        "We'll discuss the theme, imitate Jehovah's <em>generosity</em>. <em>Generosity</em> is an aspect of Jehovah's love.",
+                        "Because of Jehovah's voluminous <em>generosity</em>. But now we ask, how can we imitate Jehovah's <em>generosity</em> in giving physical gifts?",
+                        "That is the ultimate example of <em>generosity</em>. But now we ask, how can we imitate Jehovah's <em>generosity</em> in giving spiritual gifts?"
+                    ]
+                },
+                "id": 2687,
+                "location": "Samaria, Philippines, Japan, Israel, Austria, Switzerland, Croatia, Columbia, Bangladesh, French Guiana, South America, Guadaloup, Cayenne",
+                "name": "JW Broadcasting—August 2025",
+                "score": 11.7441025,
+                "scriptures": "Proverbs 3:27 - Do not withhold good from those to whom you should give it\nIf it is within your power to help., Ephesians 5:1 - Therefore, become imitators of God, as beloved children,, Proverbs 15:23 - A man rejoices in giving the right answer,\nAnd a word spoken at the right time—how good it is!, Proverbs 15:3 - The eyes of Jehovah are everywhere,\nWatching both the bad and the good., Psalms 139:14 - I praise you because in an awe-inspiring way I am wonderfully made.\nYour works are wonderful,\nI know this very well., James 1:17 - Every good gift and every perfect present is from above, coming down from the Father of the celestial lights, who does not vary or change like the shifting shadows., 1 Peter 4:9 - Be hospitable to one another without grumbling., Genesis 8:21 - And Jehovah began to smell a pleasing aroma. So Jehovah said in his heart: “Never again will I curse the ground on man’s account, for the inclination of the heart of man is bad from his youth up; and never again will I strike down every living thing as I have done., James 2:15 - If any brothers or sisters are lacking clothing and enough food for the day,, James 2:16 - yet one of you says to them, “Go in peace; keep warm and well fed,” but you do not give them what they need for their body, of what benefit is it?, 1 Corinthians 16:2 - On the first day of every week, each of you should set something aside according to his own means, so that collections will not take place when I arrive., John 14:26 - But the helper, the holy spirit, which the Father will send in my name, that one will teach you all things and bring back to your minds all the things I told you., Proverbs 18:21 - Death and life are in the power of the tongue;\nThose who love to use it will eat its fruitage., Colossians 3:13 - Continue putting up with one another and forgiving one another freely even if anyone has a cause for complaint against another. Just as Jehovah freely forgave you, you must also do the same., Psalms 37:11 - But the meek will possess the earth,\nAnd they will find exquisite delight in the abundance of peace., Romans 12:12 - Rejoice in the hope. Endure under tribulation. Persevere in prayer., Hosea 1:2 - When Jehovah started to speak his word through Ho·seʹa, Jehovah said to Ho·seʹa: “Go, marry a woman of prostitution and have children of prostitution, because by prostitution the land has turned completely away from following Jehovah.”, Hosea 3:1 - Then Jehovah said to me: “Go once again, love the woman who is loved by another man and is committing adultery, just as Jehovah loves the people of Israel while they turn to other gods and love raisin cakes.”, John 8:29 - And the One who sent me is with me; he did not abandon me to myself, because I always do the things pleasing to him.”, Luke 18:9 - He also told this illustration to some who trusted in their own righteousness and who considered others as nothing:, Luke 18:10 - “Two men went up into the temple to pray, the one a Pharisee and the other a tax collector., Luke 18:11 - The Pharisee stood and began to pray these things to himself, ‘O God, I thank you that I am not like everyone else—extortioners, unrighteous, adulterers—or even like this tax collector., Luke 18:12 - I fast twice a week; I give the tenth of all things I acquire.’, Luke 18:13 - But the tax collector, standing at a distance, was not willing even to raise his eyes heavenward but kept beating his chest, saying, ‘O God, be gracious to me, a sinner.’, Luke 18:14 - I tell you, this man went down to his home and was proved more righteous than that Pharisee. Because everyone who exalts himself will be humiliated, but whoever humbles himself will be exalted.”",
+                "speaker": null,
+                "tags": null,
+                "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-129/univ/art/jwb-129_univ_wss_01_lg.jpg",
+                "title": "JW Broadcasting—August 2025",
+                "video_id": 2687,
+                "watched": false
+            }
         ],
-        "locations": [
-            "Samaria"
-        ],
-        "speakers": [
-            "Stephen Lett"
-        ],
-        "tags": [
-            "prayer"
-        ]
+        "total": 1,
+        "using_elasticsearch": true
     },
-    "page": 1,
-    "pages": 1,
-    "per_page": 20,
-    "query": "generosity",
-    "results": [
-        {
-            "bible_character": "David, Jesus, Daniel, Mephibosheth, Hosea, Gomer (Wife of Hosea), Jeroboam II, Zechariah (King of Israel), Shallum (King of Israel), Pekahiah, Pekah",
-            "chapter_markers": "Introduction Imitate Jehovah’s Generosity Hospitality—An Opportunity to Build Deep Friendships The Otalora Sisters: Build Faith That Endures Tragedy See Yourself in Paradise Dig for Treasures - Hosea Jehovah Focuses on the Good You Do Music Video - We See You, Sister Conclusion",
-            "description": "Theme: Imitate Jehovah’s Generosity\nLessons From the Watchtower - The Delightful Course of Hospitality-So Needed!\nMaythe, Jacky, and Marcela, three sisters, discuss their experiences with unexpected tragedy with the sudden and violent loss of their father.\nInterviews - Children talk about what they look forward to about paradise.\nDig for Treasures - Hosea\nJohn Ekrann: Morning Worship (Pr 15:3)\nMusic Video - Our sisters are an example of faith\n\nVideo post card from French Guiana in South America. 90% of the land is covered by forests.\nThere is great diversity in the people and the languages they speak.\nIt is even the site for the European Space Agency.\nThe kingdom message first arrived when Olga Laland, from Guadaloup, arrived in 1945. He shared the good news in villages, gold mines, and trading posts, over the next two years.\nXavier and Sarah Knoll arrived after graduating from Gilead in 1978, by supporting a group in Cayenne.\nToday there is an average of 3000 publishers, including a peak of 700 regular pioneers, and 11500 at the memorial.\nPublishers often travel by boat to distant territories, as there’s no other way to get to many areas.",
-            "duration": 3673,
-            "highlights": {
-                "bible_character": [
-                    "<em>David</em>, Jesus, Daniel, Mephibosheth, Hosea, Gomer (Wife of Hosea), Jeroboam II, Zechariah (King of Israel), Shallum (King of Israel), Pekahiah, Pekah"
-                ],
-                "chapter_markers": [
-                    "Introduction Imitate Jehovah’s <em>Generosity</em> Hospitality—An Opportunity to Build Deep Friendships The Otalora Sisters: Build Faith That Endures Tragedy See"
-                ],
-                "description": [
-                    "Theme: Imitate Jehovah’s <em>Generosity</em>\nLessons From the Watchtower - The Delightful Course of Hospitality-So Needed!"
-                ],
-                "location": [
-                    "<em>Samaria</em>, Philippines, Japan, Israel, Austria, Switzerland, Croatia, Columbia, Bangladesh, French Guiana, South America, Guadaloup, Cayenne"
-                ],
-                "speaker": [
-                    "<em>Stephen</em> <em>Lett</em>, John Ekrann, Stefanie Karapatsios, Barbara Ilg, Sergio Ilg, Marija Golubiček, Maythe Otalora, Jacky Otalora, Marcela Lagno, Prithibi, Nanato"
-                ],
-                "tags": [
-                    "<em>prayer</em>, language, translation, construction, friends, preaching, encouragement, volunteer, prison, disaster relief, children, hospitality, peace, love,",
-                    "family, prophecy, bible, kingdom, donation, happiness, creator, comfort, <em>generosity</em>, commendation, motive, caleb, sophia, meeting, personal study, sign"
-                ],
-                "transcript": [
-                    "We'll discuss the theme, imitate Jehovah's <em>generosity</em>. <em>Generosity</em> is an aspect of Jehovah's love.",
-                    "Because of Jehovah's voluminous <em>generosity</em>. But now we ask, how can we imitate Jehovah's <em>generosity</em> in giving physical gifts?",
-                    "That is the ultimate example of <em>generosity</em>. But now we ask, how can we imitate Jehovah's <em>generosity</em> in giving spiritual gifts?"
-                ]
-            },
-            "id": 2687,
-            "location": "Samaria, Philippines, Japan, Israel, Austria, Switzerland, Croatia, Columbia, Bangladesh, French Guiana, South America, Guadaloup, Cayenne",
-            "name": "JW Broadcasting—August 2025",
-            "score": 11.7441025,
-            "scriptures": "Proverbs 3:27 - Do not withhold good from those to whom you should give it\nIf it is within your power to help., Ephesians 5:1 - Therefore, become imitators of God, as beloved children,, Proverbs 15:23 - A man rejoices in giving the right answer,\nAnd a word spoken at the right time—how good it is!, Proverbs 15:3 - The eyes of Jehovah are everywhere,\nWatching both the bad and the good., Psalms 139:14 - I praise you because in an awe-inspiring way I am wonderfully made.\nYour works are wonderful,\nI know this very well., James 1:17 - Every good gift and every perfect present is from above, coming down from the Father of the celestial lights, who does not vary or change like the shifting shadows., 1 Peter 4:9 - Be hospitable to one another without grumbling., Genesis 8:21 - And Jehovah began to smell a pleasing aroma. So Jehovah said in his heart: “Never again will I curse the ground on man’s account, for the inclination of the heart of man is bad from his youth up; and never again will I strike down every living thing as I have done., James 2:15 - If any brothers or sisters are lacking clothing and enough food for the day,, James 2:16 - yet one of you says to them, “Go in peace; keep warm and well fed,” but you do not give them what they need for their body, of what benefit is it?, 1 Corinthians 16:2 - On the first day of every week, each of you should set something aside according to his own means, so that collections will not take place when I arrive., John 14:26 - But the helper, the holy spirit, which the Father will send in my name, that one will teach you all things and bring back to your minds all the things I told you., Proverbs 18:21 - Death and life are in the power of the tongue;\nThose who love to use it will eat its fruitage., Colossians 3:13 - Continue putting up with one another and forgiving one another freely even if anyone has a cause for complaint against another. Just as Jehovah freely forgave you, you must also do the same., Psalms 37:11 - But the meek will possess the earth,\nAnd they will find exquisite delight in the abundance of peace., Romans 12:12 - Rejoice in the hope. Endure under tribulation. Persevere in prayer., Hosea 1:2 - When Jehovah started to speak his word through Ho·seʹa, Jehovah said to Ho·seʹa: “Go, marry a woman of prostitution and have children of prostitution, because by prostitution the land has turned completely away from following Jehovah.”, Hosea 3:1 - Then Jehovah said to me: “Go once again, love the woman who is loved by another man and is committing adultery, just as Jehovah loves the people of Israel while they turn to other gods and love raisin cakes.”, John 8:29 - And the One who sent me is with me; he did not abandon me to myself, because I always do the things pleasing to him.”, Luke 18:9 - He also told this illustration to some who trusted in their own righteousness and who considered others as nothing:, Luke 18:10 - “Two men went up into the temple to pray, the one a Pharisee and the other a tax collector., Luke 18:11 - The Pharisee stood and began to pray these things to himself, ‘O God, I thank you that I am not like everyone else—extortioners, unrighteous, adulterers—or even like this tax collector., Luke 18:12 - I fast twice a week; I give the tenth of all things I acquire.’, Luke 18:13 - But the tax collector, standing at a distance, was not willing even to raise his eyes heavenward but kept beating his chest, saying, ‘O God, be gracious to me, a sinner.’, Luke 18:14 - I tell you, this man went down to his home and was proved more righteous than that Pharisee. Because everyone who exalts himself will be humiliated, but whoever humbles himself will be exalted.”",
-            "speaker": null,
-            "tags": null,
-            "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-129/univ/art/jwb-129_univ_wss_01_lg.jpg",
-            "title": "JW Broadcasting—August 2025",
-            "video_id": 2687,
-            "watched": false
-        }
-    ],
-    "total": 1,
-    "using_elasticsearch": true
+    "message": "Advanced search completed",
+    "success": true
 }
 ```
 </br></br>
@@ -488,7 +506,7 @@ None
 
 **Response Body**
 
-TBA
+Returns 'data', 'message' and 'success' fields.
 </br></br>
 
 
@@ -503,10 +521,13 @@ TBA
 
 ```json
 {
-    "failed": 0,
+    "data": {
+        "failed": 0,
+        "success": 2992,
+        "total": 2992
+    },
     "message": "Reindexing completed",
-    "success": 2991,
-    "total": 2991
+    "success": true
 }
 ```
 </br></br>

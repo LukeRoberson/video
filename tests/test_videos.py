@@ -53,16 +53,24 @@ class TestGetVideo:
 
         url = f"{BASE_URL}{API_PREFIX}/videos/{valid_video_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate the response contains expected video fields
+        data = response.json().get('data', {})
         assert "id" in data
+        assert isinstance(data["id"], int)
         assert "name" in data
+        assert isinstance(data["name"], str)
         assert "description" in data
+        assert isinstance(data["description"], str)
         assert "url" in data
+        assert isinstance(data["url"], str)
         assert "duration" in data
+        assert isinstance(data["duration"], int)
         assert "date_added" in data
+        assert isinstance(data["date_added"], str)
         assert "thumbnail" in data
+        assert isinstance(data["thumbnail"], str)
         assert "url_1080" in data
         assert "url_720" in data
         assert "url_480" in data
@@ -121,23 +129,50 @@ class TestGetVideoBulk:
             url,
             json=body
         )
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate response
+        data = response.json().get('data', [])
         assert isinstance(data, list)
-        for video in data:
-            assert "id" in video
-            assert "name" in video
-            assert "description" in video
-            assert "url" in video
-            assert "duration" in video
-            assert "date_added" in video
-            assert "thumbnail" in video
-            assert "url_1080" in video
-            assert "url_720" in video
-            assert "url_480" in video
-            assert "url_360" in video
-            assert "url_240" in video
+
+        # Validate structure
+        if len(data) > 0:
+            assert all(
+                (
+                    "id" in video and
+                    isinstance(video["id"], int)
+                ) and
+                (
+                    "name" in video and
+                    isinstance(video["name"], str)
+                ) and
+                (
+                    "description" in video and
+                    isinstance(video["description"], str)
+                ) and
+                (
+                    "url" in video and
+                    isinstance(video["url"], str)
+                ) and
+                (
+                    "duration" in video and
+                    isinstance(video["duration"], int)
+                ) and
+                (
+                    "date_added" in video and
+                    isinstance(video["date_added"], str)
+                ) and
+                (
+                    "thumbnail" in video and
+                    isinstance(video["thumbnail"], str)
+                ) and
+                "url_1080" in video and
+                "url_720" in video and
+                "url_480" in video and
+                "url_360" in video and
+                "url_240" in video
+                for video in data
+            )
 
     def test_missing_body(
         self
@@ -231,10 +266,12 @@ class TestGetFilteredVideos:
             url,
             params=params
         )
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate response
+        data = response.json().get('data', [])
         assert isinstance(data, list)
+        assert len(data) > 0
 
     def test_multiple_filters(
         self,
@@ -263,7 +300,7 @@ class TestGetFilteredVideos:
         )
 
         assert response.status_code == 200
-        data = response.json()
+        data = response.json().get('data', [])
         assert isinstance(data, list)
 
         for item in data:
@@ -344,11 +381,23 @@ class TestVideoMetadata:
         """
 
         url = f"{BASE_URL}{API_PREFIX}/videos/metadata"
-        response = requests.get(url)
-
+        params = {
+            "video_name": "Can Love Conquer Hatred?",
+            "tag_name": "av",
+            "location_name": "Africa",
+            "character_name": "Jesus",
+            "speaker_name": "Stephen Lett"
+        }
+        response = requests.get(url, params=params)
         assert response.status_code == 200
-        data = response.json()
-        assert "character_id" in data['data']
-        assert "location_id" in data['data']
-        assert "speaker_id" in data['data']
-        assert "video_id" in data['data']
+
+        # Validate response
+        data = response.json().get('data', {})
+        assert "character_id" in data
+        assert isinstance(data["character_id"], int)
+        assert "location_id" in data
+        assert isinstance(data["location_id"], int)
+        assert "speaker_id" in data
+        assert isinstance(data["speaker_id"], int)
+        assert "video_id" in data
+        assert isinstance(data["video_id"], int)

@@ -66,7 +66,9 @@ None
 
 **Response Body**
 
-Returns a list of all Bible characters, with each entry describing the character.
+Contains 'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of all Bible characters, with each entry describing the character.
 </br></br>
 
 
@@ -81,15 +83,19 @@ Returns a list of all Bible characters, with each entry describing the character
 
 
 ```json
-[
-    {
-        "date_range": "1597-1474 B.C.E.",
-        "description": "Aaron was the courageous spokesman for his brother, Moses, when they appeared before Pharaoh.\nJehovah later appointed Aaron to be Israel’s ﬁrst high priest.\nAlthough he served God loyally for many years, Aaron did not honor God at Meribah.\nTherefore, he was not allowed to enter the Promised Land.",
-        "id": 230,
-        "name": "Aaron",
-        "profile_pic": "230-Aaron.png"
-    }
-]
+{
+    "data": [
+        {
+            "date_range": "1597-1474 B.C.E.",
+            "description": "Aaron was the courageous spokesman for his brother, Moses, when they appeared before Pharaoh.\nJehovah later appointed Aaron to be Israel’s ﬁrst high priest.\nAlthough he served God loyally for many years, Aaron did not honor God at Meribah.\nTherefore, he was not allowed to enter the Promised Land.",
+            "id": 230,
+            "name": "Aaron",
+            "profile_pic": "230-Aaron.png"
+        }
+    ],
+    "message": "Retrieved 205 characters",
+    "success": true
+} 
 ```
 </br></br>
 
@@ -133,7 +139,9 @@ None
 
 **Response Body**
 
-A single entry, containing details for the character
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field contains a single entry, containing details for the character
 </br></br>
 
 
@@ -149,11 +157,15 @@ A single entry, containing details for the character
 
 ```json
 {
-    "date_range": "About 1000 B.C.E.",
-    "description": "Son of Jesse, and the second King of Israel.\nA skilled poet and musician, David wrote more than 73 of the psalms.\nHe humbly sought Jehovah’s direction in his life.\nJehovah called David “a man agreeable to my heart.”",
-    "id": 1,
-    "name": "David",
-    "profile_pic": "1-David.png"
+    "data": {
+        "date_range": "About 1000 B.C.E.",
+        "description": "Son of Jesse, and the second King of Israel.\nA skilled poet and musician, David wrote more than 73 of the psalms.\nHe humbly sought Jehovah’s direction in his life.\nJehovah called David “a man agreeable to my heart.”",
+        "id": 1,
+        "name": "David",
+        "profile_pic": "1-David.png"
+    },
+    "message": "Retrieved character with ID 1",
+    "success": true
 }
 ```
 </br></br>
@@ -209,7 +221,9 @@ None
 
 **Response Body**
 
-Returns a list of entries. Each entry contains character details
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of entries. Each entry contains character details
 </br></br>
 
 
@@ -224,15 +238,19 @@ Returns a list of entries. Each entry contains character details
 
 
 ```json
-[
-    {
-        "date_range": "About 1000 B.C.E.",
-        "description": "Son of Jesse, and the second King of Israel.\nA skilled poet and musician, David wrote more than 73 of the psalms.\nHe humbly sought Jehovah’s direction in his life.\nJehovah called David “a man agreeable to my heart.”",
-        "id": 1,
-        "name": "David",
-        "profile_pic": "1-David.png"
-    }
-]
+{
+    "data": [
+        {
+            "date_range": "About 1000 B.C.E.",
+            "description": "Son of Jesse, and the second King of Israel.\nA skilled poet and musician, David wrote more than 73 of the psalms.\nHe humbly sought Jehovah’s direction in his life.\nJehovah called David “a man agreeable to my heart.”",
+            "id": 1,
+            "name": "David",
+            "profile_pic": "1-David.png"
+        }
+    ],
+    "message": "Retrieved characters for video ID 1",
+    "success": true
+}
 ```
 </br></br>
 

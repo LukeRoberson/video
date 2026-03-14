@@ -70,7 +70,9 @@ None
 
 **Response Body**
 
-A single entry, containing details of the requested video.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a single entry, containing details of the requested video.
 </br></br>
 
 
@@ -93,18 +95,22 @@ A single entry, containing details of the requested video.
 
 ```json
 {
-    "date_added": "2014-10-01 00:00:00",
-    "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
-    "duration": 3305,
-    "id": 1,
-    "name": "JW Broadcasting—October 2014",
-    "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
-    "url": null,
-    "url_1080": "",
-    "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
-    "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
-    "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
-    "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
+    "data": {
+        "date_added": "2014-10-01 00:00:00",
+        "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
+        "duration": 3305,
+        "id": 1,
+        "name": "JW Broadcasting—October 2014",
+        "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
+        "url": null,
+        "url_1080": "",
+        "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
+        "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
+        "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
+        "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
+    },
+    "message": "Video with ID 1 retrieved successfully",
+    "success": true
 }
 ```
 </br></br>
@@ -173,7 +179,9 @@ None
 
 **Response Body**
 
-Returns a list of entries, where each entry represents a video.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of entries, where each entry represents a video.
 </br></br>
 
 
@@ -195,22 +203,26 @@ Returns a list of entries, where each entry represents a video.
 
 
 ```json
-[
-    {
-        "date_added": "2014-10-01 00:00:00",
-        "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
-        "duration": 3305,
-        "id": 1,
-        "name": "JW Broadcasting—October 2014",
-        "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
-        "url": null,
-        "url_1080": "",
-        "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
-        "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
-        "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
-        "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
-    }
-]
+{
+    "data": [
+        {
+            "date_added": "2014-10-01 00:00:00",
+            "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
+            "duration": 3305,
+            "id": 1,
+            "name": "JW Broadcasting—October 2014",
+            "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
+            "url": null,
+            "url_1080": "",
+            "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
+            "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
+            "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
+            "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
+        }
+    ],
+    "message": "Videos retrieved successfully for IDs: [1, 2, 3]",
+    "success": true
+}
 ```
 </br></br>
 
@@ -286,7 +298,9 @@ None
 
 **Response Body**
 
-Returns a list of video entries that match the query.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of video entries that match the query.
 </br></br>
 
 
@@ -308,22 +322,26 @@ Returns a list of video entries that match the query.
 
 
 ```json
-[
-    {
-        "date_added": "2026-01-17",
-        "description": "",
-        "duration": 185,
-        "id": 3014,
-        "name": "Jehovah Is Real",
-        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/501800168/univ/art/501800168_univ_wss_lg.jpg",
-        "url": "https://www.jw.org/en/library/videos/#en/mediaitems/ChildrenSongs/pub-pkon_35_VIDEO",
-        "url_1080": null,
-        "url_240": "https://akamd1.jw-cdn.org/sg2/p/b91b7d/1/o/pkon_E_035_r240P.mp4",
-        "url_360": "https://akamd1.jw-cdn.org/sg2/p/01f32ef/1/o/pkon_E_035_r360P.mp4",
-        "url_480": "https://akamd1.jw-cdn.org/sg2/p/d948297/1/o/pkon_E_035_r480P.mp4",
-        "url_720": "https://akamd1.jw-cdn.org/sg2/p/cfe8c1/1/o/pkon_E_035_r720P.mp4"
-    }
-]
+{
+    "data": [
+        {
+            "date_added": "2026-03-11",
+            "description": "",
+            "duration": 60,
+            "id": 3015,
+            "name": "Test Video",
+            "thumbnail": "http://localhost/test.png",
+            "url": "http://localhost/test",
+            "url_1080": "http://localhost/test1080.mp4",
+            "url_240": "http://localhost/test240.mp4",
+            "url_360": "http://localhost/test360.mp4",
+            "url_480": "http://localhost/test480.mp4",
+            "url_720": "http://localhost/test720.mp4"
+        }
+    ],
+    "message": "Videos retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 
@@ -404,7 +422,9 @@ None
 
 **Response Body**
 
-A 'data' object, containing the resolved IDs.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains the resolved IDs.
 
 Each field will be 'null' if resolution was not requested for that field. If no fields were included in the request, each entry in the response will be 'null'.
 </br></br>
@@ -429,6 +449,7 @@ Each field will be 'null' if resolution was not requested for that field. If no 
         "tag_id": 1,
         "video_id": 1254
     },
+    "message": "Metadata resolved successfully",
     "success": true
 }
 ```

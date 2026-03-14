@@ -64,9 +64,11 @@ None
 </br></br>
 
 
-** Response Body**
+**Response Body**
 
-Returns a list of location entries.
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of location entries.
 </br></br>
 
 
@@ -78,12 +80,16 @@ Returns a list of location entries.
 
 
 ```json
-[
-    {
-        "id": 260,
-        "name": "Addis Ababa"
-    }
-]
+{
+    "data": [
+        {
+            "id": 13,
+            "name": "Philippines"
+        }
+    ],
+    "message": "Locations retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 
@@ -127,7 +133,9 @@ None
 
 **Response Body**
 
-A single location entry
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field contains a single location entry.
 </br></br>
 
 
@@ -141,8 +149,12 @@ A single location entry
 
 ```json
 {
-    "id": 1,
-    "name": "Samaria"
+    "data": {
+        "id": 1,
+        "name": "Samaria"
+    },
+    "message": "Location retrieved successfully",
+    "success": true
 }
 ```
 </br></br>
@@ -195,9 +207,9 @@ None
 
 **Response Body**
 
-A list of location entries.
+Returns 'data', 'message', and 'success' fields.
 
-An empty list if there are no locations for this video.
+The 'data' field contains a list of location entries.
 </br></br>
 
 
@@ -210,12 +222,16 @@ An empty list if there are no locations for this video.
 
 
 ```json
-[
-    {
-        "id": 13,
-        "name": "Philippines"
-    }
-]
+{
+    "data": [
+        {
+            "id": 13,
+            "name": "Philippines"
+        }
+    ],
+    "message": "Locations retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 

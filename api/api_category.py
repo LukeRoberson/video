@@ -46,14 +46,13 @@ from flask import (
     Blueprint,
     Response,
     session,
-    jsonify,
-    make_response,
 )
 import logging
 
 # Custom imports
 from api.api import (
     api_error,
+    api_success,
     seconds_to_hhmmss,
 )
 from api.sql_db import (
@@ -106,12 +105,18 @@ def get_category_id(
             404
         )
 
-    return make_response(
-        jsonify(
-            {"category_id": category_id}
-        ),
-        200
+    return api_success(
+        data={"category_id": category_id},
+        message="Retrieved category successfully",
+        status=200
     )
+
+    # return make_response(
+    #     jsonify(
+    #         {"category_id": category_id}
+    #     ),
+    #     200
+    # )
 
 
 @category_endpoint.route(
@@ -179,12 +184,18 @@ def category_filter(
         reverse=True
     )
 
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
+    return api_success(
+        data={"videos": videos},
+        message="Retrieved videos successfully",
+        status=200
     )
+
+    # return make_response(
+    #     jsonify(
+    #         videos,
+    #     ),
+    #     200
+    # )
 
 
 @category_endpoint.route(
@@ -222,9 +233,8 @@ def get_video_categories(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                categories,
-            ),
-            200
+        return api_success(
+            data=categories,
+            message="Retrieved categories successfully",
+            status=200
         )

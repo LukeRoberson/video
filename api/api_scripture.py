@@ -45,8 +45,6 @@ from flask import (
     Blueprint,
     Response,
     request,
-    make_response,
-    jsonify,
 )
 import logging
 import re
@@ -90,11 +88,10 @@ def get_scriptures() -> Response:
 
         scriptures = scripture_mgr.get() or []
 
-    return make_response(
-        jsonify(
-            scriptures,
-        ),
-        200
+    return api_success(
+        data=scriptures,
+        message=f"Retrieved {len(scriptures)} scriptures",
+        status=200
     )
 
 
@@ -126,11 +123,10 @@ def get_scripture(
                 404
             )
 
-    return make_response(
-        jsonify(
-            scripture_list[0],
-        ),
-        200
+    return api_success(
+        data=scripture_list[0],
+        message=f"Retrieved scripture with ID {scripture_id}",
+        status=200
     )
 
 
@@ -169,11 +165,10 @@ def get_video_scriptures(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                scriptures,
-            ),
-            200
+        return api_success(
+            data=scriptures,
+            message=f"Retrieved scriptures for video ID {video_id}",
+            status=200
         )
 
 

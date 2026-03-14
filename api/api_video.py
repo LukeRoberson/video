@@ -67,8 +67,6 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    jsonify,
-    make_response,
     request,
 )
 import logging
@@ -141,11 +139,10 @@ def get_video(
                 404
             )
 
-    return make_response(
-        jsonify(
-            video_list[0],
-        ),
-        200
+    return api_success(
+        data=video_list[0],
+        message=f"Video with ID {id} retrieved successfully",
+        status=200
     )
 
 
@@ -175,7 +172,10 @@ def get_videos_bulk() -> Response:
     data = request.get_json()
     if not data or "video_ids" not in data:
         logging.error("Missing 'video_ids' in request data.")
-        return api_error("Missing 'video_ids' in request data", 400)
+        return api_error(
+            "Missing 'video_ids' in request data",
+            400
+        )
 
     # Validate that 'video_ids' is a list of integers
     video_ids = data["video_ids"]
@@ -184,7 +184,10 @@ def get_videos_bulk() -> Response:
         or not all(isinstance(vid, int) for vid in video_ids)
     ):
         logging.error("'video_ids' must be a list of integers.")
-        return api_error("'video_ids' must be a list of integers", 400)
+        return api_error(
+            "'video_ids' must be a list of integers",
+            400
+        )
 
     # Fetch video details for each ID
     with DatabaseContext() as db:
@@ -202,11 +205,10 @@ def get_videos_bulk() -> Response:
             else:
                 logging.warning(f"Video with ID {video} not found. Skipping.")
 
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
+    return api_success(
+        data=videos,
+        message=f"Videos retrieved successfully for IDs: {video_ids}",
+        status=200
     )
 
 
@@ -315,11 +317,10 @@ def filter_videos() -> Response:
             latest=int(latest) if latest else 0,
         )
 
-    return make_response(
-        jsonify(
-            videos,
-        ),
-        200
+    return api_success(
+        data=videos,
+        message="Videos retrieved successfully",
+        status=200
     )
 
 
@@ -411,7 +412,9 @@ def add_video_metadata() -> Response:
                 "location_id": location_id,
                 "speaker_id": speaker_id,
                 "character_id": character_id
-            }
+            },
+            message="Metadata resolved successfully",
+            status=200
         )
 
     elif request.method == "POST":
@@ -419,9 +422,10 @@ def add_video_metadata() -> Response:
         data = request.get_json()
         if not data:
             logging.error("No data provided for adding video metadata.")
-            return api_error("No data provided", 400)
-
-        print(f"Received data: {data}")
+            return api_error(
+                "No data provided",
+                400
+            )
 
         # Validate and extract the data
         video_name = data.get("video_name", None)
@@ -448,7 +452,10 @@ def add_video_metadata() -> Response:
         # Ensure video_name is provided
         if video_name is None:
             logging.error("Missing 'video_name' in request data.")
-            return api_error("Missing 'video_name' in request data", 400)
+            return api_error(
+                "Missing 'video_name' in request data",
+                400
+            )
 
         # Ensure at least one metadata field is provided
         if all(
@@ -597,7 +604,10 @@ def add_video_metadata() -> Response:
                     logging.error(
                         f"Failed to update URL for video ID: {video_id}"
                     )
-                    return api_error("Failed to update video URL", 500)
+                    return api_error(
+                        "Failed to update video URL",
+                        500
+                    )
 
             # Add tags if provided
             if tag_name is not None:
@@ -620,7 +630,10 @@ def add_video_metadata() -> Response:
                     # Add the tag to the video
                     if tag_id is None:
                         logging.error(f"Failed to create tag: {tag}")
-                        return api_error(f"Failed to create tag: {tag}", 500)
+                        return api_error(
+                            f"Failed to create tag: {tag}",
+                            500
+                        )
 
                     logging.info(
                         f"Adding tag '{tag}' with ID {tag_id} "
@@ -636,7 +649,10 @@ def add_video_metadata() -> Response:
                         logging.error(
                             f"Failed to add tag {tag} for video ID: {video_id}"
                         )
-                        return api_error("Failed to add video tags", 500)
+                        return api_error(
+                            "Failed to add video tags",
+                            500
+                        )
 
             # Add locations if provided
             if location_name is not None:
@@ -679,7 +695,10 @@ def add_video_metadata() -> Response:
                             f"Failed to add location {location} "
                             f"for video ID: {video_id}"
                         )
-                        return api_error("Failed to add video locations", 500)
+                        return api_error(
+                            "Failed to add video locations",
+                            500
+                        )
 
             # Add speakers if provided
             if speaker_name is not None:
@@ -722,7 +741,10 @@ def add_video_metadata() -> Response:
                             f"Failed to add speaker {speaker} for "
                             f"video ID: {video_id}"
                         )
-                        return api_error("Failed to add video speakers", 500)
+                        return api_error(
+                            "Failed to add video speakers",
+                            500
+                        )
 
             # Add characters if provided
             if character_name is not None:
@@ -767,7 +789,10 @@ def add_video_metadata() -> Response:
                             f"Failed to add character {character} for "
                             f"video ID: {video_id}"
                         )
-                        return api_error("Failed to add video characters", 500)
+                        return api_error(
+                            "Failed to add video characters",
+                            500
+                        )
 
             # Add scripture if provided
             if scripture_name is not None:
@@ -844,7 +869,10 @@ def add_video_metadata() -> Response:
                             f"Failed to add scripture {scripture} "
                             f"for video ID: {video_id}"
                         )
-                        return api_error("Failed to add video scriptures", 500)
+                        return api_error(
+                            "Failed to add video scriptures",
+                            500
+                        )
 
             # Add category if provided
             if category_name is not None:
@@ -880,7 +908,10 @@ def add_video_metadata() -> Response:
                             f"Failed to add category {category} for "
                             f"video ID: {video_id}"
                         )
-                        return api_error("Failed to add video categories", 500)
+                        return api_error(
+                            "Failed to add video categories",
+                            500
+                        )
 
             if date_added is not None:
                 # Update the video's date added
@@ -893,14 +924,23 @@ def add_video_metadata() -> Response:
                     logging.error(
                         f"Failed to update date added for video ID: {video_id}"
                     )
-                    return api_error("Failed to update video date added", 500)
+                    return api_error(
+                        "Failed to update video date added",
+                        500
+                    )
 
         # Return a success response
-        return api_success()
+        return api_success(
+            message="Video metadata added successfully",
+            status=200
+        )
 
     else:
         logging.error("Unsupported request method.")
-        return api_error("Unsupported request method", 405)
+        return api_error(
+            "Unsupported request method",
+            405
+        )
 
 
 @video_endpoint.route(
@@ -925,15 +965,18 @@ def get_videos_csv() -> Response:
         df = pd.read_csv(MISSING_VIDEOS_CSV)
     except Exception as e:
         logging.error(f"Failed to load CSV: {e}")
-        return api_error("Failed to load CSV file", 500)
+        return api_error(
+            "Failed to load CSV file",
+            500
+        )
 
     # Convert the DataFrame to JSON format
     logging.debug(f"Missing videos:\n{df.to_dict(orient='records')}")
-    return make_response(
-        Response(
-            df.to_json(orient='index'),
-        ),
-        200,
+
+    return api_success(
+        data=df.to_dict(orient='index'),
+        message="Missing videos retrieved successfully",
+        status=200
     )
 
 
@@ -967,7 +1010,10 @@ def add_videos() -> Response:
     data = request.get_json()
     if not data:
         logging.error("No data provided for adding video.")
-        return api_error("No data provided", 400)
+        return api_error(
+            "No data provided",
+            400
+        )
 
     # Get fields
     video_name = data.get("video_name", None)
@@ -985,7 +1031,10 @@ def add_videos() -> Response:
 
     if not video_name:
         logging.error("Missing 'video_name' in request data.")
-        return api_error("Missing 'video_name' in request data", 400)
+        return api_error(
+            "Missing 'video_name' in request data",
+            400
+        )
 
     with DatabaseContext() as db:
         video_mgr = VideoManager(db)
@@ -1001,10 +1050,17 @@ def add_videos() -> Response:
 
         if main_cat_id is None:
             logging.error(f"Main category '{main_cat_name}' not found.")
-            return api_error(f"Main category '{main_cat_name}' not found", 404)
+            return api_error(
+                f"Main category '{main_cat_name}' not found",
+                404
+            )
+
         if sub_cat_id is None:
             logging.error(f"Subcategory '{sub_cat_name}' not found.")
-            return api_error(f"Subcategory '{sub_cat_name}' not found", 404)
+            return api_error(
+                f"Subcategory '{sub_cat_name}' not found",
+                404
+            )
 
         # Convert duration to seconds if provided
         if duration is not None:
@@ -1022,7 +1078,10 @@ def add_videos() -> Response:
 
             except ValueError:
                 logging.error(f"Invalid duration format: {duration}")
-                return api_error("Invalid duration format", 400)
+                return api_error(
+                    "Invalid duration format",
+                    400
+                )
 
         # Add the video to the database
         video_id = video_mgr.add(
@@ -1042,7 +1101,10 @@ def add_videos() -> Response:
             logging.error(
                 f"Failed to add video '{video_name}' to the database."
             )
-            return api_error(f"Failed to add video '{video_name}'", 500)
+            return api_error(
+                f"Failed to add video '{video_name}'",
+                500
+            )
 
         # Add the categories to the video
         main_result = cat_mgr.add_to_video(

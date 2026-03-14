@@ -66,7 +66,9 @@ None
 
 **Response Body**
 
-Returns a list of similarity scores for a video.
+Returns 'data', 'message', and 'success' fields.
+
+'data' is a list of entries, with each entry containing similarity scores for a video.
 
 Each entry contains the IDs for two videos, and a numerical score showing how similar they are
 </br></br>
@@ -81,13 +83,17 @@ Each entry contains the IDs for two videos, and a numerical score showing how si
 
 
 ```json
-[
-    {
-        "score": 0.23379166666666665,
-        "video_1_id": 1,
-        "video_2_id": 16
-    }
-]
+{
+    "data": [
+        {
+            "score": 0.23379166666666665,
+            "video_1_id": 1,
+            "video_2_id": 16
+        }
+    ],
+    "message": "Retrieved similar videos for video ID 1",
+    "success": true
+}
 ```
 </br></br>
 

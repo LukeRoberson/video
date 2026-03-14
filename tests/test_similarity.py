@@ -46,10 +46,30 @@ class TestSimilarity:
 
         url = f"{BASE_URL}{API_PREFIX}/similarity/{valid_video_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate response structure
+        data = response.json().get("data")
         assert isinstance(data, list)
+
+        # Validate the structure in each entry, and their types
+        if len(data) > 0:
+            assert all(isinstance(video, dict) for video in data)
+            assert all(
+                (
+                    "score" in video and
+                    isinstance(video["score"], float)
+                ) and
+                (
+                    "video_1_id" in video and
+                    isinstance(video["video_1_id"], int)
+                ) and
+                (
+                    "video_2_id" in video and
+                    isinstance(video["video_2_id"], int)
+                )
+                for video in data
+            )
 
     def test_get_similarity_invalid_video_id(
         self,

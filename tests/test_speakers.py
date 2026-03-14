@@ -48,9 +48,19 @@ class TestSpeakerList:
 
         url = f"{BASE_URL}{API_PREFIX}/speakers"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        # Validate response
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Validate structure and types
+        assert all(
+            ("id" in speaker and isinstance(speaker["id"], int)) and
+            ("name" in speaker and isinstance(speaker["name"], str)) and
+            ("profile_pic" in speaker)
+            for speaker in data
+        )
 
 
 class TestGetSpeaker:
@@ -80,11 +90,16 @@ class TestGetSpeaker:
         # Test with a valid speaker ID (assuming ID 1 exists)
         url = f"{BASE_URL}{API_PREFIX}/speakers/{valid_speaker_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate the response
+        data = response.json().get("data", {})
         assert isinstance(data, dict)
-        assert data.get("id") == valid_speaker_id
+
+        # Validate the structure and type
+        assert "id" in data and isinstance(data["id"], int)
+        assert "name" in data and isinstance(data["name"], str)
+        assert "profile_pic" in data
 
     def test_get_speaker_by_invalid_id(
         self,
@@ -129,10 +144,19 @@ class TestVideoSpeakers:
 
         url = f"{BASE_URL}{API_PREFIX}/speakers/video/{valid_video_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        data = response.json()
+
+        # Validate the response
+        data = response.json().get("data", [])
         assert isinstance(data, list)
+
+        # Validate structure and types
+        assert all(
+            ("id" in speaker and isinstance(speaker["id"], int)) and
+            ("name" in speaker and isinstance(speaker["name"], str)) and
+            ("profile_pic" in speaker)
+            for speaker in data
+        )
 
     def test_get_video_speakers_by_invalid_video_id(
         self,

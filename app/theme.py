@@ -316,7 +316,7 @@ class ThemeManager:
                     response = requests.get(
                         f"http://localhost:5010/api/videos/{video_id}"
                     )
-                    details = response.json()
+                    details = response.json().get('data')
 
                     # Check if video details were found
                     if not details:
@@ -338,7 +338,7 @@ class ThemeManager:
                             response = requests.get(
                                 f"http://localhost:5010/api/videos/{video_id}"
                             )
-                            details = response.json()
+                            details = response.json().get('data')
 
                             # Check if video details were found
                             if not details:

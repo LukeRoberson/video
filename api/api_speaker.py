@@ -38,13 +38,12 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    make_response,
-    jsonify,
 )
 
 # Local imports
 from api.api import (
     api_error,
+    api_success,
 )
 from api.sql_db import (
     DatabaseContext,
@@ -94,11 +93,10 @@ def get_speakers() -> Response:
         speakers, key=lambda spk: spk.get('name', '').lower()
     )
 
-    return make_response(
-        jsonify(
-            speakers,
-        ),
-        200
+    return api_success(
+        data=speakers,
+        message="Speakers retrieved successfully",
+        status=200
     )
 
 
@@ -130,11 +128,10 @@ def get_speaker(
                 404
             )
 
-    return make_response(
-        jsonify(
-            speaker_list[0],
-        ),
-        200
+    return api_success(
+        data=speaker_list[0],
+        message="Speaker retrieved successfully",
+        status=200
     )
 
 
@@ -173,9 +170,8 @@ def get_video_speakers(
             video_id=video_id
         )
 
-        return make_response(
-            jsonify(
-                speakers,
-            ),
-            200
+        return api_success(
+            data=speakers,
+            message="Speakers for video retrieved successfully",
+            status=200
         )

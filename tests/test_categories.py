@@ -61,9 +61,13 @@ class TestCategoryNameResolution:
         data = response.json()
 
         # Validate response structure
-        assert "category_id" in data
-        assert isinstance(data["category_id"], int)
-        assert data["category_id"] > 0
+        assert "success" in data
+        assert "data" in data
+
+        # Validate values
+        assert data["success"] is True
+        assert isinstance(data["data"]["category_id"], int)
+        assert data["data"]["category_id"] > 0
 
     def test_resolve_invalid_category_name(
         self,
@@ -106,23 +110,8 @@ class TestCategoryNameResolution:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["category_id"] == expected_id
 
-    def test_category_name_with_spaces(
-        self
-    ) -> None:
-        """
-        Test category names with spaces are handled correctly.
-
-        Arguments:
-            None
-        """
-
-        url = f"{BASE_URL}{API_PREFIX}/categories/Monthly Programs"
-        response = requests.get(url)
-
-        # Should handle URL encoding properly
-        assert response.status_code in [200, 404]
+        assert data["data"]["category_id"] == expected_id
 
 
 class TestCategoryVideoRetrieval:
@@ -163,11 +152,11 @@ class TestCategoryVideoRetrieval:
         data = response.json()
 
         # Validate response is a list
-        assert isinstance(data, list)
+        assert isinstance(data["data"]["videos"], list)
 
         # If list is not empty, validate structure
-        if len(data) > 0:
-            video = data[0]
+        if len(data["data"]["videos"]) > 0:
+            video = data["data"]["videos"][0]
             self._validate_video_structure(video)
 
     def test_get_videos_invalid_category(
@@ -192,7 +181,7 @@ class TestCategoryVideoRetrieval:
         # Should return empty list or 404
         assert response.status_code in [200, 404]
         if response.status_code == 200:
-            assert response.json() == []
+            assert response.json()["data"]["videos"] == []
 
     def test_get_videos_invalid_subcategory(
         self,
@@ -216,7 +205,7 @@ class TestCategoryVideoRetrieval:
         # Should return empty list or 404
         assert response.status_code in [200, 404]
         if response.status_code == 200:
-            assert response.json() == []
+            assert response.json()["data"]["videos"] == []
 
     def test_get_videos_both_invalid(
         self,
@@ -237,7 +226,7 @@ class TestCategoryVideoRetrieval:
 
         assert response.status_code in [200, 404]
         if response.status_code == 200:
-            assert response.json() == []
+            assert response.json()["data"]["videos"] == []
 
     def _validate_video_structure(
         self,
@@ -314,7 +303,7 @@ class TestVideoCategories:
         response = requests.get(url)
 
         assert response.status_code == 200
-        data = response.json()
+        data = response.json().get("data", [])
 
         # Validate response is a list
         assert isinstance(data, list)
@@ -356,11 +345,11 @@ class TestVideoCategories:
 
         url = f"{BASE_URL}{API_PREFIX}/categories/video/{valid_video_id}"
         response = requests.get(url)
+        assert response.status_code == 200
 
-        if response.status_code == 200:
-            data = response.json()
-            for category in data:
-                assert category["id"] > 0
+        data = response.json().get("data", [])
+        for category in data:
+            assert category["id"] > 0
 
     def test_video_belongs_to_multiple_categories(
         self,
@@ -375,8 +364,7 @@ class TestVideoCategories:
 
         url = f"{BASE_URL}{API_PREFIX}/categories/video/{valid_video_id}"
         response = requests.get(url)
+        assert response.status_code == 200
 
-        if response.status_code == 200:
-            data = response.json()
-            # Based on the example, video 3011 belongs to 2 categories
-            assert len(data) >= 1
+        data = response.json().get("data", [])
+        assert len(data) >= 1

@@ -143,7 +143,10 @@ class CategoryApiService {
      * @param subcategoryId - The subcategory ID
      * @returns Promise resolving to array of video objects
      */
-    async fetchCategoryVideos(categoryId: string | number, subcategoryId: string | number): Promise<Video[]> {
+    async fetchCategoryVideos(
+        categoryId: string | number,
+        subcategoryId: string | number
+    ): Promise<Video[]> {
         const endpoint = `${CategoryConfig.API_BASE_URL}${CategoryConfig.API_ENDPOINT_PATTERN.replace('{categoryId}', String(categoryId)).replace('{subcategoryId}', String(subcategoryId))}`;
 
         try {
@@ -153,7 +156,8 @@ class CategoryApiService {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            return await response.json();
+            const data = await response.json();
+            return data.data.videos as Video[];
         } catch (error) {
             console.error(`Error fetching videos for category ${categoryId}/${subcategoryId}:`, error);
             throw error;

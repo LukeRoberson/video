@@ -46,8 +46,6 @@ from flask import (
     Blueprint,
     request,
     current_app,
-    jsonify,
-    make_response
 )
 
 # Local Imports
@@ -55,6 +53,10 @@ from api.search import (
     SearchService,
     ElasticsearchClient,
     ElasticsearchIndexer
+)
+from api.api import (
+    api_error,
+    api_success,
 )
 
 
@@ -123,13 +125,9 @@ def search_videos():
         query = request.args.get('q', '').strip()
 
         if not query:
-            return make_response(
-                jsonify(
-                    {
-                        'error': 'Query parameter "q" is required'
-                    }
-                ),
-                400
+            return api_error(
+                error='Query parameter q is required',
+                status=400
             )
 
         # Pagination parameters
@@ -148,13 +146,9 @@ def search_videos():
 
         # Handle invalid pagination parameters
         except ValueError:
-            return make_response(
-                jsonify(
-                    {
-                        'error': 'Invalid pagination parameters'
-                    }
-                ),
-                400
+            return api_error(
+                error='Invalid pagination parameters',
+                status=400
             )
 
         # Get the search service object
@@ -187,20 +181,18 @@ def search_videos():
                 f"returned page {page}/{total_pages}"
             )
 
-        # Return JSON response
-        return make_response(
-            jsonify(
-                {
-                    'results': results,
-                    'total': total,
-                    'page': page,
-                    'per_page': per_page,
-                    'pages': total_pages,
-                    'using_elasticsearch': using_es,
-                    'query': query,
-                }
-            ),
-            200
+        return api_success(
+            data={
+                'results': results,
+                'total': total,
+                'page': page,
+                'per_page': per_page,
+                'pages': total_pages,
+                'using_elasticsearch': using_es,
+                'query': query,
+            },
+            message="Search completed for query",
+            status=200
         )
 
     # Handle unexpected errors
@@ -210,13 +202,9 @@ def search_videos():
             exc_info=True
         )
 
-        return make_response(
-            jsonify(
-                {
-                    'error': 'An error occurred while processing your search'
-                }
-            ),
-            500
+        return api_error(
+            error='An error occurred while processing your search',
+            status=500
         )
 
 
@@ -327,22 +315,37 @@ def advanced_search():
                 f"{total} results with filters {filters}"
             )
 
-        # Return JSON response
-        return make_response(
-            jsonify(
-                {
-                    'results': results,
-                    'total': total,
-                    'page': page,
-                    'per_page': per_page,
-                    'pages': total_pages,
-                    'using_elasticsearch': using_es,
-                    'query': query,
-                    'filters': filters
-                }
-            ),
-            200
+        return api_success(
+            data={
+                'results': results,
+                'total': total,
+                'page': page,
+                'per_page': per_page,
+                'pages': total_pages,
+                'using_elasticsearch': using_es,
+                'query': query,
+                'filters': filters
+            },
+            message="Advanced search completed",
+            status=200
         )
+
+        # Return JSON response
+        # return make_response(
+        #     jsonify(
+        #         {
+        #             'results': results,
+        #             'total': total,
+        #             'page': page,
+        #             'per_page': per_page,
+        #             'pages': total_pages,
+        #             'using_elasticsearch': using_es,
+        #             'query': query,
+        #             'filters': filters
+        #         }
+        #     ),
+        #     200
+        # )
 
     except Exception as e:
         logger.error(
@@ -350,13 +353,9 @@ def advanced_search():
             exc_info=True
         )
 
-        return make_response(
-            jsonify(
-                {
-                    'error': 'An error occurred during advanced search'
-                }
-            ),
-            500
+        return api_error(
+            error='An error occurred during advanced search',
+            status=500
         )
 
 
@@ -389,12 +388,9 @@ def reindex_all_videos():
 
         # Check if Elasticsearch is available
         if not es_client.is_available():
-            return make_response(
-                jsonify(
-                    {
-                        'error': 'Elasticsearch is not available'
-                    }
-                ), 503
+            return api_error(
+                error='Elasticsearch is not available',
+                status=503
             )
 
         # Create indexer
@@ -415,16 +411,14 @@ def reindex_all_videos():
         )
 
         # Return reindexing stats
-        return make_response(
-            jsonify(
-                {
-                    'success': success_count,
-                    'failed': failed_count,
-                    'total': total_count,
-                    'message': 'Reindexing completed'
-                }
-            ),
-            200
+        return api_success(
+            data={
+                'success': success_count,
+                'failed': failed_count,
+                'total': total_count
+            },
+            message='Reindexing completed',
+            status=200
         )
 
     except Exception as e:
@@ -433,13 +427,9 @@ def reindex_all_videos():
             exc_info=True
         )
 
-        return make_response(
-            jsonify(
-                {
-                    'error': 'An error occurred during reindexing'
-                }
-            ),
-            500
+        return api_error(
+            error='An error occurred during reindexing',
+            status=500
         )
 
 
@@ -499,31 +489,29 @@ def search_status():
                     index_exists = False
 
         # Return status response
-        return make_response(
-            jsonify(
-                {
-                    'elasticsearch_available': bool(es_available),
-                    'index_exists': bool(index_exists),
-                    'fallback_active': not bool(es_available),
-                    'timestamp': datetime.now(timezone.utc).isoformat()
-                }
-            ),
-            200
+        return api_success(
+            data={
+                'elasticsearch_available': bool(es_available),
+                'index_exists': bool(index_exists),
+                'fallback_active': not bool(es_available),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            },
+            message='Search service status retrieved',
+            status=200
         )
 
     # If there was an error, this means ES is not available
     except Exception as e:
         logger.error(f"Error checking search status: {e}", exc_info=True)
 
-        return make_response(
-            jsonify(
-                {
-                    'elasticsearch_available': False,
-                    'index_exists': False,
-                    'fallback_active': True,
-                    'error': str(e),
-                    'timestamp': datetime.now(timezone.utc).isoformat()
-                }
-            ),
-            200
+        return api_success(
+            data={
+                'elasticsearch_available': False,
+                'index_exists': False,
+                'fallback_active': True,
+                'error': str(e),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            },
+            message='Search service status retrieved with errors',
+            status=200
         )

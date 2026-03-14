@@ -116,7 +116,8 @@ class CategoryApiService {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            return await response.json();
+            const data = await response.json();
+            return data.data.videos;
         }
         catch (error) {
             console.error(`Error fetching videos for category ${categoryId}/${subcategoryId}:`, error);

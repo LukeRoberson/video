@@ -89,7 +89,8 @@ def render_category_page(
     response = requests.get(
         f'http://localhost:5010/api/categories/{category_name}'
     )
-    main_id = response.json().get('category_id', None)
+    data = response.json().get('data', {})
+    main_id = data.get('category_id', None)
 
     if not main_id:
         logging.error(f"Category '{category_name}' not found.")
@@ -113,7 +114,8 @@ def render_category_page(
         response = requests.get(
             f'http://localhost:5010/api/categories/{sub_cat}'
         )
-        sub_cat_id = response.json().get('category_id', None)
+        data = response.json().get('data', {})
+        sub_cat_id = data.get('category_id', None)
 
         # Get the list of videos for the subcategory and count them
         entry['name'] = sub_cat
@@ -122,7 +124,8 @@ def render_category_page(
             response = requests.get(
                 f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}'
             )
-            video_list = response.json()
+            data = response.json().get('data', {})
+            video_list = data.get('videos', [])
 
             entry['id'] = sub_cat_id
             entry['count'] = (

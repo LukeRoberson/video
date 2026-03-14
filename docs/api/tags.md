@@ -66,9 +66,9 @@ None
 
 **Response Body**
 
-Returns a list of tag entries.
+Returns 'data', 'message', and 'success' fields.
 
-Each entry describes the tag.
+The 'data' field is a list of tag entries. Each entry describes the tag.
 </br></br>
 
 
@@ -81,13 +81,17 @@ Each entry describes the tag.
 
 
 ```json
-[
-    {
-        "id": 933,
-        "name": "1914",
-        "video_count": 8
-    }
-]
+{
+    "data": [
+        {
+            "id": 933,
+            "name": "1914",
+            "video_count": 8
+        }
+    ],
+    "message": "Tags retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 
@@ -131,7 +135,9 @@ None
 
 **Response Body**
 
-TBA
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field describes a single tag.
 </br></br>
 
 
@@ -144,8 +150,12 @@ TBA
 
 ```json
 {
-    "id": 1,
-    "name": "av"
+    "data": {
+        "id": 1,
+        "name": "av"
+    },
+    "message": "Tag retrieved successfully",
+    "success": true
 }
 ```
 </br></br>
@@ -200,7 +210,9 @@ None
 
 **Response Body**
 
-Returns a list of tags.
+Returns 'data', 'message', and 'success' fields.
+
+The 'data' field is a list of entries that describe tags.
 </br></br>
 
 
@@ -212,12 +224,16 @@ Returns a list of tags.
 
 
 ```json
-[
-    {
-        "id": 1,
-        "name": "av"
-    }
-]
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "av"
+        }
+    ],
+    "message": "Tags retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 

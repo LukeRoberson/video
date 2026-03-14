@@ -262,7 +262,7 @@ def home() -> Response:
         url='http://localhost:5010/api/videos/get_bulk',
         json={'video_ids': [v['video_id'] for v in in_progress_videos]}
     )
-    data = response.json()
+    data = response.json().get('data', [])
 
     # Merge the in-progress video data with the API video details
     updated_list = []
@@ -289,13 +289,17 @@ def home() -> Response:
     )
 
     # API: Convert category names to IDs
-    monthly_cat = requests.get(
+    response = requests.get(
         url='http://localhost:5010/api/categories/Monthly Programs',
-    ).json().get('category_id', None)
+    )
+    data = response.json().get('data', {})
+    monthly_cat = data.get('category_id', None)
 
-    news_cat = requests.get(
+    response = requests.get(
         url='http://localhost:5010/api/categories/News and Announcements',
-    ).json().get('category_id', None)
+    )
+    data = response.json().get('data', {})
+    news_cat = data.get('category_id', None)
 
     # API: Get the latest monthly programs video
     monthly = None
@@ -305,7 +309,7 @@ def home() -> Response:
             'cat': monthly_cat,
             'latest': 1
         }
-    ).json()
+    ).json().get('data', [])
 
     # API: Get the latest news video
     news = None
@@ -315,7 +319,7 @@ def home() -> Response:
             'cat': news_cat,
             'latest': 1
         }
-    ).json()
+    ).json().get('data', [])
 
     # API: Get the latest videos
     latest = requests.get(
@@ -323,7 +327,7 @@ def home() -> Response:
         params={
             'latest': 9
         }
-    ).json()
+    ).json().get('data', [])
 
     return make_response(
         render_template(
@@ -486,10 +490,11 @@ def edit_profile(profile_id: int) -> Response:
             url='http://localhost:5010/api/videos/get_bulk',
             json={'video_ids': video_ids}
         )
+        data = response.json().get('data', [])
 
         # Merge the video details into the history items
         for item in history:
-            for video in response.json():
+            for video in data:
                 if video['id'] == item['video_id']:
                     item['video_name'] = video.get('name')
                     item['video_thumbnail'] = video.get('thumbnail')
@@ -539,7 +544,7 @@ def characters() -> Response:
     response = requests.get(
         url='http://localhost:5010/api/characters',
     )
-    characters = response.json()
+    characters = response.json().get('data', {})
 
     # Set default profile picture if not provided
     for character in characters:
@@ -574,7 +579,7 @@ def tags() -> Response:
     response = requests.get(
         url='http://localhost:5010/api/tags',
     )
-    tags = response.json()
+    tags = response.json().get('data', [])
 
     # Strip 'bcast_' prefix from tag names (special handling)
     tags = [
@@ -611,7 +616,7 @@ def location() -> Response:
     response = requests.get(
         url='http://localhost:5010/api/locations',
     )
-    locations = response.json()
+    locations = response.json().get('data', [])
 
     return make_response(
         render_template(
@@ -641,7 +646,7 @@ def speakers() -> Response:
     response = requests.get(
         url='http://localhost:5010/api/speakers',
     )
-    speakers = response.json()
+    speakers = response.json().get('data', [])
 
     # Set default profile picture if not provided
     for speaker in speakers:
@@ -683,7 +688,7 @@ def scriptures() -> Response:
     response = requests.get(
         url='http://localhost:5010/api/scriptures',
     )
-    scriptures = response.json()
+    scriptures = response.json().get('data', [])
 
     # Group scriptures by book and then by chapter
     scriptures_by_book = defaultdict(lambda: defaultdict(list))

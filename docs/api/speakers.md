@@ -66,7 +66,9 @@ None
 
 **Response Body**
 
-A list of speakers, with each entry describing the speaker.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of speakers, with each entry describing the speaker.
 </br></br>
 
 
@@ -80,14 +82,18 @@ A list of speakers, with each entry describing the speaker.
 
 
 ```json
-[
-    {
-        "id": 321,
-        "name": "Adolf Denk",
-        "profile_pic": "321-Adolph_Denk.png",
-        "video_count": 2
-    }
-]
+{
+    "data": [
+        {
+            "id": 321,
+            "name": "Adolf Denk",
+            "profile_pic": "321-Adolph_Denk.png",
+            "video_count": 2
+        }
+    ],
+    "message": "Speakers retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 
@@ -131,7 +137,9 @@ None
 
 **Response Body**
 
-Returns one specific speaker's details.
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a single speaker entry.
 </br></br>
 
 
@@ -145,9 +153,13 @@ Returns one specific speaker's details.
 
 ```json
 {
-    "id": 321,
-    "name": "Adolf Denk",
-    "profile_pic": "321-Adolph_Denk.png"
+    "data": {
+        "id": 321,
+        "name": "Adolf Denk",
+        "profile_pic": "321-Adolph_Denk.png"
+    },
+    "message": "Speaker retrieved successfully",
+    "success": true
 }
 ```
 </br></br>
@@ -202,7 +214,9 @@ None
 
 **Response Body**
 
-Returns a list, where each entry contains a speaker's details
+'data', 'message', and 'success' fields.
+
+The 'data' field contains a list of speakers, with each entry describing the speaker.
 </br></br>
 
 
@@ -215,13 +229,18 @@ Returns a list, where each entry contains a speaker's details
 
 
 ```json
-[
-    {
-        "id": 1,
-        "name": "Stephen Lett",
-        "profile_pic": "1-Stephen_Lett.png"
-    }
-]
+{
+    "data": [
+        {
+            "id": 321,
+            "name": "Adolf Denk",
+            "profile_pic": "321-Adolph_Denk.png",
+            "video_count": 2
+        }
+    ],
+    "message": "Speakers retrieved successfully",
+    "success": true
+}
 ```
 </br></br>
 

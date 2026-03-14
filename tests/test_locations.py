@@ -52,9 +52,19 @@ class TestLocationList:
 
         url = f"{BASE_URL}{API_PREFIX}/locations"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        # The response should contain a list of locations
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Validate the structure and type
+        if len(data) > 0:
+            assert all(
+                ("id" in loc and isinstance(loc["id"], int)) and
+                ("name" in loc and isinstance(loc["name"], str))
+                for loc in data
+            )
 
 
 class TestGetLocation:
@@ -83,10 +93,15 @@ class TestGetLocation:
         # Assuming a location with ID 1 exists for testing
         url = f"{BASE_URL}{API_PREFIX}/locations/{valid_location_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert "id" in response.json()
-        assert response.json()["id"] == valid_location_id
+
+        # Validate the response type
+        data = response.json().get("data", {})
+        assert isinstance(data, dict)
+
+        # Validate the contents of the response
+        assert "id" in data and isinstance(data["id"], int)
+        assert "name" in data and isinstance(data["name"], str)
 
     def test_get_location_by_invalid_id(
         self,
@@ -133,9 +148,18 @@ class TestVideoLocations:
 
         url = f"{BASE_URL}{API_PREFIX}/locations/video/{valid_video_id}"
         response = requests.get(url)
-
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+
+        # Validate response
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+
+        # Validate structure and type
+        assert all(
+            ("id" in loc and isinstance(loc["id"], int)) and
+            ("name" in loc and isinstance(loc["name"], str))
+            for loc in data
+        )
 
     def test_get_video_locations_by_invalid_video_id(
         self,

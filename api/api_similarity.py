@@ -34,13 +34,12 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    make_response,
-    jsonify,
 )
 
 # Local imports
 from api.api import (
     api_error,
+    api_success,
 )
 from api.sql_db import (
     DatabaseContext,
@@ -92,9 +91,8 @@ def get_similar_videos(
             video1_id=video_id,
         )
 
-        return make_response(
-            jsonify(
-                similar_videos,
-            ),
-            200
+        return api_success(
+            data=similar_videos,
+            message=f"Retrieved similar videos for video ID {video_id}",
+            status=200
         )
