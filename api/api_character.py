@@ -39,6 +39,7 @@ from flask import (
     Blueprint,
     Response,
 )
+import logging
 
 # Local imports
 from api.api import (
@@ -51,6 +52,8 @@ from api.sql_db import (
     VideoManager,
 )
 
+
+logger = logging.getLogger(__name__)
 
 # Create a blueprint for character-related endpoints
 character_endpoint = Blueprint(
@@ -74,13 +77,17 @@ def get_characters() -> Response:
 
     with DatabaseContext() as db:
         character_mgr = CharacterManager(db)
-
         characters = character_mgr.get() or []
 
-    # Sort characters alphabetically by name (case-insensitive)
-    characters = sorted(
-        characters, key=lambda char: char.get('name', '').lower()
-    )
+    if characters == []:
+        logger.debug("Module: api_character.py, Function: get_characters")
+        logger.debug("No characters found in the database.")
+
+    else:
+        # Sort characters alphabetically by name (case-insensitive)
+        characters = sorted(
+            characters, key=lambda char: char.get('name', '').lower()
+        )
 
     return api_success(
         data=characters,
@@ -112,6 +119,10 @@ def get_character(
 
         character_list = character_mgr.get(id=character_id)
         if not character_list:
+            logger.debug(
+                "Module: api_character.py, Function: get_character"
+            )
+            logger.warning(f"Character with ID {character_id} not found.")
             return api_error(
                 f"Character with ID {character_id} not found",
                 404
@@ -149,6 +160,10 @@ def get_video_characters(
         # Check if the video exists
         video_list = video_mgr.get(id=video_id)
         if not video_list:
+            logger.debug(
+                "Module: api_character.py, Function: get_video_characters"
+            )
+            logger.warning(f"Video with ID {video_id} not found.")
             return api_error(
                 f"Video with ID {video_id} not found",
                 404
@@ -159,8 +174,19 @@ def get_video_characters(
             video_id=video_id
         )
 
-        return api_success(
-            data=characters,
-            message=f"Retrieved characters for video ID {video_id}",
-            status=200
-        )
+        if characters is None:
+            logger.debug(
+                "Module: api_character.py, Function: get_video_characters"
+            )
+            logger.warning(f"No characters found for video ID {video_id}.")
+
+            return api_error(
+                error="Error retrieving characters for video ID",
+                status=500
+            )
+
+    return api_success(
+        data=characters,
+        message=f"Retrieved characters for video ID {video_id}",
+        status=200
+    )

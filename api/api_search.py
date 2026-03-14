@@ -119,12 +119,16 @@ def search_videos():
             - query: The search query string
     """
 
-    logger.info("API: Processing standard search request...")
     try:
         # Get query parameters
         query = request.args.get('q', '').strip()
 
         if not query:
+            logger.debug("Module: api_search, Function: search_videos")
+            logger.warning(
+                "Missing required query parameter 'q' in search request"
+            )
+
             return api_error(
                 error='Query parameter q is required',
                 status=400
@@ -144,8 +148,16 @@ def search_videos():
                 max(1, int(request.args.get('per_page', 20)))
             )
 
+            logger.debug(
+                f"Search pagination parameters - page: {page}, "
+                f"per_page: {per_page}"
+            )
+
         # Handle invalid pagination parameters
         except ValueError:
+            logger.debug("Module: api_search, Function: search_videos")
+            logger.warning("Invalid pagination parameters in search request")
+
             return api_error(
                 error='Invalid pagination parameters',
                 status=400
@@ -165,6 +177,10 @@ def search_videos():
 
         # Calculate total pages
         total_pages = (total + per_page - 1) // per_page
+        logger.debug(
+            f"Search results - total results: {total}, "
+            f"total_pages: {total_pages}"
+        )
 
         # Log search results and indicate method used (terminal only)
         if using_es:
@@ -175,7 +191,7 @@ def search_videos():
             )
 
         else:
-            logger.warning(
+            logger.info(
                 f"⚠ Database fallback search for '{query}': "
                 f"{total} results found, "
                 f"returned page {page}/{total_pages}"
@@ -197,6 +213,7 @@ def search_videos():
 
     # Handle unexpected errors
     except Exception as e:
+        logger.debug("Module: api_search, Function: search_videos")
         logger.error(
             f"Error processing search request: {e}",
             exc_info=True
@@ -243,7 +260,6 @@ def advanced_search():
             - query: The search query string
     """
 
-    logger.info("API: Processing advanced search request...")
     try:
         # Get text query parameter
         query = request.args.get('query', '').strip()
@@ -263,6 +279,10 @@ def advanced_search():
 
         # Fall back to defaults on invalid input
         except ValueError:
+            logger.info(
+                "Invalid pagination parameters in advanced search request, "
+                "falling back to defaults"
+            )
             page = 1
             per_page = 20
 
@@ -281,6 +301,13 @@ def advanced_search():
 
         if request.args.get('tags'):
             filters['tags'] = request.args.getlist('tags')
+
+        logging.debug(
+            f"Advanced search filters - speakers: {filters.get('speakers')}, "
+            f"characters: {filters.get('characters')}, "
+            f"locations: {filters.get('locations')}, "
+            f"tags: {filters.get('tags')}"
+        )
 
         # Get the search service object
         search_service = get_search_service()
@@ -310,7 +337,7 @@ def advanced_search():
             )
 
         else:
-            logger.warning(
+            logger.info(
                 f"⚠ Advanced database search: "
                 f"{total} results with filters {filters}"
             )
@@ -330,24 +357,8 @@ def advanced_search():
             status=200
         )
 
-        # Return JSON response
-        # return make_response(
-        #     jsonify(
-        #         {
-        #             'results': results,
-        #             'total': total,
-        #             'page': page,
-        #             'per_page': per_page,
-        #             'pages': total_pages,
-        #             'using_elasticsearch': using_es,
-        #             'query': query,
-        #             'filters': filters
-        #         }
-        #     ),
-        #     200
-        # )
-
     except Exception as e:
+        logger.debug("Module: api_search, Function: advanced_search")
         logger.error(
             f"Error in advanced search: {e}",
             exc_info=True
@@ -388,6 +399,9 @@ def reindex_all_videos():
 
         # Check if Elasticsearch is available
         if not es_client.is_available():
+            logger.debug("Module: api_search, Function: reindex_all_videos")
+            logger.error("Elasticsearch is not available for reindexing")
+
             return api_error(
                 error='Elasticsearch is not available',
                 status=503
@@ -422,6 +436,7 @@ def reindex_all_videos():
         )
 
     except Exception as e:
+        logger.debug("Module: api_search, Function: reindex_all_videos")
         logger.error(
             f"Error during reindexing: {e}",
             exc_info=True
@@ -483,10 +498,15 @@ def search_status():
                     index_exists = bool(response)
 
                 except Exception as idx_error:
+                    logger.debug("Module: api_search, Function: search_status")
                     logger.warning(
                         f"Could not check index existence: {idx_error}"
                     )
                     index_exists = False
+
+        logger.debug(
+            f"Index exists: {index_exists}, ES available: {es_available}"
+        )
 
         # Return status response
         return api_success(
@@ -502,6 +522,7 @@ def search_status():
 
     # If there was an error, this means ES is not available
     except Exception as e:
+        logger.debug("Module: api_search, Function: search_status")
         logger.error(f"Error checking search status: {e}", exc_info=True)
 
         return api_success(

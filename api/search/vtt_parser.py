@@ -62,7 +62,7 @@ class VTTParser:
             # Build full path and read file content
             path = Path(file_path)
             if not path.exists():
-                logger.warning(f"VTT file not found: {file_path}")
+                logger.debug(f"VTT file not found: {file_path}")
                 return None
 
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -119,7 +119,7 @@ class VTTParser:
 
             # Warn if no content extracted
             if not chunks:
-                logger.warning(
+                logger.debug(
                     f"No content extracted from VTT file: {file_path}"
                 )
                 return None

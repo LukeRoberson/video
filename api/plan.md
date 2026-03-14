@@ -21,8 +21,8 @@
 4. Coding improvements
     * [x] Update blueprints to use a URL prefix (as is done in api_search.py)
 5. Logging and Testing
-    * [ ] Add a debug mode when starting the API (flask debug + logging level)
-    * [ ] Add better logging to API files
+    * [x] Add a debug mode when starting the API (flask debug + logging level)
+    * [x] Add better logging to API files
     * [x] Create and organize postman files for API testing
     * [x] Create pytest structure for automated testing
 6. Clean up API Calls
@@ -112,3 +112,5 @@
 * Searching
     * `/api/search` doesn't seems to be enforcing the page size limit
     * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
+* Improve logging in api_profile
+    * After other improvements are made

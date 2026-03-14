@@ -35,6 +35,7 @@ from flask import (
     Blueprint,
     Response,
 )
+import logging
 
 # Local imports
 from api.api import (
@@ -47,6 +48,8 @@ from api.sql_db import (
     VideoManager,
 )
 
+
+logger = logging.getLogger(__name__)
 
 # Create a blueprint for similarity-related endpoints
 similarity_endpoint = Blueprint(
@@ -81,15 +84,36 @@ def get_similar_videos(
         # Check if the video exists
         video_list = video_mgr.get(id=video_id)
         if not video_list:
+            logger.debug(
+                "Module: api_similarity, Function: get_similar_videos"
+            )
+            logger.warning(f"Video with ID {video_id} not found")
+
             return api_error(
-                f"Video with ID {video_id} not found",
-                404
+                error=f"Video with ID {video_id} not found",
+                status=404
             )
 
         # Get similar videos for the video
         similar_videos = similarity_mgr.get(
             video1_id=video_id,
         )
+
+        if not similar_videos:
+            logger.debug(
+                "Module: api_similarity, Function: get_similar_videos"
+            )
+            logger.warning(
+                f"An error occurred while retrieving "
+                f"similar videos for video ID {video_id}"
+            )
+
+            return api_error(
+                error=(
+                    f"Error retrieving similar videos for video ID {video_id}"
+                ),
+                status=500
+            )
 
         return api_success(
             data=similar_videos,

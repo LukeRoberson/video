@@ -99,7 +99,8 @@ def get_category_id(
         category_id = cat_mgr.name_to_id(name=category_name)
 
     if category_id is None:
-        logging.error(f"Category '{category_name}' not found.")
+        logger.debug("Module: api_category.py, Function: get_category_id")
+        logger.error(f"Category '{category_name}' not found.")
         return api_error(
             f"Category '{category_name}' not found",
             404
@@ -110,13 +111,6 @@ def get_category_id(
         message="Retrieved category successfully",
         status=200
     )
-
-    # return make_response(
-    #     jsonify(
-    #         {"category_id": category_id}
-    #     ),
-    #     200
-    # )
 
 
 @category_endpoint.route(
@@ -151,6 +145,7 @@ def category_filter(
 
     # Select all videos with the given category ID and subcategory ID
     cat_list = [category_id, subcategory_id]
+
     with DatabaseContext() as db:
         video_mgr = VideoManager(db)
         videos = video_mgr.get_filter(
@@ -159,6 +154,11 @@ def category_filter(
 
     # If no videos are found, just return an empty list
     if not videos:
+        logger.debug("Module: api_category.py, Function: category_filter")
+        logger.debug(
+            f"No videos found for category_id={category_id}"
+            f" and subcategory_id={subcategory_id}"
+        )
         videos = []
 
     # Convert duration from seconds to HH:MM:SS format
@@ -167,6 +167,8 @@ def category_filter(
 
     # Get watch status for the active profile
     active_profile = session.get("active_profile", None)
+    logger.info(f"Active profile: {active_profile}")
+
     if active_profile is not None and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
@@ -189,13 +191,6 @@ def category_filter(
         message="Retrieved videos successfully",
         status=200
     )
-
-    # return make_response(
-    #     jsonify(
-    #         videos,
-    #     ),
-    #     200
-    # )
 
 
 @category_endpoint.route(
@@ -222,7 +217,13 @@ def get_video_categories(
 
         # Check if the video exists
         video_list = video_mgr.get(id=video_id)
+
         if not video_list:
+            logger.debug(
+                "Module: api_category.py, Function: get_video_categories"
+            )
+            logger.warning(f"Video with ID {video_id} not found.")
+
             return api_error(
                 f"Video with ID {video_id} not found",
                 404
@@ -232,6 +233,11 @@ def get_video_categories(
         categories = category_mgr.get_from_video(
             video_id=video_id
         )
+        if categories is None or categories == []:
+            logger.debug(
+                "Module: api_category.py, Function: get_video_categories"
+            )
+            logger.debug(f"No categories found for video ID {video_id}.")
 
         return api_success(
             data=categories,

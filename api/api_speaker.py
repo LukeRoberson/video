@@ -39,6 +39,7 @@ from flask import (
     Blueprint,
     Response,
 )
+import logging
 
 # Local imports
 from api.api import (
@@ -51,6 +52,8 @@ from api.sql_db import (
     VideoManager,
 )
 
+
+logger = logging.getLogger(__name__)
 
 # Create a blueprint for speaker-related endpoints
 speaker_endpoint = Blueprint(
@@ -79,19 +82,38 @@ def get_speakers() -> Response:
         # Get a list of all speakers
         speakers = speaker_mgr.get() or []
 
-        # Get the video count for each speaker
-        for speaker in speakers:
-            videos = video_mgr.get_filter(
-                speaker_id=speaker['id']
-            )
-            if not videos:
-                videos = []
-            speaker['video_count'] = len(videos)
+        if not speakers:
+            logger.debug("Module api_speaker: Function get_speakers")
+            logger.error("Error occurred while getting speakers.")
 
-    # Sort speakers alphabetically by name (case-insensitive)
-    speakers = sorted(
-        speakers, key=lambda spk: spk.get('name', '').lower()
-    )
+            return api_error(
+                error="Error occurred while getting speakers.",
+                status=500
+            )
+
+        if speakers == []:
+            logger.debug("Module api_speaker: Function get_speakers")
+            logger.info("No speakers found in the database.")
+
+        else:
+            # Get the video count for each speaker
+            for speaker in speakers:
+                videos = video_mgr.get_filter(
+                    speaker_id=speaker['id']
+                )
+
+                if not videos:
+                    videos = []
+                    logger.info(
+                        f"No videos found for speaker ID {speaker['id']}"
+                    )
+
+                speaker['video_count'] = len(videos)
+
+                # Sort speakers alphabetically by name (case-insensitive)
+                speakers = sorted(
+                    speakers, key=lambda spk: spk.get('name', '').lower()
+                )
 
     return api_success(
         data=speakers,
@@ -120,12 +142,16 @@ def get_speaker(
 
     with DatabaseContext() as db:
         speaker_mgr = SpeakerManager(db)
-
         speaker_list = speaker_mgr.get(id=speaker_id)
+
+        # Will be None if there is no speaker with the given ID
         if not speaker_list:
+            logger.debug("Module api_speaker: Function get_speaker")
+            logger.info(f"Speaker with ID {speaker_id} not found")
+
             return api_error(
-                f"Speaker with ID {speaker_id} not found",
-                404
+                error=f"Speaker with ID {speaker_id} not found",
+                status=404
             )
 
     return api_success(
@@ -158,20 +184,29 @@ def get_video_speakers(
         speaker_mgr = SpeakerManager(db)
 
         # Check if the video exists
+        #   (will be None if there is no video with the given ID)
         video_list = video_mgr.get(id=video_id)
         if not video_list:
+            logger.debug("Module api_speaker: Function get_video_speakers")
+            logger.info(f"Video with ID {video_id} not found")
+
             return api_error(
-                f"Video with ID {video_id} not found",
-                404
+                error=f"Video with ID {video_id} not found",
+                status=404
             )
 
-        # Get the speakers for the video
-        speakers = speaker_mgr.get_from_video(
-            video_id=video_id
-        )
+    # Get the speakers for the video
+    speakers = speaker_mgr.get_from_video(
+        video_id=video_id
+    )
 
-        return api_success(
-            data=speakers,
-            message="Speakers for video retrieved successfully",
-            status=200
-        )
+    # Log this, but it may not be an error
+    if speakers is None:
+        logger.debug("Module api_speaker: Function get_video_speakers")
+        logger.info(f"No speakers found for video ID {video_id}")
+
+    return api_success(
+        data=speakers,
+        message="Speakers for video retrieved successfully",
+        status=200
+    )

@@ -85,8 +85,20 @@ def get_scriptures() -> Response:
 
     with DatabaseContext() as db:
         scripture_mgr = ScriptureManager(db)
-
         scriptures = scripture_mgr.get() or []
+
+    if scriptures is None:
+        logger.debug("Module: api_scripture.py, Function: get_scriptures")
+        logger.error("Failed to retrieve scriptures from the database.")
+
+        return api_error(
+            error="Failed to retrieve scriptures",
+            status=500
+        )
+
+    if scriptures == []:
+        logger.debug("Module: api_scripture.py, Function: get_scriptures")
+        logger.debug("No scriptures found in the database.")
 
     return api_success(
         data=scriptures,
@@ -115,13 +127,24 @@ def get_scripture(
 
     with DatabaseContext() as db:
         scripture_mgr = ScriptureManager(db)
-
         scripture_list = scripture_mgr.get(id=scripture_id)
-        if not scripture_list:
-            return api_error(
-                f"Scripture with ID {scripture_id} not found",
-                404
-            )
+
+    if not scripture_list:
+        logger.debug("Module: api_scripture.py, Function: get_scripture")
+        logger.error(
+            f"Scripture with ID {scripture_id} not found in the database."
+        )
+
+        return api_error(
+            f"Scripture with ID {scripture_id} not found",
+            404
+        )
+
+    if scripture_list == []:
+        logger.debug("Module: api_scripture.py, Function: get_scripture")
+        logger.debug(
+            f"Scripture with ID {scripture_id} not found in the database."
+        )
 
     return api_success(
         data=scripture_list[0],
@@ -155,6 +178,13 @@ def get_video_scriptures(
         # Check if the video exists
         video_list = video_mgr.get(id=video_id)
         if not video_list:
+            logger.debug(
+                "Module: api_scripture.py, Function: get_video_scriptures"
+            )
+            logger.error(
+                f"Video with ID {video_id} not found in the database."
+            )
+
             return api_error(
                 f"Video with ID {video_id} not found",
                 404
@@ -164,6 +194,28 @@ def get_video_scriptures(
         scriptures = scripture_mgr.get_from_video(
             video_id=video_id
         )
+
+        if scriptures is None:
+            logger.debug(
+                "Module: api_scripture.py, Function: get_video_scriptures"
+            )
+            logger.error(
+                f"Failed to retrieve scriptures for video ID {video_id}"
+                f" from the database."
+            )
+
+            return api_error(
+                error=f"Failed to retrieve scriptures for video ID {video_id}",
+                status=500
+            )
+
+        if scriptures == []:
+            logger.debug(
+                "Module: api_scripture.py, Function: get_video_scriptures"
+            )
+            logger.debug(
+                f"No scriptures found for video ID {video_id} in the database."
+            )
 
         return api_success(
             data=scriptures,
@@ -193,17 +245,24 @@ def add_scripture_text() -> Response:
     # Get the JSON data from the request
     data = request.get_json()
     if not data:
-        logging.error("No data provided for adding scripture text.")
-        return api_error("No data provided", 400)
+        logger.debug("Module: api_scripture.py, Function: add_scripture_text")
+        logger.error("No data provided for adding scripture text.")
 
-    scr_name = data.get("scr_name")
-    scr_text = data.get("scr_text")
+        return api_error(
+            error="No data provided",
+            status=400
+        )
+
+    scr_name = data.get("scr_name", None)
+    scr_text = data.get("scr_text", None)
 
     if not scr_name or not scr_text:
-        logging.error("Missing 'scr_name' or 'scr_text' in request data.")
+        logger.debug("Module: api_scripture.py, Function: add_scripture_text")
+        logger.error("Missing 'scr_name' or 'scr_text' in request data.")
+
         return api_error(
-            "Missing 'scr_name' or 'scr_text' in request data",
-            400
+            error="Missing 'scr_name' or 'scr_text' in request data",
+            status=400
         )
 
     # Get the book, chapter, and verse from the scripture name
@@ -230,6 +289,11 @@ def add_scripture_text() -> Response:
         book = chapter = verse = None
 
     if book is None or chapter is None or verse is None:
+        logger.debug("Module: api_scripture.py, Function: add_scripture_text")
+        logger.error(
+            f"Scripture reference '{scr_name}' is not valid. Skipping."
+        )
+
         return api_error(
             f"Scripture reference '{scr_name}' is not valid. Skipping",
             400
@@ -247,16 +311,22 @@ def add_scripture_text() -> Response:
         )
 
     if scr_id is None:
-        logging.error(
+        logger.debug("Module: api_scripture.py, Function: add_scripture_text")
+        logger.error(
             f"Failed to add scripture text: {scr_name}"
         )
-        return api_error(f"Failed to add scripture text: {scr_name}", 500)
+
+        return api_error(
+            error=f"Failed to add scripture text: {scr_name}",
+            status=500
+        )
 
     # Add the scripture text to the database
-    logging.info(
+    logger.debug(
         f"Adding scripture text for {book} {chapter}:{verse} "
         f"(ID: {scr_id}) with text: '{scr_text}'"
     )
+
     with DatabaseContext() as db:
         scripture_mgr = ScriptureManager(db)
         result = scripture_mgr.update(
@@ -265,11 +335,15 @@ def add_scripture_text() -> Response:
         )
 
     if not result:
-        logging.error(f"Failed to add scripture text for '{scr_name}'.")
-        return api_error(f"Failed to add scripture text for '{scr_name}'", 500)
+        logger.debug("Module: api_scripture.py, Function: add_scripture_text")
+        logger.error(f"Failed to add scripture text for '{scr_name}'.")
 
-    logging.info(f"Successfully added scripture text for '{scr_name}'.")
+        return api_error(
+            error=f"Failed to add scripture text for '{scr_name}'",
+            status=500
+        )
 
     return api_success(
-        message=f"Added scripture text for '{scr_name}'"
+        message=f"Added scripture text for '{scr_name}'",
+        status=200
     )

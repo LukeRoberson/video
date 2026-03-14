@@ -139,6 +139,7 @@ def create_app(
     key: str,
     template_folder: str = 'templates',
     static_folder: str = 'static',
+    log_level: str = 'WARNING',
 ) -> Flask:
     """
     Create and configure the Flask application.
@@ -147,11 +148,38 @@ def create_app(
         key (str): Secret key for the Flask application.
         template_folder (str): Path to the templates folder.
         static_folder (str): Path to the static files folder.
+        log_level (str): Logging level for the application.
 
     Returns:
         Flask: The configured Flask application instance.
     """
 
+    # Set the logging level
+    match log_level:
+        case "DEBUG":
+            level = logging.DEBUG
+        case "INFO":
+            level = logging.INFO
+        case "WARNING":
+            level = logging.WARNING
+        case "ERROR":
+            level = logging.ERROR
+        case "CRITICAL":
+            level = logging.CRITICAL
+        case _:
+            level = logging.INFO
+            logging.warning(
+                f"Invalid logging level: '{log_level}'. Defaulting to INFO"
+            )
+
+    # Configure the root logger and all handlers to the specified level
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+    for handler in root_logger.handlers:
+        handler.setLevel(level)
+    print(f"Logging level set to: {logging.getLevelName(root_logger.level)}")
+
+    # Create the Flask application
     app = Flask(
         __name__,
         template_folder=template_folder,

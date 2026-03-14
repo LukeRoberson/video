@@ -39,6 +39,7 @@ from flask import (
     Blueprint,
     Response,
 )
+import logging
 
 # Local imports
 from api.api import (
@@ -51,6 +52,8 @@ from api.sql_db import (
     VideoManager,
 )
 
+
+logger = logging.getLogger(__name__)
 
 # Create a blueprint for location-related endpoints
 location_endpoint = Blueprint(
@@ -74,13 +77,17 @@ def get_locations() -> Response:
 
     with DatabaseContext() as db:
         loc_mgr = LocationManager(db)
-
         locations = loc_mgr.get() or []
 
-    # Sort locations alphabetically by name (case-insensitive)
-    locations = sorted(
-        locations, key=lambda loc: loc.get('name', '').lower()
-    )
+    if locations == []:
+        logger.debug("Module: api_location.py, Function: get_locations")
+        logger.debug("No locations found in the database.")
+
+    else:
+        # Sort locations alphabetically by name (case-insensitive)
+        locations = sorted(
+            locations, key=lambda loc: loc.get('name', '').lower()
+        )
 
     return api_success(
         data=locations,
@@ -109,9 +116,12 @@ def get_location(
 
     with DatabaseContext() as db:
         loc_mgr = LocationManager(db)
-
         loc_list = loc_mgr.get(id=location_id)
+
         if not loc_list:
+            logger.debug("Module: api_location.py, Function: get_location")
+            logger.warning(f"Location with ID {location_id} not found.")
+
             return api_error(
                 f"Location with ID {location_id} not found",
                 404
@@ -149,6 +159,11 @@ def get_video_locations(
         # Check if the video exists
         video_list = video_mgr.get(id=video_id)
         if not video_list:
+            logger.debug(
+                "Module: api_location.py, Function: get_video_locations"
+            )
+            logger.warning(f"Video with ID {video_id} not found.")
+
             return api_error(
                 f"Video with ID {video_id} not found",
                 404
@@ -158,6 +173,17 @@ def get_video_locations(
         locations = location_mgr.get_from_video(
             video_id=video_id
         )
+
+        if locations is None:
+            logger.debug(
+                "Module: api_location.py, Function: get_video_locations"
+            )
+            logger.warning(f"No locations found for video with ID {video_id}.")
+
+            return api_error(
+                error="Error retrieving locations for video",
+                status=500
+            )
 
         return api_success(
             data=locations,

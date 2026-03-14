@@ -134,9 +134,12 @@ def get_video(
 
         video_list = video_mgr.get(id)
         if not video_list:
+            logger.debug("Module: api_video.py, Function: get_video")
+            logger.error(f"Video with ID {id} not found in database")
+
             return api_error(
-                f"Video with ID {id} not found",
-                404
+                error=f"Video with ID {id} not found",
+                status=404
             )
 
     return api_success(
@@ -171,10 +174,12 @@ def get_videos_bulk() -> Response:
     # Get the list of video IDs from the request body
     data = request.get_json()
     if not data or "video_ids" not in data:
-        logging.error("Missing 'video_ids' in request data.")
+        logger.debug("Module: api_video.py, Function: get_videos_bulk")
+        logger.error("Missing 'video_ids' in request data.")
+
         return api_error(
-            "Missing 'video_ids' in request data",
-            400
+            error="Missing 'video_ids' in request data",
+            status=400
         )
 
     # Validate that 'video_ids' is a list of integers
@@ -183,10 +188,12 @@ def get_videos_bulk() -> Response:
         not isinstance(video_ids, list)
         or not all(isinstance(vid, int) for vid in video_ids)
     ):
-        logging.error("'video_ids' must be a list of integers.")
+        logger.debug("Module: api_video.py, Function: get_videos_bulk")
+        logger.error("'video_ids' must be a list of integers.")
+
         return api_error(
-            "'video_ids' must be a list of integers",
-            400
+            error="'video_ids' must be a list of integers",
+            status=400
         )
 
     # Fetch video details for each ID
@@ -197,13 +204,25 @@ def get_videos_bulk() -> Response:
         for video in video_ids:
             video_list = video_mgr.get(video)
 
-            # Add the video details to the response list if found
-            if video_list:
-                videos.append(video_list[0])
+            if not video_list:
+                logger.debug("Module: api_video.py, Function: get_videos_bulk")
+                logger.warning(
+                    f"Video with ID {video} not found in database. Skipping."
+                )
 
-            # Skip any video IDs that are not found, but log a warning
             else:
-                logging.warning(f"Video with ID {video} not found. Skipping.")
+                # Add the video details to the response list if found
+                if video_list:
+                    videos.append(video_list[0])
+
+                # Skip any video IDs that are not found, but log a warning
+                else:
+                    logger.debug(
+                        "Module: api_video.py, Function: get_videos_bulk"
+                    )
+                    logger.warning(
+                        f"Video with ID {video} not found. Skipping."
+                    )
 
     return api_success(
         data=videos,
@@ -257,6 +276,10 @@ def filter_videos() -> Response:
             latest,
         ]
     ):
+        logger.debug("Module: api_video.py, Function: filter_videos")
+        logger.error(
+            "At least one filter query parameter is required."
+        )
         return api_error(
             "At least one filter query parameter is required",
             400
@@ -277,25 +300,30 @@ def filter_videos() -> Response:
             if "," in param_value:
                 values = param_value.split(",")
                 if not all(value.strip().isdigit() for value in values):
-                    logging.error(
+                    logger.debug(
+                        "Module: api_video.py, Function: filter_videos"
+                    )
+                    logger.error(
                         f"Invalid value for {param_name}: {param_value}. "
                         "All values must be integers."
                     )
                     return api_error(
-                        f"Invalid value for {param_name}: {param_value}. "
-                        "All values must be integers.",
-                        400
+                        error=f"Invalid value for {param_name}: {param_value}."
+                        " All values must be integers.",
+                        status=400
                     )
+
             # If it's a single value, validate it
             elif not param_value.isdigit():
-                logging.error(
+                logger.debug("Module: api_video.py, Function: filter_videos")
+                logger.error(
                     f"Invalid value for {param_name}: {param_value}. "
                     "Must be an integer."
                 )
                 return api_error(
-                    f"Invalid value for {param_name}: {param_value}. "
+                    error=f"Invalid value for {param_name}: {param_value}. "
                     "Must be an integer.",
-                    400
+                    status=400
                 )
 
     # Convert category ID's to a list (if provided)
