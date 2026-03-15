@@ -9,8 +9,6 @@
 declare const ProfileMgmtConfig: {
     /** API base URL for new endpoints (separate server) */
     readonly API_BASE_URL: "http://localhost:5010";
-    /** API base URL for legacy endpoints */
-    readonly LEGACY_API_BASE_URL: "http://localhost:5000";
     /** API endpoint for creating profiles */
     readonly CREATE_PROFILE_ENDPOINT: "/api/profile/create";
     /** API endpoint for getting active profile */
@@ -220,11 +218,6 @@ declare class ProfileMgmtController {
      * Expose functions globally for template usage
      */
     private exposeGlobalFunctions;
-    /**
-     * Get the operations handler instance
-     * @returns Operations handler
-     */
-    getOperationsHandler(): ProfileOperationsHandler;
 }
 declare let profileMgmtController: ProfileMgmtController;
 //# sourceMappingURL=profileMgmt.d.ts.map

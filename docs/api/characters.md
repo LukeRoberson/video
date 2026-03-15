@@ -21,7 +21,6 @@ API endpoints that relate to Bible characters.
 | Endpoint                            | Description                                  |
 | ----------------------------------- | -------------------------------------------- |
 | /                                   | Get a list of all characters                 |
-| /{{character_id}}                   | Get a specific character                     |
 | /video/{{video_id}}                 | Get characters in a video                    |
 </br></br>
 
@@ -34,9 +33,9 @@ API endpoints that relate to Bible characters.
 
 **Description**
 
-Get a list of all Bible characters in the database.
+Get a list of all Bible characters in the database, or get a specific character by their ID.
 
-The list is sorted alphabetically by name.
+When getting the entire list, it will be sorted alphabetically by name.
 </br></br>
 
 
@@ -48,7 +47,13 @@ GET
 
 **Parameters**
 
-None
+Optionally include a character's ID to get that specific character.
+</br></br>
+
+
+| Field   | Type    | Mandatory | Description                    |
+| ------- | ------- | --------- | ------------------------------ |
+| char_id | integer | No        | The ID of a specific character |
 </br></br>
 
 
@@ -96,88 +101,6 @@ The 'data' field contains a list of all Bible characters, with each entry descri
     "message": "Retrieved 205 characters",
     "success": true
 } 
-```
-</br></br>
-
-
-
-
-----
-## /api/characters/{{character_id}}
-
-**Description**
-
-Get a specific character by their ID.
-</br></br>
-
-
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the character does not exist.
-</br></br>
-
-
-**Response Body**
-
-Returns 'data', 'message', and 'success' fields.
-
-The 'data' field contains a single entry, containing details for the character
-</br></br>
-
-
-| Field       | Type    | Description                                             |
-| ----------- | ------- | ------------------------------------------------------- |
-| id          | integer | The character's ID                                      |
-| name        | string  | The character's name                                    |
-| description | string  | A multi-line description of the character               |
-| date_range  | string  | An approximate date range when the character was active |
-| profile_pic | string  | The filename of the characters avatar                   |
-</br></br>
-
-
-```json
-{
-    "data": {
-        "date_range": "About 1000 B.C.E.",
-        "description": "Son of Jesse, and the second King of Israel.\nA skilled poet and musician, David wrote more than 73 of the psalms.\nHe humbly sought Jehovah’s direction in his life.\nJehovah called David “a man agreeable to my heart.”",
-        "id": 1,
-        "name": "David",
-        "profile_pic": "1-David.png"
-    },
-    "message": "Retrieved character with ID 1",
-    "success": true
-}
-```
-</br></br>
-
-
-If a character is not found, this JSON is returned:
-
-```json
-{
-    "error": "Character with ID 5 not found",
-    "success": false
-}
 ```
 </br></br>
 

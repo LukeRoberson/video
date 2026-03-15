@@ -9,8 +9,6 @@
 declare const VideoAddConfig: {
     /** API base URL for new endpoints (separate server) */
     readonly API_BASE_URL: "http://localhost:5010";
-    /** API base URL for legacy endpoints */
-    readonly LEGACY_API_BASE_URL: "http://localhost:5000";
     /** API endpoint for fetching CSV video data */
     readonly CSV_ENDPOINT: "/api/videos/csv";
     /** API endpoint for adding videos to database */

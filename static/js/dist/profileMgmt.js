@@ -10,8 +10,6 @@
 const ProfileMgmtConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
-    /** API base URL for legacy endpoints */
-    LEGACY_API_BASE_URL: 'http://localhost:5000',
     /** API endpoint for creating profiles */
     CREATE_PROFILE_ENDPOINT: '/api/profile/create',
     /** API endpoint for getting active profile */
@@ -73,7 +71,6 @@ class ProfileApiService {
      */
     static async setActiveProfile(profileData) {
         const url = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
-        console.log('Setting active profile with data:', profileData);
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -367,13 +364,6 @@ class ProfileMgmtController {
         window.deleteProfile = (profileId) => {
             this.operationsHandler.deleteProfile(profileId);
         };
-    }
-    /**
-     * Get the operations handler instance
-     * @returns Operations handler
-     */
-    getOperationsHandler() {
-        return this.operationsHandler;
     }
 }
 // Global controller instance

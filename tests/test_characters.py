@@ -5,14 +5,11 @@ Unit tests for character-related API endpoints.
 
 Endpoints tested:
     - GET /api/characters
-    - GET /api/characters/{id}
     - GET /api/characters/video/{video_id}
 
 Classes:
     TestAllCharacters
-        Tests for retrieving all characters.
-    TestCharacters
-        Tests for retrieving character details by ID.
+        Tests for retrieving one or all characters.
     TestVideoCharacters
         Tests for retrieving characters associated with a specific video ID.
 """
@@ -24,13 +21,19 @@ BASE_URL = "http://localhost:5010"
 API_PREFIX = "/api"
 
 
-class TestAllCharacters:
+class TestCharacters:
     """
     Tests for /api/characters endpoint.
+
+    Get all characters, or a specific one.
 
     Methods:
         test_get_all_characters
             Test retrieving all characters.
+        test_get_character_by_id
+            Test retrieving character details by ID.
+        test_get_character_by_invalid_id
+            Test retrieving character details with an invalid ID.
     """
 
     def test_get_all_characters(
@@ -69,18 +72,6 @@ class TestAllCharacters:
             for item in data
         )
 
-
-class TestCharacters:
-    """
-    Tests for /api/characters/{character_id} endpoint.
-
-    Methods:
-        test_get_character_by_id
-            Test retrieving character details by ID.
-        test_get_character_by_invalid_id
-            Test retrieving character details with an invalid ID.
-    """
-
     def test_get_character_by_id(
         self,
         valid_character_id: int
@@ -93,25 +84,32 @@ class TestCharacters:
 
         Test:
             - Endpoint returns status code 200
-            - Response contains correct character ID
+            - Response contains one entry
+            - Entry has the expected structure and correct ID
         """
 
-        url = f"{BASE_URL}{API_PREFIX}/characters/{valid_character_id}"
+        url = f"{BASE_URL}{API_PREFIX}/characters?char_id={valid_character_id}"
         response = requests.get(url)
         assert response.status_code == 200
 
         # Validate response structure and content
-        data = response.json().get("data", {})
-        assert "date_range" in data
-        assert isinstance(data["date_range"], str)
-        assert "description" in data
-        assert isinstance(data["description"], str)
-        assert "id" in data
-        assert isinstance(data["id"], int)
-        assert "name" in data
-        assert isinstance(data["name"], str)
-        assert "profile_pic" in data
-        assert isinstance(data["profile_pic"], str)
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 1
+
+        # Validate the expected structure and correct ID
+        character = data[0]
+        assert "date_range" in character
+        assert isinstance(character["date_range"], str)
+        assert "description" in character
+        assert isinstance(character["description"], str)
+        assert "id" in character
+        assert isinstance(character["id"], int)
+        assert character["id"] == valid_character_id
+        assert "name" in character
+        assert isinstance(character["name"], str)
+        assert "profile_pic" in character
+        assert isinstance(character["profile_pic"], str)
 
     def test_get_character_by_invalid_id(
         self,
@@ -124,13 +122,20 @@ class TestCharacters:
             invalid_character_id: An invalid character ID provided by fixture.
 
         Test:
-            - Endpoint returns status code 404
+            - Endpoint returns status code 200
+            - Response contains an empty list
         """
 
-        url = f"{BASE_URL}{API_PREFIX}/characters/{invalid_character_id}"
+        url = (
+            f"{BASE_URL}{API_PREFIX}/characters?char_id={invalid_character_id}"
+        )
         response = requests.get(url)
+        assert response.status_code == 200
 
-        assert response.status_code == 404
+        # Validate response structure and content
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 0
 
 
 class TestVideoCharacters:

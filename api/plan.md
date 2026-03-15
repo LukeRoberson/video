@@ -29,13 +29,17 @@
     * [x] Set video base URL to /api/videos
     * [x] Set category base URL to /api/category
     * [x] Set scripture base URL to /api/scriptures
-    * [ ] TypeScript files (below)
-    * [ ] Duplicate API calls (profileEdit vs profileMgmt)
+    * [x] TypeScript files (below)
+    * [x] Duplicate API calls (profileEdit vs profileMgmt)
 7. Consolidate endpoints
-    * [ ] Combine get_video, get_videos_bulk, and filter_videos (api_video.py)
-    * [ ] Combine endpoints to get all characters and get one specific character (api_character.py)
-    * [ ] Combine 'get all speakers' with 'get specific speaker' (api_speaker.py)
-    * [ ] Combine 'get all tags' with 'get specific tag' (api_tags.py)
+    * [x] `api_character`: get_character (/api/characters/<int>) and get_characters (/api/characters)
+    * [ ] `api_location`: get_location and get_locations
+    * [ ] `api_scripture`: get_scripture and get_scriptures
+    * [ ] `api_speaker`: get_speaker and get_speakers
+    * [ ] `api_tag`: get_tag and get_tags
+    * [ ] `api_video`: get_video, get_videos_bulk, and filter_videos
+    * [ ] `api_search`: The regular search vs the advanced search
+    * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
 8. Active user redesign
     * [ ] Get the frontend to track the active user, not the API (eg, mark as watched/unwatched, in progress videos)
         * [ ] `api_category.py` - Category filter
@@ -62,32 +66,6 @@
 
 
 
-# Cleanup
-
-## TypeScript Files
-
-* profileMgmt.ts
-    * Base URLs in ProfileMgmtConfig
-    * URL selection in setActiveProfile
-* profileEdit.ts
-    * Base URLs in ProfileEditConfig
-* populateCategories.ts
-    * Base URLs in CategoryConfig
-* videoAdd.ts
-    * Base URLs in VideoAddConfig
-* videoPlayer.ts
-    * Move API endpoints to a variable
-
-
-## Overlapping API calls and endpoints
-
-* profileEdit.ts and profileMgmt.ts
-    * These appear to do the same thing
-    * Can they be consolidated?
-* Duplicate endpoints
-    * /api/profile/update/{id} and /edit_profile/{id} appear to be the same thing
-
-
 # Notes
 
 * Not yet testing endpoints that update the database
@@ -96,21 +74,23 @@
     * POST /api/profile/create
     * DELETE /api/profile/delete/{{id}}
     * POST /api/profile/update/{{id}}
-* The 'set active profile' endpoint happily will set a non-existant profile as active
 * `/api/categories/{{category_id}}/{{subcategory_id}}`
     * Contains a 'videos' list in the response, which is unnecessary
-* `api_profile.py` still needs to be updated with `api_success` and `api_error`
 * Investigate:
     * Should images, such as avatars, be stored in the frontend, or somewhere else?
     * Other test types, such as 'debug' and 'coverage
     * How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
-* Investigate:
     * Live version has a bug while showing thumbnail for snippets (noticed on themes)
-    * Does the dev version have this too?
+        * Does the dev version have this too?
 * Need to check that we're using `api_error` in all the right places too
     * search for 'make_response', and see where that's used
 * Searching
     * `/api/search` doesn't seems to be enforcing the page size limit
     * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
+
 * Improve logging in api_profile
     * After other improvements are made
+
+* Bug:
+    * The 'set active profile' endpoint happily will set a non-existant profile as active
+

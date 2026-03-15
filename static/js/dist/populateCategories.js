@@ -10,8 +10,6 @@
 const CategoryConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
-    /** API base URL for legacy endpoints */
-    LEGACY_API_BASE_URL: 'http://localhost:5000',
     /** API endpoint pattern for category videos */
     API_ENDPOINT_PATTERN: '/api/categories/{categoryId}/{subcategoryId}',
     /** Delay before enhancing TV navigation */

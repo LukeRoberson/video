@@ -10,8 +10,6 @@
 const ProfileEditConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
-    /** API base URL for legacy endpoints */
-    LEGACY_API_BASE_URL: 'http://localhost:5000',
     /** API endpoint for profile pictures */
     PROFILE_PICTURES_ENDPOINT: '/api/profile/pictures',
     /** API endpoint pattern for profile deletion */

@@ -5,9 +5,7 @@ API endpoints related to characters.
 
 Endpoints:
     GET /api/characters
-        Get a list of all characters.
-    GET /api/characters/<int:character_id>
-        Get a character by its ID.
+        Get a list of one or all characters.
     GET /api/characters/video/<int:video_id>
         Get the characters for a video by its ID.
 
@@ -38,6 +36,7 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
+    request,
 )
 import logging
 
@@ -69,68 +68,49 @@ character_endpoint = Blueprint(
 )
 def get_characters() -> Response:
     """
-    Get a list of all characters.
+    Get a list of one or all characters.
+
+    Optional Query Parameters:
+        char_id (int): Get a character by their ID.
 
     Returns:
-        Response: A JSON response containing a list of all characters.
+        Response: A JSON response containing a list of characters.
     """
+
+    char_id = request.args.get("char_id", type=int)
 
     with DatabaseContext() as db:
         character_mgr = CharacterManager(db)
-        characters = character_mgr.get() or []
+        characters = (
+            character_mgr.get(id=char_id) if char_id
+            else character_mgr.get()
+            or []
+        )
 
-    if characters == []:
+    # Handle errors
+    if characters is None:
+        logger.debug("Module: api_character.py, Function: get_characters")
+        logger.warning("Error retrieving characters from the database.")
+        return api_error(
+            error="Error retrieving characters from the database",
+            status=500
+        )
+
+    # Handle empty results
+    elif characters == []:
         logger.debug("Module: api_character.py, Function: get_characters")
         logger.debug("No characters found in the database.")
 
     else:
         # Sort characters alphabetically by name (case-insensitive)
         characters = sorted(
-            characters, key=lambda char: char.get('name', '').lower()
+            characters,
+            key=lambda char: char.get('name', '').lower()
         )
 
     return api_success(
         data=characters,
         message=f"Retrieved {len(characters)} characters",
-        status=200
-    )
-
-
-@character_endpoint.route(
-    "/<int:character_id>",
-    methods=["GET"],
-)
-def get_character(
-    character_id: int
-) -> Response:
-    """
-    Get a character by its ID.
-
-    Args:
-        character_id (int): The ID of the character to retrieve.
-
-    Returns:
-        Response: A JSON response containing the character details if found,
-            or an error message if not found.
-    """
-
-    with DatabaseContext() as db:
-        character_mgr = CharacterManager(db)
-
-        character_list = character_mgr.get(id=character_id)
-        if not character_list:
-            logger.debug(
-                "Module: api_character.py, Function: get_character"
-            )
-            logger.warning(f"Character with ID {character_id} not found.")
-            return api_error(
-                f"Character with ID {character_id} not found",
-                404
-            )
-
-    return api_success(
-        data=character_list[0],
-        message=f"Retrieved character with ID {character_id}",
         status=200
     )
 

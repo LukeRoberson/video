@@ -521,11 +521,15 @@ def character_details(
     PIC_PATH = "/static/img/characters/"
 
     # API: Get character details
+    param = {
+        'char_id': character_id
+    }
     response = requests.get(
-        f'http://localhost:5010/api/characters/{character_id}',
+        'http://localhost:5010/api/characters',
+        params=param
     )
     if response.status_code == 200:
-        character = response.json().get('data', {})
+        character = response.json().get('data', [])[0]
     else:
         return make_response(
             render_template(
