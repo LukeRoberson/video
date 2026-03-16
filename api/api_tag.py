@@ -35,6 +35,7 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
+    request,
 )
 import logging
 
@@ -55,28 +56,38 @@ logger = logging.getLogger(__name__)
 # Create a blueprint for tag-related endpoints
 tag_endpoint = Blueprint(
     'tag_endpoint',
-    __name__
+    __name__,
+    url_prefix='/api/tags'
 )
 
 
 @tag_endpoint.route(
-    "/api/tags",
+    "",
     methods=["GET"],
 )
 def get_tags() -> Response:
     """
     Get a list of all tags.
 
+    Optional query parameters:
+        tag_id (int): Get a specific tag by its ID.
+
     Returns:
         Response: A JSON response containing a list of all tags.
     """
+
+    tag_id = request.args.get('tag_id', type=int)
 
     with DatabaseContext() as db:
         tag_mgr = TagManager(db)
         video_mgr = VideoManager(db)
 
         # Get all tags
-        tags = tag_mgr.get() or []
+        tags = (
+            tag_mgr.get(id=tag_id) if tag_id
+            else tag_mgr.get()
+            or []
+        )
 
         if not tags:
             logger.debug("Module: api_tag.py, Function: get_tags")
@@ -110,45 +121,7 @@ def get_tags() -> Response:
 
 
 @tag_endpoint.route(
-    "/api/tags/<int:tag_id>",
-    methods=["GET"],
-)
-def get_tag(
-    tag_id: int
-) -> Response:
-    """
-    Get a tag by its ID.
-
-    Args:
-        tag_id (int): The ID of the tag to retrieve.
-
-    Returns:
-        Response: A JSON response containing the tag details if found,
-            or an error message if not found.
-    """
-
-    with DatabaseContext() as db:
-        tag_mgr = TagManager(db)
-
-        tag_list = tag_mgr.get(id=tag_id)
-        if not tag_list:
-            logger.debug("Module: api_tag.py, Function: get_tag")
-            logger.error(f"Tag with ID {tag_id} not found in database")
-
-            return api_error(
-                error=f"Tag with ID {tag_id} not found",
-                status=404
-            )
-
-    return api_success(
-        data=tag_list[0],
-        message="Tag retrieved successfully",
-        status=200
-    )
-
-
-@tag_endpoint.route(
-    "/api/tags/video/<int:video_id>",
+    "/video/<int:video_id>",
     methods=["GET"],
 )
 def get_video_tags(

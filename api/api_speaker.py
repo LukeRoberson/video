@@ -38,6 +38,7 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
+    request,
 )
 import logging
 
@@ -69,18 +70,27 @@ speaker_endpoint = Blueprint(
 )
 def get_speakers() -> Response:
     """
-    Get a list of all speakers.
+    Get a list of all speakers, or a specific speaker by ID.
+
+    Optional query parameters:
+        spk_id (int): Filter speakers by ID.
 
     Returns:
         Response: A JSON response containing a list of all speakers.
     """
+
+    speaker_id = request.args.get("spk_id", type=int)
 
     with DatabaseContext() as db:
         speaker_mgr = SpeakerManager(db)
         video_mgr = VideoManager(db)
 
         # Get a list of all speakers
-        speakers = speaker_mgr.get() or []
+        speakers = (
+            speaker_mgr.get(id=speaker_id) if speaker_id
+            else speaker_mgr.get()
+            or []
+        )
 
         if not speakers:
             logger.debug("Module api_speaker: Function get_speakers")

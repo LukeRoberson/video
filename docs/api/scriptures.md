@@ -47,7 +47,13 @@ GET
 
 **Parameters**
 
-None
+Optionally, include a scripture ID to get one specfic scripture.
+</br></br>
+
+
+| Field  | Type    | Mandatory | Description                           |
+| ------ | ------- | --------- | ------------------------------------- |
+| scr_id | integer | No        | The ID of a specific scripture to get |
 </br></br>
 
 
@@ -99,89 +105,16 @@ The 'data' field is a list of scripture entries.
 </br></br>
 
 
-
-
-----
-## /api/scriptures/{{scripture_id}}
-
-**Description**
-
-Get a single scripture by its ID
-</br></br>
-
-
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the scripture does not exist.
-</br></br>
-
-
-**Response Body**
-
-Returns 'data', 'message', and 'success' fields.
-
-The 'data' field contains the details for an individual scripture
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-| id          | integer | Scripture's ID  |
-| book        | string  | Book name       |
-| chapter     | integer | Chapter number  |
-| verse       | integer | Verse number    |
-| verse_text  | string  | Verse text      |
-</br></br>
-
+If there are no results (eg, a specific scripture does not exist):
 
 ```json
 {
-    "data": {
-        "book": "Matthew",
-        "chapter": 19,
-        "id": 2,
-        "verse": 13,
-        "verse_text": "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
-    },
-    "message": "Retrieved scripture with ID 2",
+    "data": [],
+    "message": "Retrieved 0 scriptures",
     "success": true
 }
 ```
 </br></br>
-
-
-
-If the scripture is not found:
-
-```json
-{
-    "error": "Scripture with ID 1 not found",
-    "success": false
-}
-```
-</br></br>
-
-
 
 
 

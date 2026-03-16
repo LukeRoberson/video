@@ -34,7 +34,7 @@ API endpoints for tag management.
 
 **Description**
 
-Get a list of all tags.
+Get a list of all tags, or one specific tag.
 
 Tags are sorted alphabetically by their name.
 </br></br>
@@ -48,7 +48,13 @@ GET
 
 **Parameters**
 
-None
+Optionally, include a tag ID to get a specific tag.
+</br></br>
+
+
+| Field  | Type    | Mandatory | Description                          |
+| ------ | ------- | --------- | ------------------------------------ |
+| tag_id | integer | No        | The ID of a specific tag to retrieve |
 </br></br>
 
 
@@ -96,80 +102,16 @@ The 'data' field is a list of tag entries. Each entry describes the tag.
 </br></br>
 
 
-
-
-----
-## /api/tags/{{tag_id}}
-
-**Description**
-
-Get a specific tag by its ID.
-</br></br>
-
-
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the tag does not exist.
-</br></br>
-
-
-**Response Body**
-
-Returns 'data', 'message', and 'success' fields.
-
-The 'data' field describes a single tag.
-</br></br>
-
-
-| Field       | Type    | Description     |
-| ----------- | ------- | --------------- |
-| id          | integer | The tag's ID    |
-| name        | string  | The tag's name  |
-</br></br>
-
+If the tag does not exist:
 
 ```json
 {
-    "data": {
-        "id": 1,
-        "name": "av"
-    },
-    "message": "Tag retrieved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If there's an error:
-
-```json
-{
-    "error": "Tag with ID 3 not found",
+    "error": "Error retrieving tags from database",
     "success": false
 }
 ```
 </br></br>
+
 
 
 

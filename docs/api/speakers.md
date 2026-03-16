@@ -34,7 +34,7 @@ API endpoints that relate to video speakers and interviewees.
 
 **Description**
 
-Get a list of all speakers.
+Get a list of all speakers, or just one specific speaker.
 
 List is sorted alphabetically by speaker name.
 </br></br>
@@ -48,7 +48,13 @@ GET
 
 **Parameters**
 
-None
+Optionally, include a speaker ID to get just one speaker.
+</br></br>
+
+
+| Field  | Type    | Mandatory | Description                                |
+| ------ | ------- | --------- | ------------------------------------------ |
+| spk_id | integer | No        | The ID of a specific speaker to return     |
 </br></br>
 
 
@@ -61,6 +67,8 @@ None
 **Response Code**
 
 `200 OK` on success
+
+`500 INTERNAL SERVER ERROR` If there was a problem getting speakers
 </br></br>
 
 
@@ -93,6 +101,17 @@ The 'data' field contains a list of speakers, with each entry describing the spe
     ],
     "message": "Speakers retrieved successfully",
     "success": true
+}
+```
+</br></br>
+
+
+If an invalid speaker was requested:
+
+```json
+{
+    "error": "Error occurred while getting speakers.",
+    "success": false
 }
 ```
 </br></br>

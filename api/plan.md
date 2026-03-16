@@ -32,12 +32,12 @@
     * [x] TypeScript files (below)
     * [x] Duplicate API calls (profileEdit vs profileMgmt)
 7. Consolidate endpoints
-    * [x] `api_character`: get_character (/api/characters/<int>) and get_characters (/api/characters)
-    * [ ] `api_location`: get_location and get_locations
-    * [ ] `api_scripture`: get_scripture and get_scriptures
-    * [ ] `api_speaker`: get_speaker and get_speakers
-    * [ ] `api_tag`: get_tag and get_tags
-    * [ ] `api_video`: get_video, get_videos_bulk, and filter_videos
+    * [x] `api_character`: get_character
+    * [x] `api_location`: get_location and get_locations
+    * [x] `api_scripture`: get_scripture and get_scriptures
+    * [x] `api_speaker`: get_speaker and get_speakers
+    * [x] `api_tag`: get_tag and get_tags
+    * [ ] `api_video`: get_video, get_videos_bulk, and filter_videos (/api/videos/<int>, /api/videos/get_bulk, /api/videos/filter)
     * [ ] `api_search`: The regular search vs the advanced search
     * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
 8. Active user redesign
@@ -51,6 +51,7 @@
     * [ ] Video; About 13 calls (video details, various metadata, similarity, watch status on similar videos, etc)
     * [ ] Themes; It makes many calls to the API instead of just one or two
     * [ ] Tag; Multiple API calls to check which videos have been watched
+    * [ ] Check if a video has been watched: Check multiple videos in a single call
 10. Clean up bugs
     * [ ] In categories, watch status on individual videos is not showing
     * [ ] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
@@ -87,6 +88,10 @@
 * Searching
     * `/api/search` doesn't seems to be enforcing the page size limit
     * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
+* Speakers endpoint:
+    * Query for invalid speaker does not return an empty list like other endpoints do
+* Tags endpoint:
+    * Query for invalid tag does not return an empty list like other endpoints do
 
 * Improve logging in api_profile
     * After other improvements are made

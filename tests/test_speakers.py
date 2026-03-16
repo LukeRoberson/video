@@ -11,8 +11,6 @@ Endpoints Tested:
 Classes:
     TestSpeakerList
         Tests for retrieving the list of all speakers.
-    TestGetSpeaker
-        Tests for retrieving speaker details by ID.
     TestVideoSpeakers
         Tests for retrieving speakers associated with a video.
 """
@@ -33,6 +31,10 @@ class TestSpeakerList:
     Methods:
         test_get_all_speakers
             Test retrieving the list of all speakers.
+        test_get_speaker_by_id
+            Test retrieving speaker details by ID.
+        test_get_speaker_by_invalid_id
+            Test retrieving speaker details with an invalid ID.
     """
 
     def test_get_all_speakers(
@@ -62,18 +64,6 @@ class TestSpeakerList:
             for speaker in data
         )
 
-
-class TestGetSpeaker:
-    """
-    Tests for the GET /api/speakers/<int:speaker_id> endpoint.
-
-    Methods:
-        test_get_speaker_by_id
-            Test retrieving speaker details by ID.
-        test_get_speaker_by_invalid_id
-            Test retrieving speaker details with an invalid ID.
-    """
-
     def test_get_speaker_by_id(
         self,
         valid_speaker_id: int
@@ -88,18 +78,29 @@ class TestGetSpeaker:
         """
 
         # Test with a valid speaker ID (assuming ID 1 exists)
-        url = f"{BASE_URL}{API_PREFIX}/speakers/{valid_speaker_id}"
-        response = requests.get(url)
+        url = f"{BASE_URL}{API_PREFIX}/speakers"
+        params = {"spk_id": valid_speaker_id}
+        response = requests.get(url, params=params)
         assert response.status_code == 200
 
         # Validate the response
-        data = response.json().get("data", {})
-        assert isinstance(data, dict)
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 1
 
         # Validate the structure and type
-        assert "id" in data and isinstance(data["id"], int)
-        assert "name" in data and isinstance(data["name"], str)
-        assert "profile_pic" in data
+        speaker = data[0]
+        assert isinstance(speaker, dict)
+        assert "id" in speaker and isinstance(speaker["id"], int)
+        assert "name" in speaker and isinstance(speaker["name"], str)
+        assert (
+            "profile_pic" in speaker and
+            isinstance(speaker["profile_pic"], str)
+        )
+        assert (
+            "video_count" in speaker and
+            isinstance(speaker["video_count"], int)
+        )
 
     def test_get_speaker_by_invalid_id(
         self,
@@ -109,14 +110,16 @@ class TestGetSpeaker:
         Test retrieving speaker details with an invalid ID.
 
         Test:
-            - Endpoint returns status code 404 for invalid ID
+            - Endpoint returns status code 500 for invalid ID
         """
 
         # Test with an invalid speaker ID (assuming ID 9999 does not exist)
-        url = f"{BASE_URL}{API_PREFIX}/speakers/{invalid_speaker_id}"
-        response = requests.get(url)
+        url = f"{BASE_URL}{API_PREFIX}/speakers"
+        params = {"spk_id": invalid_speaker_id}
+        response = requests.get(url, params=params)
 
-        assert response.status_code == 404
+        # Validate the response
+        assert response.status_code == 500
 
 
 class TestVideoSpeakers:

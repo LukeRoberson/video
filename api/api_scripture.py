@@ -6,8 +6,6 @@ API endpoints related to scriptures.
 Endpoints:
     GET /api/scriptures
         Get a list of all scriptures.
-    GET /api/scriptures/video/<int:video_id>
-        Get the scriptures for a video by its ID.
     GET /api/scriptures/<int:scripture_id>
         Get a scripture by its ID.
     POST /api/scriptures
@@ -79,13 +77,22 @@ def get_scriptures() -> Response:
     """
     Get a list of all scriptures.
 
+    Optional query parameters:
+        scr_id (int): Filter by scripture ID.
+
     Returns:
         Response: A JSON response containing a list of all scriptures.
     """
 
+    scripture_id = request.args.get("scr_id", None, type=int)
+
     with DatabaseContext() as db:
         scripture_mgr = ScriptureManager(db)
-        scriptures = scripture_mgr.get() or []
+        scriptures = (
+            scripture_mgr.get(id=scripture_id) if scripture_id
+            else scripture_mgr.get()
+            or []
+        )
 
     if scriptures is None:
         logger.debug("Module: api_scripture.py, Function: get_scriptures")
@@ -103,52 +110,6 @@ def get_scriptures() -> Response:
     return api_success(
         data=scriptures,
         message=f"Retrieved {len(scriptures)} scriptures",
-        status=200
-    )
-
-
-@scripture_endpoint.route(
-    "/<int:scripture_id>",
-    methods=["GET"],
-)
-def get_scripture(
-    scripture_id: int
-) -> Response:
-    """
-    Get a scripture by its ID.
-
-    Args:
-        scripture_id (int): The ID of the scripture to retrieve.
-
-    Returns:
-        Response: A JSON response containing the scripture details if found,
-            or an error message if not found.
-    """
-
-    with DatabaseContext() as db:
-        scripture_mgr = ScriptureManager(db)
-        scripture_list = scripture_mgr.get(id=scripture_id)
-
-    if not scripture_list:
-        logger.debug("Module: api_scripture.py, Function: get_scripture")
-        logger.error(
-            f"Scripture with ID {scripture_id} not found in the database."
-        )
-
-        return api_error(
-            f"Scripture with ID {scripture_id} not found",
-            404
-        )
-
-    if scripture_list == []:
-        logger.debug("Module: api_scripture.py, Function: get_scripture")
-        logger.debug(
-            f"Scripture with ID {scripture_id} not found in the database."
-        )
-
-    return api_success(
-        data=scripture_list[0],
-        message=f"Retrieved scripture with ID {scripture_id}",
         status=200
     )
 

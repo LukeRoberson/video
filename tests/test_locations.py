@@ -5,14 +5,11 @@ Unit tests for location-related API endpoints.
 
 Endpoints Tested:
     - GET /api/locations
-    - GET /api/locations/<int:location_id>
     - GET /api/locations/video/<int:video_id>
 
 Classes:
     TestLocationList
         Tests for retrieving the list of all locations.
-    TestGetLocation
-        Tests for retrieving location details by ID.
     TestVideoLocations
         Tests for retrieving locations associated with a video.
 """
@@ -33,10 +30,10 @@ class TestLocationList:
     Methods:
         test_get_all_locations
             Test retrieving the list of all locations.
-
-    Test:
-        - Endpoint returns status code 200
-        - Response is a list
+        test_get_location_by_id
+            Test retrieving location details by ID.
+        test_get_location_by_invalid_id
+            Test retrieving location details with an invalid ID.
     """
 
     def test_get_all_locations(
@@ -66,18 +63,6 @@ class TestLocationList:
                 for loc in data
             )
 
-
-class TestGetLocation:
-    """
-    Tests for the GET /api/locations/<int:location_id> endpoint.
-
-    Methods:
-        test_get_location_by_id
-            Test retrieving location details by ID.
-        test_get_location_by_invalid_id
-            Test retrieving location details with an invalid ID.
-    """
-
     def test_get_location_by_id(
         self,
         valid_location_id: int
@@ -87,21 +72,23 @@ class TestGetLocation:
 
         Test:
             - Endpoint returns status code 200 for valid ID
+            - Response is a list
             - Response contains expected location details
         """
 
-        # Assuming a location with ID 1 exists for testing
-        url = f"{BASE_URL}{API_PREFIX}/locations/{valid_location_id}"
-        response = requests.get(url)
+        url = f"{BASE_URL}{API_PREFIX}/locations"
+        params = {"loc_id": valid_location_id}
+        response = requests.get(url, params=params)
         assert response.status_code == 200
 
         # Validate the response type
-        data = response.json().get("data", {})
-        assert isinstance(data, dict)
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
 
         # Validate the contents of the response
-        assert "id" in data and isinstance(data["id"], int)
-        assert "name" in data and isinstance(data["name"], str)
+        location = data[0]
+        assert "id" in location and isinstance(location["id"], int)
+        assert "name" in location and isinstance(location["name"], str)
 
     def test_get_location_by_invalid_id(
         self,
@@ -111,16 +98,19 @@ class TestGetLocation:
         Test retrieving location details with an invalid ID.
 
         Test:
-            - Endpoint returns status code 404 for invalid ID
-            - Response contains error message
+            - Endpoint returns status code 200
+            - Response contains an empty list
         """
 
-        # Using an unlikely high ID to ensure it does not exist
-        url = f"{BASE_URL}{API_PREFIX}/locations/{invalid_location_id}"
-        response = requests.get(url)
+        url = f"{BASE_URL}{API_PREFIX}/locations"
+        params = {"loc_id": invalid_location_id}
+        response = requests.get(url, params=params)
+        assert response.status_code == 200
 
-        assert response.status_code == 404
-        assert "error" in response.json()
+        # Validate the response type
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 0
 
 
 class TestVideoLocations:

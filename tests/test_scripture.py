@@ -14,8 +14,6 @@ Classes:
         Tests for retrieving the list of all scriptures.
     TestGetScripture
         Tests for retrieving scripture details by ID.
-    TestVideoScriptures
-        Tests for retrieving scriptures associated with a video.
     TestAddScriptureText
         Tests for adding text to a scripture.
 """
@@ -35,6 +33,10 @@ class TestScriptureList:
     Methods:
         test_get_all_scriptures
             Test retrieving the list of all scriptures.
+        test_get_valid_scripture
+            Test retrieving a single scripture by ID.
+        test_get_invalid_scripture
+            Test retrieving a scripture with an invalid ID.
     """
 
     def test_get_all_scriptures(
@@ -84,64 +86,66 @@ class TestScriptureList:
                 for scripture in data
             )
 
-
-class TestGetScripture:
-    """
-    Tests for the GET /api/scriptures/<int:scripture_id> endpoint.
-
-    Methods:
-        test_get_scripture_by_id
-            Test retrieving scripture details by ID.
-        test_get_scripture_by_invalid_id
-            Test retrieving scripture details with an invalid ID.
-    """
-
-    def test_get_scripture_by_id(
+    def test_get_valid_scripture(
         self,
         valid_scripture_id: int,
     ) -> None:
         """
-        Test retrieving scripture details by ID.
+        Test retrieving a single scripture by ID.
 
         Test:
             - Endpoint returns status code 200 for valid ID
-            - Endpoint returns status code 404 for invalid ID
+            - Response contains the correct scripture details
         """
 
-        # Test with a valid scripture ID
-        valid_url = f"{BASE_URL}{API_PREFIX}/scriptures/{valid_scripture_id}"
-        valid_response = requests.get(valid_url)
-        assert valid_response.status_code == 200
+        url = f"{BASE_URL}{API_PREFIX}/scriptures"
+        params = {"scr_id": valid_scripture_id}
+        response = requests.get(
+            url,
+            params=params
+        )
+        assert response.status_code == 200
 
-        # Validate the response structure
-        data = valid_response.json().get("data", {})
-        assert isinstance(data, dict)
+        # Verify that the response contains a list with one scripture
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 1
 
-        # Validate the contents
-        assert "id" in data and isinstance(data["id"], int)
-        assert "book" in data and isinstance(data["book"], str)
-        assert "chapter" in data and isinstance(data["chapter"], int)
-        assert "verse" in data and isinstance(data["verse"], int)
-        assert "verse_text" in data
+        # Validate the contents of the scripture
+        scripture = data[0]
+        assert "id" in scripture and scripture["id"] == valid_scripture_id
+        assert "book" in scripture and isinstance(scripture["book"], str)
+        assert "chapter" in scripture and isinstance(scripture["chapter"], int)
+        assert "verse" in scripture and isinstance(scripture["verse"], int)
+        assert (
+            "verse_text" in scripture and
+            isinstance(scripture["verse_text"], str)
+        )
 
-    def test_get_scripture_by_invalid_id(
+    def test_get_invalid_scripture(
         self,
         invalid_scripture_id: int,
     ) -> None:
         """
-        Test retrieving scripture details with an invalid ID.
+        Test retrieving a scripture with an invalid ID.
 
         Test:
-            - Endpoint returns status code 404 for invalid ID
+            - Endpoint returns status code 200
+            - Response contains an empty list
         """
 
-        # Test with an invalid scripture ID (assuming -1 is invalid)
-        invalid_url = (
-            f"{BASE_URL}{API_PREFIX}/scriptures/{invalid_scripture_id}"
+        url = f"{BASE_URL}{API_PREFIX}/scriptures"
+        params = {"scr_id": invalid_scripture_id}
+        response = requests.get(
+            url,
+            params=params
         )
-        invalid_response = requests.get(invalid_url)
+        assert response.status_code == 200
 
-        assert invalid_response.status_code == 404
+        # Verify that the response contains an empty list
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 0
 
 
 class TestVideoScriptures:

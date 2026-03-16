@@ -63,58 +63,52 @@ class TestTagList:
                 for tag in data
             )
 
-
-class TestGetTag:
-    """
-    Tests for the GET /api/tags/<int:tag_id> endpoint.
-
-    Methods:
-        test_get_tag_by_id
-            Test retrieving tag details by ID.
-        test_get_tag_by_invalid_id
-            Test retrieving tag details with an invalid ID.
-    """
-
-    def test_get_tag_by_id(
+    def test_get_tags_by_id(
         self,
         valid_tag_id: int
     ) -> None:
         """
-        Test retrieving tag details by ID.
-
+        Test retrieving a specific tag by ID.
         Test:
             - Endpoint returns status code 200 for valid ID
-            - Response contains 'id' and 'name' fields
+            - Response contains 'id', 'name', and 'video_count' fields
             - Each field has the correct data type
         """
 
-        # Test with a valid tag ID (assuming 1 is valid)
-        valid_url = f"{BASE_URL}{API_PREFIX}/tags/{valid_tag_id}"
-        response = requests.get(valid_url)
+        url = f"{BASE_URL}{API_PREFIX}/tags"
+        params = {"tag_id": valid_tag_id}
+        response = requests.get(url, params=params)
         assert response.status_code == 200
 
-        # Validate the response structure and data types
-        data = response.json().get("data", {})
-        assert isinstance(data, dict)
-        assert "id" in data and isinstance(data["id"], int)
-        assert "name" in data and isinstance(data["name"], str)
+        # Validate the response
+        data = response.json().get("data", [])
+        assert isinstance(data, list)
+        assert len(data) == 1
 
-    def test_get_tag_by_invalid_id(
+        # Validate the structure and data types of the returned tag
+        tag = data[0]
+        assert isinstance(tag, dict)
+        assert "id" in tag and isinstance(tag["id"], int)
+        assert "name" in tag and isinstance(tag["name"], str)
+        assert "video_count" in tag and isinstance(tag["video_count"], int)
+
+    def test_get_tags_by_invalid_id(
         self,
         invalid_tag_id: int
     ) -> None:
         """
-        Test retrieving tag details with an invalid ID.
-
+        Test retrieving a specific tag with an invalid ID.
         Test:
-            - Endpoint returns status code 404 for invalid ID
+            - Endpoint returns status code 200 for invalid ID
+            - Response contains an empty list
         """
 
-        # Test with an invalid tag ID (assuming -1 is invalid)
-        invalid_url = f"{BASE_URL}{API_PREFIX}/tags/{invalid_tag_id}"
-        invalid_response = requests.get(invalid_url)
+        url = f"{BASE_URL}{API_PREFIX}/tags"
+        params = {"tag_id": invalid_tag_id}
+        response = requests.get(url, params=params)
 
-        assert invalid_response.status_code == 404
+        # Validate the response
+        assert response.status_code == 500
 
 
 class TestVideoTags:

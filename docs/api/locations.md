@@ -34,9 +34,9 @@ Implemented in `api_location.py`.
 
 **Description**
 
-Get a list of all locations.
+Get a list of all locations, or one specific location when including the location ID.
 
-Response entries are sorted alphabetically by location name.
+When all locations are resturned, they are sorted alphabetically by location name.
 </br></br>
 
 
@@ -48,7 +48,13 @@ GET
 
 **Parameters**
 
-None
+Optionally include a location ID to get one specific location.
+</br></br>
+
+
+| Field       | Type    | Mandatory | Description                 |
+| ----------- | ------- | --------- | --------------------------- |
+| loc_id      | integer | No        | A location ID to search for |
 </br></br>
 
 
@@ -94,6 +100,18 @@ The 'data' field contains a list of location entries.
 </br></br>
 
 
+If a specific location is searched for, but it does not exist:
+
+```json
+{
+    "data": [],
+    "message": "Retrieved 0 locations",
+    "success": true
+}
+```
+</br></br>
+
+
 
 
 ----
@@ -113,7 +131,7 @@ GET
 
 **Parameters**
 
-None
+
 </br></br>
 
 
@@ -126,8 +144,6 @@ None
 **Response Code**
 
 `200 OK` on success
-
-`404 NOT FOUND` if the location does not exist
 </br></br>
 
 
@@ -164,8 +180,9 @@ If the location does not exist:
 
 ```json
 {
-    "error": "Location with ID 9999 not found",
-    "success": false
+    "data": [],
+    "message": "Retrieved 0 locations",
+    "success": true
 }
 ```
 

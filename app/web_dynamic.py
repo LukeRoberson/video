@@ -323,11 +323,26 @@ def tag_details(
     """
 
     # API: Get tag details
+    param = {
+        'tag_id': tag_id
+    }
     response = requests.get(
-        f'http://localhost:5010/api/tags/{tag_id}',
+        'http://localhost:5010/api/tags',
+        params=param
     )
+
     if response.status_code == 200:
         tag = response.json().get('data', {})
+        if len(tag) == 0:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Tag not found in API"
+                ),
+                404
+            )
+        tag = tag[0]
+
     else:
         return make_response(
             render_template(
@@ -389,12 +404,48 @@ def location_details(
     """
 
     # API: Get locations
+    param = {
+        'loc_id': location_id
+    }
     response = requests.get(
-        f'http://localhost:5010/api/locations/{location_id}',
+        'http://localhost:5010/api/locations',
+        params=param
     )
+
     if response.status_code == 200:
-        location = response.json().get('data', {})
+        location = response.json().get('data', [])
+        if len(location) == 0:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Location not found in API"
+                ),
+                404
+            )
+        location = location[0]
+
     else:
+        logger.debug("Module: web_dynamic.py, Function: location_details")
+        logger.error(
+            f"Problems with API call to get location with ID {location_id}"
+        )
+
+        return make_response(
+            render_template(
+                "500.html",
+                message="Problems with API call to get location"
+            ),
+            500
+        )
+
+    # Just the first item in the list since we are searching by ID
+    if len(location) > 0:
+        location = location[0]
+
+    else:
+        logger.debug("Module: web_dynamic.py, Function: location_details")
+        logger.warning(f"Location with ID {location_id} not found in API")
+
         return make_response(
             render_template(
                 "404.html",
@@ -454,11 +505,27 @@ def speaker_details(
     """
 
     # API: Get speaker
+    param = {
+        'spk_id': speaker_id
+    }
     response = requests.get(
-        f'http://localhost:5010/api/speakers/{speaker_id}',
+        'http://localhost:5010/api/speakers',
+        params=param
     )
+
     if response.status_code == 200:
-        speaker = response.json().get('data', {})
+        speaker = response.json().get('data', [])
+        if len(speaker) > 0:
+            speaker = speaker[0]
+        else:
+            return make_response(
+                render_template(
+                    "404.html",
+                    message="Speaker not found in API"
+                ),
+                404
+            )
+
     else:
         return make_response(
             render_template(
@@ -594,11 +661,20 @@ def scripture_details(
     """
 
     # API: Get the scripture
+    param = {
+        'scr_id': scripture_id
+    }
     response = requests.get(
-        f'http://localhost:5010/api/scriptures/{scripture_id}',
+        'http://localhost:5010/api/scriptures',
+        params=param
     )
+
+    # Get a single scripture from the list since we are searching by ID
     if response.status_code == 200:
-        scripture = response.json().get('data', {})
+        scripture = response.json().get('data', [])
+        if len(scripture) > 0:
+            scripture = scripture[0]
+
     else:
         return make_response(
             render_template(

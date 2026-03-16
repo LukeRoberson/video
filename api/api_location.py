@@ -38,6 +38,7 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
+    request,
 )
 import logging
 
@@ -71,14 +72,34 @@ def get_locations() -> Response:
     """
     Get a list of all locations.
 
+    Optionals query parameters:
+        loc_id (int): Get a single location by its ID.
+
     Returns:
         Response: A JSON response containing a list of all locations.
     """
 
+    location_id = request.args.get('loc_id', type=int)
+
     with DatabaseContext() as db:
         loc_mgr = LocationManager(db)
-        locations = loc_mgr.get() or []
+        locations = (
+            loc_mgr.get(id=location_id) if location_id
+            else loc_mgr.get()
+            or []
+        )
 
+    # Handle errors
+    if locations is None:
+        logger.debug("Module: api_location.py, Function: get_locations")
+        logger.warning("Error retrieving locations from the database.")
+
+        return api_error(
+            error="Error retrieving locations from the database",
+            status=500
+        )
+
+    # Empty list is a valid response, but log it for debugging purposes
     if locations == []:
         logger.debug("Module: api_location.py, Function: get_locations")
         logger.debug("No locations found in the database.")
@@ -91,7 +112,7 @@ def get_locations() -> Response:
 
     return api_success(
         data=locations,
-        message="Locations retrieved successfully",
+        message=f"Retrieved {len(locations)} locations",
         status=200
     )
 
