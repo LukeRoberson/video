@@ -4,8 +4,6 @@ Module: api_video.py
 API endpoints related to videos.
 
 Endpoints:
-    GET /api/videos/<int:id>
-        Get a video by its ID, and return details.
     POST /api/videos/get_bulk
         Get multiple videos by their IDs.
     GET /api/videos/filter
@@ -112,44 +110,6 @@ video_endpoint = Blueprint(
 
 
 @video_endpoint.route(
-    "/<int:id>",
-    methods=["GET"],
-)
-def get_video(
-    id: int
-) -> Response:
-    """
-    Get a video by its ID, and return details.
-
-    Args:
-        id (int): The ID of the video to retrieve.
-
-    Returns:
-        Response: A JSON response containing the video details if found,
-            or an error message if not found.
-    """
-
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-
-        video_list = video_mgr.get(id)
-        if not video_list:
-            logger.debug("Module: api_video.py, Function: get_video")
-            logger.error(f"Video with ID {id} not found in database")
-
-            return api_error(
-                error=f"Video with ID {id} not found",
-                status=404
-            )
-
-    return api_success(
-        data=video_list[0],
-        message=f"Video with ID {id} retrieved successfully",
-        status=200
-    )
-
-
-@video_endpoint.route(
     "/get_bulk",
     methods=["POST"],
 )
@@ -237,7 +197,7 @@ def get_videos_bulk() -> Response:
 )
 def filter_videos() -> Response:
     """
-    Filter videos based on query parameters.
+    Get a list of videos based on filter criteria provided as query parameters.
 
     Query parameters can include:
         - category_id: Filter by category ID.

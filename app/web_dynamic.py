@@ -123,17 +123,31 @@ def video_details(
     """
 
     # API: Fetch video details
-    response = requests.get(
-        f'http://localhost:5010/api/videos/{video_id}',
+    body = {
+        'video_ids': [video_id]
+    }
+    response = requests.post(
+        "http://localhost:5010/api/videos/get_bulk",
+        json=body
     )
-    video = response.json().get('data', {})
+    video = response.json().get('data', [])
+
+    if video is None or len(video) == 0:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Video not found in API"
+            ),
+            404
+        )
+
+    video = video[0]
 
     # API: Get categories for the video
     response = requests.get(
         f'http://localhost:5010/api/categories/video/{video_id}',
     )
-    data = response.json().get('data', {})
-    cat_list = data.get('categories', [])
+    cat_list = response.json().get('data', {})
 
     # API: Get tags for the video
     response = requests.get(
@@ -215,13 +229,18 @@ def video_details(
             id = similar['video_1_id']
 
         # Get details for the similar video
-        response = requests.get(
-            f'http://localhost:5010/api/videos/{id}',
+        body = {
+            'video_ids': [id]
+        }
+        response = requests.post(
+            "http://localhost:5010/api/videos/get_bulk",
+            json=body
         )
 
         if response.status_code == 200:
-            video_details = response.json().get('data', {})
-            video_ids.append(video_details)
+            video_details = response.json().get('data', [])
+            if len(video_details) > 0:
+                video_ids.append(video_details[0])
 
         else:
             print(f"Video with ID {id} not found in API.")
@@ -794,9 +813,9 @@ def search_results() -> Response:
     if query:
         try:
             # Make API call to search endpoint
-            api_url = f'{SEARCH_API_BASE_URL}/api/search'
+            api_url = f'{SEARCH_API_BASE_URL}/api/search/advanced'
             params = {
-                'q': query,
+                'query': query,
                 'page': page,
                 'per_page': per_page
             }
@@ -865,13 +884,13 @@ def search_results() -> Response:
             # Log search operation
             if using_elasticsearch:
                 logger.info(
-                    f"✓ Elasticsearch search for '{query}': "
+                    f"Elasticsearch search for '{query}': "
                     f"{total} results, page {page}/{pages}"
                 )
 
             else:
                 logger.warning(
-                    f"⚠ Database fallback search for '{query}': "
+                    f"Database fallback search for '{query}': "
                     f"{total} results, page {page}/{pages}"
                 )
 
@@ -1148,12 +1167,12 @@ def advanced_search() -> Response:
             # Log search operation
             if using_elasticsearch:
                 logger.info(
-                    f"✓ Advanced Elasticsearch search: "
+                    f"Advanced Elasticsearch search: "
                     f"{total} results, page {page}/{pages}"
                 )
             else:
                 logger.warning(
-                    f"⚠ Advanced database search: "
+                    f"Advanced database search: "
                     f"{total} results, page {page}/{pages}"
                 )
 

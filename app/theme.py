@@ -313,20 +313,24 @@ class ThemeManager:
                     video_id = item['video'].get('id')
 
                     # API: Get video details
-                    response = requests.get(
-                        f"http://localhost:5010/api/videos/{video_id}"
+                    body = {
+                        'video_ids': [video_id]
+                    }
+                    response = requests.post(
+                        "http://localhost:5010/api/videos/get_bulk",
+                        json=body
                     )
-                    details = response.json().get('data')
+                    details = response.json().get('data', [])
 
                     # Check if video details were found
-                    if not details:
+                    if not details or len(details) == 0:
                         logging.warning(
                             f"Video ID {video_id} not found in database."
                         )
                         continue
 
                     # Update the video info with fetched details
-                    item['video'].update(details)
+                    item['video'].update(details[0])
 
                 # Handle video grid
                 elif 'video_grid' in item:
@@ -335,13 +339,17 @@ class ThemeManager:
                             video_id = grid_item['video'].get('id')
 
                             # API: Get video details
-                            response = requests.get(
-                                f"http://localhost:5010/api/videos/{video_id}"
+                            body = {
+                                'video_ids': [video_id]
+                            }
+                            response = requests.post(
+                                "http://localhost:5010/api/videos/get_bulk",
+                                json=body
                             )
-                            details = response.json().get('data')
+                            details = response.json().get('data', [])
 
                             # Check if video details were found
-                            if not details:
+                            if not details or len(details) == 0:
                                 logging.warning(
                                     f"Video ID {video_id} "
                                     f"not found in database."
@@ -349,7 +357,7 @@ class ThemeManager:
                                 continue
 
                             # Update the video info with fetched details
-                            grid_item['video'].update(details)
+                            grid_item['video'].update(details[0])
 
     def load_theme(
         self,

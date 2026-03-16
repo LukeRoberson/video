@@ -536,7 +536,7 @@ class SearchService:
         if self.es_client.is_available():
             try:
                 logger.info(
-                    f"🔍 Using Elasticsearch for query: '{query}'"
+                    f"Using Elasticsearch for query: '{query}'"
                 )
 
                 results = self._elasticsearch_search(
@@ -547,7 +547,7 @@ class SearchService:
                 )
 
                 logger.info(
-                    f"✓ Elasticsearch returned {results[1]} results "
+                    f"Elasticsearch returned {results[1]} results "
                     f"for query: '{query}'"
                 )
 
@@ -562,7 +562,7 @@ class SearchService:
 
         # Fallback to database search if needed
         logger.warning(
-            f"⚠ Using database fallback for query: '{query}' "
+            f"Using database fallback for query: '{query}' "
             "(Elasticsearch unavailable)"
         )
 
@@ -574,7 +574,7 @@ class SearchService:
         )
 
         logger.warning(
-            f"⚠ Database fallback returned {results[1]} results "
+            f"Database fallback returned {results[1]} results "
             f"for query: '{query}'"
         )
 

@@ -12,10 +12,9 @@ Blueprint:
     /api/search
 
 Endpoints:
-    GET /           - Search videos with query parameters
+    GET /advanced   - Advanced search with multiple filters
     POST /reindex   - Reindex all videos in Elasticsearch
     GET /status     - Check search service status
-    GET /advanced   - Advanced search with multiple filters
 
 External Dependencies:
     Flask
@@ -23,7 +22,6 @@ External Dependencies:
         request - to access request data
         current_app - to access app context
         jsonify - to create JSON responses
-        make_response - to create custom responses
 
 Local Dependencies:
     api.search.SearchService
@@ -85,144 +83,6 @@ def get_search_service() -> SearchService:
         current_app.config['SEARCH_SERVICE'] = SearchService()
 
     return current_app.config['SEARCH_SERVICE']
-
-
-@search_bp.route(
-    '',
-    methods=['GET']
-)
-def search_videos():
-    """
-    Search for videos using a simple search string.
-
-    Args:
-        None
-
-    Query Parameters:
-        q (str): Search query string (required)
-        page (int): Page number for pagination (default: 1)
-        per_page (int): Results per page (default: 20, max: 100)
-
-    Status Codes:
-        200: Success
-        400: Bad request (missing or invalid parameters)
-        500: Internal server error
-
-    Returns:
-        JSON response containing:
-            - results: List of matching videos
-            - total: Total count of matching videos
-            - page: Current page number
-            - per_page: Number of results per page
-            - pages: Total number of pages
-            - using_elasticsearch: Boolean indicating search method used
-            - query: The search query string
-    """
-
-    try:
-        # Get query parameters
-        query = request.args.get('q', '').strip()
-
-        if not query:
-            logger.debug("Module: api_search, Function: search_videos")
-            logger.warning(
-                "Missing required query parameter 'q' in search request"
-            )
-
-            return api_error(
-                error='Query parameter q is required',
-                status=400
-            )
-
-        # Pagination parameters
-        try:
-            # Set the page number with defaults and limits
-            page = max(
-                1,
-                int(request.args.get('page', 1))
-            )
-
-            # Set the results per page with defaults and limits
-            per_page = min(
-                100,
-                max(1, int(request.args.get('per_page', 20)))
-            )
-
-            logger.debug(
-                f"Search pagination parameters - page: {page}, "
-                f"per_page: {per_page}"
-            )
-
-        # Handle invalid pagination parameters
-        except ValueError:
-            logger.debug("Module: api_search, Function: search_videos")
-            logger.warning("Invalid pagination parameters in search request")
-
-            return api_error(
-                error='Invalid pagination parameters',
-                status=400
-            )
-
-        # Get the search service object
-        search_service = get_search_service()
-
-        # Perform search
-        #   Returns tuple: (results list, total count)
-        #   and boolean indicating if ES was used
-        (results, total), using_es = search_service.search(
-            query=query,
-            page=page,
-            per_page=per_page,
-        )
-
-        # Calculate total pages
-        total_pages = (total + per_page - 1) // per_page
-        logger.debug(
-            f"Search results - total results: {total}, "
-            f"total_pages: {total_pages}"
-        )
-
-        # Log search results and indicate method used (terminal only)
-        if using_es:
-            logger.info(
-                f"✓ Elasticsearch search for '{query}': "
-                f"{total} results found, "
-                f"returned page {page}/{total_pages}"
-            )
-
-        else:
-            logger.info(
-                f"⚠ Database fallback search for '{query}': "
-                f"{total} results found, "
-                f"returned page {page}/{total_pages}"
-            )
-
-        return api_success(
-            data={
-                'results': results,
-                'total': total,
-                'page': page,
-                'per_page': per_page,
-                'pages': total_pages,
-                'using_elasticsearch': using_es,
-                'query': query,
-            },
-            message="Search completed for query",
-            status=200
-        )
-
-    # Handle unexpected errors
-    except Exception as e:
-        logger.debug("Module: api_search, Function: search_videos")
-        logger.error(
-            f"Error processing search request: {e}",
-            exc_info=True
-        )
-
-        return api_error(
-            error='An error occurred while processing your search',
-            status=500
-        )
 
 
 @search_bp.route(
@@ -332,13 +192,13 @@ def advanced_search():
         # Log results to terminal
         if using_es:
             logger.info(
-                f"✓ Advanced Elasticsearch search: "
+                f"Advanced Elasticsearch search: "
                 f"{total} results with filters {filters}"
             )
 
         else:
             logger.info(
-                f"⚠ Advanced database search: "
+                f"Advanced database search: "
                 f"{total} results with filters {filters}"
             )
 

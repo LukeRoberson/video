@@ -37,9 +37,8 @@
     * [x] `api_scripture`: get_scripture and get_scriptures
     * [x] `api_speaker`: get_speaker and get_speakers
     * [x] `api_tag`: get_tag and get_tags
-    * [ ] `api_video`: get_video, get_videos_bulk, and filter_videos (/api/videos/<int>, /api/videos/get_bulk, /api/videos/filter)
-    * [ ] `api_search`: The regular search vs the advanced search
-    * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
+    * [x] `api_video`: get_video, get_videos_bulk
+    * [x] `api_search`: The regular search vs the advanced search
 8. Active user redesign
     * [ ] Get the frontend to track the active user, not the API (eg, mark as watched/unwatched, in progress videos)
         * [ ] `api_category.py` - Category filter
@@ -52,13 +51,14 @@
     * [ ] Themes; It makes many calls to the API instead of just one or two
     * [ ] Tag; Multiple API calls to check which videos have been watched
     * [ ] Check if a video has been watched: Check multiple videos in a single call
+    * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
 10. Clean up bugs
     * [ ] In categories, watch status on individual videos is not showing
-    * [ ] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
+    * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
     * [ ] Searches sometimes throw unicode errors in the terminal
     * [ ] When saving a profile name change, this is not immediately reflected in the edit screen
     * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
-    * [ ] 'Logging Error' at terminal when searching with ElasticSearch
+    * [x] 'Logging Error' at terminal when searching with ElasticSearch
 
 
 </br></br>
@@ -72,9 +72,6 @@
 * Not yet testing endpoints that update the database
     * POST /api/videos/metadata
     * POST /api/videos/add
-    * POST /api/profile/create
-    * DELETE /api/profile/delete/{{id}}
-    * POST /api/profile/update/{{id}}
 * `/api/categories/{{category_id}}/{{subcategory_id}}`
     * Contains a 'videos' list in the response, which is unnecessary
 * Investigate:
@@ -83,8 +80,6 @@
     * How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
     * Live version has a bug while showing thumbnail for snippets (noticed on themes)
         * Does the dev version have this too?
-* Need to check that we're using `api_error` in all the right places too
-    * search for 'make_response', and see where that's used
 * Searching
     * `/api/search` doesn't seems to be enforcing the page size limit
     * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
@@ -92,8 +87,11 @@
     * Query for invalid speaker does not return an empty list like other endpoints do
 * Tags endpoint:
     * Query for invalid tag does not return an empty list like other endpoints do
+* Video endpoint is still 'get_bulk', which should change
 
 * Improve logging in api_profile
+    * After other improvements are made
+* Add tests for api_profile
     * After other improvements are made
 
 * Bug:

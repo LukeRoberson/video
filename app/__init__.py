@@ -113,7 +113,7 @@ console_formatter = ColouredFormatter(
 )
 
 # Create handlers
-file_handler = logging.FileHandler('app.log')
+file_handler = logging.FileHandler('app.log', encoding='utf-8')
 file_handler.setFormatter(file_formatter)
 
 stream_handler = logging.StreamHandler()
