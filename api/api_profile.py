@@ -69,6 +69,10 @@ from api.local_db import (
     ProfileManager,
     ProgressManager,
 )
+from api.sql_db import (
+    DatabaseContext,
+    VideoManager,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -395,6 +399,16 @@ def get_watch_history() -> Response:
             message="No watch history for guest profile"
         )
 
+    # Check the profile exists in the database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile = profile_mgr.read(profile_id=int(active_profile))
+
+    if not profile:
+        logging.error(f"Profile with ID {active_profile} not found.")
+        return api_error(f"Profile with ID {active_profile} not found", 404)
+
+    # Retrieve the watch history for the active profile
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
         watch_history = profile_mgr.read_watch_history(
@@ -494,7 +508,7 @@ def clear_watch_history(profile_id: int) -> Response:
 
 @profile_bp.route(
     "/api/profile/in_progress",
-    methods=["GET", "POST", "UPDATE", "DELETE"]
+    methods=["GET", "POST", "DELETE"]
 )
 def in_progress_videos() -> Response:
     """
@@ -504,13 +518,21 @@ def in_progress_videos() -> Response:
         - GET: Retrieve in-progress videos for the active profile.
             Optional 'video_id' parameter to filter by specific video.
         - POST: Add a video to the in-progress list.
-        - UPDATE: Update the playback position of an in-progress video.
         - DELETE: Remove a video from the in-progress list.
 
-    Expects JSON for POST and UPDATE requests:
+    Parameters:
+        profile (int): The ID of the profile to manage in-progress videos for.
+        video_id (int, optional): The ID of the video to filter by (for GET)
+
+    Expects JSON for POST requests:
         {
             "video_id": <int>,
             "current_time": <int>
+        }
+
+    Expects JSON for DELETE requests:
+        {
+            "video_id": <int>
         }
 
     Returns:
@@ -521,28 +543,31 @@ def in_progress_videos() -> Response:
     method_used = request.method
 
     # Get the active profile from the parameter
-    active_profile = request.args.get("profile", None)
+    active_profile = request.args.get(
+        "profile",
+        None,
+        type=int
+    )
 
-    # If not provided, get from the session
+    # Check that the active profile parameter is provided
     if not active_profile:
-        logging.info(
-            "No active_profile parameter provided, "
-            "retrieving from session"
-        )
-        active_profile = session.get("active_profile", "guest")
+        logger.debug("Module: api_profile.py, Function: in_progress_videos")
+        logger.warning("No active_profile parameter provided")
 
-    # If no active profile is set, return empty response
-    if active_profile is None or active_profile == "guest":
-        return api_success(
-            message="No in progress videos for guest profile"
-        )
-
-    # Ensure active_profile is an integer
-    try:
-        active_profile = int(active_profile)
-    except ValueError:
         return api_error(
-            error="Invalid profile ID"
+            error="Missing 'profile' parameter in request",
+            status=400
+        )
+
+    # Check that the profile exists in the database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile = profile_mgr.read(active_profile)
+
+    if not profile:
+        return api_error(
+            error="Profile not found",
+            status=404
         )
 
     # Get one or more in progress videos
@@ -565,28 +590,73 @@ def in_progress_videos() -> Response:
                 )
 
             return api_success(
-                data=in_progress_videos,
-                message="Retrieved in-progress videos successfully"
+                data=in_progress_videos or [],
+                message="Retrieved in-progress videos successfully",
+                status=200
             )
 
     # Add a video to the in-progress list
     elif method_used == "POST":
         data = request.get_json()
         if not data:
-            return api_error("No data provided", 400)
-
-        video_id = data.get("video_id")
-        position = data.get("current_time")
-
-        if not video_id or not isinstance(position, int):
             return api_error(
-                """
-                Invalid data types for 'video_id' or 'current_time'.
-                Must be integers.
-                """,
-                400
+                error="No data provided",
+                status=400
             )
 
+        video_id = data.get("video_id", None)
+        position = data.get("current_time", None)
+
+        # Check that video_id and position are provided
+        if video_id is None or position is None:
+            logger.debug(
+                "Module: api_profile.py, Function: in_progress_videos (POST)"
+            )
+            logger.warning(
+                "Missing 'video_id' or 'current_time' in request data"
+            )
+
+            return api_error(
+                error="Missing 'video_id' or 'current_time' in request data",
+                status=400
+            )
+
+        # Check that the video_id and position are of the correct type
+        if not isinstance(video_id, int) or not isinstance(position, int):
+            logger.debug(
+                "Module: api_profile.py, Function: in_progress_videos (POST)"
+            )
+            logger.warning(
+                """
+                Invalid data types for 'video_id' or 'current_time'."
+                Must be integers.
+                """
+            )
+
+            return api_error(
+                error="Invalid data types. Must be integers",
+                status=400
+            )
+
+        # Check that the video exists in the database
+        with DatabaseContext() as db:
+            video_mgr = VideoManager(db)
+            video = video_mgr.get(video_id)
+
+            if video is None:
+                logger.debug(
+                    """
+                    Module: api_profile.py, Function: in_progress_videos (POST)
+                    """
+                )
+                logger.warning(f"Video with ID {video_id} not found")
+
+                return api_error(
+                    error=f"Video with ID {video_id} not found",
+                    status=404
+                )
+
+        # Add the video to the in-progress list for the profile
         with LocalDbContext() as db:
             progress_mgr = ProgressManager(db)
             result = progress_mgr.create(
@@ -604,59 +674,51 @@ def in_progress_videos() -> Response:
         return api_success(
             message=(
                 f"Added in-progress video {video_id} at position {position}"
-            )
-        )
-
-    # Update the playback position of an in-progress video
-    elif method_used == "UPDATE":
-        data = request.get_json()
-        if not data:
-            return api_error("No data provided", 400)
-
-        video_id = data.get("video_id")
-        position = data.get("current_time")
-
-        if not isinstance(video_id, int) or not isinstance(position, int):
-            return api_error(
-                """
-                Invalid data types for 'video_id' or 'current_time'.
-                Must be integers.
-                """,
-                400
-            )
-
-        with LocalDbContext() as db:
-            progress_mgr = ProgressManager(db)
-            result = progress_mgr.update(
-                profile_id=active_profile,
-                video_id=video_id,
-                current_time=position
-            )
-
-        if not result:
-            return api_error(
-                f"Failed to update in-progress video {video_id}",
-                500
-            )
-
-        return api_success(
-            message=(
-                f"Updated in-progress video {video_id} at position {position}"
-            )
+            ),
+            status=201
         )
 
     # Remove a video from the in-progress list
     elif method_used == "DELETE":
         data = request.get_json()
+
+        # Handle missing JSON body
         if not data:
-            return api_error("No data provided", 400)
+            logger.debug(
+                "Module: api_profile.py, Function: in_progress_videos (DELETE)"
+            )
+            logger.warning("No data provided for deleting in-progress video")
 
-        video_id = data.get("video_id")
-
-        if video_id is None:
             return api_error(
-                "Missing 'video_id' in request data",
-                400
+                error="No data provided",
+                status=400
+            )
+
+        # Get the video ID
+        video_id = data.get("video_id", None)
+
+        # Check that the video_id is provided
+        if video_id is None:
+            logger.debug(
+                "Module: api_profile.py, Function: in_progress_videos (DELETE)"
+            )
+            logger.warning("Missing 'video_id' in request data for deletion")
+
+            return api_error(
+                error="Missing 'video_id' in request data",
+                status=400
+            )
+
+        # Check that the video_id is of the correct type
+        if not isinstance(video_id, int):
+            logger.debug(
+                "Module: api_profile.py, Function: in_progress_videos (DELETE)"
+            )
+            logger.warning("Invalid data type for 'video_id'. Must be integer")
+
+            return api_error(
+                error="Invalid data type for 'video_id'. Must be integer",
+                status=400
             )
 
         with LocalDbContext() as db:
@@ -668,20 +730,26 @@ def in_progress_videos() -> Response:
             )
 
             if not result:
+                logger.debug(
+                    "Module: api_profile.py, Function: in_progress_videos"
+                )
+                logger.warning(
+                    f"Failed to remove in-progress video {video_id}"
+                )
+
                 return api_error(
-                    f"Failed to remove in-progress video {video_id}",
-                    500
+                    error=f"Failed to remove in-progress video {video_id}",
+                    status=500
                 )
 
             return api_success(
                 message="Removed in-progress videos successfully"
             )
 
-    # Handle unsupported methods
     else:
         return api_error(
-            f"Method {method_used} not allowed for this endpoint",
-            405
+            error="Method not allowed",
+            status=405
         )
 
 
@@ -691,7 +759,7 @@ def in_progress_videos() -> Response:
 )
 def get_watched() -> Response:
     """
-    Get videos that are marked as watched for the active profile.
+    Check if a specific video is marked as watched for the active profile.
 
     Request Args:
         video_id (int):
@@ -700,19 +768,11 @@ def get_watched() -> Response:
             The ID of the profile to check watched status for.
 
     Returns:
-        Response: A JSON response with the list of watched videos.
+        Response: A JSON response with the watched status of the video.
     """
 
     # Get the active profile from the parameter
     active_profile = request.args.get("profile", None)
-
-    # If not provided, get from the session
-    if not active_profile:
-        logging.info(
-            "No active_profile parameter provided, "
-            "retrieving from session"
-        )
-        active_profile = session.get("active_profile", "guest")
 
     # If no active profile is set, return empty response
     if active_profile is None or active_profile == "guest":
@@ -720,11 +780,32 @@ def get_watched() -> Response:
             message="No in progress videos for guest profile"
         )
 
+    # Check the profile exists in the database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile = profile_mgr.read(profile_id=int(active_profile))
+
+    if not profile:
+        logging.error(f"Profile with ID {active_profile} not found.")
+        return api_error(f"Profile with ID {active_profile} not found", 404)
+
+    # Get the video ID from the request arguments
     video = request.args.get("video_id", None)
     if not video:
         return api_error(error="Missing 'video_id' in request data")
     video = int(video)
 
+    # Check the video exists in the database
+    with DatabaseContext() as db:
+        video_mgr = VideoManager(db)
+        video_id = video_mgr.get(video)
+
+        # Error if the video ID is not found in the database
+        if video_id is None or len(video_id) == 0:
+            logging.error(f"Video with ID {video} not found.")
+            return api_error(f"Video with ID {video} not found", 404)
+
+    # Check that the video is in the watch history for the active profile
     with LocalDbContext() as local_db:
         profile_mgr = ProfileManager(local_db)
 

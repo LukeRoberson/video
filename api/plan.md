@@ -39,11 +39,22 @@
     * [x] `api_tag`: get_tag and get_tags
     * [x] `api_video`: get_video, get_videos_bulk
     * [x] `api_search`: The regular search vs the advanced search
+    * [ ] `api_profile`: get_watched and check_watched_bulk
+        * Prerequisite: Fix bug where watched status not appearing on thumbnails
 8. Active user redesign
-    * [ ] Get the frontend to track the active user, not the API (eg, mark as watched/unwatched, in progress videos)
-        * [ ] `api_category.py` - Category filter
+    * [ ] Get the frontend to track the active user, not the API
+        * Currently set in `api_profile.py`, in set_active_profile()
     * [ ] API calls from the frontend should include the active user if needed
-    * [ ] Clean up profile.py, as there's some code reuse around active profiles
+        * [x] `api_profile.py`: get_watch_history; Still gets profile from local session; Should receive as a parameter
+        * [ ] `api_profile.py`: mark_watched; Still gets profile from local session; Should receive as a parameter
+        * [ ] `api_profile.py`: mark_unwatched; Still gets profile from local session; Should receive as a parameter
+        * [ ] `api_category.py`: category_filter; Still gets profile from local session; Should receive as a parameter
+    * [ ] Cleanup active user code in the API
+        * [x] `api_profile.py`: in_progress_videos; Get's parameter, but falls back to local profile
+        * [x] `api_profile.py`: get_watched; Get's parameter, but falls back to local profile
+        * [ ] `api_profile.py`: check_watched_bulk; Get's parameter, but falls back to local profile
+        * [ ] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
+        * [ ] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
     * [ ] Home page; 7x separate API calls (get latest videos, get latest news and broadcasting, get watch status for each)
     * [ ] Character; Separate API call for each video to check watch status
@@ -80,6 +91,7 @@
     * How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
     * Live version has a bug while showing thumbnail for snippets (noticed on themes)
         * Does the dev version have this too?
+    * Do we really need both POST and UPDATE methods for updating in progress videos?
 * Searching
     * `/api/search` doesn't seems to be enforcing the page size limit
     * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
@@ -93,7 +105,26 @@
     * After other improvements are made
 * Add tests for api_profile
     * After other improvements are made
+* Create helper functions for reused components:
+    * Check if a video exists
+    * Logging debugs and warnings during field validation
+* Get active profile
+    * This is used as an API call, as well as to verify that a profile exists
+    * Would be better as a helper function
+* Checking if a video exists
+    * Used in many places, should be a helper function
+
+* Additional tests
+    * GET /api/profile/in_progress
+        * Need to test passing a video ID as a parameter
+        * However, need to be sure that video ID is listed as in progress in the DB first
+    * DELETE /api/profile/in_progress
+        * Need to test that we can remove an in progress video
+        * However, there needs to be one to remove
 
 * Bug:
     * The 'set active profile' endpoint happily will set a non-existant profile as active
+    * Error retrieving speakers for video 1036: Cannot operate on a closed database.
+        * DEBUG - Module api_speaker: Function get_video_speakers
+        * INFO - No speakers found for video ID 1036
 

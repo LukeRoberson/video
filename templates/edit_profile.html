@@ -11,6 +11,8 @@ Edit Profile
 
 {% block content %}
 
+<!-- Profile Edit Section -->
+<!-- profile.id is included here so the active profile can be easily referenced in JavaScript (for API calls) -->
 <div class="edit-profile"
     data-profile-id="{{ profile.id }}" 
     data-profile-image="{{ profile.image }}"
@@ -66,7 +68,7 @@ Edit Profile
 
                         {% for entry in watch_history %}
                         {% set progress_percent = (entry.current_time / entry.duration * 100) if entry.duration > 0 else 0 %}
-                        <div class="history-item" data-video-id={{ entry.video_id }}>
+                        <div class="history-item" data-video-id="{{ entry.video_id }}">
                             <div class="history-thumbnail">
                                 <img src="{{ entry.video_thumbnail }}" alt="{{ entry.video_name }}">
                                 {% if progress_percent > 0 %}
@@ -83,7 +85,7 @@ Edit Profile
                                 {% if progress_percent > 0 %}
                                 <button class="btn-mark-watched" data-video-id="{{ entry.video_id }}">Mark Watched</button>
                                 {% endif %}
-                                <button class="btn-remove-item" data-video-id={{ entry.video_id }}>×</button>
+                                <button class="btn-remove-item" data-video-id="{{ entry.video_id }}">×</button>
                             </div>
                         </div>
                         {% endfor %}

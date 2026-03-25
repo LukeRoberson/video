@@ -19,7 +19,7 @@ const ProfileEditConfig = {
     /** API endpoint pattern for clearing history */
     CLEAR_HISTORY_ENDPOINT: '/api/profile/clear_history/{id}',
     /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
+    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched/{id}',
     /** Content type for JSON requests */
     JSON_CONTENT_TYPE: 'application/json',
     /** Profile pictures directory path */
@@ -178,6 +178,8 @@ class ProfilePictureManager {
 }
 /**
  * Manages profile data extraction and validation
+ * This gets the active profile data from the DOM
+ * This is set on the Jinja template as data attributes on the main container
  */
 class ProfileDataManager {
     /**
@@ -268,7 +270,6 @@ class ProfileEditApiService {
     static async clearHistoryItem(profileId, videoId) {
         const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
         const requestBody = { video_id: videoId };
-        console.log('Clearing history item with request body:', requestBody);
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -283,16 +284,16 @@ class ProfileEditApiService {
     }
     /**
      * Mark a video as watched
+     * @param profileId - ID of profile
      * @param videoId - ID of video to mark as watched
      */
-    static async markWatched(videoId) {
+    static async markWatched(profileId, videoId) {
         const requestBody = { video_id: videoId };
-        const response = await fetch(`${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT}`, {
+        const response = await fetch(`${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT.replace('{id}', profileId.toString())}`, {
             method: 'POST',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
-            credentials: 'include',
             body: JSON.stringify(requestBody)
         });
         if (!response.ok) {
@@ -459,7 +460,8 @@ class ProfileEditController {
     async handleMarkWatched(button) {
         try {
             const videoId = parseInt(button.getAttribute('data-video-id') || '0');
-            await ProfileEditApiService.markWatched(videoId);
+            const profileData = ProfileDataManager.getProfileData();
+            await ProfileEditApiService.markWatched(profileData.id, videoId);
             const btn = button;
             btn.disabled = true;
             btn.textContent = 'Watched';

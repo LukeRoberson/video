@@ -1,5 +1,5 @@
 """
-Module: fixtures.py
+Module: conftest.py
 
 Fixtures for testing.
     Provides reusable fixtures for valid and invalid values.

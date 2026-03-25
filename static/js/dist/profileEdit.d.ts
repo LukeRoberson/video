@@ -18,7 +18,7 @@ declare const ProfileEditConfig: {
     /** API endpoint pattern for clearing history */
     readonly CLEAR_HISTORY_ENDPOINT: "/api/profile/clear_history/{id}";
     /** API endpoint for marking videos as watched */
-    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched";
+    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched/{id}";
     /** Content type for JSON requests */
     readonly JSON_CONTENT_TYPE: "application/json";
     /** Profile pictures directory path */
@@ -131,6 +131,8 @@ declare class ProfilePictureManager {
 }
 /**
  * Manages profile data extraction and validation
+ * This gets the active profile data from the DOM
+ * This is set on the Jinja template as data attributes on the main container
  */
 declare class ProfileDataManager {
     /**
@@ -173,9 +175,10 @@ declare class ProfileEditApiService {
     static clearHistoryItem(profileId: number, videoId: number): Promise<void>;
     /**
      * Mark a video as watched
+     * @param profileId - ID of profile
      * @param videoId - ID of video to mark as watched
      */
-    static markWatched(videoId: number): Promise<void>;
+    static markWatched(profileId: number, videoId: number): Promise<void>;
 }
 /**
  * Main controller for profile editing functionality

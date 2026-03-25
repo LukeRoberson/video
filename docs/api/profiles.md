@@ -789,59 +789,44 @@ The response is simply 'message' and 'success' fields.
 
 
 ----
-## /api/profile/in_progress
+## GET /api/profile/in_progress
 
 **Description**
 
 Manages in-progress video tracking for user profiles.
 
-This is to track where a video is up to, so it can be resumed there in future.
+This tracks where a video is up to, so it can be resumed there in future.
 
-Primary operations:
-* GET - Retrieve in progress videos for the active profile
-* POST - Add a video to the in progress list
-* UPDATE - Update the playback position of an in-progress video
-* DELETE - Remove a video from the in-progress list
+Specifically, the GET method will either:
+* Get a list of in progress videos for a particular profile
+* Check if a specific video is in progress for a specific profile
+
+This endpoint also supports POST and DELETE methods.
 </br></br>
 
 
 **Method**
 
-GET, POST, UPDATE, DELETE
+GET
 </br></br>
 
 
 **Parameters**
 
-| Field       | Type    | Description              |
-| ----------- | ------- | ------------------------ |
-| profile     | integer | The profile to check for |
+| Field       | Type    | Mandatory | Description                                                             |
+| ----------- | ------- | --------- | ----------------------------------------------------------------------- |
+| profile     | integer | Yes       | The profile to check for                                                |
+| video_id    | integer | No        | Optional video ID to check status for (rather than checking all videos) |
 </br></br>
 
 > [!NOTE]
-> If the profile ID is not included as a parameter, the API will look in the location session.
-> This will change in future, as the API shouldn't be tracking the session.
+> If the profile ID is not included as a parameter, a 400 error will be returned
+</br></br>
 
 
 **Body**
 
-For POST and UPDATE methods, a body is included with information to update the current playback time of a video.
-</br></br>
-
-
-| Field        | Type    | Description                                         |
-| ------------ | ------- | --------------------------------------------------- |
-| video_id     | integer | The ID of the video to update                       |
-| current_time | integer | The current playback time, in seconds, of the video |
-</br></br>
-
-
-```json
-{
-    "video_id": "<int>",
-    "current_time": "<int>"
-}
-```
+None
 </br></br>
 
 
@@ -849,21 +834,17 @@ For POST and UPDATE methods, a body is included with information to update the c
 
 `200 OK` on success
 
-`400 BAD REQUEST` If a JSON body was required, but none provided (eg, POST and UPDATE)
+`400 BAD REQUEST` If the profile ID is not provided.
 
-`400 BAD REQUEST` If fields in the body are invalid
-
-`500 INTERNAL SERVER ERROR` If a video could not be processed. For example, during an UPDATE
+`404 NOT FOUND` If an invalid profile is provided
 </br></br>
 
 
 **Response Body**
 
-The GET response is made up of the usual 'data', 'message', and 'success' fields.
+Includes the usual 'data', 'message', and 'success' fields.
 
 The 'data' field is a list of videos in progress, where each entry describes the status of the video.
-
-Responses for other methods (POST, UPDATE, DELETE) contain simple fields to indicate success or failure.
 </br></br>
 
 
@@ -893,15 +874,284 @@ Responses for other methods (POST, UPDATE, DELETE) contain simple fields to indi
 </br></br>
 
 
+If the 'profile' parameter is not included:
+
+```json
+{
+    "error": "Missing 'profile' parameter in request",
+    "success": false
+}
+```
+</br></br>
+
+
+If an invalid profile is provided:
+
+```json
+{
+    "error": "Profile not found",
+    "success": false
+}
+```
+</br></br>
+
+
 
 
 ----
-
-## /api/profile/mark_watched
+## POST /api/profile/in_progress
 
 **Description**
 
-Check if a video has been marked as watched.
+Manages in-progress video tracking for user profiles.
+
+This adds a video to the list of in progress videos for the specific profile, and stores the playback location of the video.
+
+This endpoint also supports GET and DELETE methods.
+</br></br>
+
+
+> [!NOTE]
+> If a video is already marked as in progress, this endpoint will overwrite it's status.
+</br></br>
+
+
+**Method**
+
+POST
+</br></br>
+
+
+**Parameters**
+
+| Field       | Type    | Mandatory | Description                                                             |
+| ----------- | ------- | --------- | ----------------------------------------------------------------------- |
+| profile     | integer | Yes       | The profile to check for                                                |
+</br></br>
+
+> [!NOTE]
+> If the profile ID is not included as a parameter, a 400 error will be returned
+</br></br>
+
+
+**Body**
+
+A body is included with information to update the current playback time of a video.
+</br></br>
+
+
+| Field        | Type    | Description                                         |
+| ------------ | ------- | --------------------------------------------------- |
+| video_id     | integer | The ID of the video to update                       |
+| current_time | integer | The current playback time, in seconds, of the video |
+</br></br>
+
+
+```json
+{
+    "video_id": "<int>",
+    "current_time": "<int>"
+}
+```
+</br></br>
+
+
+**Response Code**
+
+`201 CREATED` If adding the video was successful
+
+`400 BAD REQUEST` If the profile ID is not provided.
+
+`400 BAD REQUEST` If a JSON body was required, but none provided (eg, POST and UPDATE)
+
+`400 BAD REQUEST` If fields in the body are invalid
+
+`404 NOT FOUND` If an invalid profile is provided
+
+`404 NOT FOUND` If the video ID does not exist
+
+`415 UNSUPPORTED MEDIA TYPE` if the body is missing
+
+`500 INTERNAL SERVER ERROR` If there was a problem updating the database
+</br></br>
+
+
+**Response Body**
+
+The response body contains 'message' and 'success' fields to report on the status of the operation.
+</br></br>
+
+
+```json
+{
+    "message": "Added in-progress video 1 at position 60",
+    "success": true
+}
+```
+</br></br>
+
+
+If the 'profile' parameter is not included:
+
+```json
+{
+    "error": "Missing 'profile' parameter in request",
+    "success": false
+}
+```
+</br></br>
+
+
+If an invalid profile is provided:
+
+```json
+{
+    "error": "Profile not found",
+    "success": false
+}
+```
+</br></br>
+
+
+If required fields are missing from the body:
+
+```json
+{
+    "error": "Missing 'video_id' or 'current_time' in request data",
+    "success": false
+}
+```
+</br></br>
+
+
+If the required field values have incorrect types:
+
+```json
+{
+    "error": "Invalid data types. Must be integers",
+    "success": false
+}
+```
+</br></br>
+
+
+
+
+----
+## DELETE /api/profile/in_progress
+
+**Description**
+
+Manages in-progress video tracking for user profiles.
+
+This is to remove a video as being in progress. This could be when:
+* A user manually clears it from their profile
+* A video is marked as watched
+
+This endpoint also supports GET and POST methods.
+</br></br>
+
+
+**Method**
+
+DELETE
+</br></br>
+
+
+**Parameters**
+
+| Field       | Type    | Mandatory | Description                                                             |
+| ----------- | ------- | --------- | ----------------------------------------------------------------------- |
+| profile     | integer | Yes       | The profile to check for                                                |
+</br></br>
+
+> [!NOTE]
+> If the profile ID is not included as a parameter, a 400 error will be returned
+</br></br>
+
+
+**Body**
+
+For POST and UPDATE methods, a body is included with information to update the current playback time of a video.
+</br></br>
+
+
+| Field        | Type    | Description                                         |
+| ------------ | ------- | --------------------------------------------------- |
+| video_id     | integer | The ID of the video to update                       |
+</br></br>
+
+
+```json
+{
+    "video_id": "<int>",
+    "current_time": "<int>"
+}
+```
+</br></br>
+
+
+**Response Code**
+
+`200 OK` on success
+
+`400 BAD REQUEST` If the profile ID is not provided.
+
+`400 BAD REQUEST` If a JSON body was required, but none provided (eg, POST and UPDATE)
+
+`400 BAD REQUEST` If fields in the body are invalid
+
+`404 NOT FOUND` If an invalid profile is provided
+
+`500 INTERNAL SERVER ERROR` If a video could not be processed
+</br></br>
+
+
+**Response Body**
+
+Contains a simple status and message.
+</br></br>
+
+
+```json
+{
+    "message": "Removed in-progress videos successfully",
+    "success": true
+}
+```
+</br></br>
+
+
+If the 'profile' parameter is not included:
+
+```json
+{
+    "error": "Missing 'profile' parameter in request",
+    "success": false
+}
+```
+</br></br>
+
+
+If an invalid profile is provided:
+
+```json
+{
+    "error": "Profile not found",
+    "success": false
+}
+```
+</br></br>
+
+
+
+
+----
+## GET /api/profile/mark_watched
+
+**Description**
+
+Check if a specific video has been marked as watched for a profile.
 
 This checks against the active profile for this session.
 

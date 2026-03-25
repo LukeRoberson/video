@@ -240,15 +240,10 @@ def home() -> Response:
 
     # Get the session profile ID from the request context
     in_progress_videos = []
-    profile_id = session.get('active_profile')
+    profile_id = session.get('active_profile', None)
 
-    # Get in progress videos
-    if profile_id != 0 and profile_id is not None and profile_id != 'guest':
-        profile_id = (
-            int(profile_id) if isinstance(profile_id, str) else profile_id
-        )
-
-        # Get in-progress videos from the API
+    # API: Get in progress videos
+    if profile_id is not None:
         response = requests.get(
             url='http://localhost:5010/api/profile/in_progress',
             params={

@@ -190,19 +190,28 @@ def video_details(
     watched = response.json()['data'].get('watched', False)
 
     # API: Check if video is in progress
-    response = requests.get(
-        'http://localhost:5010/api/profile/in_progress',
-        params={
-            'video_id': video_id,
-            'profile': session.get("active_profile", "guest")
-        }
-    )
-    payload = response.json().get('data', [])
+    profile_id = session.get("active_profile", None)
 
-    if payload:
-        current_time = response.json()['data'][0].get('current_time', 0)
-    else:
+    if profile_id is None:
+        # We don't track in-progress videos for guest profile
         current_time = 0
+
+    else:
+        response = requests.get(
+            'http://localhost:5010/api/profile/in_progress',
+            params={
+                'video_id': video_id,
+                'profile': profile_id
+            }
+        )
+        payload = response.json().get('data', [])
+
+        # If the videos is in progress, get the current time.
+        #   Otherwise, default to 0.
+        if payload:
+            current_time = response.json()['data'][0].get('current_time', 0)
+        else:
+            current_time = 0
 
     # API: Get a list of similar videos
     response = requests.get(

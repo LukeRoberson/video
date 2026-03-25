@@ -24,8 +24,6 @@ declare const videojs: any;
 const ApiConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
-    /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
     /** API endpoint for in-progress videos */

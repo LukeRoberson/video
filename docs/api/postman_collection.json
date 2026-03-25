@@ -304,12 +304,12 @@
       "name": "Characters",
       "item": [
         {
-          "name": "Get a list of all characters",
+          "name": "Get Characters",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/characters",
+              "raw": "http://localhost:5010/api/characters?char_id={{character_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -318,38 +318,24 @@
               "path": [
                 "api",
                 "characters"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a Bible character",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/characters/{{character_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
               ],
-              "port": "5010",
-              "path": [
-                "api",
-                "characters",
-                "{{character_id}}"
+              "query": [
+                {
+                  "key": "char_id",
+                  "value": "{{character_id}}",
+                  "type": "text"
+                }
               ]
             }
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Specific Character",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/characters/1",
+                  "raw": "http://localhost:5010/api/characters?char_id=1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -357,8 +343,13 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "characters",
-                    "1"
+                    "characters"
+                  ],
+                  "query": [
+                    {
+                      "key": "char_id",
+                      "value": "1"
+                    }
                   ]
                 }
               },
@@ -368,12 +359,12 @@
               "body": null
             },
             {
-              "name": "Failure",
+              "name": "Invalid Character",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/characters/5",
+                  "raw": "http://localhost:5010/api/characters?char_id=99999",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -381,8 +372,43 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "characters",
-                    "5"
+                    "characters"
+                  ],
+                  "query": [
+                    {
+                      "key": "char_id",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "All Characters",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/characters",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "characters"
+                  ],
+                  "query": [
+                    {
+                      "key": "char_id",
+                      "value": "{{character_id}}",
+                      "disabled": true
+                    }
                   ]
                 }
               },
@@ -547,12 +573,12 @@
       "name": "Speakers",
       "item": [
         {
-          "name": "Get All Speakers",
+          "name": "Get Speakers",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/speakers",
+              "raw": "http://localhost:5010/api/speakers?spk_id={{speaker_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -561,38 +587,24 @@
               "path": [
                 "api",
                 "speakers"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a specific speaker",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/speakers/{{speaker_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
               ],
-              "port": "5010",
-              "path": [
-                "api",
-                "speakers",
-                "{{speaker_id}}"
+              "query": [
+                {
+                  "key": "spk_id",
+                  "value": "{{speaker_id}}",
+                  "type": "text"
+                }
               ]
             }
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Specific Speaker",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/speakers/321",
+                  "raw": "http://localhost:5010/api/speakers?spk_id=1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -600,8 +612,13 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "speakers",
-                    "321"
+                    "speakers"
+                  ],
+                  "query": [
+                    {
+                      "key": "spk_id",
+                      "value": "1"
+                    }
                   ]
                 }
               },
@@ -611,12 +628,12 @@
               "body": null
             },
             {
-              "name": "Failure",
+              "name": "Invalid Speaker",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/speakers/3",
+                  "raw": "http://localhost:5010/api/speakers?spk_id=99999",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -624,8 +641,43 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "speakers",
-                    "3"
+                    "speakers"
+                  ],
+                  "query": [
+                    {
+                      "key": "spk_id",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Get All Speakers",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/speakers",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "speakers"
+                  ],
+                  "query": [
+                    {
+                      "key": "spk_id",
+                      "value": "{{speaker_id}}",
+                      "disabled": true
+                    }
                   ]
                 }
               },
@@ -715,12 +767,12 @@
       "name": "Tags",
       "item": [
         {
-          "name": "Get All Tags",
+          "name": "Get Tags",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/tags",
+              "raw": "http://localhost:5010/api/tags?tag_id={{tag_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -729,38 +781,24 @@
               "path": [
                 "api",
                 "tags"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a specific tag",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/tags/{{tag_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
               ],
-              "port": "5010",
-              "path": [
-                "api",
-                "tags",
-                "{{tag_id}}"
+              "query": [
+                {
+                  "key": "tag_id",
+                  "value": "{{tag_id}}",
+                  "type": "text"
+                }
               ]
             }
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Specific Tag",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/tags/1",
+                  "raw": "http://localhost:5010/api/tags?tag_id=1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -768,8 +806,13 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "tags",
-                    "1"
+                    "tags"
+                  ],
+                  "query": [
+                    {
+                      "key": "tag_id",
+                      "value": "1"
+                    }
                   ]
                 }
               },
@@ -779,12 +822,12 @@
               "body": null
             },
             {
-              "name": "Failure",
+              "name": "Invalid Tag",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/tags/3",
+                  "raw": "http://localhost:5010/api/tags?tag_id=99999",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -792,8 +835,43 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "tags",
-                    "3"
+                    "tags"
+                  ],
+                  "query": [
+                    {
+                      "key": "tag_id",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Get All Tags",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/tags",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "tags"
+                  ],
+                  "query": [
+                    {
+                      "key": "tag_id",
+                      "value": "{{tag_id}}",
+                      "disabled": true
+                    }
                   ]
                 }
               },
@@ -883,12 +961,12 @@
       "name": "Scriptures",
       "item": [
         {
-          "name": "List all Scriptures",
+          "name": "Get Scriptures",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/scriptures",
+              "raw": "http://localhost:5010/api/scriptures?scr_id={{scripture_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -897,38 +975,23 @@
               "path": [
                 "api",
                 "scriptures"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a scripture",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/scriptures/{{scripture_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
               ],
-              "port": "5010",
-              "path": [
-                "api",
-                "scriptures",
-                "{{scripture_id}}"
+              "query": [
+                {
+                  "key": "scr_id",
+                  "value": "{{scripture_id}}"
+                }
               ]
             }
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Specific Scripture",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/scriptures/2",
+                  "raw": "http://localhost:5010/api/scriptures?scr_id=2",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -936,8 +999,13 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "scriptures",
-                    "2"
+                    "scriptures"
+                  ],
+                  "query": [
+                    {
+                      "key": "scr_id",
+                      "value": "2"
+                    }
                   ]
                 }
               },
@@ -947,12 +1015,12 @@
               "body": null
             },
             {
-              "name": "Failure",
+              "name": "Invalid Scripture",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/scriptures/1",
+                  "raw": "http://localhost:5010/api/scriptures?scr_id=99999",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -960,8 +1028,43 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "scriptures",
-                    "1"
+                    "scriptures"
+                  ],
+                  "query": [
+                    {
+                      "key": "scr_id",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "All Scriptures",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/scriptures",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "scriptures"
+                  ],
+                  "query": [
+                    {
+                      "key": "scr_id",
+                      "value": "{{scripture_id}}",
+                      "disabled": true
+                    }
                   ]
                 }
               },
@@ -1200,12 +1303,12 @@
       "name": "Locations",
       "item": [
         {
-          "name": "Get All Locations",
+          "name": "Get Locations",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/locations",
+              "raw": "http://localhost:5010/api/locations?loc_id={{location_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -1214,38 +1317,24 @@
               "path": [
                 "api",
                 "locations"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a location",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/locations/{{location_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
               ],
-              "port": "5010",
-              "path": [
-                "api",
-                "locations",
-                "{{location_id}}"
+              "query": [
+                {
+                  "key": "loc_id",
+                  "value": "{{location_id}}",
+                  "type": "text"
+                }
               ]
             }
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Specific Location",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/locations/1",
+                  "raw": "http://localhost:5010/api/locations?loc_id=1",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1253,29 +1342,28 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "locations",
-                    "1"
+                    "locations"
+                  ],
+                  "query": [
+                    {
+                      "key": "loc_id",
+                      "value": "1"
+                    }
                   ]
                 }
               },
-              "_postman_previewlanguage": "",
-              "header": [],
-              "cookie": [
-                {
-                  "expires": "Invalid Date",
-                  "domain": "",
-                  "path": ""
-                }
-              ],
-              "body": ""
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
             },
             {
-              "name": "Failure",
+              "name": "Invalid Location",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/locations/9999",
+                  "raw": "http://localhost:5010/api/locations?loc_id=99999",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -1283,8 +1371,43 @@
                   "port": "5010",
                   "path": [
                     "api",
-                    "locations",
-                    "9999"
+                    "locations"
+                  ],
+                  "query": [
+                    {
+                      "key": "loc_id",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "All Locations",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/locations",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "locations"
+                  ],
+                  "query": [
+                    {
+                      "key": "loc_id",
+                      "value": "{{location_id}}",
+                      "disabled": true
+                    }
                   ]
                 }
               },
@@ -1398,279 +1521,6 @@
     {
       "name": "Search",
       "item": [
-        {
-          "name": "Search",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/search?q={{query}}&page={{page_number}}&per_page={{results_per_page}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "{{query}}"
-                },
-                {
-                  "key": "page",
-                  "value": "{{page_number}}",
-                  "type": "text"
-                },
-                {
-                  "key": "per_page",
-                  "value": "{{results_per_page}}",
-                  "type": "text"
-                }
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Simple Query",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search?q=bible",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "bible"
-                    },
-                    {
-                      "key": "page",
-                      "value": "{{page_number}}",
-                      "disabled": true
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "{{results_per_page}}",
-                      "disabled": true
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Search with Pages",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search?q=bible&page=2&per_page=10",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "bible"
-                    },
-                    {
-                      "key": "page",
-                      "value": "2"
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "10"
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Search term not found",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search?q=asddqa",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "asddqa"
-                    },
-                    {
-                      "key": "page",
-                      "value": "{{page_number}}",
-                      "disabled": true
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "{{results_per_page}}",
-                      "disabled": true
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": "",
-              "header": [],
-              "cookie": [
-                {
-                  "expires": "Invalid Date",
-                  "domain": "",
-                  "path": ""
-                }
-              ],
-              "body": ""
-            },
-            {
-              "name": "Invalid Page Size",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search?q=bible&per_page=200",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "bible"
-                    },
-                    {
-                      "key": "page",
-                      "value": "{{page_number}}",
-                      "disabled": true
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "200"
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Invalid Page Number",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search?q=bible&page=200&per_page=100",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "bible"
-                    },
-                    {
-                      "key": "page",
-                      "value": "200"
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "100"
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Missing Query Parameter",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/search",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "search"
-                  ],
-                  "query": [
-                    {
-                      "key": "q",
-                      "value": "{{query}}",
-                      "disabled": true
-                    },
-                    {
-                      "key": "page",
-                      "value": "{{page_number}}",
-                      "disabled": true
-                    },
-                    {
-                      "key": "per_page",
-                      "value": "{{results_per_page}}",
-                      "disabled": true
-                    }
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            }
-          ]
-        },
         {
           "name": "Get Search Status",
           "request": {
@@ -2195,83 +2045,13 @@
       "name": "Videos",
       "item": [
         {
-          "name": "Get a specific video",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/videos/{{video_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "videos",
-                "{{video_id}}"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Success",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/videos/1",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "videos",
-                    "1"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Failure",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/videos/6",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "videos",
-                    "6"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            }
-          ]
-        },
-        {
-          "name": "Get Several Videos",
+          "name": "Get Videos",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"video_ids\": [\r\n        {{id_1}},\r\n        {{id_2}},\r\n        {{id_3}}\r\n    ]\r\n}",
+              "raw": "{\r\n    \"video_ids\": [\r\n        {{video_1}},\r\n        {{video_2}},\r\n        {{video_3}}\r\n    ]\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2294,7 +2074,40 @@
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Get a specific video",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_ids\": [\r\n        1\r\n    ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/videos/get_bulk",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "videos",
+                    "get_bulk"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Get several videos",
               "originalRequest": {
                 "method": "POST",
                 "header": [],
@@ -2327,37 +2140,13 @@
               "body": null
             },
             {
-              "name": "No body present",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/videos/get_bulk",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "videos",
-                    "get_bulk"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Missing Video IDs",
+              "name": "Error: Invalid Video ID",
               "originalRequest": {
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"videos\": [\r\n        {{id_1}},\r\n        {{id_2}},\r\n        {{id_3}}\r\n    ]\r\n}",
+                  "raw": "{\r\n    \"video_ids\": [\r\n        99999\r\n    ]\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2384,13 +2173,70 @@
               "body": null
             },
             {
-              "name": "Incorrect ID Type",
+              "name": "Error: Missing Body",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/videos/get_bulk",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "videos",
+                    "get_bulk"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Error: Missing Video IDs",
               "originalRequest": {
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"video_ids\": [\r\n        1,\r\n        \"two\",\r\n        3\r\n    ]\r\n}",
+                  "raw": "{\r\n\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/videos/get_bulk",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "videos",
+                    "get_bulk"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Error: Invalid ID Type",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_ids\": [\r\n        1,\r\n        \"Two\",\r\n        3\r\n    ]\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
