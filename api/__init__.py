@@ -43,6 +43,7 @@ Custom Imports:
 import logging
 from flask import Flask
 from flask_cors import CORS
+from flask_swagger_ui import get_swaggerui_blueprint
 
 # Custom imports
 from api.api_profile import profile_bp
@@ -60,6 +61,10 @@ from api.search import SearchService
 
 # CORS, for running locally with the frontend on localhost:5000
 FRONTEND_ORIGIN = 'http://localhost:5000'
+
+# Settings
+APP_NAME = 'Videos API'
+APP_VERSION = '1.0.0'
 
 
 class ColouredFormatter(
@@ -208,6 +213,14 @@ def create_app(
     app.register_blueprint(speaker_endpoint)
     app.register_blueprint(character_endpoint)
     app.register_blueprint(similarity_endpoint)
+
+    # Register Swagger UI for API documentation
+    swagger_ui_blueprint = get_swaggerui_blueprint(
+        '/api/docs',
+        '/static/swagger.yaml',
+        config={'app_name': APP_NAME}
+    )
+    app.register_blueprint(swagger_ui_blueprint)
 
     # Initialize search service with app context
     with app.app_context():

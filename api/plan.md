@@ -56,7 +56,7 @@
         * [x] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
-    * [ ] Home page; 7x separate API calls (get latest videos, get latest news and broadcasting, get watch status for each)
+    * [ ] Home page (`web.py`, `home()`)
     * [ ] Character; Separate API call for each video to check watch status
     * [ ] Video; About 13 calls (video details, various metadata, similarity, watch status on similar videos, etc)
     * [ ] Themes; It makes many calls to the API instead of just one or two
@@ -64,12 +64,28 @@
     * [ ] Check if a video has been watched: Check multiple videos in a single call
     * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
 10. Clean up bugs
-    * [ ] In categories, watch status on individual videos is not showing
+    * [x] In categories, watch status on individual videos is not showing
     * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
-    * [ ] Searches sometimes throw unicode errors in the terminal
-    * [ ] When saving a profile name change, this is not immediately reflected in the edit screen
-    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
     * [x] 'Logging Error' at terminal when searching with ElasticSearch
+    * [ ] Searches sometimes throw unicode errors in the terminal
+    * [ ] Profile edits
+        * Profile updates work successfully (eg, name, clearing watch history)
+        * They do not update on the page immediately
+    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
+    * [ ] Getting speakers for a video; API displays errors
+        * Error retrieving speakers for video 1: Cannot operate on a closed database.
+        * DEBUG - Module api_speaker: Function get_video_speakers
+    * [ ] After deleting a profile:
+        * The profile happened to be ID: 6
+        * When loading the profile selection screen, API reports an error
+            * DEBUG - Module: api_profile.py, Function: get_profile
+            * ERROR - Profile with ID 6 not found.
+        * Page loads fine, nothing in console
+    * [ ] Cannot mark videos as watched
+        * Does not work on individual videos
+        * Does not work in the user's profile
+        * Silent error
+    * [ ] `/api/search` doesn't seems to be enforcing the page size limit
 
 
 </br></br>
@@ -80,39 +96,44 @@
 
 # Notes
 
-* Not yet testing endpoints that update the database
-    * POST /api/videos/metadata
-    * POST /api/videos/add
+## Performance
+
+* Home page (8x API calls, 16s loading time)
+    * GET /api/profile/in_progress?profile={ID}
+    * POST /api/videos/get_bulk
+    * GET /api/categories/Monthly%20Programs
+    * GET /api/categories/News%20and%20Announcements
+    * /api/videos/filter?cat=1&latest=1
+    * /api/videos/filter?cat=3&latest=1
+    * /api/videos/filter?latest=9
+    * GET /api/profile/4
+
+
+## Improvements
+
+* Searching
+    * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
+* Improve logging in api_profile
+    * After other improvements are made
+* Create helper functions for reused components:
+    * Check if a video exists
+    * Logging debugs and warnings during field validation
+
+
+
+## Cleanup
+
 * `/api/categories/{{category_id}}/{{subcategory_id}}`
     * Contains a 'videos' list in the response, which is unnecessary
-* Investigate:
-    * Should images, such as avatars, be stored in the frontend, or somewhere else?
-    * Other test types, such as 'debug' and 'coverage
-    * How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
-    * Live version has a bug while showing thumbnail for snippets (noticed on themes)
-        * Does the dev version have this too?
-    * Do we really need both POST and UPDATE methods for updating in progress videos?
-* Searching
-    * `/api/search` doesn't seems to be enforcing the page size limit
-    * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
 * Speakers endpoint:
     * Query for invalid speaker does not return an empty list like other endpoints do
 * Tags endpoint:
     * Query for invalid tag does not return an empty list like other endpoints do
 * Video endpoint is still 'get_bulk', which should change
 
-* Improve logging in api_profile
-    * After other improvements are made
-* Add tests for api_profile
-    * After other improvements are made
-* Create helper functions for reused components:
-    * Check if a video exists
-    * Logging debugs and warnings during field validation
-* Get active profile
-    * This is used as an API call, as well as to verify that a profile exists
-    * Would be better as a helper function
-* Checking if a video exists
-    * Used in many places, should be a helper function
+
+
+## Tests
 
 * Additional tests
     * GET /api/profile/in_progress
@@ -121,22 +142,21 @@
     * DELETE /api/profile/in_progress
         * Need to test that we can remove an in progress video
         * However, there needs to be one to remove
+* Not yet testing endpoints that update the database
+    * POST /api/videos/metadata
+    * POST /api/videos/add
+* Add tests for api_profile
+    * After other improvements are made
 
-* Bug:
-    * The 'set active profile' endpoint happily will set a non-existant profile as active
-    * Error retrieving speakers for video 1036: Cannot operate on a closed database.
-        * DEBUG - Module api_speaker: Function get_video_speakers
-        * INFO - No speakers found for video ID 1036
-    * After deleting a profile:
-        * The profile happened to be ID: 6
-        * When loading the profile selection screen, API reports an error
-            * DEBUG - Module: api_profile.py, Function: get_profile
-            * ERROR - Profile with ID 6 not found.
-        * Page loads fine, nothing in console
-    * Mark as watched
-        * Failing from the profile page
-        * Haven't tested from a video page
-    * Clearing watch history
-        * This works, but does not update the page in real time
+
+
+## Investigate
+
+* Should images, such as avatars, be stored in the frontend, or somewhere else?
+* Other test types, such as 'debug' and 'coverage
+* How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
+* Live version has a bug while showing thumbnail for snippets (noticed on themes)
+    * Does the dev version have this too?
+* Do we really need both POST and UPDATE methods for updating in progress videos?
 
 

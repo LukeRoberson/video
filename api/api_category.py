@@ -77,6 +77,79 @@ category_endpoint = Blueprint(
 
 
 @category_endpoint.route(
+    "",
+    methods=["GET", "POST"],
+)
+def get_all() -> Response:
+    """
+    Get a list of all categories.
+
+    Returns:
+        Response: A JSON response containing a list of all categories
+    """
+
+    # To get all categories
+    if request.method == "GET":
+        with DatabaseContext() as db:
+            cat_mgr = CategoryManager(db)
+            categories = cat_mgr.get()
+
+        if categories is None:
+            logger.debug("Module: api_category.py, Function: get_all")
+            logger.error("No categories found.")
+            return api_error(
+                "No categories found",
+                404
+            )
+
+        return api_success(
+            data=categories,
+            message="Retrieved categories successfully",
+            status=200
+        )
+
+    # To get the IDs for a list of category names
+    if request.method == "POST":
+        # Requires a JSON body with a list of category names
+        cat_list = request.json
+        if not cat_list:
+            logger.debug("Module: api_category.py, Function: get_all")
+            logger.error("No category data provided in request.")
+            return api_error(
+                "No category data provided in request",
+                400
+            )
+
+        with DatabaseContext() as db:
+            cat_mgr = CategoryManager(db)
+            resolved = []
+
+            # Check each one
+            for item in cat_list:
+                category_id = cat_mgr.name_to_id(name=item)
+                if category_id is not None:
+                    resolved.append({
+                        "name": item,
+                        "id": category_id,
+                    })
+
+                else:
+                    logger.debug("Module: api_category.py, Function: get_all")
+                    logger.warning(f"Category '{item}' not found.")
+
+        return api_success(
+            data=resolved,
+            message="Retrieved categories successfully",
+            status=200
+        )
+
+    return api_error(
+        "Method not allowed",
+        415
+    )
+
+
+@category_endpoint.route(
     "/<string:category_name>",
     methods=["GET"],
 )

@@ -284,17 +284,16 @@ def home() -> Response:
     )
 
     # API: Convert category names to IDs
-    response = requests.get(
-        url='http://localhost:5010/api/categories/Monthly Programs',
+    response = requests.post(
+        url='http://localhost:5010/api/categories',
+        json=[
+            'Monthly Programs',
+            'News and Announcements'
+        ]
     )
-    data = response.json().get('data', {})
-    monthly_cat = data.get('category_id', None)
-
-    response = requests.get(
-        url='http://localhost:5010/api/categories/News and Announcements',
-    )
-    data = response.json().get('data', {})
-    news_cat = data.get('category_id', None)
+    data = response.json().get('data', [])
+    monthly_cat = data[0].get('category_id', None) if len(data) > 0 else None
+    news_cat = data[1].get('category_id', None) if len(data) > 1 else None
 
     # API: Get the latest monthly programs video
     monthly = None

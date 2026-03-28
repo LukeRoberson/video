@@ -43,6 +43,82 @@ class TestCategoryNameResolution:
             Test category names with spaces are handled correctly.
     """
 
+    def test_get_all_categories(
+        self
+    ) -> None:
+        """
+        Test retrieving all categories returns 200 and correct structure.
+
+        Tests:
+            - GET /api/categories returns 200
+            - Response contains a list of categories
+            - Each category has 'id' (int) and 'name' (str)
+        """
+
+        url = f"{BASE_URL}{API_PREFIX}/categories"
+        response = requests.get(url)
+
+        # Check response
+        assert response.status_code == 200
+        data = response.json().get("data", [])
+        assert len(data) > 0, "Expected at least one category in response"
+
+        # Validate response structure
+        for index, category in enumerate(data):
+            assert "id" in category, (
+                f"Missing 'id' in category at index {index}"
+            )
+            assert isinstance(category["id"], int), (
+                f"'id' is not an integer in category at index {index}"
+            )
+
+            assert "name" in category, (
+                f"Missing 'name' in category at index {index}"
+            )
+            assert isinstance(category["name"], str), (
+                f"'name' is not a string in category at index {index}"
+            )
+
+    def test_resolve_category_list(
+        self
+    ) -> None:
+        """
+        Test POST request to resolve a list of category names.
+
+        Tests:
+            - POST /api/categories with a list of category names returns 200
+        """
+
+        url = f"{BASE_URL}{API_PREFIX}/categories"
+        category_names = ["Monthly Programs", "JW Broadcasting"]
+        response = requests.post(
+            url,
+            json=category_names
+        )
+
+        # Check response
+        assert response.status_code == 200
+        data = response.json().get("data", [])
+        assert len(data) == 2, (
+            "Expected 2 resolved categories in response"
+        )
+
+        # Validate response structure
+        for index, category in enumerate(data):
+            assert "id" in category, (
+                f"Missing 'id' in category at index {index}"
+            )
+            assert isinstance(category["id"], int), (
+                f"'id' is not an integer in category at index {index}"
+            )
+
+            assert "name" in category, (
+                f"Missing 'name' in category at index {index}"
+            )
+            assert isinstance(category["name"], str), (
+                f"'name' is not a string in category at index {index}"
+            )
+
     def test_resolve_valid_category_name(
         self,
         valid_category_name: str
