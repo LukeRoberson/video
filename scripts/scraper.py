@@ -54,6 +54,7 @@ Custom dependencies:
 Note:
     Selenium requires a web driver to be installed
         (e.g., ChromeDriver for Chrome).
+        https://googlechromelabs.github.io/chrome-for-testing/#stable
 """
 
 from selenium import webdriver
