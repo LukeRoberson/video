@@ -54,22 +54,28 @@ class TestSimilarity:
 
         # Validate the structure in each entry, and their types
         if len(data) > 0:
-            assert all(isinstance(video, dict) for video in data)
-            assert all(
-                (
-                    "score" in video and
-                    isinstance(video["score"], float)
-                ) and
-                (
-                    "video_1_id" in video and
-                    isinstance(video["video_1_id"], int)
-                ) and
-                (
-                    "video_2_id" in video and
-                    isinstance(video["video_2_id"], int)
+            for index, video in enumerate(data):
+                assert isinstance(video, dict), (
+                    f"Entry at index {index} is not a dictionary"
                 )
-                for video in data
-            )
+                assert "score" in video, (
+                    f"Entry at index {index} is missing 'score'"
+                )
+                assert isinstance(video["score"], float), (
+                    f"'score' in entry at index {index} is not a float"
+                )
+                assert "video_1_id" in video, (
+                    f"Entry at index {index} is missing 'video_1_id'"
+                )
+                assert isinstance(video["video_1_id"], int), (
+                    f"'video_1_id' in entry at index {index} is not an int"
+                )
+                assert "video_2_id" in video, (
+                    f"Entry at index {index} is missing 'video_2_id'"
+                )
+                assert isinstance(video["video_2_id"], int), (
+                    f"'video_2_id' in entry at index {index} is not an int"
+                )
 
     def test_get_similarity_invalid_video_id(
         self,

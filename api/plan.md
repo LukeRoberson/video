@@ -42,19 +42,19 @@
     * [ ] `api_profile`: get_watched and check_watched_bulk
         * Prerequisite: Fix bug where watched status not appearing on thumbnails
 8. Active user redesign
-    * [ ] Get the frontend to track the active user, not the API
+    * [x] Get the frontend to track the active user, not the API
         * Currently set in `api_profile.py`, in set_active_profile()
-    * [ ] API calls from the frontend should include the active user if needed
+    * [x] API calls from the frontend should include the active user if needed
         * [x] `api_profile.py`: get_watch_history; Still gets profile from local session; Should receive as a parameter
-        * [ ] `api_profile.py`: mark_watched; Still gets profile from local session; Should receive as a parameter
-        * [ ] `api_profile.py`: mark_unwatched; Still gets profile from local session; Should receive as a parameter
-        * [ ] `api_category.py`: category_filter; Still gets profile from local session; Should receive as a parameter
-    * [ ] Cleanup active user code in the API
+        * [x] `api_profile.py`: mark_watched; Still gets profile from local session; Should receive as a parameter
+        * [x] `api_profile.py`: mark_unwatched; Still gets profile from local session; Should receive as a parameter
+        * [x] `api_category.py`: category_filter; Still gets profile from local session; Should receive as a parameter
+    * [x] Cleanup active user code in the API
         * [x] `api_profile.py`: in_progress_videos; Get's parameter, but falls back to local profile
         * [x] `api_profile.py`: get_watched; Get's parameter, but falls back to local profile
-        * [ ] `api_profile.py`: check_watched_bulk; Get's parameter, but falls back to local profile
-        * [ ] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
-        * [ ] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
+        * [x] `api_profile.py`: check_watched_bulk; Get's parameter, but falls back to local profile
+        * [x] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
+        * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
     * [ ] Home page; 7x separate API calls (get latest videos, get latest news and broadcasting, get watch status for each)
     * [ ] Character; Separate API call for each video to check watch status
@@ -127,4 +127,16 @@
     * Error retrieving speakers for video 1036: Cannot operate on a closed database.
         * DEBUG - Module api_speaker: Function get_video_speakers
         * INFO - No speakers found for video ID 1036
+    * After deleting a profile:
+        * The profile happened to be ID: 6
+        * When loading the profile selection screen, API reports an error
+            * DEBUG - Module: api_profile.py, Function: get_profile
+            * ERROR - Profile with ID 6 not found.
+        * Page loads fine, nothing in console
+    * Mark as watched
+        * Failing from the profile page
+        * Haven't tested from a video page
+    * Clearing watch history
+        * This works, but does not update the page in real time
+
 

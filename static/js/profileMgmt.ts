@@ -10,6 +10,8 @@
 const ProfileMgmtConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
+    /** Base URL for frontend settings */
+    FRONTEND_BASE_URL: 'http://localhost:5000',
     /** API endpoint for creating profiles */
     CREATE_PROFILE_ENDPOINT: '/api/profile/create',
     /** API endpoint for getting active profile */
@@ -109,7 +111,7 @@ class ProfileApiService {
      */
     static async getActiveProfile(): Promise<ActiveProfileResponse> {
         const response = await fetch(
-            `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.GET_ACTIVE_ENDPOINT}`,
+            `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.GET_ACTIVE_ENDPOINT}`,
             {
                 credentials: 'include'
             }
@@ -130,7 +132,7 @@ class ProfileApiService {
     static async setActiveProfile(
         profileData: SetActiveProfileData,
     ): Promise<ApiResponse> {
-        const url = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
+        const url = `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
 
         const response = await fetch(url, {
             method: 'POST',

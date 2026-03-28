@@ -82,9 +82,10 @@ declare class CategoryApiService {
      * Fetch videos for a specific category and subcategory
      * @param categoryId - The main category ID
      * @param subcategoryId - The subcategory ID
+     * @param profileId - The profile ID
      * @returns Promise resolving to array of video objects
      */
-    fetchCategoryVideos(categoryId: string | number, subcategoryId: string | number): Promise<Video[]>;
+    fetchCategoryVideos(categoryId: string | number, subcategoryId: string | number, profileId: string): Promise<Video[]>;
 }
 /**
  * Manages lazy loading of category content using IntersectionObserver
@@ -165,6 +166,8 @@ declare class CategoryPopulator {
     private lazyLoader;
     /** TV enhancement instance */
     private tvEnhancer;
+    /** Active profile ID */
+    private profileId;
     /**
      * Create a category populator instance
      */

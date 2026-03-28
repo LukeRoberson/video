@@ -10,7 +10,7 @@ const VideoDetailsConfig = {
     /** API base URL */
     API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
+    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched/{id}',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
     /** Content type for JSON requests */
@@ -74,9 +74,9 @@ class VideoDetailsController {
 
         if (!this.form) return;
 
+        const profileData = ProfileDataManager.getProfileData();
         const videoId = parseInt(this.form.dataset.videoId || '0');
         const isCurrentlyWatched = this.form.dataset.isWatched === 'true';
-        console.log(`Video ID: ${videoId}, Currently Watched: ${isCurrentlyWatched}`);
 
         try {
             if (this.button) {
@@ -84,9 +84,9 @@ class VideoDetailsController {
             }
 
             if (isCurrentlyWatched) {
-                await this.markUnwatched(videoId);
+                await this.markUnwatched(profileData.id, videoId);
             } else {
-                await this.markWatched(videoId);
+                await this.markWatched(profileData.id, videoId);
             }
 
             // Reload page to update UI
@@ -106,11 +106,14 @@ class VideoDetailsController {
      * Mark video as watched
      * @param videoId - ID of video to mark as watched
      */
-    private async markWatched(videoId: number): Promise<void> {
+    private async markWatched(
+        profileId: number,
+        videoId: number
+    ): Promise<void> {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
 
         const response = await fetch(
-            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_WATCHED_ENDPOINT}`,
+            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_WATCHED_ENDPOINT.replace('{id}', profileId.toString())}`,
             {
                 method: 'POST',
                 headers: {
@@ -131,11 +134,14 @@ class VideoDetailsController {
      * Mark video as unwatched
      * @param videoId - ID of video to mark as unwatched
      */
-    private async markUnwatched(videoId: number): Promise<void> {
+    private async markUnwatched(
+        profileId: number,
+        videoId: number
+    ): Promise<void> {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
 
         const response = await fetch(
-            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_UNWATCHED_ENDPOINT}`,
+            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_UNWATCHED_ENDPOINT}?profile=${profileId}`,
             {
                 method: 'POST',
                 headers: {

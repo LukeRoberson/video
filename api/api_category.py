@@ -45,7 +45,7 @@ Custom Modules:
 from flask import (
     Blueprint,
     Response,
-    session,
+    request,
 )
 import logging
 
@@ -137,11 +137,29 @@ def category_filter(
         category_id (int): The ID of the major category to filter videos by.
         subcategory_id (int): The ID of the subcategory to filter videos by.
 
+    Parameters:
+        profile_id (int, optional):
+            The ID of the active profile to check watch status for.
+
     Returns:
         Response: A JSON response containing the list of videos
             in the specified category and subcategory.
         If no videos are found, an empty list is returned.
     """
+
+    # Check the profile ID is valid
+    active_profile = request.args.get("profile_id", None)
+    if active_profile is not None:
+        with LocalDbContext() as db:
+            profile_mgr = ProfileManager(db)
+            profile = profile_mgr.read(profile_id=int(active_profile))
+
+            if not profile:
+                logging.error(f"Profile with ID {active_profile} not found.")
+                return api_error(
+                    f"Profile with ID {active_profile} not found",
+                    404
+                )
 
     # Select all videos with the given category ID and subcategory ID
     cat_list = [category_id, subcategory_id]
@@ -166,9 +184,6 @@ def category_filter(
         video['duration'] = seconds_to_hhmmss(video['duration'])
 
     # Get watch status for the active profile
-    active_profile = session.get("active_profile", None)
-    logger.info(f"Active profile: {active_profile}")
-
     if active_profile is not None and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
@@ -176,7 +191,7 @@ def category_filter(
             for video in videos:
                 watched = profile_mgr.check_watched(
                     video_id=video['id'],
-                    profile_id=active_profile,
+                    profile_id=int(active_profile),
                 )
                 video['watched'] = watched
 

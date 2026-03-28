@@ -747,7 +747,7 @@ class ProgressTracker {
         ).catch(err => console.error('Error removing from progress:', err));
 
         // Mark as watched
-        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`, {
+        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}?profile=${this.profileId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

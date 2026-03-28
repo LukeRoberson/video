@@ -114,7 +114,7 @@ def valid_video_id() -> int:
     Return a valid video ID for testing.
     """
 
-    return 3011
+    return 1
 
 
 @pytest.fixture

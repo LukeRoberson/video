@@ -121,8 +121,14 @@ def render_category_page(
         entry['name'] = sub_cat
         if sub_cat_id is not None:
             # Get the list of videos for the subcategory
+            params = {
+                "profile_id": active_profile if (
+                    active_profile and active_profile != 'guest'
+                ) else None
+            }
             response = requests.get(
-                f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}'
+                f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}',
+                params=params
             )
             data = response.json().get('data', {})
             video_list = data.get('videos', [])

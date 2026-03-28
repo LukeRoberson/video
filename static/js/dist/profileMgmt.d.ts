@@ -9,6 +9,8 @@
 declare const ProfileMgmtConfig: {
     /** API base URL for new endpoints (separate server) */
     readonly API_BASE_URL: "http://localhost:5010";
+    /** Base URL for frontend settings */
+    readonly FRONTEND_BASE_URL: "http://localhost:5000";
     /** API endpoint for creating profiles */
     readonly CREATE_PROFILE_ENDPOINT: "/api/profile/create";
     /** API endpoint for getting active profile */

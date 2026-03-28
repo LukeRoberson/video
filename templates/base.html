@@ -143,6 +143,7 @@
                 </div>
 
                 <!-- Profile Icon (fixed to top right) -->
+                <!-- 'Guest' is shown here by default; JS updates this when the page loads -->
                 <div class="position-absolute top-0 end-0 d-flex align-items-center mt-2 me-2">
                     <span id="profile-name" class="me-2 text-white">Guest</span>
                     <a href="{{ url_for('web_pages.select_profile') }}" class="bg-secondary rounded-circle d-flex justify-content-center align-items-center text-decoration-none" style="width:32px; height:32px;">

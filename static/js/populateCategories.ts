@@ -139,16 +139,19 @@ class CategoryApiService {
      * Fetch videos for a specific category and subcategory
      * @param categoryId - The main category ID
      * @param subcategoryId - The subcategory ID
+     * @param profileId - The profile ID
      * @returns Promise resolving to array of video objects
      */
     async fetchCategoryVideos(
         categoryId: string | number,
-        subcategoryId: string | number
+        subcategoryId: string | number,
+        profileId: string
     ): Promise<Video[]> {
         const endpoint = `${CategoryConfig.API_BASE_URL}${CategoryConfig.API_ENDPOINT_PATTERN.replace('{categoryId}', String(categoryId)).replace('{subcategoryId}', String(subcategoryId))}`;
+        const params = new URLSearchParams({ profile_id: profileId });
 
         try {
-            const response = await fetch(endpoint);
+            const response = await fetch(`${endpoint}?${params.toString()}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -351,6 +354,9 @@ class CategoryPopulator {
     /** TV enhancement instance */
     private tvEnhancer: TVCategoryEnhancer;
 
+    /** Active profile ID */
+    private profileId: string;
+
     /**
      * Create a category populator instance
      */
@@ -359,6 +365,9 @@ class CategoryPopulator {
         this.apiService = new CategoryApiService();
         this.lazyLoader = new CategoryLazyLoader(this);
         this.tvEnhancer = new TVCategoryEnhancer();
+
+        const container = document.querySelector<HTMLElement>('.container[data-profile-id]');
+        this.profileId = container?.dataset.profileId || 'guest';
     }
 
     /**
@@ -380,7 +389,7 @@ class CategoryPopulator {
      */
     async populateCategory(categoryId: string | number, subcategoryId: string | number): Promise<void> {
         try {
-            const videos = await this.apiService.fetchCategoryVideos(categoryId, subcategoryId);
+            const videos = await this.apiService.fetchCategoryVideos(categoryId, subcategoryId, this.profileId);
             const container = this.getThumbnailContainer(subcategoryId);
             
             if (!container) {

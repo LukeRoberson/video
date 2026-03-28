@@ -20,8 +20,6 @@
 const ApiConfig = {
     /** API base URL for new endpoints (separate server) */
     API_BASE_URL: 'http://localhost:5010',
-    /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
     /** API endpoint for in-progress videos */
@@ -571,7 +569,7 @@ class ProgressTracker {
             body: JSON.stringify({ video_id: this.videoId })
         }).catch(err => console.error('Error removing from progress:', err));
         // Mark as watched
-        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}`, {
+        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}?profile=${this.profileId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
