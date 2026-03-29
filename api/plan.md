@@ -99,6 +99,7 @@
 ## Performance
 
 * Home page (8x API calls, 16s loading time)
+* Original:
     * GET /api/profile/in_progress?profile={ID}
     * POST /api/videos/get_bulk
     * GET /api/categories/Monthly%20Programs
@@ -107,6 +108,18 @@
     * /api/videos/filter?cat=3&latest=1
     * /api/videos/filter?latest=9
     * GET /api/profile/4
+* Updated (5x calls, 11s loading time)
+    * GET /api/profile/in_progress?profile={ID}
+    * POST /api/videos/get_bulk
+    * /api/videos/filter?cat=1&latest=1
+    * /api/videos/filter?cat=3&latest=1
+    * /api/videos/filter?latest=9
+
+    * REMOVED: GET /api/categories
+        * Now uses a cache to improve performance
+    * GET /api/profile/4
+        * This is being called as part of the base template
+        * This is client-side, so not really an issue
 
 
 ## Improvements

@@ -51,8 +51,7 @@ class TestCategoryNameResolution:
 
         Tests:
             - GET /api/categories returns 200
-            - Response contains a list of categories
-            - Each category has 'id' (int) and 'name' (str)
+            - Response contains a dictionary of category names to IDs
         """
 
         url = f"{BASE_URL}{API_PREFIX}/categories"
@@ -60,23 +59,16 @@ class TestCategoryNameResolution:
 
         # Check response
         assert response.status_code == 200
-        data = response.json().get("data", [])
+        data = response.json().get("data", {})
         assert len(data) > 0, "Expected at least one category in response"
 
         # Validate response structure
-        for index, category in enumerate(data):
-            assert "id" in category, (
-                f"Missing 'id' in category at index {index}"
+        for category_name, category_id in data.items():
+            assert isinstance(category_name, str), (
+                f"Category name is not a string: {category_name}"
             )
-            assert isinstance(category["id"], int), (
-                f"'id' is not an integer in category at index {index}"
-            )
-
-            assert "name" in category, (
-                f"Missing 'name' in category at index {index}"
-            )
-            assert isinstance(category["name"], str), (
-                f"'name' is not a string in category at index {index}"
+            assert isinstance(category_id, int), (
+                f"Category ID is not an integer for category {category_name}"
             )
 
     def test_resolve_category_list(

@@ -102,8 +102,11 @@ def get_all() -> Response:
                 404
             )
 
+        # Convert to a dictionary for easy lookup (name -> id)
+        full_categories = {cat['name']: cat['id'] for cat in categories}
+
         return api_success(
-            data=categories,
+            data=full_categories,
             message="Retrieved categories successfully",
             status=200
         )

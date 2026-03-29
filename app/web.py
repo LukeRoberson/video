@@ -41,6 +41,9 @@ Dependencies:
     - typing: For type hinting.
     - yaml: For parsing YAML files.
     - requests: For making HTTP requests.
+
+Custom Imports:
+    - app_cache: Instance of the AppCache class for caching category IDs.
 """
 
 # Standard library imports
@@ -64,6 +67,10 @@ from functools import wraps
 from typing import Callable
 import yaml
 import requests
+
+
+# Custom imports
+from app.cache import app_cache
 
 
 web_bp = Blueprint(
@@ -283,24 +290,27 @@ def home() -> Response:
         reverse=True
     )
 
+    # Get category IDs from the cache (cached at startup)
+    categories = app_cache.get_category_ids()
+
     # API: Convert category names to IDs
-    response = requests.post(
-        url='http://localhost:5010/api/categories',
-        json=[
-            'Monthly Programs',
-            'News and Announcements'
-        ]
-    )
-    data = response.json().get('data', [])
-    monthly_cat = data[0].get('category_id', None) if len(data) > 0 else None
-    news_cat = data[1].get('category_id', None) if len(data) > 1 else None
+    # response = requests.post(
+    #     url='http://localhost:5010/api/categories',
+    #     json=[
+    #         'Monthly Programs',
+    #         'News and Announcements'
+    #     ]
+    # )
+    # data = response.json().get('data', [])
+    # monthly_cat = data[0].get('category_id', None) if len(data) > 0 else None
+    # news_cat = data[1].get('category_id', None) if len(data) > 1 else None
 
     # API: Get the latest monthly programs video
     monthly = None
     monthly = requests.get(
         url='http://localhost:5010/api/videos/filter',
         params={
-            'cat': monthly_cat,
+            'cat': categories.get('Monthly Programs', None),
             'latest': 1
         }
     ).json().get('data', [])
@@ -310,7 +320,7 @@ def home() -> Response:
     news = requests.get(
         url='http://localhost:5010/api/videos/filter',
         params={
-            'cat': news_cat,
+            'cat': categories.get('News and Announcements', None),
             'latest': 1
         }
     ).json().get('data', [])

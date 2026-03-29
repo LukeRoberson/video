@@ -154,19 +154,15 @@ paths:
                 type: object
                 properties:
                   data:
-                    type: array
-                    description: List of categories
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: number
-                          description: Unique identifier for the category
-                          example: 1
-                        name:
-                          type: string
-                          description: Name of the category
-                          example: "Monthly Programs"
+                    type: object
+                    description: All categories with names and IDs
+                    additionalProperties:
+                      type: integer
+                      description: Unique identifier for the category
+                    example:
+                      "Monthly Programs": 1
+                      "Bible Teachings": 51
+                      "Dramas": 1349
                   message:
                     type: string
                     description: A message indicating the result of the operation

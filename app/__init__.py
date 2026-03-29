@@ -35,6 +35,7 @@ Custom Imports:
     - app.web: Main web blueprint.
     - app.web_errors: Blueprint and handlers for error pages.
     - app.api_profile: Blueprint for user profile API endpoints.
+    - app.cache: Caching mechanisms for the application.
 """
 
 # Standard library imports
