@@ -62,6 +62,53 @@ logger = logging.getLogger(__name__)
 SEARCH_API_BASE_URL = 'http://localhost:5010'
 
 
+def check_watch_status(
+    video_list: list,
+    profile_id: int
+) -> None:
+    """
+    Check videos in a list to see if they have been watched by the user.
+    If is has, mark them as watched by adding a 'watched' key with value True.
+    This is used to display a watched badge on the video thumbnails.
+
+    Args:
+        video_list (list):
+            A list of video IDs to check watched status for.
+            These will contain video IDs and other metadata.
+        profile_id (int):
+            The ID of the user profile to check watched status against.
+
+    Returns:
+        None: The function modifies the video_list in place.
+    """
+
+    # Extract video IDs from the video list
+    video_ids = [video['id'] for video in video_list]
+
+    # API call to check status of multiple videos at once
+    response = requests.post(
+        url='http://localhost:5010/api/profile/mark_watched_bulk',
+        params={
+            'profile': profile_id
+        },
+        json={
+            'video_ids': video_ids
+        }
+    )
+
+    if response.status_code == 200:
+        watched_data = response.json().get('data', {})
+        for video in video_list:
+            video['watched'] = watched_data.get(str(video['id']), False)
+        logger.warning(video_list)
+
+    else:
+        logger.error(
+            f"Failed to fetch watched status for videos: "
+            f"{response.status_code}"
+        )
+
+
 def set_watched_status(
     videos: list,
     profile_id: int,
@@ -653,10 +700,10 @@ def character_details(
             404
         )
 
-    # Check watched status for the videos
+    # Testing
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        set_watched_status(videos, active_profile)
+        check_watch_status(videos, active_profile)
 
     return make_response(
         render_template(

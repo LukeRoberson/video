@@ -789,7 +789,10 @@ def check_watched_bulk() -> Response:
             )
             watched_status[str(video_id)] = watched
 
-    return api_success(data=watched_status)
+    return api_success(
+        data=watched_status,
+        message="Successfully checked watched status"
+    )
 
 
 @profile_bp.route(

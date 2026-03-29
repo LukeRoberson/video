@@ -56,15 +56,17 @@
         * [x] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
-    * [ ] Home page (`web.py`, `home()`)
-    * [ ] Character pages (`web_dynamic`, `character_details()`)
-    * [ ] Speaker pages
-    * [ ] Scripture pages
-    * [ ] Video; About 13 calls (video details, various metadata, similarity, watch status on similar videos, etc)
-    * [ ] Themes; It makes many calls to the API instead of just one or two
-    * [ ] Tag; Multiple API calls to check which videos have been watched
-    * [ ] Check if a video has been watched: Check multiple videos in a single call
-    * [ ] One endpoint to get characters, tags, etc from a given video (currently one per type)
+    * [ ] Home page; 16s loading time
+    * [ ] Character pages; 24s to load the 'Aaron' profile (http://localhost:5000/character/230)
+    * [ ] Speaker pages; 67s to load 'Anthony Morris'
+    * [ ] Scripture pages; 38s to load Heb 11:6
+    * [ ] Location pages; 26s to load 'Africa'
+    * [ ] Tag pages; 4:26 to load 'faith'
+    * [ ] Video detail; 22s to load '2026 GB update #1' (http://localhost:5000/video/3083)
+    * [ ] Themes; 93s to load 'Powerful by Faith' (http://localhost:5000/theme/2021_powerful_by_faith)
+    * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
+    * [ ] Advanced Search page; 10s to load (http://localhost:5000/search/advanced)
+    * [ ] Advanced Search; 13s to search 'With Eyes of Faith' (http://localhost:5000/search/advanced?q=With+Eyes+of+Faith)
 10. Clean up bugs
     * [x] In categories, watch status on individual videos is not showing
     * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
@@ -100,8 +102,10 @@
 
 ## Performance
 
-* Home page (8x API calls, 16s loading time)
-* Original:
+* Home page
+    * `web.py`
+    * `home()`
+* API calls:
     * GET /api/profile/in_progress?profile={ID}
     * POST /api/videos/get_bulk
     * GET /api/categories/Monthly%20Programs
@@ -117,7 +121,10 @@
         * This is being called as part of the base template
         * This is client-side, so not really an issue
 
-* Character details page (24s to load the 'Aaron' profile)
+* Character details page
+    * `web_dynamic`
+    * `character_details()`
+* API calls:
     * GET /api/characters
         * Gets details for a specific character
     * GET /api/videos/filter
@@ -125,13 +132,52 @@
     * GET /api/profile/mark_watched
         * Checks if videos have been watched by the current profile
         * One call for each video, means many calls
-        * [!NOTE] There is already a check_watched_bulk endpoint we may be able to use
+* Updated:
+    * Loads in 7s for 'Aaron'
+    * Bulk check of watched videos, rather than one at a time
 
-* Speaker details page (67s to load 'Anthony Morris')
+* Speaker details page
+    * `web_dynamic`
+    * `speaker_details()`
+* API calls:
     * Checks watch status on every video
 
-* Scripture details page (38s to load Heb 11:6)
+* Scripture details page
+    * `web_dynamic`
+    * `scripture_details()`
+* API calls:
     * Checks watch status on every video
+
+* Location detail page
+    * `web_dynamic`
+    * `location_details()`
+* API calls:
+    * Checks watch status on every video
+
+* Tag detail page
+    * `web_dynamic`
+    * `tag_details()`
+* API calls:
+    * Checks watch status on every video
+
+* Video details
+    * `web_dynamic`
+    * `video_details()`
+    * Bug: Error retrieving speakers for video 3083: Cannot operate on a closed database.
+    * Bug: An error occurred while retrieving similar videos for video ID 3083
+* API calls:
+    * About 13 API calls (video details, various metadata, similarity, watch status on similar videos, etc)
+
+* Themes pages
+    * `web_dynamic`
+    * `theme()`
+* API calls:
+    * Separate API call for every video, rather than getting them in bulk
+
+* Categories
+* API calls:
+    * Still making API calls to get category IDs
+    * Use cached category IDs
 
 
 
@@ -157,6 +203,9 @@
 * Tags endpoint:
     * Query for invalid tag does not return an empty list like other endpoints do
 * Video endpoint is still 'get_bulk', which should change
+* Profile API
+    * `mark_watched` checks if a video has been watched; This is a misleading name
+    * `mark_watched_bulk` takes `profile` as a parameter, others take `profile_id`; Update for consistency
 
 
 
