@@ -30,6 +30,25 @@ API endpoints that relate to video categories.
 ----
 # Endpoints
 
+## /api/categories
+
+**Description**
+
+Get all categories at once, including name and ID.
+
+Or, get specific categories using a filter.
+</br></br>
+
+
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
+</br></br>
+
+
+
+
+----
 ## /api/categories/{{category_name}}
 
 **Description**

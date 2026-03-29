@@ -18,6 +18,20 @@ Endpoints are categorised into these types:
 </br></br>
 
 
+
+----
+## Swagger UI
+
+Some of these endpoints are now documented in Swagger.
+
+This is accessible at http://localhost:5010.
+
+> [!NOTE]
+> Not all endpoints have been migrated to swagger yet.
+</br></br>
+
+
+
 ----
 ## Standard Responses
 

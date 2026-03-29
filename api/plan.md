@@ -57,7 +57,9 @@
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
     * [ ] Home page (`web.py`, `home()`)
-    * [ ] Character; Separate API call for each video to check watch status
+    * [ ] Character pages (`web_dynamic`, `character_details()`)
+    * [ ] Speaker pages
+    * [ ] Scripture pages
     * [ ] Video; About 13 calls (video details, various metadata, similarity, watch status on similar videos, etc)
     * [ ] Themes; It makes many calls to the API instead of just one or two
     * [ ] Tag; Multiple API calls to check which videos have been watched
@@ -109,17 +111,29 @@
     * /api/videos/filter?latest=9
     * GET /api/profile/4
 * Updated (5x calls, 11s loading time)
-    * GET /api/profile/in_progress?profile={ID}
-    * POST /api/videos/get_bulk
-    * /api/videos/filter?cat=1&latest=1
-    * /api/videos/filter?cat=3&latest=1
-    * /api/videos/filter?latest=9
-
     * REMOVED: GET /api/categories
         * Now uses a cache to improve performance
     * GET /api/profile/4
         * This is being called as part of the base template
         * This is client-side, so not really an issue
+
+* Character details page (24s to load the 'Aaron' profile)
+    * GET /api/characters
+        * Gets details for a specific character
+    * GET /api/videos/filter
+        * Gets a list of videos for this character
+    * GET /api/profile/mark_watched
+        * Checks if videos have been watched by the current profile
+        * One call for each video, means many calls
+        * [!NOTE] There is already a check_watched_bulk endpoint we may be able to use
+
+* Speaker details page (67s to load 'Anthony Morris')
+    * Checks watch status on every video
+
+* Scripture details page (38s to load Heb 11:6)
+    * Checks watch status on every video
+
+
 
 
 ## Improvements

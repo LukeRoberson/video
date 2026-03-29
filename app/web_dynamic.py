@@ -466,11 +466,8 @@ def location_details(
             500
         )
 
-    # Just the first item in the list since we are searching by ID
-    if len(location) > 0:
-        location = location[0]
-
-    else:
+    # Handle errors where location is not found or API returns empty data
+    if len(location) == 0 or location is None:
         logger.debug("Module: web_dynamic.py, Function: location_details")
         logger.warning(f"Location with ID {location_id} not found in API")
 

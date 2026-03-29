@@ -12,7 +12,7 @@ API endpoints that relate to videos.
 
 **Base URL**
 
-TBA
+/api/videos
 </br></br>
 
 
@@ -44,102 +44,9 @@ This is more efficient than getting a single video at a time
 </br></br>
 
 
-**Method**
-
-POST
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-| Field       | Type    | Description                                   |
-| ----------- | ------- | --------------------------------------------- |
-| video_ids   | list    | A list of video ID's to retrieve, as integers |
-</br></br>
-
-
-```json
-{
-    "video_ids": [1, 2, 3]
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` if video IDs are missing, or are not integers.
-
-`415 UNSUPPORTED MEDIA TYPE` If a body is not present.
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains a list of entries, where each entry represents a video.
-</br></br>
-
-
-| Field       | Type    | Description                                       |
-| ----------- | ------- | ------------------------------------------------- |
-| id          | integer | The video's ID                                    |
-| name        | string  | The video's name                                  |
-| description | string  | The video's description                           |
-| duration    | integer | The duration of the video in seconds              |
-| date_added  | string  | The date the video was added (YYY-MM-DD HH:MM:SS) |
-| thumbnail   | string  | URL of the video's thumbnail                      |
-| url         | string  | URL to the original video on jw.org               |
-| url_1080    | string  | URL to the video (1080p)                          |
-| url_720     | string  | URL to the video (720p)                           |
-| url_480     | string  | URL to the video (480p)                           |
-| url_360     | string  | URL to the video (360p)                           |
-| url_240     | string  | URL to the video (240p)                           |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "date_added": "2014-10-01 00:00:00",
-            "description": "Behind the scenes look at the design and construction of the JW Broadcasting set.\nA race for everlasting life, where the runners are not in competition with each other.\nHow principles in the Bible can help face bullies.\nAn archived interview with Theodore Jaracz, as he talks about the challenges he faced as a young man.\nThe role the legal department plays in establishing the good news\nThe experience of Burt Mann, who became a witness in his 90s\nA music video: The Best Life Ever",
-            "duration": 3305,
-            "id": 1,
-            "name": "JW Broadcasting—October 2014",
-            "thumbnail": "https://assetsnffrgf-a.akamaihd.net/assets/m/jwb/univ/201410/art/jwb_univ_201410_lss_01_lg.jpg",
-            "url": null,
-            "url_1080": "",
-            "url_240": "https://akdd1.jw-cdn.org/sg2/p/1cf913/1/o/jwb_E_201410_01_r240p.mp4",
-            "url_360": "https://akdd1.jw-cdn.org/sg2/p/ed9f24/1/o/jwb_E_201410_01_r360P.mp4",
-            "url_480": "https://akdd1.jw-cdn.org/sg2/p/1ff4d1a/1/o/jwb_E_201410_01_r480P.mp4",
-            "url_720": "https://akdd1.jw-cdn.org/sg2/p/8fa715/1/o/jwb_E_201410_01_r720p.mp4"
-        }
-    ],
-    "message": "Videos retrieved successfully for IDs: [1, 2, 3]",
-    "success": true
-}
-```
-</br></br>
-
-
-If the video IDs are not integers as expected:
-
-```json
-{
-    "error": "'video_ids' must be a list of integers",
-    "success": false
-}
-```
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
 
 
@@ -156,120 +63,9 @@ This can be used to return the 'x' number of latest videos.
 </br></br>
 
 
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-| Field  | Type    | Description                           |
-| ------ | ------- | ------------------------------------- |
-| cat    | integer | The ID of the category to filter by   |
-| tag    | integer | The ID of the tag to filter by        |
-| loc    | integer | The ID of the location to filter by   |
-| speak  | integer | The ID of the speaker to filter by    |
-| char   | integer | The ID of the character to filter by  |
-| scrip  | integer | The ID of the scripture to filter by  |
-| latest | integer | The number of latest videos to return |
-</br></br>
-
-
 > [!NOTE]
-> All the parameters are optional, but at least one must be provided.
-</br></br>
-
-
-> [!NOTE]
-> Multiple of each parameter may be provided to create a list of that type.
-</br></br>
-
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` if there isn't at least one parameter included
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains a list of video entries that match the query.
-</br></br>
-
-
-| Field       | Type    | Description                                       |
-| ----------- | ------- | ------------------------------------------------- |
-| id          | integer | The video's ID                                    |
-| name        | string  | The video's name                                  |
-| description | string  | The video's description                           |
-| duration    | integer | The duration of the video in seconds              |
-| date_added  | string  | The date the video was added (YYY-MM-DD HH:MM:SS) |
-| thumbnail   | string  | URL of the video's thumbnail                      |
-| url         | string  | URL to the original video on jw.org               |
-| url_1080    | string  | URL to the video (1080p)                          |
-| url_720     | string  | URL to the video (720p)                           |
-| url_480     | string  | URL to the video (480p)                           |
-| url_360     | string  | URL to the video (360p)                           |
-| url_240     | string  | URL to the video (240p)                           |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "date_added": "2026-03-11",
-            "description": "",
-            "duration": 60,
-            "id": 3015,
-            "name": "Test Video",
-            "thumbnail": "http://localhost/test.png",
-            "url": "http://localhost/test",
-            "url_1080": "http://localhost/test1080.mp4",
-            "url_240": "http://localhost/test240.mp4",
-            "url_360": "http://localhost/test360.mp4",
-            "url_480": "http://localhost/test480.mp4",
-            "url_720": "http://localhost/test720.mp4"
-        }
-    ],
-    "message": "Videos retrieved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If no parameters are included:
-
-```json
-{
-    "error": "At least one filter query parameter is required",
-    "success": false
-}
-```
-</br></br>
-
-
-If parameters are invalid (not integers):
-
-```json
-{
-    "error": "Invalid value for category_id: \"one\". Must be an integer.",
-    "success": false
-}
-```
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
 
 
@@ -295,86 +91,9 @@ Not all fields need to be included in the request.
 </br></br>
 
 
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-| Field          | Type    | Description             |
-| -------------- | ------- | ----------------------- |
-| video_name     | string  | The name of a video     |
-| tag_name       | string  | The name of a tag       |
-| location_name  | string  | The name of a location  |
-| speaker_name   | string  | the name of a speaker   |
-| character_name | string  | the name of a character |
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains the resolved IDs.
-
-Each field will be 'null' if resolution was not requested for that field. If no fields were included in the request, each entry in the response will be 'null'.
-</br></br>
-
-
-| Field        | Type    | Description               |
-| ------------ | ------- | ------------------------- |
-| character_id | integer | The resolved character ID |
-| location_id  | integer | The resolved location ID  |
-| speaker_id   | integer | The resolved speaker ID   |
-| tag_id       | integer | The resolved tag ID       |
-| video_id     | integer | The resolved video ID     |
-</br></br>
-
-
-```json
-{
-    "data": {
-        "character_id": 31,
-        "location_id": 15,
-        "speaker_id": 1,
-        "tag_id": 1,
-        "video_id": 1254
-    },
-    "message": "Metadata resolved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-When no entries are included in the reqest:
-
-```json
-{
-    "data": {
-        "character_id": null,
-        "location_id": null,
-        "speaker_id": null,
-        "tag_id": null,
-        "video_id": null
-    },
-    "success": true
-}
-```
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
 
 
