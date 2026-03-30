@@ -6,6 +6,8 @@ Defines a Flask blueprint for dynamic web routes.
     bible chapter, or scripture.
 
 Functions:
+    - check_watch_status:
+        Checks if videos in a list have been watched by the user.
     - set_watched_status:
         Sets the watched status for each video in a list.
     - get_search_service:

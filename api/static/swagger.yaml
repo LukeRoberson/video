@@ -462,6 +462,108 @@ paths:
   # Similarity
 
   # /api/profile
+  /api/profile/mark_watched:
+    post:
+      tags: [Profiles]
+      summary: Mark a video as watched
+      description: |
+        Mark a video as watched for a specific user profile.
+        This updates the watch history for the profile, allowing the UI to reflect watched status.
+      parameters:
+        - in: query
+          name: profile
+          required: false
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to mark the video as watched for. 
+            If not provided, 'guest' will be assumed and no changes will be made to any profile.
+          example: 1
+      requestBody:
+        description: The video ID to mark as watched
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: integer
+                  description: The ID of the video to mark as watched
+                  example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Video marked as watched successfully for the profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Video marked as watched successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/profile/mark_unwatched:
+    post:
+      tags: [Profiles]
+      summary: Mark a video as unwatched
+      description: |
+        Mark a video as unwatched for a specific user profile.
+        This updates the watch history for the profile, allowing the UI to reflect unwatched status.
+      parameters:
+        - in: query
+          name: profile
+          required: false
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to mark the video as unwatched for. 
+            If not provided, 'guest' will be assumed and no changes will be made to any profile.
+          example: 1
+      requestBody:
+        description: The video ID to mark as unwatched
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: integer
+                  description: The ID of the video to mark as unwatched
+                  example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Video marked as unwatched successfully for the profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Video marked as unwatched successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /api/profile/mark_watched_bulk:
     post:
       tags: [Profiles]
@@ -535,8 +637,6 @@ paths:
     # POST /api/profiles/in_progress
     # DELETE /api/profiles/in_progress
     # GET /api/profiles/mark_watched
-    # POST /api/profiles/mark_watched
-    # /api/profiles/mark_unwatched
 
 
 components:

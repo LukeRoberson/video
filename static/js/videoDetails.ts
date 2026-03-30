@@ -10,7 +10,7 @@ const VideoDetailsConfig = {
     /** API base URL */
     API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched/{id}',
+    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
     /** Content type for JSON requests */
@@ -74,7 +74,9 @@ class VideoDetailsController {
 
         if (!this.form) return;
 
-        const profileData = ProfileDataManager.getProfileData();
+        const profileId = parseInt(
+            (document.querySelector('[data-profile-id]') as HTMLElement)?.dataset.profileId || '0'
+        );
         const videoId = parseInt(this.form.dataset.videoId || '0');
         const isCurrentlyWatched = this.form.dataset.isWatched === 'true';
 
@@ -84,9 +86,9 @@ class VideoDetailsController {
             }
 
             if (isCurrentlyWatched) {
-                await this.markUnwatched(profileData.id, videoId);
+                await this.markUnwatched(profileId, videoId);
             } else {
-                await this.markWatched(profileData.id, videoId);
+                await this.markWatched(profileId, videoId);
             }
 
             // Reload page to update UI
@@ -104,6 +106,7 @@ class VideoDetailsController {
 
     /**
      * Mark video as watched
+     * @param profileId - ID of the user's profile
      * @param videoId - ID of video to mark as watched
      */
     private async markWatched(
@@ -113,7 +116,7 @@ class VideoDetailsController {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
 
         const response = await fetch(
-            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_WATCHED_ENDPOINT.replace('{id}', profileId.toString())}`,
+            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`,
             {
                 method: 'POST',
                 headers: {

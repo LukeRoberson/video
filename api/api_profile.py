@@ -803,6 +803,8 @@ def mark_watched() -> Response:
     """
     Mark a video as watched for the active profile.
 
+    Expects the profile ID as a query parameter
+
     Expects JSON:
         {
             "video_id": <int>
@@ -812,11 +814,34 @@ def mark_watched() -> Response:
         Response: A JSON response indicating success or failure.
     """
 
+    # Get the active profile from the parameter
+    active_profile = request.args.get("profile", None)
+
+    # Handle the guest profile
+    if active_profile is None or active_profile == "guest":
+        return api_success(message="No watched videos for guest profile")
+
+    # Check the profile exists in the database
+    with LocalDbContext() as db:
+        profile_mgr = ProfileManager(db)
+        profile = profile_mgr.read(profile_id=int(active_profile))
+
+    if not profile:
+        logging.error(f"Profile with ID {active_profile} not found.")
+        return api_error(f"Profile with ID {active_profile} not found", 404)
+
+    # Get the body of the request and validate it
     data = request.get_json()
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return api_error(error="Missing 'video_id' in request data")
+        logger.debug("Module: api_profile.py, Function: mark_watched")
+        logger.warning(
+            "Missing 'video_id' in request data for marking watched"
+        )
+        return api_error(
+            error="Missing 'video_id' in request data"
+        )
 
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
@@ -824,8 +849,8 @@ def mark_watched() -> Response:
 
         # Mark the video as watched for the active profile
         result = profile_mgr.mark_watched(
-            profile_id=session.get("active_profile", "guest"),
-            video_id=video_id
+            profile_id=int(active_profile),
+            video_id=int(video_id)
         )
 
         if not result:
@@ -895,7 +920,10 @@ def mark_unwatched() -> Response:
     video_id = data.get("video_id", None)
 
     if not video_id:
-        return api_error(error="Missing 'video_id' in request data")
+        return api_error(
+            error="Missing 'video_id' in request data",
+            status=400
+        )
 
     logging.info(
         f"Marking video {video_id} as unwatched "

@@ -58,10 +58,10 @@
 9. Performance
     * [ ] Home page; 16s loading time
     * [ ] Character pages; 24s to load the 'Aaron' profile (http://localhost:5000/character/230)
-    * [ ] Speaker pages; 67s to load 'Anthony Morris'
-    * [ ] Scripture pages; 38s to load Heb 11:6
-    * [ ] Location pages; 26s to load 'Africa'
-    * [ ] Tag pages; 4:26 to load 'faith'
+    * [ ] Speaker pages; 67s to load 'Anthony Morris' (http://localhost:5000/speaker/284)
+    * [ ] Scripture pages; 38s to load Heb 11:6 (http://localhost:5000/scripture/1679)
+    * [ ] Location pages; 26s to load 'Africa' (http://localhost:5000/location/15)
+    * [ ] Tag pages; 4:26 to load 'faith' (http://localhost:5000/tag/971)
     * [ ] Video detail; 22s to load '2026 GB update #1' (http://localhost:5000/video/3083)
     * [ ] Themes; 93s to load 'Powerful by Faith' (http://localhost:5000/theme/2021_powerful_by_faith)
     * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
@@ -71,6 +71,7 @@
     * [x] In categories, watch status on individual videos is not showing
     * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
     * [x] 'Logging Error' at terminal when searching with ElasticSearch
+    * [x] Cannot mark videos as watched
     * [ ] Searches sometimes throw unicode errors in the terminal
     * [ ] Profile edits
         * Profile updates work successfully (eg, name, clearing watch history)
@@ -85,10 +86,6 @@
             * DEBUG - Module: api_profile.py, Function: get_profile
             * ERROR - Profile with ID 6 not found.
         * Page loads fine, nothing in console
-    * [ ] Cannot mark videos as watched
-        * Does not work on individual videos
-        * Does not work in the user's profile
-        * Silent error
     * [ ] `/api/search` doesn't seems to be enforcing the page size limit
 
 
@@ -218,6 +215,8 @@
     * DELETE /api/profile/in_progress
         * Need to test that we can remove an in progress video
         * However, there needs to be one to remove
+    * POST /api/profile/mark_watched
+        * Test marking a video as watched
 * Not yet testing endpoints that update the database
     * POST /api/videos/metadata
     * POST /api/videos/add

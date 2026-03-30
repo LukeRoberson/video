@@ -18,20 +18,20 @@ API endpoints that relate to profile management
 
 **Endpoint Summary**
 
-| Endpoint                            | Description                                  |
-| ----------------------------------- | -------------------------------------------- |
-| /                                   | Get all profiles                             |
-| /{{profile_id}}                     | Get a specific profile                       |
-| /create                             | Create a profile                             |
-| /delete{{profile_id}}               | Delete a profile                             |
-| /update/{{profile_id}}              | Update a profile                             |
-| clear_history/{{profile_id}}        | Clear a user's watch history                 |
-| mark_watched                        | Checks watch status for a video*             |
-| mark_watched_bulk                   | Check watch status on multiple videos*       |
-| mark_watched                        | Mark a video as watched*                     |
-| mark_unwatched                      | Mark a video as unwatched*                   |
-| watch_history                       | Check watch history for a profile*           |
-| in_progress                         | Manage in-progress status for a video        |
+| Endpoint                            | Description                                  | Swagger UI |
+| ----------------------------------- | -------------------------------------------- | ---------- |
+| /                                   | Get all profiles                             |            |
+| /{{profile_id}}                     | Get a specific profile                       |            |
+| /create                             | Create a profile                             |            |
+| /delete{{profile_id}}               | Delete a profile                             |            |
+| /update/{{profile_id}}              | Update a profile                             |            |
+| clear_history/{{profile_id}}        | Clear a user's watch history                 |            |
+| mark_watched                        | Checks watch status for a video              |            |
+| mark_watched_bulk                   | Check watch status on multiple videos        | Done       |
+| mark_watched                        | Mark a video as watched                      | Done       |
+| mark_unwatched                      | Mark a video as unwatched                    | Done       |
+| watch_history                       | Check watch history for a profile*           |            |
+| in_progress                         | Manage in-progress status for a video        |            |
 </br></br>
 
 
@@ -1058,51 +1058,13 @@ This checks against a profile ID included in the request
 
 **Description**
 
-Mark a video as watched.
-
-This is performed on the active profile for this session.
-
-Note: The active profile will be migrated to the frontend in future.
+Mark a video as watched for a specific profile.
 </br></br>
 
 
-**Method**
-
-POST
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-| Field       | Type    | Description                     |
-| ----------- | ------- | ------------------------------- |
-| video_id    | integer | The video ID to mark as watched |
-</br></br>
-
-
-```json
-{
-    "video_id": 1
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-Returns a simple message indicating success or failure.
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
 
 
@@ -1113,49 +1075,12 @@ Returns a simple message indicating success or failure.
 
 **Description**
 
-Mark a video as unwatched.
-
-This is performed on the active profile for this session.
-
-Note: The active profile will be migrated to the frontend in future.
+Mark a video as unwatched for a given profile ID.
 </br></br>
 
 
-**Method**
-
-POST
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-The video to mark as unwatched.
-</br></br>
-
-
-| Field       | Type    | Description                    |
-| ----------- | ------- | ------------------------------ |
-| video_id    | integer | The video to mark as unwatched |
-</br></br>
-
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-A simple message to indicate the success or failure of the operation.
-</br></br>
-
-
 

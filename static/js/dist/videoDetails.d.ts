@@ -9,7 +9,7 @@ declare const VideoDetailsConfig: {
     /** API base URL */
     readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint for marking videos as watched */
-    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched/{id}";
+    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched";
     /** API endpoint for marking videos as unwatched */
     readonly MARK_UNWATCHED_ENDPOINT: "/api/profile/mark_unwatched";
     /** Content type for JSON requests */
@@ -53,6 +53,7 @@ declare class VideoDetailsController {
     private handleSubmit;
     /**
      * Mark video as watched
+     * @param profileId - ID of the user's profile
      * @param videoId - ID of video to mark as watched
      */
     private markWatched;

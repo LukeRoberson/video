@@ -33,7 +33,10 @@
 ] %}
 
 <!-- The card with the main content-->
-<div class="container d-flex justify-content-center my-5" style="min-height: 40vh;">
+<div class="container d-flex justify-content-center my-5"
+    style="min-height: 40vh;"
+    data-profile-id="{{ session.get('active_profile', 'guest') }}"
+>
     <div class="card shadow-lg bg-dark text-white" style="width: 1000px; border-radius: 18px;">
         <div class="card-body">
 
