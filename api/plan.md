@@ -56,7 +56,7 @@
         * [x] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
-    * [ ] Home page; 16s loading time
+    * [x] Home page; Down to 5s loading time
     * [ ] Character pages; 24s to load the 'Aaron' profile (http://localhost:5000/character/230)
     * [ ] Speaker pages; 67s to load 'Anthony Morris' (http://localhost:5000/speaker/284)
     * [ ] Scripture pages; 38s to load Heb 11:6 (http://localhost:5000/scripture/1679)
@@ -108,12 +108,14 @@
     * /api/videos/filter?cat=1&latest=1
     * /api/videos/filter?cat=3&latest=1
     * /api/videos/filter?latest=9
-* Updated (11s loading time)
+* Updated (5s loading time)
     * REMOVED: GET /api/categories
         * Now uses a cache to improve performance
     * GET /api/profile/4
         * This is being called as part of the base template
         * This is client-side, so not really an issue
+    * Added workers to handle API calls
+    * Added 'as_complete' for better worker efficiency
 
 * Character details page
     * `web_dynamic`
@@ -253,6 +255,12 @@
 * Create helper functions for reused components:
     * Check if a video exists
     * Logging debugs and warnings during field validation
+* Caching
+    * Cache theme banners in AppCache (like category IDs); Improve loading the home page
+* get_bulk endpoint
+    * gets details of several videos in one API call
+    * processing is still a synchronous loop of queries
+    * Use a single SQL query to get all at once
 
 
 
@@ -298,5 +306,9 @@
 * Live version has a bug while showing thumbnail for snippets (noticed on themes)
     * Does the dev version have this too?
 * Do we really need both POST and UPDATE methods for updating in progress videos?
+* API batching
+    * How can we do batching?
+    * Eg, home page has multiple calls to /api/videos/filter
+    * Is there a way to run this as a batch?
 
 

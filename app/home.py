@@ -4,7 +4,10 @@ Module: home.py
 Define flask route for the home page.
 
 Functions:
-    TBA
+    - ensure_profile_selected:
+        A before_request function that checks if a profile is selected.
+    - inject_admin_status:
+        Injects the admin status into the template context.
 
 Routes:
     - /
@@ -43,6 +46,7 @@ from flask import (
     session,
     request
 )
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import (
     Dict,
     Any,
@@ -138,7 +142,9 @@ def inject_admin_status() -> Dict[str, Any]:
 )
 def home() -> Response:
     """
-    A very simple home page that renders the main HTML template.
+    A home page that renders the main HTML template.
+        API calls are separatted into helper functions.
+        Some of these are called in parallel.
 
     Returns:
         Response: A rendered HTML 'welcome' page
@@ -155,7 +161,7 @@ def home() -> Response:
         if profile_id is None:
             return []
 
-        response = requests.get(
+        response = api_session.get(
             url='http://localhost:5010/api/profile/in_progress',
             params={'profile': profile_id},
         )
@@ -170,7 +176,7 @@ def home() -> Response:
             list: A list of the latest monthly programs.
         """
 
-        return requests.get(
+        return api_session.get(
             url='http://localhost:5010/api/videos/filter',
             params={
                 'cat': categories.get('Monthly Programs', None),
@@ -186,7 +192,7 @@ def home() -> Response:
             list: A list of the latest news and announcements.
         """
 
-        return requests.get(
+        return api_session.get(
             url='http://localhost:5010/api/videos/filter',
             params={
                 'cat': categories.get('News and Announcements', None),
@@ -202,118 +208,155 @@ def home() -> Response:
             list: A list of the latest videos.
         """
 
-        return requests.get(
+        return api_session.get(
             url='http://localhost:5010/api/videos/filter',
             params={'latest': 9},
         ).json().get('data', [])
 
-    # Get a list of files in the themes directory
-    themes_dir = os.path.join('static', 'themes')
-    themes = []
-    if os.path.exists(themes_dir):
-        themes = [
-            f for f in os.listdir(themes_dir)
-            if (
-                os.path.isfile(os.path.join(themes_dir, f)) and
-                f.lower() != 'sample.yaml'
-            )
-        ]
+    def fetch_video_details() -> list:
+        """
+        For each in-progress video, get the video details from the API
+            and merge them together.
+        Sort the list by the most recently updated videos first.
 
-    # Get banners and titles from each theme file
-    banners = []
-    for theme in themes:
-        with open(os.path.join(themes_dir, theme), 'r', encoding='utf-8') as f:
-            try:
-                theme_data = list(yaml.safe_load_all(f))
-                banner = {
-                    'image': theme_data[0].get('banner', None),
-                    'title': theme_data[0].get('title', 'No Title'),
-                    'path': theme[:-5],  # Remove .yaml extension
-                }
-                banners.append(banner)
-            except yaml.YAMLError as e:
-                print(f"Error loading theme file {theme}: {e}")
-                themes.remove(theme)
+        Returns:
+            list: A list of in-progress videos with their details merged in.
+        """
 
-    # Get the session profile ID from the request context
-    in_progress_videos = []
+        # API call to get details for all in-progress videos
+        response = api_session.post(
+            url='http://localhost:5010/api/videos/get_bulk',
+            json={'video_ids': [v['video_id'] for v in in_progress_videos]}
+        )
+        data = response.json().get('data', [])
+
+        # Merge the in-progress video data with the API video details
+        video_list = []
+        for video in in_progress_videos:
+            entry = {}
+            entry['current_time'] = video['current_time']
+            entry['profile_id'] = video['profile_id']
+            entry['updated_at'] = video['updated_at']
+            entry['video_id'] = video['video_id']
+
+            for i in data:
+                if i['id'] == video['video_id']:
+                    entry['name'] = i.get('name')
+                    entry['thumbnail'] = i.get('thumbnail')
+                    entry['duration'] = i.get('duration')
+                    break
+
+            video_list.append(entry)
+
+        # Sort, so the most recently updated videos are first
+        video_list.sort(
+            key=lambda v: v.get('updated_at', ''),
+            reverse=True
+        )
+
+        return video_list
+
+    def fetch_themes() -> list:
+        """
+        Get the themes for the home page, and extract the banner image
+            and title from each theme file.
+
+        Returns:
+            list: A list of dictionaries containing the banner image,
+                title, and path for each theme.
+        """
+
+        themes = []
+        banners = []
+
+        # Get a list of files in the themes directory
+        themes_dir = os.path.join('static', 'themes')
+
+        if os.path.exists(themes_dir):
+            themes = [
+                f for f in os.listdir(themes_dir)
+                if (
+                    os.path.isfile(os.path.join(themes_dir, f)) and
+                    f.lower() != 'sample.yaml'
+                )
+            ]
+
+        # Get banners and titles from each theme file
+        for theme in themes:
+            with open(
+                os.path.join(themes_dir, theme),
+                'r',
+                encoding='utf-8'
+            ) as f:
+                try:
+                    theme_data = list(yaml.safe_load_all(f))
+                    banner = {
+                        'image': theme_data[0].get('banner', None),
+                        'title': theme_data[0].get('title', 'No Title'),
+                        'path': theme[:-5],  # Remove .yaml extension
+                    }
+                    banners.append(banner)
+                except yaml.YAMLError as e:
+                    print(f"Error loading theme file {theme}: {e}")
+                    themes.remove(theme)
+
+        return banners
+
+    # Create a single requests session for all API calls
+    api_session = requests.Session()
+
+    # Get the session profile ID
     profile_id = session.get('active_profile', None)
-
-    # API: Get in progress videos
-    in_progress_videos = fetch_in_progress()
-
-    # API: Get the details for each in-progress video
-    response = requests.post(
-        url='http://localhost:5010/api/videos/get_bulk',
-        json={'video_ids': [v['video_id'] for v in in_progress_videos]}
-    )
-    data = response.json().get('data', [])
-
-    # Merge the in-progress video data with the API video details
-    updated_list = []
-    for video in in_progress_videos:
-        entry = {}
-        entry['current_time'] = video['current_time']
-        entry['profile_id'] = video['profile_id']
-        entry['updated_at'] = video['updated_at']
-        entry['video_id'] = video['video_id']
-
-        for i in data:
-            if i['id'] == video['video_id']:
-                entry['name'] = i.get('name')
-                entry['thumbnail'] = i.get('thumbnail')
-                entry['duration'] = i.get('duration')
-                break
-
-        updated_list.append(entry)
-
-    # Sort, so the most recently updated videos are first
-    updated_list.sort(
-        key=lambda v: v.get('updated_at', ''),
-        reverse=True
-    )
 
     # Get category IDs from the cache (cached at startup)
     categories = app_cache.get_category_ids()
 
-    # API: Get the latest monthly programs video
-    monthly = fetch_monthly()
-    # monthly = None
-    # monthly = requests.get(
-    #     url='http://localhost:5010/api/videos/filter',
-    #     params={
-    #         'cat': categories.get('Monthly Programs', None),
-    #         'latest': 1
-    #     }
-    # ).json().get('data', [])
+    # Initialise a dict for storing results of futures
+    results = {}
 
-    # API: Get the latest news video
-    news = fetch_news()
-    # news = None
-    # news = requests.get(
-    #     url='http://localhost:5010/api/videos/filter',
-    #     params={
-    #         'cat': categories.get('News and Announcements', None),
-    #         'latest': 1
-    #     }
-    # ).json().get('data', [])
+    # Initialize a variable to hold the future for video details
+    #   This relies on the result of the 'in progress' lookup
+    future_video_details = None
 
-    # API: Get the latest videos
-    latest = fetch_latest()
-    # latest = requests.get(
-    #     url='http://localhost:5010/api/videos/filter',
-    #     params={
-    #         'latest': 9
-    #     }
-    # ).json().get('data', [])
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        # Start the API calls in parallel and store the futures in a dict
+        pending = {
+            executor.submit(fetch_in_progress): 'in_progress',
+            executor.submit(fetch_monthly): 'monthly',
+            executor.submit(fetch_news): 'news',
+            executor.submit(fetch_latest): 'latest',
+            executor.submit(fetch_themes): 'themes',
+        }
+
+        # As each future completes, store the result in the results dict
+        for future in as_completed(pending):
+            key = pending[future]
+            results[key] = future.result()
+
+            # When the 'in progress' videos are fetched,
+            #   start the next API call to get their details
+            if key == 'in_progress':
+                # Check that there are actually in-progress videos
+                if len(results['in_progress']) > 0:
+                    in_progress_videos = results['in_progress']
+                    future_video_details = executor.submit(fetch_video_details)
+                else:
+                    results['in_progress'] = []
+
+    # Extract the results
+    in_progress_list = (
+        future_video_details.result()
+        if future_video_details
+        else []
+    )
 
     return make_response(
         render_template(
             "home.html",
-            banners=banners,
-            in_progress_videos=updated_list,
-            latest_monthly=monthly[0] if monthly else None,
-            latest_news=news[0] if news else None,
-            latest_videos=latest,
+            banners=results.get('themes', []),
+            in_progress_videos=in_progress_list,
+            latest_monthly=(results.get('monthly') or [None])[0],
+            latest_news=(results.get('news') or [None])[0],
+            latest_videos=results.get('latest', []),
         )
     )
