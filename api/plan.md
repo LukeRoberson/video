@@ -105,13 +105,10 @@
 * API calls:
     * GET /api/profile/in_progress?profile={ID}
     * POST /api/videos/get_bulk
-    * GET /api/categories/Monthly%20Programs
-    * GET /api/categories/News%20and%20Announcements
     * /api/videos/filter?cat=1&latest=1
     * /api/videos/filter?cat=3&latest=1
     * /api/videos/filter?latest=9
-    * GET /api/profile/4
-* Updated (5x calls, 11s loading time)
+* Updated (11s loading time)
     * REMOVED: GET /api/categories
         * Now uses a cache to improve performance
     * GET /api/profile/4
@@ -137,25 +134,57 @@
     * `web_dynamic`
     * `speaker_details()`
 * API calls:
-    * Checks watch status on every video
+    * /api/speakers
+        * Gets details for the specific speaker
+    * /api/videos/filter
+        * Gets videos associated with the speaker
+    * /api/profile/mark_watched
+        * Checks if each video has been watched by the current profile
+* Updates:
+    * Loads in 8s for 'Anthony Morris'
+    * Bulk check of watched videos, rather than one at a time
 
 * Scripture details page
     * `web_dynamic`
     * `scripture_details()`
 * API calls:
-    * Checks watch status on every video
+    * /api/scriptures
+        * Gets details for the specific scripture
+    * /api/videos/filter
+        * Gets videos associated with the scripture
+    * /api/profile/mark_watched
+        * Checks if each video has been watched by the current profile
+* Updates:
+    * Loads in 7s for Heb 11:6
+    * Bulk check of watched videos, rather than one at a time
 
 * Location detail page
     * `web_dynamic`
     * `location_details()`
 * API calls:
-    * Checks watch status on every video
+    * /api/locations
+        * Gets details for the specific location
+    * /api/videos/filter
+        * Gets videos associated with the location
+    * /api/profile/mark_watched
+        * Checks if each video has been watched by the current profile
+* Updates:
+    * Loads in 7s for 'Africa'
+    * Bulk check of watched videos, rather than one at a time
 
 * Tag detail page
     * `web_dynamic`
     * `tag_details()`
 * API calls:
-    * Checks watch status on every video
+    * /api/tags
+        * Gets details for the specific tag
+    * /api/videos/filter
+        * Gets videos associated with the tag
+    * /api/profile/mark_watched
+        * Checks if each video has been watched by the current profile
+* Updates:
+    * Loads in 8s for 'faith'
+    * Bulk check of watched videos, rather than one at a time
 
 * Video details
     * `web_dynamic`
@@ -163,19 +192,55 @@
     * Bug: Error retrieving speakers for video 3083: Cannot operate on a closed database.
     * Bug: An error occurred while retrieving similar videos for video ID 3083
 * API calls:
-    * About 13 API calls (video details, various metadata, similarity, watch status on similar videos, etc)
+    * /api/videos/get_bulk
+        * Gets the details for the video
+    * /api/categories/video/{video_id}
+        * Gets categories the video belongs to
+    * /api/tags/video/{video_id}
+        * Gets tags associated with a video
+    * /api/locations/video/{video_id}
+        * Gets locations associated with a video
+    * /api/speakers/video/{video_id}
+        * Gets speakers associated with the video
+    * /api/characters/video/{video_id}
+        * Gets characters associated with a video
+    * /api/scriptures/video/{video_id}
+        * Gets scriptures associated with a video
+    * /api/profile/mark_watched
+        * Check if the video has been watched on this profile
+    * /api/profile/in_progress
+        * Check if the video is in progress for the profile
+    * /api/similarity/{video_id}
+        * Get a list of similar videos
+    * /api/videos/get_bulk
+        * x3
+        * Get details for each similar video
 
 * Themes pages
     * `web_dynamic`
     * `theme()`
 * API calls:
-    * Separate API call for every video, rather than getting them in bulk
+    * /api/videos/get_bulk
+        * Gets video details
+        * This is a synchronous loop for every video in the file
 
 * Categories
+    * `web_categories.py`
+    * `render_category_page()`
 * API calls:
-    * Still making API calls to get category IDs
-    * Use cached category IDs
-
+    * /api/categories/{category}
+        * Resolve the main category name to ID
+        * Can make use of the cache now
+    * /api/categories/{category}
+        * Resolve each subcategory name to an ID
+        * Called several times synchronously
+        * Can make use of the cache now
+    * /api/categories/{main_id}/{sub_cat_id}
+        * Get a list of videos in each main/sub category combo
+    * /api/profile/mark_watched_bulk
+        * Check watch status of videos
+        * Run for each main/sub category combo
+        * Already checks all videos in a single request
 
 
 

@@ -715,7 +715,7 @@ class ProgressTracker {
      */
     private updateProgress(currentTime: number): void {
         fetch(
-            `${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`,
+            `${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}?profile=${this.profileId}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -760,7 +760,6 @@ class ProgressTracker {
      * Removes theatre mode class from container if active.
      */
     private handleVideoEnd(): void {
-        console.log('Video playback completed.');
         const container = this.player.el().parentElement;
         if (container && container.classList.contains('theatre-mode')) {
             container.classList.remove('theatre-mode');
@@ -805,21 +804,15 @@ class UrlTimeHandler {
      * Initializes the URL time handler by checking for 't' and 'end' parameters or data attributes.
      */
     private init(): void {
-        console.log('UrlTimeHandler init() called');
-        
         // Check URL parameters first (takes priority)
         const urlParams = new URLSearchParams(window.location.search);
         const urlStartTime = urlParams.get('t');
         const urlEndTime = urlParams.get('end');
         
-        console.log('URL params - t:', urlStartTime, 'end:', urlEndTime);
-        
         if (urlStartTime) {
             const start = parseInt(urlStartTime, 10);
             const end = urlEndTime ? parseInt(urlEndTime, 10) : null;
             this.snippetSource = 'url';
-            
-            console.log('Setting up URL snippet - start:', start, 'end:', end);
             
             if (end && end > start) {
                 this.setupSnippet(start, end);
@@ -834,14 +827,10 @@ class UrlTimeHandler {
         const themeStartTime = videoElement.getAttribute('data-snippet-start');
         const themeEndTime = videoElement.getAttribute('data-snippet-end');
         
-        console.log('Theme data attributes - start:', themeStartTime, 'end:', themeEndTime);
-        
         if (themeStartTime && themeEndTime) {
             const start = parseInt(themeStartTime, 10);
             const end = parseInt(themeEndTime, 10);
             this.snippetSource = 'theme';
-            
-            console.log('Setting up theme snippet - start:', start, 'end:', end);
             
             if (end > start) {
                 this.setupSnippet(start, end);
@@ -852,11 +841,8 @@ class UrlTimeHandler {
             // Just start time, no end time
             const start = parseInt(themeStartTime, 10);
             this.snippetSource = 'theme';
-            console.log('Setting up theme start time only:', start);
             this.jumpToTime(start);
         }
-        
-        console.log('No snippet parameters found');
     }
 
     /**
@@ -917,12 +903,8 @@ class UrlTimeHandler {
             </div>
         `;
         
-        console.log('Snippet indicator HTML:', this.snippetIndicator.innerHTML);
-        
         // Add to player
         this.player.el().appendChild(this.snippetIndicator);
-        
-        console.log('Snippet indicator added to player');
         
         // Add close button event listener for URL-based snippets
         if (this.snippetSource === 'url') {
@@ -946,27 +928,19 @@ class UrlTimeHandler {
         
         const createHighlight = (): void => {
             const duration = this.player.duration();
-            console.log('Player duration:', duration);
             
             if (duration > 0) {
                 const startPercent = (startTime / duration) * 100;
                 const endPercent = (endTime / duration) * 100;
                 
-                console.log('Percentages - start:', startPercent, 'end:', endPercent);
-                
                 const progressControl = this.player.controlBar.progressControl.el();
-                console.log('Progress control element:', progressControl);
                 
                 const highlight = document.createElement('div');
                 highlight.className = 'snippet-highlight';
                 highlight.style.left = `${startPercent}%`;
                 highlight.style.width = `${endPercent - startPercent}%`;
                 
-                console.log('Highlight element created:', highlight);
-                console.log('Highlight styles:', highlight.style.cssText);
-                
                 progressControl.appendChild(highlight);
-                console.log('Highlight appended to progress control');
             } else {
                 console.log('Duration is still 0, retrying...');
             }
@@ -1327,7 +1301,6 @@ class SubtitleManager {
         fetch(subtitleUrl, { method: 'HEAD' })
             .then(response => {
                 if (response.ok) {
-                    console.log(`Subtitle file found: ${subtitleUrl}`);
                     this.addSubtitleTrack(subtitleUrl);
                 } else {
                     console.log(`No subtitle file found: ${subtitleUrl}`);
@@ -1352,8 +1325,6 @@ class SubtitleManager {
                 src: subtitleUrl,
                 default: false  // Set to true to enable by default
             }, false);
-            
-            console.log(`Subtitle track added: ${subtitleUrl}`);
         });
     }
 }

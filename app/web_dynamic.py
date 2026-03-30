@@ -8,8 +8,6 @@ Defines a Flask blueprint for dynamic web routes.
 Functions:
     - check_watch_status:
         Checks if videos in a list have been watched by the user.
-    - set_watched_status:
-        Sets the watched status for each video in a list.
     - get_search_service:
         Retrieves or creates a SearchService instance.
 
@@ -109,40 +107,6 @@ def check_watch_status(
             f"Failed to fetch watched status for videos: "
             f"{response.status_code}"
         )
-
-
-def set_watched_status(
-    videos: list,
-    profile_id: int,
-) -> None:
-    """
-    Check each video in the list to see if it has been watched by the user.
-    If it has, mark it as watched by adding a 'watched' key with value True.
-    This is used to display a watched badge on the video thumbnails.
-
-    Args:
-        videos (list):
-            A list of video dictionaries to update with watched status.
-        profile_id (int):
-            The ID of the user profile to check watched status against.
-
-    Returns:
-        None: The function modifies the videos list in place.
-    """
-
-    # Loop through each video and check if it has been watched
-    for video in videos:
-        # API: Check if video is marked as watched
-        response = requests.get(
-            'http://localhost:5010/api/profile/mark_watched',
-            params={
-                'video_id': video['id'],
-                'profile': profile_id
-            },
-        )
-
-        # Set the 'watched' key to True or False
-        video['watched'] = response.json()['data'].get('watched', False)
 
 
 dynamic_bp = Blueprint(
@@ -450,7 +414,7 @@ def tag_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        set_watched_status(videos, active_profile)
+        check_watch_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -549,7 +513,7 @@ def location_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        set_watched_status(videos, active_profile)
+        check_watch_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -630,7 +594,7 @@ def speaker_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        set_watched_status(videos, active_profile)
+        check_watch_status(videos, active_profile)
 
     return make_response(
         render_template(
@@ -784,7 +748,7 @@ def scripture_details(
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
-        set_watched_status(videos, active_profile)
+        check_watch_status(videos, active_profile)
 
     return make_response(
         render_template(

@@ -46,6 +46,7 @@ from flask import Flask
 from app.web_categories import category_bp
 from app.web_dynamic import dynamic_bp
 from app.web import web_bp
+from app.home import home_bp
 from app.web_errors import (
     error_bp,
     forbidden,
@@ -197,6 +198,7 @@ def create_app():
     # Import and register blueprints
     app.register_blueprint(profile_api_bp)
     app.register_blueprint(web_bp)
+    app.register_blueprint(home_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(dynamic_bp)
     app.register_blueprint(error_bp)

@@ -625,6 +625,65 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /api/profile/in_progress:
+    post:
+      tags: [Profiles]
+      summary: Update in progress video status
+      description: |
+        Manages in-progress video tracking for user profiles.
+        This adds a video to the list of in progress videos for the specific profile, and stores the playback location of the video.
+      parameters:
+        - in: query
+          name: profile
+          required: false
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to update in-progress videos for. 
+            If not provided, 'guest' will be assumed and video progress will not be tracked.
+          example: 1
+      requestBody:
+        description: The video ID and current playback time to mark as in-progress
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: integer
+                  description: The ID of the video to mark as in-progress
+                  example: 123
+                current_time:
+                  type: integer
+                  description: The current playback time of the video in seconds
+                  example: 1200
+      responses:
+        '201':
+          summary: Successful response
+          description: In-progress videos updated successfully for the profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: In-progress videos updated successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   # Profiles to do:
     # /api/profiles
     # /api/profiles/{{profile_id}}
