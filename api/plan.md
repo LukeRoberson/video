@@ -57,11 +57,11 @@
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
     * [x] Home page; Down to 5s loading time
-    * [ ] Character pages; 24s to load the 'Aaron' profile (http://localhost:5000/character/230)
-    * [ ] Speaker pages; 67s to load 'Anthony Morris' (http://localhost:5000/speaker/284)
-    * [ ] Scripture pages; 38s to load Heb 11:6 (http://localhost:5000/scripture/1679)
-    * [ ] Location pages; 26s to load 'Africa' (http://localhost:5000/location/15)
-    * [ ] Tag pages; 4:26 to load 'faith' (http://localhost:5000/tag/971)
+    * [x] Character pages; Down to 5s to load the 'Aaron' profile
+    * [x] Speaker pages; Down to 5s to load 'Anthony Morris'
+    * [x] Scripture pages; Down to 5s to load Heb 11:6
+    * [x] Location pages; Down to 6s to load 'Africa'
+    * [x] Tag pages; Down to 6s to load 'faith'
     * [ ] Video detail; 22s to load '2026 GB update #1' (http://localhost:5000/video/3083)
     * [ ] Themes; 93s to load 'Powerful by Faith' (http://localhost:5000/theme/2021_powerful_by_faith)
     * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
@@ -87,6 +87,7 @@
             * ERROR - Profile with ID 6 not found.
         * Page loads fine, nothing in console
     * [ ] `/api/search` doesn't seems to be enforcing the page size limit
+    * [ ] jinja2.exceptions.TemplateNotFound: 404.html
 
 
 </br></br>
@@ -98,95 +99,6 @@
 # Notes
 
 ## Performance
-
-* Home page
-    * `web.py`
-    * `home()`
-* API calls:
-    * GET /api/profile/in_progress?profile={ID}
-    * POST /api/videos/get_bulk
-    * /api/videos/filter?cat=1&latest=1
-    * /api/videos/filter?cat=3&latest=1
-    * /api/videos/filter?latest=9
-* Updated (5s loading time)
-    * REMOVED: GET /api/categories
-        * Now uses a cache to improve performance
-    * GET /api/profile/4
-        * This is being called as part of the base template
-        * This is client-side, so not really an issue
-    * Added workers to handle API calls
-    * Added 'as_complete' for better worker efficiency
-
-* Character details page
-    * `web_dynamic`
-    * `character_details()`
-* API calls:
-    * GET /api/characters
-        * Gets details for a specific character
-    * GET /api/videos/filter
-        * Gets a list of videos for this character
-    * GET /api/profile/mark_watched
-        * Checks if videos have been watched by the current profile
-        * One call for each video, means many calls
-* Updated:
-    * Loads in 7s for 'Aaron'
-    * Bulk check of watched videos, rather than one at a time
-
-* Speaker details page
-    * `web_dynamic`
-    * `speaker_details()`
-* API calls:
-    * /api/speakers
-        * Gets details for the specific speaker
-    * /api/videos/filter
-        * Gets videos associated with the speaker
-    * /api/profile/mark_watched
-        * Checks if each video has been watched by the current profile
-* Updates:
-    * Loads in 8s for 'Anthony Morris'
-    * Bulk check of watched videos, rather than one at a time
-
-* Scripture details page
-    * `web_dynamic`
-    * `scripture_details()`
-* API calls:
-    * /api/scriptures
-        * Gets details for the specific scripture
-    * /api/videos/filter
-        * Gets videos associated with the scripture
-    * /api/profile/mark_watched
-        * Checks if each video has been watched by the current profile
-* Updates:
-    * Loads in 7s for Heb 11:6
-    * Bulk check of watched videos, rather than one at a time
-
-* Location detail page
-    * `web_dynamic`
-    * `location_details()`
-* API calls:
-    * /api/locations
-        * Gets details for the specific location
-    * /api/videos/filter
-        * Gets videos associated with the location
-    * /api/profile/mark_watched
-        * Checks if each video has been watched by the current profile
-* Updates:
-    * Loads in 7s for 'Africa'
-    * Bulk check of watched videos, rather than one at a time
-
-* Tag detail page
-    * `web_dynamic`
-    * `tag_details()`
-* API calls:
-    * /api/tags
-        * Gets details for the specific tag
-    * /api/videos/filter
-        * Gets videos associated with the tag
-    * /api/profile/mark_watched
-        * Checks if each video has been watched by the current profile
-* Updates:
-    * Loads in 8s for 'faith'
-    * Bulk check of watched videos, rather than one at a time
 
 * Video details
     * `web_dynamic`

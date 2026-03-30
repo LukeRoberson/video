@@ -693,7 +693,6 @@ paths:
     # /api/profiles/watch_history
     # /api/profiles/clear_history/{{profile_id}}
     # GET /api/profiles/in_progress
-    # POST /api/profiles/in_progress
     # DELETE /api/profiles/in_progress
     # GET /api/profiles/mark_watched
 

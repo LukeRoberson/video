@@ -28,6 +28,8 @@ Routes:
 Dependancies:
     Flask: To define the blueprint for web pages.
     logging: For logging debug information.
+    requests: For making API calls to fetch data for the pages.
+    ThreadPoolExecutor: For concurrent API calls.
 
 Custom Dependencies:
     app.theme:
@@ -47,6 +49,7 @@ from flask import (
     session,
     current_app
 )
+from concurrent.futures import ThreadPoolExecutor
 import random
 import os
 import logging
@@ -58,8 +61,9 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Configuration for search API
+# Configuration
 SEARCH_API_BASE_URL = 'http://localhost:5010'
+PIC_PATH = "/static/img/characters/"
 
 
 def check_watch_status(
@@ -355,6 +359,12 @@ def tag_details(
     """
     Render the details of a specific tag and the videos associated with it.
 
+    Functions:
+        - get_tag_details:
+            Fetches the details of a specific tag from the API.
+        - get_tag_videos:
+            Fetches the videos associated with a tag from the API.
+
     Args:
         tag_id (int): The ID of the tag to fetch details for.
 
@@ -363,28 +373,69 @@ def tag_details(
         If the tag is not found, a 404 error is returned.
     """
 
-    # API: Get tag details
-    param = {
-        'tag_id': tag_id
-    }
-    response = requests.get(
-        'http://localhost:5010/api/tags',
-        params=param
-    )
+    def get_tag_details() -> dict | None:
+        """
+        Fetch the details of a specific tag from the API.
 
-    if response.status_code == 200:
-        tag = response.json().get('data', {})
-        if len(tag) == 0:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Tag not found in API"
-                ),
-                404
-            )
-        tag = tag[0]
+        Returns:
+            dict:
+                A dictionary containing tag details if found,
+                else None.
+        """
 
-    else:
+        # API: Get tag details
+        param = {
+            'tag_id': tag_id
+        }
+        response = requests.get(
+            'http://localhost:5010/api/tags',
+            params=param
+        )
+
+        if response.status_code == 200:
+            tag = response.json().get('data', {})
+            if len(tag) == 0:
+                tag = None
+            else:
+                tag = tag[0]
+
+        else:
+            tag = None
+
+        return tag
+
+    def get_tag_videos() -> list | None:
+        """
+        Fetch the videos associated with a specific tag from the API.
+
+        Returns:
+            list: A list of videos if found,
+            else None.
+        """
+
+        # API: Fetch videos for the tag
+        response = requests.get(
+            'http://localhost:5010/api/videos/filter',
+            params={
+                'tag': tag_id
+            },
+        )
+        if response.status_code == 200:
+            videos = response.json().get('data', [])
+        else:
+            videos = None
+
+        return videos
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_tag_details = executor.submit(get_tag_details)
+        future_tag_videos = executor.submit(get_tag_videos)
+
+        tag = future_tag_details.result()
+        videos = future_tag_videos.result()
+
+    # Validate tag details
+    if tag is None:
         return make_response(
             render_template(
                 "404.html",
@@ -393,27 +444,9 @@ def tag_details(
             404
         )
 
-    # API: Fetch videos for the tag
-    response = requests.get(
-        'http://localhost:5010/api/videos/filter',
-        params={
-            'tag': tag_id
-        },
-    )
-    if response.status_code == 200:
-        videos = response.json().get('data', [])
-    else:
-        return make_response(
-            render_template(
-                "404.html",
-                message="No videos found for this tag"
-            ),
-            404
-        )
-
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile and active_profile != "guest":
+    if active_profile and active_profile != "guest" and videos is not None:
         check_watch_status(videos, active_profile)
 
     return make_response(
@@ -435,6 +468,12 @@ def location_details(
     """
     Details of a specific location and the videos associated with it.
 
+    Functions:
+        - get_location_details:
+            Fetches the details of a specific location from the API.
+        - get_location_videos:
+            Fetches the videos associated with a location from the API.
+
     Args:
         location_id (int): The ID of the location to fetch details for.
 
@@ -444,28 +483,68 @@ def location_details(
         If the location is not found, a 404 error is returned.
     """
 
-    # API: Get locations
-    param = {
-        'loc_id': location_id
-    }
-    response = requests.get(
-        'http://localhost:5010/api/locations',
-        params=param
-    )
+    def get_location_details() -> dict | None:
+        """
+        Fetch the details of a specific location from the API.
 
-    if response.status_code == 200:
-        location = response.json().get('data', [])
-        if len(location) == 0:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Location not found in API"
-                ),
-                404
-            )
-        location = location[0]
+        Returns:
+            dict:
+                A dictionary containing location details if found,
+                else None.
+        """
 
-    else:
+        param = {
+            'loc_id': location_id
+        }
+        response = requests.get(
+            'http://localhost:5010/api/locations',
+            params=param
+        )
+
+        if response.status_code == 200:
+            location = response.json().get('data', [])
+            if len(location) == 0:
+                location = None
+            else:
+                location = location[0]
+
+        else:
+            location = None
+
+        return location
+
+    def get_location_videos() -> list | None:
+        """
+        Fetch the videos associated with a specific location from the API.
+
+        Returns:
+            list: A list of videos if found,
+            else None.
+        """
+
+        # API: Fetch videos for the location
+        response = requests.get(
+            'http://localhost:5010/api/videos/filter',
+            params={
+                'loc': location_id
+            },
+        )
+        if response.status_code == 200:
+            videos = response.json().get('data', [])
+        else:
+            videos = None
+
+        return videos
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_location_details = executor.submit(get_location_details)
+        future_location_videos = executor.submit(get_location_videos)
+
+        location = future_location_details.result()
+        videos = future_location_videos.result()
+
+    # Validate location details
+    if location is None:
         logger.debug("Module: web_dynamic.py, Function: location_details")
         logger.error(
             f"Problems with API call to get location with ID {location_id}"
@@ -473,46 +552,15 @@ def location_details(
 
         return make_response(
             render_template(
-                "500.html",
-                message="Problems with API call to get location"
-            ),
-            500
-        )
-
-    # Handle errors where location is not found or API returns empty data
-    if len(location) == 0 or location is None:
-        logger.debug("Module: web_dynamic.py, Function: location_details")
-        logger.warning(f"Location with ID {location_id} not found in API")
-
-        return make_response(
-            render_template(
                 "404.html",
-                message="Location not found in API"
+                message="Location could not be found"
             ),
             404
         )
 
-    # API: Fetch videos for the location
-    response = requests.get(
-        'http://localhost:5010/api/videos/filter',
-        params={
-            'loc': location_id
-        },
-    )
-    if response.status_code == 200:
-        videos = response.json().get('data', [])
-    else:
-        return make_response(
-            render_template(
-                "404.html",
-                message="No videos found for this location"
-            ),
-            404
-        )
-
-    # Check watched status for the videos
+    # API: Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile and active_profile != "guest":
+    if active_profile and active_profile != "guest" and videos is not None:
         check_watch_status(videos, active_profile)
 
     return make_response(
@@ -534,6 +582,12 @@ def speaker_details(
     """
     Render the details of a specific speaker and the videos with them.
 
+    Functions:
+        - get_speaker_details:
+            Fetches the details of a specific speaker from the API.
+        - get_speaker_videos:
+            Fetches the videos associated with a speaker from the API.
+
     Args:
         speaker_id (int): The ID of the speaker to fetch details for.
 
@@ -542,29 +596,68 @@ def speaker_details(
         If the speaker is not found, a 404 error is returned.
     """
 
-    # API: Get speaker
-    param = {
-        'spk_id': speaker_id
-    }
-    response = requests.get(
-        'http://localhost:5010/api/speakers',
-        params=param
-    )
+    def get_speaker_details() -> dict | None:
+        """
+        Fetch the details of a specific speaker from the API.
 
-    if response.status_code == 200:
-        speaker = response.json().get('data', [])
-        if len(speaker) > 0:
-            speaker = speaker[0]
+        Returns:
+            dict:
+                A dictionary containing speaker details if found,
+                else None.
+        """
+
+        # API: Get speaker
+        param = {
+            'spk_id': speaker_id
+        }
+        response = requests.get(
+            'http://localhost:5010/api/speakers',
+            params=param
+        )
+
+        if response.status_code == 200:
+            speaker = response.json().get('data', [])
+            if len(speaker) > 0:
+                speaker = speaker[0]
+            else:
+                speaker = None
         else:
-            return make_response(
-                render_template(
-                    "404.html",
-                    message="Speaker not found in API"
-                ),
-                404
-            )
+            speaker = None
 
-    else:
+        return speaker
+
+    def get_speaker_videos() -> list | None:
+        """
+        Fetch the videos associated with a specific speaker from the API.
+
+        Returns:
+            list: A list of videos if found,
+            else None.
+        """
+
+        # API: Fetch videos for the speaker
+        response = requests.get(
+            'http://localhost:5010/api/videos/filter',
+            params={
+                'speak': speaker_id
+            },
+        )
+        if response.status_code == 200:
+            videos = response.json().get('data', [])
+        else:
+            videos = None
+
+        return videos
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_speaker_details = executor.submit(get_speaker_details)
+        future_speaker_videos = executor.submit(get_speaker_videos)
+
+        speaker = future_speaker_details.result()
+        videos = future_speaker_videos.result()
+
+    # Validate speaker details
+    if speaker is None:
         return make_response(
             render_template(
                 "404.html",
@@ -573,27 +666,9 @@ def speaker_details(
             404
         )
 
-    # API: Fetch videos associated with the speaker
-    response = requests.get(
-        'http://localhost:5010/api/videos/filter',
-        params={
-            'speak': speaker_id
-        },
-    )
-    if response.status_code == 200:
-        videos = response.json().get('data', [])
-    else:
-        return make_response(
-            render_template(
-                "404.html",
-                message="No videos found for this speaker"
-            ),
-            404
-        )
-
-    # Check watched status for the videos
+    # API: Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile and active_profile != "guest":
+    if active_profile and active_profile != "guest" and videos is not None:
         check_watch_status(videos, active_profile)
 
     return make_response(
@@ -615,6 +690,12 @@ def character_details(
     """
     Render the details of a specific character and the videos their them.
 
+    Functions:
+        - get_char_details:
+            Fetches the details of a specific character from the API.
+        - get_char_videos:
+            Fetches the videos associated with a character from the API.
+
     Args:
         character_id (int): The ID of the character to fetch details for.
 
@@ -623,19 +704,63 @@ def character_details(
         If the character is not found, a 404 error is returned.
     """
 
-    PIC_PATH = "/static/img/characters/"
+    def get_char_details() -> dict | None:
+        """
+        Fetch the details of a specific character from the API.
 
-    # API: Get character details
-    param = {
-        'char_id': character_id
-    }
-    response = requests.get(
-        'http://localhost:5010/api/characters',
-        params=param
-    )
-    if response.status_code == 200:
-        character = response.json().get('data', [])[0]
-    else:
+        Returns:
+            dict:
+                A dictionary containing character details if found,
+                else None.
+        """
+
+        # API: Get character details
+        param = {
+            'char_id': character_id
+        }
+        response = requests.get(
+            'http://localhost:5010/api/characters',
+            params=param
+        )
+        if response.status_code == 200:
+            character = response.json().get('data', [])[0]
+        else:
+            character = None
+        return character
+
+    def get_char_videos() -> list | None:
+        """
+        Fetch the videos associated with a specific character from the API.
+
+        Returns:
+            list: A list of videos if found,
+            else None.
+        """
+
+        # API: Fetch videos for the character
+        response = requests.get(
+            'http://localhost:5010/api/videos/filter',
+            params={
+                'char': character_id
+            },
+        )
+        if response.status_code == 200:
+            videos = response.json().get('data', [])
+        else:
+            videos = None
+
+        return videos
+
+    # Concurrent API calls
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_char_details = executor.submit(get_char_details)
+        future_char_videos = executor.submit(get_char_videos)
+
+        character = future_char_details.result()
+        videos = future_char_videos.result()
+
+    # Validate character details
+    if character is None:
         return make_response(
             render_template(
                 "404.html",
@@ -644,20 +769,8 @@ def character_details(
             404
         )
 
-    # If the character has a profile picture, add the path to it
-    if character.get('profile_pic'):
-        character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
-
-    # API: Fetch videos for the character
-    response = requests.get(
-        'http://localhost:5010/api/videos/filter',
-        params={
-            'char': character_id
-        },
-    )
-    if response.status_code == 200:
-        videos = response.json().get('data', [])
-    else:
+    # Validate videos
+    if videos is None:
         return make_response(
             render_template(
                 "404.html",
@@ -666,7 +779,11 @@ def character_details(
             404
         )
 
-    # Testing
+    # If the character has a profile picture, add the path to it
+    if character.get('profile_pic'):
+        character['profile_pic'] = f"{PIC_PATH}{character['profile_pic']}"
+
+    # API call: Check watched status for the videos
     active_profile = session.get("active_profile", None)
     if active_profile and active_profile != "guest":
         check_watch_status(videos, active_profile)
@@ -690,6 +807,12 @@ def scripture_details(
     """
     Render the details of a specific scripture and their videos.
 
+    Functions:
+        - get_scripture_details:
+            Fetches the details of a specific scripture from the API.
+        - get_scripture_videos:
+            Fetches the videos associated with a scripture from the API.
+
     Args:
         scripture_id (int): The ID of the scripture to fetch details for.
 
@@ -698,22 +821,67 @@ def scripture_details(
         If the scripture is not found, a 404 error is returned.
     """
 
-    # API: Get the scripture
-    param = {
-        'scr_id': scripture_id
-    }
-    response = requests.get(
-        'http://localhost:5010/api/scriptures',
-        params=param
-    )
+    def get_scripture_details() -> dict | None:
+        """
+        Fetch the details of a specific scripture from the API.
 
-    # Get a single scripture from the list since we are searching by ID
-    if response.status_code == 200:
-        scripture = response.json().get('data', [])
-        if len(scripture) > 0:
-            scripture = scripture[0]
+        Returns:
+            dict:
+                A dictionary containing scripture details if found,
+                else None.
+        """
 
-    else:
+        # API: Get the scripture
+        param = {
+            'scr_id': scripture_id
+        }
+        response = requests.get(
+            'http://localhost:5010/api/scriptures',
+            params=param
+        )
+
+        # Get a single scripture from the list since we are searching by ID
+        if response.status_code == 200:
+            scripture = response.json().get('data', [])
+            if len(scripture) > 0:
+                scripture = scripture[0]
+        else:
+            scripture = None
+
+        return scripture
+
+    def get_scripture_videos() -> list | None:
+        """
+        Fetch the videos associated with a specific scripture from the API.
+
+        Returns:
+            list: A list of videos if found,
+            else None.
+        """
+
+        # API: Fetch videos for the scripture
+        response = requests.get(
+            'http://localhost:5010/api/videos/filter',
+            params={
+                'scrip': scripture_id
+            },
+        )
+        if response.status_code == 200:
+            videos = response.json().get('data', [])
+        else:
+            videos = None
+
+        return videos
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_scripture_details = executor.submit(get_scripture_details)
+        future_scripture_videos = executor.submit(get_scripture_videos)
+
+        scripture = future_scripture_details.result()
+        videos = future_scripture_videos.result()
+
+    # Validate scripture details
+    if scripture is None:
         return make_response(
             render_template(
                 "404.html",
@@ -727,27 +895,9 @@ def scripture_details(
         f"{scripture['book']} {scripture['chapter']}:{scripture['verse']}"
     )
 
-    # API: Fetch videos for the scripture
-    response = requests.get(
-        'http://localhost:5010/api/videos/filter',
-        params={
-            'scrip': scripture_id
-        },
-    )
-    if response.status_code == 200:
-        videos = response.json().get('data', [])
-    else:
-        return make_response(
-            render_template(
-                "404.html",
-                message="No videos found for this scripture"
-            ),
-            404
-        )
-
     # Check watched status for the videos
     active_profile = session.get("active_profile", None)
-    if active_profile and active_profile != "guest":
+    if active_profile and active_profile != "guest" and videos is not None:
         check_watch_status(videos, active_profile)
 
     return make_response(
