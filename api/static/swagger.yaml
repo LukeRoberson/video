@@ -449,10 +449,193 @@ paths:
         '415':
           $ref: '#/components/responses/UnsupportedMediaType'
 
-  # Categories to do:
-    # /api/categories/{{category name}}
-    # /api/categories/{{category_id}}/{{subcategory_id}}
-    # /api/categories/video/{{video_id}}
+  /api/categories/{{category_name}}:
+    get:
+      tags: [Categories]
+      summary: Resolve a category name to its ID
+      description: |
+        Get the ID of a specific category by its name.
+        This allows for resolving category names to their corresponding IDs.
+      parameters:
+        - in: path
+          name: category_name
+          required: true
+          schema:
+            type: string
+          description: The name of the category to resolve to an ID
+          example: "Monthly Programs"
+      responses:
+        '200':
+          summary: Successful response
+          description: The ID of the specified category retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of resolved categories matching the filter
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          description: Unique identifier for the category
+                          example: 1
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Category retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+          '404':
+            $ref: '#/components/responses/NotFound'
+
+  /api/categories/{category_id}/{subcategory_id}:
+    get:
+      tags: [Categories]
+      summary: Retrieve videos for a category and subcategory
+      description: |
+        Get a list of videos for a specific category and subcategory combination.
+        This allows for browsing videos based on the categories used on jw.org and JW Library.
+      parameters:
+        - in: path
+          name: category_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the category to retrieve videos for
+          example: 1
+        - in: path
+          name: subcategory_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the subcategory to retrieve videos for
+          example: 2
+      responses:
+        '200':
+          summary: Successful response
+          description: A list of videos for the specified category and subcategory retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of video details for the specified category and subcategory
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          description: Unique identifier for the video
+                          example: 123
+                        name:
+                          type: string
+                          description: Name of the video
+                          example: "Language of the Heart"
+                        description:
+                          type: string
+                          description: A brief description of the video
+                        duration:
+                          type: integer
+                          description: Duration of the video in seconds
+                          example: 3600
+                        date_added:
+                          type: string
+                          format: date-time
+                          description: The date and time when the video was added to the database
+                          example: "2025-11-04 00:00:00"
+                        thumbnail:
+                          type: string
+                          description: URL to the video's thumbnail image
+                          example: "https://cms-imgp.jw-cdn.org/img/p/jwb-132/univ/art/jwb-132_univ_wss_01_lg.jpg"
+                        url:
+                          type: string
+                          description: URL to stream the video
+                          example: "https://www.jw.org/en/library/videos/#en/mediaitems/LatestVideos/pub-jwb-132_1_VIDEO"
+                        url_1080:
+                          type: string
+                          description: URL to stream the video in 1080p resolution
+                          example: "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r1080P.mp4"
+                        url_720:
+                          type: string
+                          description: URL to stream the video in 720p resolution
+                          example: "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r720P.mp4"
+                        url_480:
+                          type: string
+                          description: URL to stream the video in 480p resolution
+                          example: "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r480P.mp4"
+                        url_360:
+                          type: string
+                          description: URL to stream the video in 360p resolution
+                          example: "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r360P.mp4"
+                        url_240:
+                          type: string
+                          description: URL to stream the video in 240p resolution
+                          example: "https://akamd1.jw-cdn.org/sg2/p/d7ad66/1/o/jwb-132_E_01_r240P.mp4"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Videos retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+
+  /api/categories/video/{{video_id}}:
+    get:
+      tags: [Categories]
+      summary: Retrieve categories for a video
+      description: |
+        Get the categories associated with a specific video.
+        This allows for understanding the categorization of videos.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to retrieve categories for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Categories for the specified video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of categories associated with the specified video, including category names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the category
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the category
+                          example: "Monthly Programs"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Categories retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # Bible Characters
   # Scriptures

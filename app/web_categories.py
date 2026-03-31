@@ -42,6 +42,9 @@ Routes:
 Dependancies:
     Flask: To define the blueprint for web pages.
     logging: For logging debug information.
+
+Custom dependencies:
+    app_cache: To access cached category IDs for efficient lookups.
 """
 
 # Standard library imports
@@ -52,10 +55,15 @@ from flask import (
     make_response,
     session,
 )
+from concurrent.futures import ThreadPoolExecutor
 import logging
-
 import requests
 
+# Custom Imports
+from app.cache import app_cache
+
+
+logger = logging.getLogger(__name__)
 
 category_bp = Blueprint(
     'category_pages',
@@ -70,6 +78,12 @@ def render_category_page(
     """
     Dynamically render a category page with subcategories.
 
+    Functions:
+        get_video_list() -> list:
+            Fetch video lists for category/subcategory combinations.
+        get_watch_status() -> dict:
+            Fetch the watch status for a list of videos for the active profile.
+
     Args:
         category_name (str): The name of the main category.
         sub_category_list (list): A list of subcategory names.
@@ -81,95 +95,170 @@ def render_category_page(
             a 404 error page is returned.
     """
 
-    logging.info(
+    def get_video_list(
+        main_id: int,
+        sub_cat_id: int
+    ) -> dict:
+        """
+        Fetch video lists for category/subcategory combinations.
+
+        Args:
+            main_id (int): The ID of the main category.
+            sub_cat_id (int): The ID of the subcategory.
+
+        Returns:
+            dict:
+                A dictionary keyed with the subcategory ID
+                as the key and a list of videos as the value.
+        """
+
+        # API call
+        response = requests.get(
+            f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}',
+        )
+
+        # Collect the video list from the API response
+        if response.status_code == 200:
+            data = response.json().get('data', {})
+            video_list = data.get('videos', [])
+
+        else:
+            video_list = []
+
+        keyed_result = {
+            sub_cat_id: video_list
+        }
+
+        return keyed_result
+
+    def get_watch_status(
+        video_list: list,
+        category: int,
+    ) -> dict:
+        """
+        Fetch the watch status for a list of videos for the active profile.
+            Determines how many videos in the list have been marked as watched.
+
+        Args:
+            video_list (list):
+                A list of video dictionaries.
+            category (int):
+                The ID of the category to which the videos belong.
+
+        Returns:
+            dict:
+                The count of watched videos, keyed by category ID.
+        """
+
+        if active_profile is None or active_profile == "guest":
+            return {category: 0}
+
+        # API call to get watch status for a list of video IDs
+        response = requests.post(
+            'http://localhost:5010/api/profile/mark_watched_bulk',
+            params={'profile': active_profile},
+            json={
+                'video_ids': [video['id'] for video in video_list]
+            }
+        )
+
+        if response.status_code == 200:
+            data = response.json().get('data', {})
+            watch_count = sum(
+                1 for video_id in data if data[video_id]
+            )
+
+            return {category: watch_count}
+
+        else:
+            return {category: 0}
+
+    logger.info(
         f"Category: {category_name}. Subcategories: {sub_category_list}"
     )
 
+    # Get category IDs from the cache (cached at startup)
+    categories = app_cache.get_category_ids()
+
     # Resolve main category name to ID
-    response = requests.get(
-        f'http://localhost:5010/api/categories/{category_name}'
-    )
-    data = response.json().get('data', {})
-    main_id = data.get('category_id', None)
-
-    if not main_id:
-        logging.error(f"Category '{category_name}' not found.")
-        return make_response(
-            render_template("404.html", message="Category not found"), 404
-        )
-
+    main_id = categories.get(category_name)
     main_cat = {"id": main_id, "name": category_name}
 
     # Get the active profile from the session
     active_profile = session.get("active_profile", None)
 
-    # Get a list of subcategory IDs
-    watch_status = []
+    # Get the video list for each subcategory in parallel
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        # Creates futures for each subcategory in a list
+        results = executor.map(
+            get_video_list,
 
-    # Loop through each subcategory name
-    for sub_cat in sub_category_list:
-        entry = {}
+            # Repeat the main category ID for each subcategory
+            [main_id]*len(sub_category_list),
 
-        # Resolve the subcategory name to ID
-        response = requests.get(
-            f'http://localhost:5010/api/categories/{sub_cat}'
+            # Map subcategory names to their IDs for the API calls
+            [categories.get(sub_cat) for sub_cat in sub_category_list]
         )
-        data = response.json().get('data', {})
-        sub_cat_id = data.get('category_id', None)
 
-        # Get the list of videos for the subcategory and count them
+    # Convert output (generator) to a dict for easier processing
+    #   Keyed by subcategory ID with the list of videos as the value
+    all_videos = {}
+    for result in results:
+        all_videos.update(result)
+
+    # Get the watch status for each subcategory in parallel
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        # Creates futures for each subcategory in a list
+        watch_results = executor.map(
+            get_watch_status,
+
+            # Map subcategory names to their IDs for the API calls
+            [
+                all_videos.get(categories.get(sub_cat), [])
+                for sub_cat in sub_category_list
+            ],
+            [categories.get(sub_cat) for sub_cat in sub_category_list]
+        )
+
+    # Convert output into a dict
+    watch_counts = {}
+    for entry in watch_results:
+        watch_counts.update(entry)
+
+    # Build data structure for each subcategory
+    #   A list of dicts with the subcat name, ID, video count, and watch count
+    watch_status = []
+    for sub_cat in sub_category_list:
+        # Resolve the subcategory name to ID
+        sub_cat_id = categories.get(sub_cat)
+        if sub_cat_id is None:
+            logger.warning(
+                f"Subcategory '{sub_cat}' not found in cache. "
+                "Skipping this subcategory."
+            )
+            continue
+
+        # Build the dictionary for this subcategory
+        entry = {}
         entry['name'] = sub_cat
-        if sub_cat_id is not None:
-            # Get the list of videos for the subcategory
-            params = {
-                "profile_id": active_profile if (
-                    active_profile and active_profile != 'guest'
-                ) else None
-            }
-            response = requests.get(
-                f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}',
-                params=params
-            )
-            data = response.json().get('data', {})
-            video_list = data.get('videos', [])
+        entry['id'] = sub_cat_id
 
-            entry['id'] = sub_cat_id
-            entry['count'] = (
-                len(video_list) if video_list else 0
-            )
-            logging.debug(
-                f"Subcategory '{sub_cat}' (Videos: {video_list}) "
-            )
+        # Get the list of videos for the subcategory
+        video_list = all_videos.get(sub_cat_id, [])
+        entry['count'] = (
+            len(video_list) if video_list else 0
+        )
+        logger.debug(
+            f"Subcategory '{sub_cat}' (Videos: {video_list}) "
+        )
 
-            # Get the watch status for the active profile
-            if (
-                active_profile is not None and
-                active_profile != "guest" and
-                video_list is not None
-            ):
-                watch_count = 0
+        # Get the watch count for the active profile
+        if (video_list is not None):
+            entry['watched'] = watch_counts.get(sub_cat_id, 0)
+        else:
+            entry['watched'] = 0
 
-                # Bulk API call
-                response = requests.post(
-                    'http://localhost:5010/api/profile/mark_watched_bulk',
-                    params={'profile': active_profile},
-                    json={
-                        'video_ids': [video['id'] for video in video_list]
-                    }
-                )
-
-                # Collect the watch status from the API response
-                if response.status_code == 200:
-                    data = response.json().get('data', {})
-                    watch_count = sum(
-                        1 for video_id in data if data[video_id]
-                    )
-                    entry['watched'] = watch_count
-
-            else:
-                entry['watched'] = 0
-
-            watch_status.append(entry)
+        watch_status.append(entry)
 
     return make_response(
         render_template(

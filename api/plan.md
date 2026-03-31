@@ -64,7 +64,7 @@
     * [x] Tag pages; Down to 6s to load 'faith'
     * [x] Video detail; Down to 6s to load '2026 GB update #1'
     * [x] Themes
-    * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
+    * [x] Categories
     * [ ] Advanced Search page; 10s to load (http://localhost:5000/search/advanced)
     * [ ] Advanced Search; 13s to search 'With Eyes of Faith' (http://localhost:5000/search/advanced?q=With+Eyes+of+Faith)
 10. Clean up bugs
@@ -97,14 +97,6 @@
 # Notes
 
 ## Performance
-
-* Themes pages
-    * `web_dynamic`
-    * `theme()`
-* API calls:
-    * /api/videos/get_bulk
-        * Gets video details
-        * This is a synchronous loop for every video in the file
 
 * Categories
     * `web_categories.py`
