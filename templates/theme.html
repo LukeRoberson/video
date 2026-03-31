@@ -65,7 +65,8 @@
 
                         <!-- Video -->
                         {% elif item.video %}
-                            {% set video = item.video %}
+                            {% set video_meta = item.video %}
+                            {% set video = video_cache[video_meta.id] %}
                             {% set resolutions = [
                                 ('1080', video.url_1080),
                                 ('720', video.url_720),
@@ -74,24 +75,24 @@
                                 ('240', video.url_240)
                             ] %}
                             <div class="content-item video-item">
-                                {% if item.video.title %}
+                                {% if video_meta.title %}
                                 <div class="video-title">
-                                    <h4 class="video-title mb-3">{{ item.video.title }}</h4>
+                                    <h4 class="video-title mb-3">{{ video_meta.title }}</h4>
                                 </div>
                                 {% endif %}
                                 <div class="video-wrapper">
                                     <div class="video-player mb-4 position-relative">
                                         <video
-                                            id="player-{{ video.id }}"
+                                            id="player-{{ video_meta.id }}"
                                             class="video-js"
                                             controls
                                             preload="auto"
                                             poster="{{ video.thumbnail or '' }}"
                                             data-profile-id="{{ session.get('active_profile', 'guest') }}"
-                                            data-video-id="{{ video.id }}"
-                                            {% if video.start is defined and video.end is defined %}
-                                            data-snippet-start="{{ video.start }}"
-                                            data-snippet-end="{{ video.end }}"
+                                            data-video-id="{{ video_meta.id }}"
+                                            {% if video_meta.start is defined and video_meta.end is defined %}
+                                            data-snippet-start="{{ video_meta.start }}"
+                                            data-snippet-end="{{ video_meta.end }}"
                                             {% endif %}
                                         >
                                             <!-- Set up the available resolutions -->
@@ -116,7 +117,8 @@
                             <div class="content-item video-grid-container">
                                 <div class="video-grid">
                                     {% for grid_item in item.video_grid %}
-                                        {% set video = grid_item.video %}
+                                        {% set video_meta = grid_item.video %}
+                                        {% set video = video_cache[video_meta.id] %}
                                         {% set resolutions = [
                                             ('1080', video.url_1080),
                                             ('720', video.url_720),
@@ -125,24 +127,24 @@
                                             ('240', video.url_240)
                                         ] %}
                                         <div class="video-grid-item">
-                                            {% if video.title %}
+                                            {% if video_meta.title %}
                                             <div class="video-title">
-                                                <h4>{{ video.title }}</h4>
+                                                <h4>{{ video_meta.title }}</h4>
                                             </div>
                                             {% endif %}
                                             <div class="video-wrapper">
                                                 <div class="video-player position-relative">
                                                     <video
-                                                        id="player-{{ video.id }}"
+                                                        id="player-{{ video_meta.id }}"
                                                         class="video-js"
                                                         controls
                                                         preload="auto"
                                                         poster="{{ video.thumbnail or '' }}"
                                                         data-profile-id="{{ session.get('active_profile', 'guest') }}"
-                                                        data-video-id="{{ video.id }}"
-                                                        {% if video.start is defined and video.end is defined %}
-                                                        data-snippet-start="{{ video.start }}"
-                                                        data-snippet-end="{{ video.end }}"
+                                                        data-video-id="{{ video_meta.id }}"
+                                                        {% if video_meta.start is defined and video_meta.end is defined %}
+                                                        data-snippet-start="{{ video_meta.start }}"
+                                                        data-snippet-end="{{ video_meta.end }}"
                                                         {% endif %}
                                                     >
                                                         <!-- Set up the available resolutions -->

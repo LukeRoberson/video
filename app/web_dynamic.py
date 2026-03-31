@@ -524,6 +524,7 @@ def theme(
             title=theme.main['title'],
             main_heading=theme.main['heading'],
             sections=theme.sections,
+            video_cache=theme.video_cache,
         )
     )
 

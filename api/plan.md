@@ -63,7 +63,7 @@
     * [x] Location pages; Down to 6s to load 'Africa'
     * [x] Tag pages; Down to 6s to load 'faith'
     * [x] Video detail; Down to 6s to load '2026 GB update #1'
-    * [ ] Themes; 93s to load 'Powerful by Faith' (http://localhost:5000/theme/2021_powerful_by_faith)
+    * [x] Themes
     * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
     * [ ] Advanced Search page; 10s to load (http://localhost:5000/search/advanced)
     * [ ] Advanced Search; 13s to search 'With Eyes of Faith' (http://localhost:5000/search/advanced?q=With+Eyes+of+Faith)

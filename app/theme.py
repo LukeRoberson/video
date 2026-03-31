@@ -26,6 +26,9 @@ import logging
 import requests
 
 
+logger = logging.getLogger(__name__)
+
+
 class ThemeManager:
     """
     Manages a theme:
@@ -47,6 +50,10 @@ class ThemeManager:
         The section schema validates each section document.
         """
 
+        # Video information cache
+        self.video_cache = {}
+
+        # Schemas
         self.main_schema = {
             # This is the HTML title of the page
             'title': {
@@ -265,7 +272,7 @@ class ThemeManager:
         # Validate the main document
         main_doc = self.theme_documents[0]
         if not self.main_validator.validate(main_doc):  # type: ignore
-            logging.error(
+            logger.error(
                 f"Main document validation errors: "
                 f"{self.main_validator.errors}"  # type: ignore
             )
@@ -281,7 +288,7 @@ class ThemeManager:
                 section_doc,
                 self.section_schema
             ):
-                logging.error(
+                logger.error(
                     f"Section {i} validation errors: "
                     f"{self.section_validator.errors}"  # type: ignore
                 )
@@ -305,59 +312,31 @@ class ThemeManager:
             Update the document with these details.
         """
 
-        # Loop through each section document (skipping the main document)
+        # Extract video IDs from each section (skipping the main document)
+        video_list = []
         for section in self.theme_documents[1:]:
             for item in section.get('section', []):
                 # Handle single video
                 if 'video' in item:
                     video_id = item['video'].get('id')
-
-                    # API: Get video details
-                    body = {
-                        'video_ids': [video_id]
-                    }
-                    response = requests.post(
-                        "http://localhost:5010/api/videos/get_bulk",
-                        json=body
-                    )
-                    details = response.json().get('data', [])
-
-                    # Check if video details were found
-                    if not details or len(details) == 0:
-                        logging.warning(
-                            f"Video ID {video_id} not found in database."
-                        )
-                        continue
-
-                    # Update the video info with fetched details
-                    item['video'].update(details[0])
+                    video_list.append(video_id)
 
                 # Handle video grid
                 elif 'video_grid' in item:
                     for grid_item in item['video_grid']:
                         if 'video' in grid_item:
                             video_id = grid_item['video'].get('id')
+                            video_list.append(video_id)
 
-                            # API: Get video details
-                            body = {
-                                'video_ids': [video_id]
-                            }
-                            response = requests.post(
-                                "http://localhost:5010/api/videos/get_bulk",
-                                json=body
-                            )
-                            details = response.json().get('data', [])
+        # Bulk API call to fetch video details for all video IDs
+        response = requests.post(
+            "http://localhost:5010/api/videos/get_bulk",
+            json={'video_ids': video_list}
+        )
 
-                            # Check if video details were found
-                            if not details or len(details) == 0:
-                                logging.warning(
-                                    f"Video ID {video_id} "
-                                    f"not found in database."
-                                )
-                                continue
-
-                            # Update the video info with fetched details
-                            grid_item['video'].update(details[0])
+        # Update the video cache with the response data
+        data = response.json().get('data', [])
+        self.video_cache = {video['id']: video for video in data}
 
     def load_theme(
         self,
@@ -378,7 +357,7 @@ class ThemeManager:
 
         # Check if the file exists
         if not os.path.exists(filepath):
-            logging.error(f"Theme file does not exist: {filepath}")
+            logger.error(f"Theme file does not exist: {filepath}")
             return (
                 False,
                 "File does not exist."
@@ -398,7 +377,7 @@ class ThemeManager:
 
                 # Ensure there is at least one document
                 if not self.theme_documents:
-                    logging.error(
+                    logger.error(
                         f"No valid documents found in theme file: {filepath}"
                     )
                     return (
@@ -407,7 +386,7 @@ class ThemeManager:
                     )
 
         except Exception as e:
-            logging.error(f"Exception reading theme file: {e}")
+            logger.error(f"Exception reading theme file: {e}")
             return (
                 False,
                 "Error reading theme file"
