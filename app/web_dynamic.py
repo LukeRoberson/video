@@ -130,6 +130,28 @@ def video_details(
     Render the details of a specific video along with similar videos.
     This is seen when a user clicks on a video from the home page.
 
+    Functions:
+        - get_video_details:
+            Fetches the details of a video from the API.
+        - get_video_categories:
+            Fetches the categories associated with a video from the API.
+        - get_video_tags:
+            Fetches the tags associated with a video from the API.
+        - get_video_locations:
+            Fetches the locations associated with a video from the API.
+        - get_video_speakers:
+            Fetches the speakers associated with a video from the API.
+        - get_video_characters:
+            Fetches the characters associated with a video from the API.
+        - get_video_scriptures:
+            Fetches the scriptures associated with a video from the API.
+        - get_watch_status:
+            Checks if the video has been watched by the user from the API.
+        - get_watch_time:
+            Gets the current time for the video from the API.
+        - get_similar_videos:
+            Fetches a list of similar videos from the API.
+
     Args:
         video_id (int): The ID of the video to fetch details for.
 
@@ -139,81 +161,188 @@ def video_details(
         If the video is not found, a 404 error is returned.
     """
 
-    # API: Fetch video details
-    body = {
-        'video_ids': [video_id]
-    }
-    response = requests.post(
-        "http://localhost:5010/api/videos/get_bulk",
-        json=body
-    )
-    video = response.json().get('data', [])
+    def get_video_details() -> dict | None:
+        """
+        Fetch the details of a specific video from the API.
 
-    if video is None or len(video) == 0:
-        return make_response(
-            render_template(
-                "404.html",
-                message="Video not found in API"
-            ),
-            404
+        Returns:
+            dict: A dictionary containing video details if found,
+            else None.
+        """
+
+        # API: Fetch video details
+        body = {
+            'video_ids': [video_id]
+        }
+        response = requests.post(
+            "http://localhost:5010/api/videos/get_bulk",
+            json=body
+        )
+        video = response.json().get('data', [])
+
+        if video is None or len(video) == 0:
+            video = None
+        else:
+            video = video[0]
+
+        return video
+
+    def get_video_categories() -> dict | None:
+        """
+        Fetch the categories associated with a specific video from the API.
+
+        Returns:
+            list: A list of categories if found,
+            else None.
+        """
+
+        # API: Get categories for the video
+        response = requests.get(
+            f'http://localhost:5010/api/categories/video/{video_id}',
+        )
+        if response.status_code == 200:
+            cat_list = response.json().get('data', {})
+        else:
+            cat_list = None
+
+        return cat_list
+
+    def get_video_tags() -> dict | None:
+        """
+        Fetch the tags associated with a specific video from the API.
+
+        Returns:
+            list: A list of tags if found,
+            else None.
+        """
+
+        # API: Get tags for the video
+        response = requests.get(
+            f'http://localhost:5010/api/tags/video/{video_id}',
+        )
+        if response.status_code == 200:
+            tags = response.json().get('data', {})
+        else:
+            tags = None
+
+        return tags
+
+    def get_video_locations() -> dict | None:
+        """
+        Fetch the locations associated with a specific video from the API.
+
+        Returns:
+            list: A list of locations if found,
+            else None.
+        """
+
+        # API: Get locations for the video
+        response = requests.get(
+            f'http://localhost:5010/api/locations/video/{video_id}',
+        )
+        if response.status_code == 200:
+            locations = response.json().get('data', {})
+        else:
+            locations = None
+
+        return locations
+
+    def get_video_speakers() -> dict | None:
+        """
+        Fetch the speakers associated with a specific video from the API.
+
+        Returns:
+            list: A list of speakers if found,
+            else None.
+        """
+
+        # API: Get speakers for the video
+        response = requests.get(
+            f'http://localhost:5010/api/speakers/video/{video_id}',
+        )
+        if response.status_code == 200:
+            speakers = response.json().get('data', {})
+        else:
+            speakers = None
+
+        logging.warning(f"Speakers for video {video_id}: {speakers}")
+
+        return speakers
+
+    def get_video_characters() -> dict | None:
+        """
+        Fetch the characters associated with a specific video from the API.
+
+        Returns:
+            list: A list of characters if found,
+            else None.
+        """
+
+        # API: Get characters for the video
+        response = requests.get(
+            f'http://localhost:5010/api/characters/video/{video_id}',
+        )
+        if response.status_code == 200:
+            characters = response.json().get('data', {})
+        else:
+            characters = None
+
+        return characters
+
+    def get_video_scriptures() -> dict | None:
+        """
+        Fetch the scriptures associated with a specific video from the API.
+
+        Returns:
+            list: A list of scriptures if found,
+            else None.
+        """
+
+        # API: Get scriptures for the video
+        response = requests.get(
+            f'http://localhost:5010/api/scriptures/video/{video_id}',
+        )
+        if response.status_code == 200:
+            scriptures = response.json().get('data', {})
+        else:
+            scriptures = None
+
+        return scriptures
+
+    def get_watch_status() -> bool:
+        """
+        Check if the video has been watched by the user.
+
+        Returns:
+            bool: True if the video has been watched, else False.
+        """
+
+        response = requests.get(
+            'http://localhost:5010/api/profile/mark_watched',
+            params={
+                'video_id': video_id,
+                'profile': profile_id
+            }
         )
 
-    video = video[0]
+        if response.status_code == 200:
+            return response.json()['data'].get('watched', False)
+        else:
+            logger.error(
+                f"Failed to fetch watched status for video {video_id}: "
+                f"{response.status_code}"
+            )
+            return False
 
-    # API: Get categories for the video
-    response = requests.get(
-        f'http://localhost:5010/api/categories/video/{video_id}',
-    )
-    cat_list = response.json().get('data', {})
+    def get_watch_time() -> int:
+        """
+        If the video is in progress, get the current time for the video.
 
-    # API: Get tags for the video
-    response = requests.get(
-        f'http://localhost:5010/api/tags/video/{video_id}',
-    )
-    tags = response.json().get('data', {})
+        Returns:
+            int: The current time in seconds if the video is in progress,
+            else 0.
+        """
 
-    # API: Get locations for the video
-    response = requests.get(
-        f'http://localhost:5010/api/locations/video/{video_id}',
-    )
-    locations = response.json().get('data', [])
-
-    # API: Get speakers for the video
-    response = requests.get(
-        f'http://localhost:5010/api/speakers/video/{video_id}',
-    )
-    speakers = response.json().get('data', [])
-
-    # API: Get characters for the video
-    response = requests.get(
-        f'http://localhost:5010/api/characters/video/{video_id}',
-    )
-    characters = response.json().get('data', {})
-
-    # API: Get scriptures for the video
-    response = requests.get(
-        f'http://localhost:5010/api/scriptures/video/{video_id}',
-    )
-    scriptures = response.json().get('data', [])
-
-    # API: Check if video is marked as watched
-    response = requests.get(
-        'http://localhost:5010/api/profile/mark_watched',
-        params={
-            'video_id': video_id,
-            'profile': session.get("active_profile", "guest")
-        }
-    )
-    watched = response.json()['data'].get('watched', False)
-
-    # API: Check if video is in progress
-    profile_id = session.get("active_profile", None)
-
-    if profile_id is None:
-        # We don't track in-progress videos for guest profile
-        current_time = 0
-
-    else:
         response = requests.get(
             'http://localhost:5010/api/profile/in_progress',
             params={
@@ -223,53 +352,104 @@ def video_details(
         )
         payload = response.json().get('data', [])
 
-        # If the videos is in progress, get the current time.
-        #   Otherwise, default to 0.
         if payload:
-            current_time = response.json()['data'][0].get('current_time', 0)
+            return payload[0].get('current_time', 0)
         else:
-            current_time = 0
+            return 0
 
-    # API: Get a list of similar videos
-    response = requests.get(
-        f'http://localhost:5010/api/similarity/{video_id}',
-    )
-    if response.status_code == 200:
-        similar_videos = response.json().get('data', [])
-    else:
-        similar_videos = None
+    def get_similar_videos() -> list | None:
+        """
+        Fetch a list of similar videos from the API.
 
-    # Randomly select up to 3 similar videos to display
-    if similar_videos:
-        similar_videos = random.sample(
-            similar_videos, min(3, len(similar_videos))
+        Returns:
+            list: A list of similar videos if found,
+            else None.
+        """
+
+        # API: Get a list of similar videos
+        response = requests.get(
+            f'http://localhost:5010/api/similarity/{video_id}',
         )
-    else:
-        similar_videos = []
-
-    video_ids = []
-    for similar in similar_videos:
-        if similar['video_2_id'] != video_id:
-            id = similar['video_2_id']
+        if response.status_code == 200:
+            similar_videos = response.json().get('data', [])
         else:
-            id = similar['video_1_id']
+            similar_videos = None
 
-        # Get details for the similar video
-        body = {
-            'video_ids': [id]
-        }
+        if similar_videos is None or len(similar_videos) == 0:
+            return None
+
+        # Pick three videos at random, and get their IDs
+        sample = random.sample(similar_videos, min(3, len(similar_videos)))
+        ids = [
+            s['video_2_id'] if s['video_2_id'] != video_id else s['video_1_id']
+            for s in sample
+        ]
+
+        # Get the details for the similar videos
         response = requests.post(
-            "http://localhost:5010/api/videos/get_bulk",
-            json=body
+            'http://localhost:5010/api/videos/get_bulk',
+            json={'video_ids': ids}
         )
 
         if response.status_code == 200:
-            video_details = response.json().get('data', [])
-            if len(video_details) > 0:
-                video_ids.append(video_details[0])
-
+            video_ids = response.json().get('data', [])
         else:
-            print(f"Video with ID {id} not found in API.")
+            logger.error(
+                f"Failed to fetch details for similar videos: "
+                f"{response.status_code}"
+            )
+            video_ids = []
+
+        return video_ids
+
+    # Manage profile ID or guest
+    profile_id = session.get("active_profile", None)
+    future_watch_status = None
+    future_watch_time = None
+
+    # Concurrent API calls
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        future_video_details = executor.submit(get_video_details)
+        future_video_categories = executor.submit(get_video_categories)
+        future_video_tags = executor.submit(get_video_tags)
+        future_video_locations = executor.submit(get_video_locations)
+        future_video_speakers = executor.submit(get_video_speakers)
+        future_video_characters = executor.submit(get_video_characters)
+        future_video_scriptures = executor.submit(get_video_scriptures)
+        future_similar_videos = executor.submit(get_similar_videos)
+
+        # Skip this for the guest profile
+        if profile_id is not None and profile_id != "guest":
+            future_watch_status = executor.submit(get_watch_status)
+            future_watch_time = executor.submit(get_watch_time)
+
+    # Get the results
+    video = future_video_details.result()
+    cat_list = future_video_categories.result()
+    tags = future_video_tags.result()
+    locations = future_video_locations.result()
+    speakers = future_video_speakers.result()
+    characters = future_video_characters.result()
+    scriptures = future_video_scriptures.result()
+    video_ids = future_similar_videos.result()
+
+    # Get these results if the user is not a guest
+    if future_watch_status is not None and future_watch_time is not None:
+        watched = future_watch_status.result()
+        current_time = future_watch_time.result()
+    else:
+        watched = False
+        current_time = 0
+
+    # Validate video details
+    if video is None:
+        return make_response(
+            render_template(
+                "404.html",
+                message="Video not found"
+            ),
+            404
+        )
 
     # Check for webVTT file for chapters
     vtt_file = os.path.join(
@@ -278,7 +458,6 @@ def video_details(
         f'{video_id}.vtt'
     )
     has_chapters = os.path.exists(vtt_file)
-    print(vtt_file)
 
     return make_response(
         render_template(
@@ -427,12 +606,14 @@ def tag_details(
 
         return videos
 
+    # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_tag_details = executor.submit(get_tag_details)
         future_tag_videos = executor.submit(get_tag_videos)
 
-        tag = future_tag_details.result()
-        videos = future_tag_videos.result()
+    # Get the results
+    tag = future_tag_details.result()
+    videos = future_tag_videos.result()
 
     # Validate tag details
     if tag is None:
@@ -536,12 +717,14 @@ def location_details(
 
         return videos
 
+    # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_location_details = executor.submit(get_location_details)
         future_location_videos = executor.submit(get_location_videos)
 
-        location = future_location_details.result()
-        videos = future_location_videos.result()
+    # Get the results
+    location = future_location_details.result()
+    videos = future_location_videos.result()
 
     # Validate location details
     if location is None:
@@ -649,12 +832,14 @@ def speaker_details(
 
         return videos
 
+    # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_speaker_details = executor.submit(get_speaker_details)
         future_speaker_videos = executor.submit(get_speaker_videos)
 
-        speaker = future_speaker_details.result()
-        videos = future_speaker_videos.result()
+    # Get the results
+    speaker = future_speaker_details.result()
+    videos = future_speaker_videos.result()
 
     # Validate speaker details
     if speaker is None:
@@ -756,8 +941,9 @@ def character_details(
         future_char_details = executor.submit(get_char_details)
         future_char_videos = executor.submit(get_char_videos)
 
-        character = future_char_details.result()
-        videos = future_char_videos.result()
+    # Get the results
+    character = future_char_details.result()
+    videos = future_char_videos.result()
 
     # Validate character details
     if character is None:
@@ -873,12 +1059,14 @@ def scripture_details(
 
         return videos
 
+    # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_scripture_details = executor.submit(get_scripture_details)
         future_scripture_videos = executor.submit(get_scripture_videos)
 
-        scripture = future_scripture_details.result()
-        videos = future_scripture_videos.result()
+    # Get the results
+    scripture = future_scripture_details.result()
+    videos = future_scripture_videos.result()
 
     # Validate scripture details
     if scripture is None:

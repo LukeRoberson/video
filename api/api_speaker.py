@@ -205,10 +205,10 @@ def get_video_speakers(
                 status=404
             )
 
-    # Get the speakers for the video
-    speakers = speaker_mgr.get_from_video(
-        video_id=video_id
-    )
+        # Get the speakers for the video
+        speakers = speaker_mgr.get_from_video(
+            video_id=video_id
+        )
 
     # Log this, but it may not be an error
     if speakers is None:

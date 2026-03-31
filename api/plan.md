@@ -62,7 +62,7 @@
     * [x] Scripture pages; Down to 5s to load Heb 11:6
     * [x] Location pages; Down to 6s to load 'Africa'
     * [x] Tag pages; Down to 6s to load 'faith'
-    * [ ] Video detail; 22s to load '2026 GB update #1' (http://localhost:5000/video/3083)
+    * [x] Video detail; Down to 6s to load '2026 GB update #1'
     * [ ] Themes; 93s to load 'Powerful by Faith' (http://localhost:5000/theme/2021_powerful_by_faith)
     * [ ] Categories; 22s to load 'Broadcasting' (http://localhost:5000/broadcasting)
     * [ ] Advanced Search page; 10s to load (http://localhost:5000/search/advanced)
@@ -72,14 +72,12 @@
     * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
     * [x] 'Logging Error' at terminal when searching with ElasticSearch
     * [x] Cannot mark videos as watched
+    * [x] Getting speakers for a video; API displays errors
     * [ ] Searches sometimes throw unicode errors in the terminal
     * [ ] Profile edits
         * Profile updates work successfully (eg, name, clearing watch history)
         * They do not update on the page immediately
     * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
-    * [ ] Getting speakers for a video; API displays errors
-        * Error retrieving speakers for video 1: Cannot operate on a closed database.
-        * DEBUG - Module api_speaker: Function get_video_speakers
     * [ ] After deleting a profile:
         * The profile happened to be ID: 6
         * When loading the profile selection screen, API reports an error
@@ -99,36 +97,6 @@
 # Notes
 
 ## Performance
-
-* Video details
-    * `web_dynamic`
-    * `video_details()`
-    * Bug: Error retrieving speakers for video 3083: Cannot operate on a closed database.
-    * Bug: An error occurred while retrieving similar videos for video ID 3083
-* API calls:
-    * /api/videos/get_bulk
-        * Gets the details for the video
-    * /api/categories/video/{video_id}
-        * Gets categories the video belongs to
-    * /api/tags/video/{video_id}
-        * Gets tags associated with a video
-    * /api/locations/video/{video_id}
-        * Gets locations associated with a video
-    * /api/speakers/video/{video_id}
-        * Gets speakers associated with the video
-    * /api/characters/video/{video_id}
-        * Gets characters associated with a video
-    * /api/scriptures/video/{video_id}
-        * Gets scriptures associated with a video
-    * /api/profile/mark_watched
-        * Check if the video has been watched on this profile
-    * /api/profile/in_progress
-        * Check if the video is in progress for the profile
-    * /api/similarity/{video_id}
-        * Get a list of similar videos
-    * /api/videos/get_bulk
-        * x3
-        * Get details for each similar video
 
 * Themes pages
     * `web_dynamic`
@@ -173,6 +141,8 @@
     * gets details of several videos in one API call
     * processing is still a synchronous loop of queries
     * Use a single SQL query to get all at once
+* Missing similarity scores
+    * Not handled well at this time
 
 
 

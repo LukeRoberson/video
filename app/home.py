@@ -161,7 +161,7 @@ def home() -> Response:
         if profile_id is None:
             return []
 
-        response = api_session.get(
+        response = requests.get(
             url='http://localhost:5010/api/profile/in_progress',
             params={'profile': profile_id},
         )
@@ -176,7 +176,7 @@ def home() -> Response:
             list: A list of the latest monthly programs.
         """
 
-        return api_session.get(
+        return requests.get(
             url='http://localhost:5010/api/videos/filter',
             params={
                 'cat': categories.get('Monthly Programs', None),
@@ -192,7 +192,7 @@ def home() -> Response:
             list: A list of the latest news and announcements.
         """
 
-        return api_session.get(
+        return requests.get(
             url='http://localhost:5010/api/videos/filter',
             params={
                 'cat': categories.get('News and Announcements', None),
@@ -208,7 +208,7 @@ def home() -> Response:
             list: A list of the latest videos.
         """
 
-        return api_session.get(
+        return requests.get(
             url='http://localhost:5010/api/videos/filter',
             params={'latest': 9},
         ).json().get('data', [])
@@ -224,7 +224,7 @@ def home() -> Response:
         """
 
         # API call to get details for all in-progress videos
-        response = api_session.post(
+        response = requests.post(
             url='http://localhost:5010/api/videos/get_bulk',
             json={'video_ids': [v['video_id'] for v in in_progress_videos]}
         )
@@ -301,9 +301,6 @@ def home() -> Response:
                     themes.remove(theme)
 
         return banners
-
-    # Create a single requests session for all API calls
-    api_session = requests.Session()
 
     # Get the session profile ID
     profile_id = session.get('active_profile', None)
