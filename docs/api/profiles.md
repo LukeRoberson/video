@@ -26,7 +26,6 @@ API endpoints that relate to profile management
 | /delete{{profile_id}}               | Delete a profile                             |            |
 | /update/{{profile_id}}              | Update a profile                             |            |
 | clear_history/{{profile_id}}        | Clear a user's watch history                 |            |
-| mark_watched                        | Checks watch status for a video              |            |
 | mark_watched_bulk                   | Check watch status on multiple videos        | Done       |
 | mark_watched                        | Mark a video as watched                      | Done       |
 | mark_unwatched                      | Mark a video as unwatched                    | Done       |
@@ -957,79 +956,6 @@ If an invalid profile is provided:
 }
 ```
 </br></br>
-
-
-
-
-----
-## GET /api/profile/mark_watched
-
-**Description**
-
-Check if a specific video has been marked as watched for a profile.
-
-This checks against the active profile for this session.
-
-Note: The active profile will be migrated to the frontend in future.
-</br></br>
-
-
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-| Field       | Type    | Description                           |
-| ----------- | ------- | ------------------------------------- |
-| profile     | integer | The profile to check watch status for |
-| video_id    | integer | The video to check status for         |
-</br></br>
-
-
-> [!NOTE]
-> If the profile is not included as a parameter, the API will get it from the active session.
-> This will change in future, as the API shouldn't track the active session.
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-'data' and 'success' fields, where 'data' describes the watch status of a video.
-</br></br>
-
-
-| Field       | Type    | Description                                       |
-| ----------- | ------- | ------------------------------------------------- |
-| video_id    | integer | Video that was checked                            |
-| watched     | boolean | true or false, to indicate if it has been watched |
-</br></br>
-
-
-```json
-{
-    "data": {
-        "video_id": 1871,
-        "watched": false
-    },
-    "success": true
-}
-```
-</br></br>
-
 
 
 

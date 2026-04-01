@@ -39,8 +39,7 @@
     * [x] `api_tag`: get_tag and get_tags
     * [x] `api_video`: get_video, get_videos_bulk
     * [x] `api_search`: The regular search vs the advanced search
-    * [ ] `api_profile`: get_watched and check_watched_bulk
-        * Prerequisite: Fix bug where watched status not appearing on thumbnails
+    * [x] `api_profile`: get_watched and check_watched_bulk
 8. Active user redesign
     * [x] Get the frontend to track the active user, not the API
         * Currently set in `api_profile.py`, in set_active_profile()

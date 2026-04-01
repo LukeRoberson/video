@@ -317,16 +317,17 @@ def video_details(
             bool: True if the video has been watched, else False.
         """
 
-        response = requests.get(
-            'http://localhost:5010/api/profile/mark_watched',
+        response = requests.post(
+            'http://localhost:5010/api/profile/mark_watched_bulk',
             params={
-                'video_id': video_id,
                 'profile': profile_id
-            }
+            },
+            json={'video_ids': [video_id]}
         )
 
         if response.status_code == 200:
-            return response.json()['data'].get('watched', False)
+            data = response.json().get('data', {})
+            return data.get(str(video_id), False)
         else:
             logger.error(
                 f"Failed to fetch watched status for video {video_id}: "

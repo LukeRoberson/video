@@ -31,8 +31,6 @@ Endpoints:
     GET/POST/UPDATE/DELETE /api/profile/in_progress
         Manages in-progress video tracking for user profiles.
 
-    GET /api/profile/mark_watched
-        Checks if a video is marked as watched for the active profile.
     POST /api/profile/mark_watched_bulk
         Checks watched status for multiple videos for the active profile.
     POST /api/profile/mark_watched
@@ -662,75 +660,6 @@ def in_progress_videos() -> Response:
             error="Method not allowed",
             status=405
         )
-
-
-@profile_bp.route(
-    "/api/profile/mark_watched",
-    methods=["GET"]
-)
-def get_watched() -> Response:
-    """
-    Check if a specific video is marked as watched for the active profile.
-
-    Request Args:
-        video_id (int):
-            The ID of the video to check watched status for.
-        profile (int):
-            The ID of the profile to check watched status for.
-
-    Returns:
-        Response: A JSON response with the watched status of the video.
-    """
-
-    # Get the active profile from the parameter
-    active_profile = request.args.get("profile", None)
-
-    # If no active profile is set, return empty response
-    if active_profile is None or active_profile == "guest":
-        return api_success(
-            message="No in progress videos for guest profile"
-        )
-
-    # Check the profile exists in the database
-    with LocalDbContext() as db:
-        profile_mgr = ProfileManager(db)
-        profile = profile_mgr.read(profile_id=int(active_profile))
-
-    if not profile:
-        logging.error(f"Profile with ID {active_profile} not found.")
-        return api_error(f"Profile with ID {active_profile} not found", 404)
-
-    # Get the video ID from the request arguments
-    video = request.args.get("video_id", None)
-    if not video:
-        return api_error(error="Missing 'video_id' in request data")
-    video = int(video)
-
-    # Check the video exists in the database
-    with DatabaseContext() as db:
-        video_mgr = VideoManager(db)
-        video_id = video_mgr.get(video)
-
-        # Error if the video ID is not found in the database
-        if video_id is None or len(video_id) == 0:
-            logging.error(f"Video with ID {video} not found.")
-            return api_error(f"Video with ID {video} not found", 404)
-
-    # Check that the video is in the watch history for the active profile
-    with LocalDbContext() as local_db:
-        profile_mgr = ProfileManager(local_db)
-
-        watched = profile_mgr.check_watched(
-            profile_id=int(active_profile),
-            video_id=video
-        )
-
-    return api_success(
-        data={
-            "video_id": video,
-            "watched": watched
-        }
-    )
 
 
 @profile_bp.route(
