@@ -354,9 +354,80 @@ paths:
                     type: boolean
                     description: Indicates whether the operation was successful
                     example: true
+    post:
+      tags: [Videos]
+      summary: Add metadata to a video.
+      description: |
+        Add metadata to an existing video. This allows for associating videos with categories, tags, locations, speakers, characters, and scriptures.
+        Also allows updating existing metadata on a video.
+      requestBody:
+        description: Metadata names to filter by
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_name:
+                  type: string
+                  description: The name of the video to update
+                  example: "David Schafer: Why We Have Faith in . . . God’s Existence"
+                description:
+                  type: string
+                  description: A description of the video
+                  example: Video description
+                url:
+                  type: string
+                  description: The URL of the video
+                  example: "https://example.com/video"
+                tag_name:
+                  type: string
+                  description: A comma-separated list of tag names to add to the video
+                  example: "tag-1, tag-2"
+                location_name:
+                  type: string
+                  description: A comma-separated list of location names to associate with the video
+                  example: "Africa, Europe"
+                speaker_name:
+                  type: string
+                  description: A comma-separated list of speaker names to associate with the video
+                  example: "Stephen Lett, David Schafer"
+                character_name:
+                  type: string
+                  description: A comma-separated list of character names to associate with the video
+                  example: "Jesus, David"
+                scripture_name:
+                  type: string
+                  description: A comma-separated list of scripture names to associate with the video
+                  example: "John 3:16, Psalm 23:1"
+                category_name:
+                  type: string
+                  description: A comma-separated list of category names to associate with the video
+                  example: "Monthly Programs, Bible Teachings"
+                date_added:
+                  type: string
+                  format: date-time
+                  description: The date and time when the video was added to the database
+                  example: "2024-01-01T12:00:00Z"
+      responses:
+        '200':
+          summary: Successful response
+          description: A filtered list of videos retrieved successfully based on metadata names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful for the video
+                    example: true
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
 
   # Videos to do:
-    # POST /api/videos/metadata
     # /api/videos/csv
     # /api/videos/add
 

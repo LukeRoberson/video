@@ -445,7 +445,7 @@ def video_details(
     if video is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Video not found"
             ),
             404
@@ -620,7 +620,7 @@ def tag_details(
     if tag is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Tag not found in API"
             ),
             404
@@ -736,7 +736,7 @@ def location_details(
 
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Location could not be found"
             ),
             404
@@ -846,7 +846,7 @@ def speaker_details(
     if speaker is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Speaker not found in API"
             ),
             404
@@ -950,7 +950,7 @@ def character_details(
     if character is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Character not found in API"
             ),
             404
@@ -960,7 +960,7 @@ def character_details(
     if videos is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="No videos found for this character"
             ),
             404
@@ -1073,7 +1073,7 @@ def scripture_details(
     if scripture is None:
         return make_response(
             render_template(
-                "404.html",
+                "errors/404.html",
                 message="Scripture not found in API"
             ),
             404
@@ -1286,8 +1286,13 @@ def search_results() -> Response:
 def advanced_search() -> Response:
     """
     Display advanced search page with filters and results.
-
     Supports searching with text query and multiple filter types.
+
+    Functions:
+        - get_speakers: Fetches the list of speakers from the API.
+        - get_characters: Fetches the list of characters from the API.
+        - get_locations: Fetches the list of locations from the API.
+        - get_tags: Fetches the list of tags from the API.
 
     Query Parameters:
         q (str): Text search query (optional).
@@ -1301,45 +1306,101 @@ def advanced_search() -> Response:
         Rendered advanced search template with metadata options and results.
     """
 
-    # API: Get speakers
-    response = requests.get(
-        'http://localhost:5010/api/speakers',
-    )
-    if response.status_code == 200:
-        speakers = response.json().get('data', [])
-    else:
-        logger.error("Failed to fetch speakers from API")
-        speakers = []
+    def get_speakers() -> list:
+        """
+        Fetch the list of speakers from the API.
 
-    # API: Get characters
-    response = requests.get(
-        'http://localhost:5010/api/characters',
-    )
-    if response.status_code == 200:
-        characters = response.json().get('data', [])
-    else:
-        logger.error("Failed to fetch characters from API")
-        characters = []
+        Returns:
+             list: A list of speakers if found, else an empty list.
+        """
 
-    # API: Get locations
-    response = requests.get(
-        'http://localhost:5010/api/locations',
-    )
-    if response.status_code == 200:
-        locations = response.json().get('data', [])
-    else:
-        logger.error("Failed to fetch locations from API")
-        locations = []
+        # API: Get speakers
+        response = requests.get(
+            'http://localhost:5010/api/speakers',
+        )
 
-    # API: Get tags
-    response = requests.get(
-        'http://localhost:5010/api/tags',
-    )
-    if response.status_code == 200:
-        tags = response.json().get('data', [])
-    else:
-        logger.error("Failed to fetch tags from API")
-        tags = []
+        if response.status_code == 200:
+            speakers = response.json().get('data', [])
+        else:
+            logger.error("Failed to fetch speakers from API")
+            speakers = []
+
+        return speakers
+
+    def get_characters() -> list:
+        """
+        Fetch the list of characters from the API.
+
+        Returns:
+             list: A list of characters if found, else an empty list.
+        """
+
+        # API: Get characters
+        response = requests.get(
+            'http://localhost:5010/api/characters',
+        )
+
+        if response.status_code == 200:
+            characters = response.json().get('data', [])
+        else:
+            logger.error("Failed to fetch characters from API")
+            characters = []
+
+        return characters
+
+    def get_locations() -> list:
+        """
+        Fetch the list of locations from the API.
+
+        Returns:
+             list: A list of locations if found, else an empty list.
+        """
+
+        # API: Get locations
+        response = requests.get(
+            'http://localhost:5010/api/locations',
+        )
+
+        if response.status_code == 200:
+            locations = response.json().get('data', [])
+        else:
+            logger.error("Failed to fetch locations from API")
+            locations = []
+
+        return locations
+
+    def get_tags() -> list:
+        """
+        Fetch the list of tags from the API.
+
+        Returns:
+             list: A list of tags if found, else an empty list.
+        """
+
+        # API: Get tags
+        response = requests.get(
+            'http://localhost:5010/api/tags',
+        )
+
+        if response.status_code == 200:
+            tags = response.json().get('data', [])
+        else:
+            logger.error("Failed to fetch tags from API")
+            tags = []
+
+        return tags
+
+    # Concurrently fetch metadata for filters to speed up page load
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        future_speakers = executor.submit(get_speakers)
+        future_characters = executor.submit(get_characters)
+        future_locations = executor.submit(get_locations)
+        future_tags = executor.submit(get_tags)
+
+    speakers = future_speakers.result()
+    characters = future_characters.result()
+    locations = future_locations.result()
+    tags = future_tags.result()
 
     # Check if a search was performed
     query = request.args.get("q", "").strip()

@@ -56,24 +56,24 @@
         * [x] `api_profile.py`: set_active_profile; Shouldn't be needed anymore
         * [x] `api_profile.py`: get_active_profile; Shouldn't be needed anymore
 9. Performance
-    * [x] Home page; Down to 5s loading time
-    * [x] Character pages; Down to 5s to load the 'Aaron' profile
-    * [x] Speaker pages; Down to 5s to load 'Anthony Morris'
-    * [x] Scripture pages; Down to 5s to load Heb 11:6
-    * [x] Location pages; Down to 6s to load 'Africa'
-    * [x] Tag pages; Down to 6s to load 'faith'
-    * [x] Video detail; Down to 6s to load '2026 GB update #1'
+    * [x] Home page
+    * [x] Character pages
+    * [x] Speaker pages
+    * [x] Scripture pages
+    * [x] Location pages
+    * [x] Tag pages
+    * [x] Video detail
     * [x] Themes
     * [x] Categories
-    * [ ] Advanced Search page; 10s to load (http://localhost:5000/search/advanced)
-    * [ ] Advanced Search; 13s to search 'With Eyes of Faith' (http://localhost:5000/search/advanced?q=With+Eyes+of+Faith)
+    * [x] Advanced Search page
 10. Clean up bugs
     * [x] In categories, watch status on individual videos is not showing
     * [x] Terminal errors for one user (500-Marija_Golubiček.png) due to unicode
     * [x] 'Logging Error' at terminal when searching with ElasticSearch
     * [x] Cannot mark videos as watched
     * [x] Getting speakers for a video; API displays errors
-    * [ ] Searches sometimes throw unicode errors in the terminal
+    * [x] Searches sometimes throw unicode errors in the terminal
+    * [x] jinja2.exceptions.TemplateNotFound: 404.html
     * [ ] Profile edits
         * Profile updates work successfully (eg, name, clearing watch history)
         * They do not update on the page immediately
@@ -85,7 +85,6 @@
             * ERROR - Profile with ID 6 not found.
         * Page loads fine, nothing in console
     * [ ] `/api/search` doesn't seems to be enforcing the page size limit
-    * [ ] jinja2.exceptions.TemplateNotFound: 404.html
 
 
 </br></br>
@@ -95,28 +94,6 @@
 
 
 # Notes
-
-## Performance
-
-* Categories
-    * `web_categories.py`
-    * `render_category_page()`
-* API calls:
-    * /api/categories/{category}
-        * Resolve the main category name to ID
-        * Can make use of the cache now
-    * /api/categories/{category}
-        * Resolve each subcategory name to an ID
-        * Called several times synchronously
-        * Can make use of the cache now
-    * /api/categories/{main_id}/{sub_cat_id}
-        * Get a list of videos in each main/sub category combo
-    * /api/profile/mark_watched_bulk
-        * Check watch status of videos
-        * Run for each main/sub category combo
-        * Already checks all videos in a single request
-
-
 
 ## Improvements
 
