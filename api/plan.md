@@ -75,8 +75,8 @@
     * [x] Profile Edit: Marking a video as watched can result in duplicates
     * [x] Profile edits: UI doesn't reflect changes straight away
     * [x] After deleting a profile:
-    * [ ] Confirm that guests can't have in progress videos, or watched videos
-    * [ ] Confirm that deleting a profile will remove their watch history and in progress videos
+    * [x] Confirm that guests can't have in progress videos, or watched videos
+    * [x] Deleting a profile does not remove their in-progress history or watch history
     * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
     * [ ] `/api/search` doesn't seems to be enforcing the page size limit
 

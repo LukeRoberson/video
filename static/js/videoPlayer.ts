@@ -640,8 +640,13 @@ class ProgressTracker {
      * Initializes the progress tracker and validates required parameters.
      */
     private init(): void {
-        if (!this.profileId || !this.videoId) {
-            console.error('Missing profileId or videoId. Progress tracking will not work.');
+        if (!this.profileId) {
+            console.log('Guest profile. Progress tracking will not work.');
+            return;
+        }
+
+        if (!this.videoId) {
+            console.error('Missing videoId. Progress tracking will not work.');
             return;
         }
 

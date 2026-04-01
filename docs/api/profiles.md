@@ -18,19 +18,19 @@ API endpoints that relate to profile management
 
 **Endpoint Summary**
 
-| Endpoint                            | Description                                  | Swagger UI |
-| ----------------------------------- | -------------------------------------------- | ---------- |
-| /                                   | Get all profiles                             | Done       |
-| /{{profile_id}}                     | Get a specific profile                       | Done       |
-| /create                             | Create a profile                             |            |
-| /delete{{profile_id}}               | Delete a profile                             |            |
-| /update/{{profile_id}}              | Update a profile                             |            |
-| clear_history/{{profile_id}}        | Clear a user's watch history                 |            |
-| mark_watched_bulk                   | Check watch status on multiple videos        | Done       |
-| mark_watched                        | Mark a video as watched                      | Done       |
-| mark_unwatched                      | Mark a video as unwatched                    | Done       |
-| watch_history                       | Check watch history for a profile*           | Done       |
-| in_progress                         | Manage in-progress status for a video        | Done       |
+| Endpoint                            | Description                                  |
+| ----------------------------------- | -------------------------------------------- |
+| /                                   | Get all profiles                             |
+| /{{profile_id}}                     | Get a specific profile                       |
+| /create                             | Create a profile                             |
+| /delete{{profile_id}}               | Delete a profile                             |
+| /update/{{profile_id}}              | Update a profile                             |
+| clear_history/{{profile_id}}        | Clear a user's watch history                 |
+| mark_watched_bulk                   | Check watch status on multiple videos        |
+| mark_watched                        | Mark a video as watched                      |
+| mark_unwatched                      | Mark a video as unwatched                    |
+| watch_history                       | Check watch history for a profile*           |
+| in_progress                         | Manage in-progress status for a video        |
 </br></br>
 
 
@@ -82,71 +82,10 @@ The avatar filenames exist on the server itself, not locally. Uploading new avat
 </br></br>
 
 
-**Method**
-
-POST
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-```json
-{
-    "name": "<Profile Name>",
-    "image": "<image file name>",
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` if the body is not included, or fields are missing
-
-`500 INTERNAL SERVER ERROR` if the create operation was unsuccessful
-</br></br>
-
-
-**Response Body**
-
-A simple response to determine if this was successful.
-</br></br>
-
-
-| Field       | Type    | Description                                     |
-| ----------- | ------- | ----------------------------------------------- |
-| message     | string  | A successor fail message                        |
-| success     | boolean | True means the profile was created successfully |
-</br></br>
-
-
-```json
-{
-    "message": "Created profile with ID: 10",
-    "success": true
-}
-```
-</br></br>
-
-
-When fields are missing:
-
-```json
-{
-    "error": "Missing required fields: name and image",
-    "success": false
-}
-```
-</br></br>
-
 
 
 
@@ -159,67 +98,10 @@ Delete a profile, identified by its ID.
 </br></br>
 
 
-**Method**
-
-DELETE
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the profile ID does not exist
-
-`500 INTERNAL SERVER ERROR` if the delete operation failed
-</br></br>
-
-
-**Response Body**
-
-A simple response to determine if this was successful.
-</br></br>
-
-
-| Field       | Type    | Description                                     |
-| ----------- | ------- | ----------------------------------------------- |
-| message     | string  | A successor fail message                        |
-| success     | boolean | True means the profile was created successfully |
-</br></br>
-
-
-```json
-{
-    "message": "Profile with ID 10 deleted successfully.",
-    "success": true
-}
-```
-</br></br>
-
-
-If the profile is not found:
-
-```json
-{
-    "error": "Profile with ID 99999 not found",
-    "success": false
-}
-```
-</br></br>
-
-
 
 
 
@@ -232,89 +114,10 @@ Update the name or avatar filename for a profile.
 </br></br>
 
 
-**Method**
-
-POST
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-| Field       | Type    | Description                   |
-| ----------- | ------- | ----------------------------- |
-| name        | string  | The profile name              |
-| icon        | string  | The filename for their avatar |
-
-```json
-{
-    "name": "<new profile name>",
-    "icon": "<new profile icon>"
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` if fields are missing
-
-`404 NOT FOUND` if the profile does not exist
-
-`500 INTERNAL SERVER ERROR` if the operation was unsuccessful
-</br></br>
-
-
-**Response Body**
-
-A simple response to determine if this was successful.
-</br></br>
-
-
-| Field       | Type    | Description                                     |
-| ----------- | ------- | ----------------------------------------------- |
-| message     | string  | A successor fail message                        |
-| success     | boolean | True means the profile was created successfully |
-</br></br>
-
-
-```json
-{
-    "message": "Profile with ID 5 updated successfully.",
-    "success": true
-}
-```
-</br></br>
-
-
-If bad fields are provided in the request body:
-
-```json
-{
-    "error": "Failed to update profile with ID 5",
-    "success": false
-}
-```
-</br></br>
-
-
-If the profile does not exist:
-
-```json
-{
-    "error": "Profile with ID 99999 not found",
-    "success": false
-}
-```
-</br></br>
-
 
 
 
@@ -343,64 +146,10 @@ Clears the watch history in a user's profile.
 </br></br>
 
 
-**Method**
-
-POST
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-The body of the request contains the ID of the video to remove from the watch history.
-
-This is an optional field. If it is not present, all history is cleared.
-</br></br>
-
-
-| Field       | Type    | Description                            |
-| ----------- | ------- | -------------------------------------- |
-| video_id    | integer | The video to remove from watch history |
-</br></br>
-
-
-```json
-{
-    "video_id": "{{int}}"
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` If the profile is not found
-
-`500 INTERNAL SERVER ERROR` if there was a problem with clearing the video
-</br></br>
-
-
-**Response Body**
-
-The response is simply 'message' and 'success' fields.
-</br></br>
-
-
-```json
-{
-    "message": "Cleared video 1871 from watch history of profile 2.",
-    "success": true
-}
-```
-</br></br>
-
 
 
 

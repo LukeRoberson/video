@@ -185,7 +185,10 @@ def create_profile() -> Response:
         return api_error('Failed to create profile', 500)
 
     # Return the response with the created profile ID
-    return api_success(message=f'Created profile with ID: {id}')
+    return api_success(
+        message=f'Created profile with ID: {id}',
+        status=201
+    )
 
 
 @profile_bp.route(
@@ -214,13 +217,30 @@ def delete_profile(profile_id: int) -> Response:
             logging.error(f"Profile with ID {profile_id} not found.")
             return api_error(f"Profile with ID {profile_id} not found", 404)
 
+        # Clear the watch history for the profile before deletion
+        result = profile_mgr.remove_history(profile_id=profile_id)
+        if result is None:
+            logging.error(
+                f"Failed to clear watch history for "
+                f"profile with ID {profile_id}."
+            )
+            return api_error(
+                f"Failed to clear watch history for "
+                f"profile with ID {profile_id}",
+                status=500
+            )
+        logging.debug(
+            f"Cleared watch history for profile with ID {profile_id} "
+            f"before deletion."
+        )
+
         # Delete the profile (should return the deleted profile ID)
         result = profile_mgr.delete(profile_id)
         if result != profile_id:
             logging.error(f"Failed to delete profile with ID {profile_id}.")
             return api_error(
                 f"Failed to delete profile with ID {profile_id}",
-                500
+                status=500
             )
 
         logging.info(f"Successfully deleted profile with ID {profile_id}.")

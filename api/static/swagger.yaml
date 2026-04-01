@@ -32,7 +32,9 @@ tags:
     description: Information about user profiles and their preferences.
 
 paths:
-  # Videos
+  # ----------
+  #   Videos
+  # ----------
   /api/videos/get_bulk:
     post:
       tags: [Videos]
@@ -431,7 +433,9 @@ paths:
     # /api/videos/csv
     # /api/videos/add
 
-  # Categories
+  # --------------
+  #   Categories
+  # --------------
   /api/categories:
     get:
       tags: [Categories]
@@ -715,7 +719,9 @@ paths:
   # Search
   # Similarity
 
-  # Profile Management
+  # ----------------------
+  #   Profile Management
+  # ----------------------
   /api/profile:
     get:
       tags: [Profiles]
@@ -1231,13 +1237,197 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # Profiles to do:
-    # /api/profile/create
-    # /api/profile/delete/{{profile_id}}
-    # /api/profile/update/{{profile_id}}
-    # /api/profile/clear_history/{{profile_id}}
-    # DELETE /api/profile/in_progress
-    # GET /api/profile/mark_watched
+  /api/profile/create:
+    post:
+      tags: [Profiles]
+      summary: Create a new user profile
+      description: |
+        Create a new user profile with a specified name and image.
+        This allows for multiple users to have their own profiles and watch histories.
+        The avatar images are predefined and stored on the server, not uploaded by users.
+      requestBody:
+        description: The name and image for the new user profile
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the new user profile
+                  example: "Jane"
+                image:
+                  type: string
+                  description: The filename for the new user profile's image
+                  example: "profile-1.png"
+      responses:
+        '201':
+          summary: Successful response
+          description: User profile created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: User profile created successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/profile/delete/{{profile_id}}:
+    delete:
+      tags: [Profiles]
+      summary: Delete a user profile
+      description: |
+        Delete a user profile by its ID.
+        This removes the profile and all associated watch history and in-progress tracking.
+      parameters:
+        - in: path
+          name: profile_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user profile to delete
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: User profile deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: User profile deleted successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/profile/update/{{profile_id}}:
+    post:
+      tags: [Profiles]
+      summary: Update a user profile
+      description: |
+        Update the name and/or image for a specific user profile by its ID.
+        This allows users to change their profile details after creation.
+      parameters:
+        - in: path
+          name: profile_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user profile to update
+          example: 1
+      requestBody:
+        description: The new name and/or image for the user profile
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The new name for the user profile
+                  required: false
+                  example: "Jane Doe"
+                image:
+                  type: string
+                  description: The new filename for the user profile's image
+                  required: false
+                  example: "profile-2.png"
+      responses:
+        '200':
+          summary: Successful response
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: User profile updated successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/profile/clear_history/{{profile_id}}:
+    post:
+      tags: [Profiles]
+      summary: Clear watch history for a user profile
+      description: |
+        Clear the watch history for a specific user profile by its ID.
+        This removes records of watched and in-progress videos for the profile.
+        This can be for a specific video, or all videos, depending on the request body.
+      parameters:
+        - in: path
+          name: profile_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user profile to clear watch history for
+          example: 1
+      requestBody:
+        description: Videos to remove from watch history
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: integer
+                  description: |
+                    The ID of the video to remove from watch history.
+                    If not provided, all watch history will be cleared for the profile.
+                  example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Watch history cleared successfully for the user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Watch history cleared successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 
 components:

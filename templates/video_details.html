@@ -73,7 +73,11 @@
                 <!-- Progress bar overlay -->
                 {% if current_time and video.duration %}
                     <div class="progress-overlay">
-                        <div class="progress-bar" style="width: {{ (current_time / video.duration) * 100 }}%;"></div>
+                        <div
+                            class="progress-bar"
+                            style="width: {{ (current_time / video.duration) * 100 }}%;"
+                        >
+                        </div>
                     </div>
                 {% endif %}
             </div>
@@ -91,7 +95,14 @@
                     data-video-id="{{ video.id }}"
                     data-is-watched="{{ 'true' if watched else 'false' }}"
                 >
-                    <button type="submit" class="btn btn-success">
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                        {% if not session.get('active_profile') or session.get('active_profile') == 'guest' %}
+                            disabled
+                            title="Select a profile to track watched videos"
+                        {% endif %}
+                    >
                         {% if watched %}
                             Mark as Unwatched
                         {% else %}
