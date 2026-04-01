@@ -271,6 +271,7 @@ def select_profile() -> Response:
         url='http://localhost:5010/api/profile',
     )
     profile_list = response.json().get('data', [])
+    logger.info(f"Active profile: {session.get('active_profile', None)}")
 
     return make_response(
         render_template(

@@ -74,12 +74,7 @@
     * [x] Profile Edit: Can't mark videos as watched
     * [x] Profile Edit: Marking a video as watched can result in duplicates
     * [x] Profile edits: UI doesn't reflect changes straight away
-    * [ ] After deleting a profile:
-        * The profile happened to be ID: 6
-        * When loading the profile selection screen, API reports an error
-            * DEBUG - Module: api_profile.py, Function: get_profile
-            * ERROR - Profile with ID 6 not found.
-        * Page loads fine, nothing in console
+    * [x] After deleting a profile:
     * [ ] Confirm that guests can't have in progress videos, or watched videos
     * [ ] Confirm that deleting a profile will remove their watch history and in progress videos
     * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data

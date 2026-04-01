@@ -1120,6 +1120,56 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Profiles]
+      summary: Remove a video from in-progress tracking
+      description: |
+        Remove a video from the list of in progress videos for the specific profile.
+        This is used when a video is completed or no longer being tracked as in-progress.
+      parameters:
+        - in: query
+          name: profile
+          required: true
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to remove the in-progress video for. 
+          example: 1
+      requestBody:
+        description: The video ID to remove from in-progress tracking
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: integer
+                  description: The ID of the video to remove from in-progress tracking
+                  example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: In-progress video removed successfully for the profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: In-progress video removed successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /api/profile/watch_history:
     get:

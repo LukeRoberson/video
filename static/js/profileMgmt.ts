@@ -133,8 +133,10 @@ class ProfileApiService {
     static async setActiveProfile(
         profileData: SetActiveProfileData,
     ): Promise<ApiResponse> {
-        const url = `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
+        console.log('Setting active profile with data:', profileData);
 
+        // API call
+        const url = `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 
@@ -154,11 +156,20 @@ class ProfileApiService {
     /**
      * Delete a profile
      * @param profileId - Profile ID to delete
+     * @param event - Click event to prevent bubbling
      * @returns API response data
      */
-    static async deleteProfile(profileId: string): Promise<ApiResponse> {
+    static async deleteProfile(
+        profileId: string,
+        event?: Event
+    ): Promise<ApiResponse> {
+        // Prevents the click event from bubbling up to parent elements (like profile selection)
+        if (event) {
+            event.preventDefault();
+        }
+
+        // API call to delete the profile
         const endpoint = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId)}`;
-        
         const response = await fetch(endpoint, {
             method: 'DELETE',
             headers: { 
@@ -404,7 +415,15 @@ class ProfileOperationsHandler {
      * Delete a profile with confirmation
      * @param profileId - Profile ID to delete
      */
-    async deleteProfile(profileId: string): Promise<void> {
+    async deleteProfile(
+        profileId: string,
+        event?: Event
+    ): Promise<void> {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
         console.log('Deleting profile:', profileId);
         
         if (!this.validateProfileId(profileId)) {
@@ -484,8 +503,8 @@ class ProfileMgmtController {
             this.operationsHandler.editProfile(profileId, event);
         };
         
-        (window as any).deleteProfile = (profileId: string) => {
-            this.operationsHandler.deleteProfile(profileId);
+        (window as any).deleteProfile = (profileId: string, event?: Event) => {
+            this.operationsHandler.deleteProfile(profileId, event);
         };
     }
 }

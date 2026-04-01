@@ -73,6 +73,8 @@ class ProfileApiService {
      * @returns API response data
      */
     static async setActiveProfile(profileData) {
+        console.log('Setting active profile with data:', profileData);
+        // API call
         const url = `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
         const response = await fetch(url, {
             method: 'POST',
@@ -90,9 +92,15 @@ class ProfileApiService {
     /**
      * Delete a profile
      * @param profileId - Profile ID to delete
+     * @param event - Click event to prevent bubbling
      * @returns API response data
      */
-    static async deleteProfile(profileId) {
+    static async deleteProfile(profileId, event) {
+        // Prevents the click event from bubbling up to parent elements (like profile selection)
+        if (event) {
+            event.preventDefault();
+        }
+        // API call to delete the profile
         const endpoint = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId)}`;
         const response = await fetch(endpoint, {
             method: 'DELETE',
@@ -300,7 +308,11 @@ class ProfileOperationsHandler {
      * Delete a profile with confirmation
      * @param profileId - Profile ID to delete
      */
-    async deleteProfile(profileId) {
+    async deleteProfile(profileId, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
         console.log('Deleting profile:', profileId);
         if (!this.validateProfileId(profileId)) {
             alert('Error: Invalid profile ID');
@@ -365,8 +377,8 @@ class ProfileMgmtController {
         window.editProfile = (profileId, event) => {
             this.operationsHandler.editProfile(profileId, event);
         };
-        window.deleteProfile = (profileId) => {
-            this.operationsHandler.deleteProfile(profileId);
+        window.deleteProfile = (profileId, event) => {
+            this.operationsHandler.deleteProfile(profileId, event);
         };
     }
 }

@@ -30,7 +30,7 @@ API endpoints that relate to profile management
 | mark_watched                        | Mark a video as watched                      | Done       |
 | mark_unwatched                      | Mark a video as unwatched                    | Done       |
 | watch_history                       | Check watch history for a profile*           | Done       |
-| in_progress                         | Manage in-progress status for a video        | GET, POST* |
+| in_progress                         | Manage in-progress status for a video        | Done       |
 </br></br>
 
 
@@ -582,97 +582,10 @@ This endpoint also supports GET and POST methods.
 </br></br>
 
 
-**Method**
-
-DELETE
-</br></br>
-
-
-**Parameters**
-
-| Field       | Type    | Mandatory | Description                                                             |
-| ----------- | ------- | --------- | ----------------------------------------------------------------------- |
-| profile     | integer | Yes       | The profile to check for                                                |
-</br></br>
-
 > [!NOTE]
-> If the profile ID is not included as a parameter, a 400 error will be returned
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Body**
-
-For POST and UPDATE methods, a body is included with information to update the current playback time of a video.
-</br></br>
-
-
-| Field        | Type    | Description                                         |
-| ------------ | ------- | --------------------------------------------------- |
-| video_id     | integer | The ID of the video to update                       |
-</br></br>
-
-
-```json
-{
-    "video_id": "<int>",
-    "current_time": "<int>"
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` If the profile ID is not provided.
-
-`400 BAD REQUEST` If a JSON body was required, but none provided (eg, POST and UPDATE)
-
-`400 BAD REQUEST` If fields in the body are invalid
-
-`404 NOT FOUND` If an invalid profile is provided
-
-`500 INTERNAL SERVER ERROR` If a video could not be processed
-</br></br>
-
-
-**Response Body**
-
-Contains a simple status and message.
-</br></br>
-
-
-```json
-{
-    "message": "Removed in-progress videos successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If the 'profile' parameter is not included:
-
-```json
-{
-    "error": "Missing 'profile' parameter in request",
-    "success": false
-}
-```
-</br></br>
-
-
-If an invalid profile is provided:
-
-```json
-{
-    "error": "Profile not found",
-    "success": false
-}
-```
-</br></br>
-
 
 
 

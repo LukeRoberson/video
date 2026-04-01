@@ -121,6 +121,8 @@ def get_profile(profile_id: int) -> Response:
         Response: A JSON response with the user profile data.
     """
 
+    logger.debug(f"Retrieving profile with ID: {profile_id}")
+
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
         profile = profile_mgr.read(profile_id)
@@ -130,6 +132,7 @@ def get_profile(profile_id: int) -> Response:
         logger.error(f"Profile with ID {profile_id} not found.")
         return api_error(f"Profile with ID {profile_id} not found", 404)
 
+    logger.debug(f"Profile with ID {profile_id} retrieved successfully.")
     return api_success(
         data=profile[0]
     )

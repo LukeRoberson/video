@@ -94,9 +94,10 @@ declare class ProfileApiService {
     /**
      * Delete a profile
      * @param profileId - Profile ID to delete
+     * @param event - Click event to prevent bubbling
      * @returns API response data
      */
-    static deleteProfile(profileId: string): Promise<ApiResponse>;
+    static deleteProfile(profileId: string, event?: Event): Promise<ApiResponse>;
 }
 /**
  * Handles profile creation form functionality
@@ -191,7 +192,7 @@ declare class ProfileOperationsHandler {
      * Delete a profile with confirmation
      * @param profileId - Profile ID to delete
      */
-    deleteProfile(profileId: string): Promise<void>;
+    deleteProfile(profileId: string, event?: Event): Promise<void>;
     /**
      * Validate profile ID
      * @param profileId - Profile ID to validate

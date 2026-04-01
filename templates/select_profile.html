@@ -44,7 +44,7 @@ Select Profile
                         </button>
 
                         <!-- Delete a profile; profileMgmt.ts-->
-                        <button class="btn btn-sm btn-outline-danger" title="Delete Profile" onclick="event.preventDefault(); deleteProfile('{{ profile.id }}');">
+                        <button class="btn btn-sm btn-outline-danger" title="Delete Profile" onclick="event.preventDefault(); deleteProfile('{{ profile.id }}', event);">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
