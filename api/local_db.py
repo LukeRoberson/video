@@ -28,6 +28,8 @@ import logging
 from datetime import datetime
 
 
+logger = logging.getLogger(__name__)
+
 DB_NAME = "local.db"
 
 
@@ -387,6 +389,12 @@ class ProfileManager:
             )
             return None
 
+        logger.debug(f"LocalDB, read history: {history_list}")
+        logger.debug(
+            f"LocalDB, read history: watch count: "
+            f"{len(history_list) if history_list else 0}"
+        )
+
         # Get videos in progress
         try:
             with self.db.conn:
@@ -410,6 +418,12 @@ class ProfileManager:
                 f"{profile_id}: {e}"
             )
             return None
+
+        logger.debug(f"LocalDB, read in progress: {video_list}")
+        logger.debug(
+            f"LocalDB, read in progress: in progress count: "
+            f"{len(video_list) if video_list else 0}"
+        )
 
         # Add the current_time field to the history list
         for entry in history_list:

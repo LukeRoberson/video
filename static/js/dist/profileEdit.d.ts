@@ -18,7 +18,7 @@ declare const ProfileEditConfig: {
     /** API endpoint pattern for clearing history */
     readonly CLEAR_HISTORY_ENDPOINT: "/api/profile/clear_history/{id}";
     /** API endpoint for marking videos as watched */
-    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched/{id}";
+    readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched";
     /** Content type for JSON requests */
     readonly JSON_CONTENT_TYPE: "application/json";
     /** Profile pictures directory path */
@@ -235,6 +235,12 @@ declare class ProfileEditController {
      * @param button - Button that was clicked
      */
     private handleMarkWatched;
+    /**
+     * Update the watch history count display
+     * Used when removing individual items from the history
+     * This prevents the need for a full page reload
+     */
+    private updateHistoryCount;
 }
 declare let profileEditController: ProfileEditController;
 //# sourceMappingURL=profileEdit.d.ts.map

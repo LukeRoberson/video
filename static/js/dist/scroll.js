@@ -115,7 +115,6 @@ class ThumbnailScrollManager {
         this.rightArrow = this.wrapper.querySelector('.carousel-scroll-arrow--right');
         // If arrows don't exist, skip updating them
         if (!this.leftArrow || !this.rightArrow) {
-            console.log(`Scroll arrows not yet available for wrapper ${this.wrapperId}`);
             return;
         }
         const canScrollLeft = this.thumbnails.scrollLeft > 0;

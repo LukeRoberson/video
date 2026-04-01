@@ -82,8 +82,6 @@ class VideoApiService {
      * @throws Error if API call fails
      */
     static async addVideoToDatabase(videoData: VideoData): Promise<VideoAddApiResponse> {
-        console.log('Adding video with data:', videoData);
-        
         const response = await fetch(
             `${VideoAddConfig.API_BASE_URL}${VideoAddConfig.ADD_ENDPOINT}`,
             {
@@ -91,6 +89,7 @@ class VideoApiService {
                 headers: {
                     'Content-Type': VideoAddConfig.JSON_CONTENT_TYPE
                 },
+                credentials: 'include',
                 body: JSON.stringify(videoData)
             }
         );
@@ -482,7 +481,6 @@ class VideoAddController {
             this.setLoadingState(true);
             
             const videos = await VideoApiService.fetchVideosFromCSV();
-            console.log('Videos data:', videos);
             
             this.tableManager.displayVideos(videos);
             

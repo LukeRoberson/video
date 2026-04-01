@@ -689,7 +689,6 @@ class UrlTimeHandler {
      * @param endTime - Snippet end time
      */
     createSnippetIndicator(startTime, endTime) {
-        console.log('Creating snippet indicator - start:', startTime, 'end:', endTime, 'source:', this.snippetSource);
         // Create snippet info overlay
         this.snippetIndicator = document.createElement('div');
         this.snippetIndicator.className = 'snippet-indicator';
@@ -721,7 +720,6 @@ class UrlTimeHandler {
      * @param endTime - Snippet end time
      */
     highlightSnippetRange(startTime, endTime) {
-        console.log('highlightSnippetRange called - start:', startTime, 'end:', endTime);
         const createHighlight = () => {
             const duration = this.player.duration();
             if (duration > 0) {
@@ -734,9 +732,6 @@ class UrlTimeHandler {
                 highlight.style.width = `${endPercent - startPercent}%`;
                 progressControl.appendChild(highlight);
             }
-            else {
-                console.log('Duration is still 0, retrying...');
-            }
         };
         // If duration is available now, create highlight immediately
         if (this.player.duration() > 0) {
@@ -744,7 +739,6 @@ class UrlTimeHandler {
         }
         else {
             // Otherwise, wait for loadedmetadata event
-            console.log('Waiting for video metadata to load...');
             this.player.one('loadedmetadata', createHighlight);
         }
     }
@@ -1021,7 +1015,6 @@ class SubtitleManager {
      */
     init() {
         if (!this.videoId) {
-            console.log('No video ID provided for subtitles');
             return;
         }
         this.checkAndLoadSubtitle();
@@ -1037,12 +1030,9 @@ class SubtitleManager {
             if (response.ok) {
                 this.addSubtitleTrack(subtitleUrl);
             }
-            else {
-                console.log(`No subtitle file found: ${subtitleUrl}`);
-            }
         })
             .catch(err => {
-            console.log('Error checking subtitle file:', err);
+            console.error('Error checking subtitle file:', err);
         });
     }
     /**
@@ -1176,7 +1166,6 @@ function handleTheatreMode(player, container) {
         void wrapper.offsetWidth;
         // Disable body scroll
         document.body.style.overflow = 'hidden';
-        console.log('Entered theatre mode');
     }
     /**
      * Exit theatre mode - restore wrapper to original position
@@ -1198,7 +1187,6 @@ function handleTheatreMode(player, container) {
         // Clear stored values
         originalParent = null;
         originalNextSibling = null;
-        console.log('Exited theatre mode');
     }
     // Watch for theatre-mode class changes
     const observer = new MutationObserver((mutations) => {

@@ -21,6 +21,8 @@ Routes:
     - /about: Render the about page.
     - /select_profile: Render the profile selection page.
     - /create_profile: Render the profile creation page.
+    - /edit_profile/<profile_id>:
+        Render the profile editing page for the specified profile.
     - /character: Render the character details page.
     - /tag: Render the tag details page.
     - /speaker: Render the speaker details page.
@@ -67,7 +69,11 @@ from functools import wraps
 from typing import Callable
 import yaml
 import requests
+import logging
+from concurrent.futures import ThreadPoolExecutor
 
+
+logger = logging.getLogger(__name__)
 
 web_bp = Blueprint(
     'web_pages',
@@ -311,6 +317,10 @@ def edit_profile(profile_id: int) -> Response:
     """
     Render the profile editing page.
 
+    Functions:
+        get_profile: Get profile details from the API.
+        get_watch_history: Get watch history for the profile from the API.
+
     Args:
         profile_id (int): The ID of the profile to edit.
 
@@ -318,18 +328,49 @@ def edit_profile(profile_id: int) -> Response:
         Response: A rendered HTML page for editing the specified profile.
     """
 
-    # API: Get profile details
-    response = requests.get(
-        url=f'http://localhost:5010/api/profile/{profile_id}',
-    )
-    profile = response.json().get('data', {})
+    def get_profile() -> Dict[str, Any]:
+        """
+        Get profile details from the API.
 
-    # API: Get watch history for the profile
-    response = requests.get(
-        url='http://localhost:5010/api/profile/watch_history',
-        params={'profile': profile_id}
-    )
-    history = response.json().get('data', [])
+        Returns:
+            Dict[str, Any]: A dictionary containing the profile details.
+        """
+
+        # API: Get profile details
+        response = requests.get(
+            url=f'http://localhost:5010/api/profile/{profile_id}',
+        )
+        profile = response.json().get('data', {})
+
+        return profile
+
+    def get_watch_history() -> list[Dict[str, Any]]:
+        """
+        Get watch history for the profile from the API.
+
+        Returns:
+            list[Dict[str, Any]]:
+                A list of dictionaries containing watch history items.
+        """
+
+        # API: Get watch history for the profile
+        response = requests.get(
+            url='http://localhost:5010/api/profile/watch_history',
+            params={'profile': profile_id}
+        )
+        history = response.json().get('data', [])
+
+        return history
+
+    # Run API calls concurrently to speed up page load time
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        profile_future = executor.submit(get_profile)
+        history_future = executor.submit(get_watch_history)
+
+    profile = profile_future.result()
+    history = history_future.result()
+
+    logger.info(f"Watch history: {history}")
 
     # Sort from newest to oldest, stripping fractional seconds
     if history:
@@ -342,6 +383,7 @@ def edit_profile(profile_id: int) -> Response:
 
     # Count items in history
     history_count = len(history) if history else 0
+    logger.info(f"Watch history count: {history_count}")
 
     # API: Get the video details for each history item
     if history:

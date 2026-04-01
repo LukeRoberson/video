@@ -715,7 +715,119 @@ paths:
   # Search
   # Similarity
 
-  # /api/profile
+  # Profile Management
+  /api/profile:
+    get:
+      tags: [Profiles]
+      summary: Retrieve a list of all profiles
+      description: |
+        Get all user profiles.
+      responses:
+        '200':
+          summary: Successful response
+          description: User profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: A list of user profiles, including their IDs and names
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the user profile
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the user profile
+                          example: "John"
+                        image:
+                          type: string
+                          description: Filename for the user profile's image
+                          example: "profile.jpg"
+                        admin:
+                          type: boolean
+                          description: Indicates whether the profile has admin privileges
+                          example: false
+                        created_at:
+                          type: string
+                          format: date-time
+                          description: The date and time when the user profile was created
+                          example: "2025-06-30 01:24:03"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: User profiles retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+
+  /api/profile/{{profile_id}}:
+    get:
+      tags: [Profiles]
+      summary: Retrieve a specific user profile
+      description: |
+        Get details for a specific user profile by its ID.
+      parameters:
+        - in: path
+          name: profile_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user profile to retrieve
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Details of the specified user profile, including ID, name, image filename, admin status, and creation timestamp
+                    properties:
+                      id:
+                        type: integer
+                        description: Unique identifier for the user profile
+                        example: 1
+                      name:
+                        type: string
+                        description: Name of the user profile
+                        example: "John"
+                      image:
+                        type: string
+                        description: Filename for the user profile's image
+                        example: "amos_1.png"
+                      admin:
+                        type: integer
+                        description: |
+                          Indicates whether the profile has admin privileges.
+                          This is represented as an integer (0 for false, 1 for true) to align with database storage.
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        description: The date and time when the user profile was created
+                        example: "2025-06-30 01:24:03"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: User profile retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /api/profile/mark_watched:
     post:
       tags: [Profiles]
@@ -880,6 +992,77 @@ paths:
           $ref: '#/components/responses/BadRequest'
 
   /api/profile/in_progress:
+    get:
+      tags: [Profiles]
+      summary: Retrieve in-progress videos for a profile
+      description: |
+        This tracks where a video is up to, so it can be resumed there in future.
+        Specifically, the GET method will either:
+        * Get a list of in progress videos for a particular profile
+        * Check if a specific video is in progress for a specific profile
+      parameters:
+        - in: query
+          name: profile
+          required: true
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to retrieve in-progress videos for. 
+            If not provided, 'guest' will be assumed and an empty list will be returned.
+          example: 1
+        - in: query
+          name: video_id
+          required: false
+          schema:
+            type: integer
+          description: |
+            The ID of the video to check for in-progress status.
+            If not provided, a list of all in-progress videos for the profile will be returned.
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: In-progress videos for the specified profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of in-progress videos for the specified profile, including video IDs and current playback times
+                    items:
+                      type: object
+                      properties:
+                        profile_id:
+                          type: integer
+                          description: Unique identifier for the user profile
+                          example: 2
+                        video_id:
+                          type: integer
+                          description: Unique identifier for the video
+                          example: 123
+                        current_time:
+                          type: integer
+                          description: The current playback time of the video in seconds
+                          example: 1200
+                        updated_at:
+                          type: string
+                          format: date-time
+                          description: The date and time when the in-progress status was last updated
+                          example: "2026-01-17 07:14:08"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: In-progress videos retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
     post:
       tags: [Profiles]
       summary: Update in progress video status
@@ -938,17 +1121,73 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /api/profile/watch_history:
+    get:
+      tags: [Profiles]
+      summary: Retrieve watch history for a profile
+      description: |
+        Get the watch history for a specific user profile.
+        This allows the UI to display recently watched videos and continue watching in-progress videos.
+      parameters:
+        - in: query
+          name: profile
+          required: false
+          schema:
+            type: integer
+          description: |
+            The ID of the user profile to retrieve watch history for. 
+            If not provided, 'guest' will be assumed and an empty watch history will be returned.
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: Watch history for the specified profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of watched videos for the specified profile, including video IDs and timestamps
+                    items:
+                      type: object
+                      properties:
+                        profile_id:
+                          type: integer
+                          description: Unique identifier for the user profile
+                          example: 2
+                        video_id:
+                          type: integer
+                          description: Unique identifier for the video
+                          example: 1871
+                        current_time:
+                          type: integer
+                          description: The last playback time of the video in seconds
+                          example: 60
+                        watched_at:
+                          type: string
+                          format: date-time
+                          description: The date and time when the video was watched
+                          example: "2026-01-18 12:51:26.409769"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Watch history retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # Profiles to do:
-    # /api/profiles
-    # /api/profiles/{{profile_id}}
-    # /api/profiles/create
-    # /api/profiles/delete/{{profile_id}}
-    # /api/profiles/update/{{profile_id}}
-    # /api/profiles/watch_history
-    # /api/profiles/clear_history/{{profile_id}}
-    # GET /api/profiles/in_progress
-    # DELETE /api/profiles/in_progress
-    # GET /api/profiles/mark_watched
+    # /api/profile/create
+    # /api/profile/delete/{{profile_id}}
+    # /api/profile/update/{{profile_id}}
+    # /api/profile/clear_history/{{profile_id}}
+    # DELETE /api/profile/in_progress
+    # GET /api/profile/mark_watched
 
 
 components:

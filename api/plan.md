@@ -1,5 +1,3 @@
-
-
 # Plan
 
 1. General clean up
@@ -73,92 +71,20 @@
     * [x] Getting speakers for a video; API displays errors
     * [x] Searches sometimes throw unicode errors in the terminal
     * [x] jinja2.exceptions.TemplateNotFound: 404.html
-    * [ ] Profile edits
-        * Profile updates work successfully (eg, name, clearing watch history)
-        * They do not update on the page immediately
-    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
+    * [x] Profile Edit: Can't mark videos as watched
+    * [x] Profile Edit: Marking a video as watched can result in duplicates
+    * [x] Profile edits: UI doesn't reflect changes straight away
     * [ ] After deleting a profile:
         * The profile happened to be ID: 6
         * When loading the profile selection screen, API reports an error
             * DEBUG - Module: api_profile.py, Function: get_profile
             * ERROR - Profile with ID 6 not found.
         * Page loads fine, nothing in console
+    * [ ] Confirm that guests can't have in progress videos, or watched videos
+    * [ ] Confirm that deleting a profile will remove their watch history and in progress videos
+    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
     * [ ] `/api/search` doesn't seems to be enforcing the page size limit
 
 
 </br></br>
-
-
-
-
-
-# Notes
-
-## Improvements
-
-* Searching
-    * reindexing: This can take time, so maybe respond with 'starting', and check a URL to find an updated status
-* Improve logging in api_profile
-    * After other improvements are made
-* Create helper functions for reused components:
-    * Check if a video exists
-    * Logging debugs and warnings during field validation
-* Caching
-    * Cache theme banners in AppCache (like category IDs); Improve loading the home page
-* get_bulk endpoint
-    * gets details of several videos in one API call
-    * processing is still a synchronous loop of queries
-    * Use a single SQL query to get all at once
-* Missing similarity scores
-    * Not handled well at this time
-
-
-
-## Cleanup
-
-* `/api/categories/{{category_id}}/{{subcategory_id}}`
-    * Contains a 'videos' list in the response, which is unnecessary
-* Speakers endpoint:
-    * Query for invalid speaker does not return an empty list like other endpoints do
-* Tags endpoint:
-    * Query for invalid tag does not return an empty list like other endpoints do
-* Video endpoint is still 'get_bulk', which should change
-* Profile API
-    * `mark_watched` checks if a video has been watched; This is a misleading name
-    * `mark_watched_bulk` takes `profile` as a parameter, others take `profile_id`; Update for consistency
-
-
-
-## Tests
-
-* Additional tests
-    * GET /api/profile/in_progress
-        * Need to test passing a video ID as a parameter
-        * However, need to be sure that video ID is listed as in progress in the DB first
-    * DELETE /api/profile/in_progress
-        * Need to test that we can remove an in progress video
-        * However, there needs to be one to remove
-    * POST /api/profile/mark_watched
-        * Test marking a video as watched
-* Not yet testing endpoints that update the database
-    * POST /api/videos/metadata
-    * POST /api/videos/add
-* Add tests for api_profile
-    * After other improvements are made
-
-
-
-## Investigate
-
-* Should images, such as avatars, be stored in the frontend, or somewhere else?
-* Other test types, such as 'debug' and 'coverage
-* How to mock API tests that are 'destructive'; Eg, add/delete items from the DB
-* Live version has a bug while showing thumbnail for snippets (noticed on themes)
-    * Does the dev version have this too?
-* Do we really need both POST and UPDATE methods for updating in progress videos?
-* API batching
-    * How can we do batching?
-    * Eg, home page has multiple calls to /api/videos/filter
-    * Is there a way to run this as a batch?
-
 

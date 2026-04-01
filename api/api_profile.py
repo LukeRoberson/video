@@ -304,6 +304,10 @@ def get_watch_history() -> Response:
 
     # If no active profile is set, return empty response
     if active_profile is None or active_profile == "guest":
+        logger.debug(
+            f"Get Watch History: Returning early, "
+            f"active profile is {active_profile}"
+        )
         return api_success(
             message="No watch history for guest profile"
         )
@@ -314,8 +318,10 @@ def get_watch_history() -> Response:
         profile = profile_mgr.read(profile_id=int(active_profile))
 
     if not profile:
-        logging.error(f"Profile with ID {active_profile} not found.")
+        logger.error(f"Profile with ID {active_profile} not found.")
         return api_error(f"Profile with ID {active_profile} not found", 404)
+
+    logger.debug(f"Get Watch History: Profile: {profile}")
 
     # Retrieve the watch history for the active profile
     with LocalDbContext() as db:
@@ -323,6 +329,12 @@ def get_watch_history() -> Response:
         watch_history = profile_mgr.read_watch_history(
             profile_id=int(active_profile)
         )
+
+    logger.debug(f"Get Watch History: Watch history: {watch_history}")
+    logger.debug(
+        f"Get Watch History: Watch history count: "
+        f"{len(watch_history) if watch_history else 0}"
+    )
 
     # Remove the 'id' field from each item in watch_history
     if isinstance(watch_history, list):
@@ -358,7 +370,7 @@ def clear_watch_history(profile_id: int) -> Response:
         Response: A JSON response indicating success or failure.
     """
 
-    logging.info(f"Clearing watch history for profile with ID: {profile_id}")
+    logger.info(f"Clearing watch history for profile with ID: {profile_id}")
 
     data = request.get_json(silent=True) if request.is_json else None
 
@@ -368,7 +380,7 @@ def clear_watch_history(profile_id: int) -> Response:
         # Check if the profile exists
         profile = profile_mgr.read(profile_id)
         if profile is None:
-            logging.error(f"Profile with ID {profile_id} not found.")
+            logger.error(f"Profile with ID {profile_id} not found.")
             return api_error(f"Profile with ID {profile_id} not found", 404)
 
         # Clear an individual video from the watch history
@@ -378,7 +390,7 @@ def clear_watch_history(profile_id: int) -> Response:
                 video_id=data["video_id"],
             )
             if not result:
-                logging.error(
+                logger.error(
                     f"Failed to clear watch history for profile {profile_id}."
                 )
                 return api_error(
@@ -386,7 +398,7 @@ def clear_watch_history(profile_id: int) -> Response:
                     500
                 )
 
-            logging.info(
+            logger.info(
                 f"Cleared video {data["video_id"]} "
                 f"from watch history of profile {profile_id}."
             )
@@ -401,7 +413,7 @@ def clear_watch_history(profile_id: int) -> Response:
                 profile_id=profile_id,
             )
             if not result:
-                logging.error(
+                logger.error(
                     f"Failed to clear watch history for profile {profile_id}."
                 )
                 return api_error(
@@ -409,7 +421,7 @@ def clear_watch_history(profile_id: int) -> Response:
                     500
                 )
 
-        logging.info(f"Cleared watch history for profile {profile_id}.")
+        logger.info(f"Cleared watch history for profile {profile_id}.")
         return api_success(
             message=f"Cleared watch history for profile {profile_id}."
         )
@@ -748,6 +760,10 @@ def mark_watched() -> Response:
 
     # Handle the guest profile
     if active_profile is None or active_profile == "guest":
+        logger.debug(
+            f"Mark Watched: Returning early, "
+            f"active profile is {active_profile}"
+        )
         return api_success(message="No watched videos for guest profile")
 
     # Check the profile exists in the database
@@ -756,8 +772,10 @@ def mark_watched() -> Response:
         profile = profile_mgr.read(profile_id=int(active_profile))
 
     if not profile:
-        logging.error(f"Profile with ID {active_profile} not found.")
+        logger.error(f"Profile with ID {active_profile} not found.")
         return api_error(f"Profile with ID {active_profile} not found", 404)
+
+    logger.debug(f"Mark watched: Active profile is {active_profile}")
 
     # Get the body of the request and validate it
     data = request.get_json()
@@ -772,27 +790,43 @@ def mark_watched() -> Response:
             error="Missing 'video_id' in request data"
         )
 
+    logger.debug(f"Mark Watched: Received video_id: {video_id}")
+
     with LocalDbContext() as db:
         profile_mgr = ProfileManager(db)
         progress_mgr = ProgressManager(db)
 
-        # Mark the video as watched for the active profile
-        result = profile_mgr.mark_watched(
+        # Check if the video has already been marked as watched
+        already_watched = profile_mgr.check_watched(
             profile_id=int(active_profile),
             video_id=int(video_id)
         )
 
-        if not result:
-            return api_error(
-                error=f"Failed to mark video {video_id} as watched",
-                status=500
+        if already_watched:
+            logger.debug(
+                f"Mark Watched: Video {video_id} is already marked as watched"
             )
+
+        # Mark the video as watched for the active profile
+        else:
+            result = profile_mgr.mark_watched(
+                profile_id=int(active_profile),
+                video_id=int(video_id)
+            )
+
+            if not result:
+                return api_error(
+                    error=f"Failed to mark video {video_id} as watched",
+                    status=500
+                )
 
         # Remove from in progress list if needed
         result = progress_mgr.delete(
             profile_id=session.get("active_profile", "guest"),
             video_id=video_id
         )
+
+        logger.debug(f"Mark Watched: In-progress result is {result}")
 
     return api_success(
         message=f"Marked video {video_id} as watched"

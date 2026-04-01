@@ -122,14 +122,6 @@ class TVDetectionManager {
             this.isTV = this.performEnhancedDetection();
         }
 
-        console.log('Enhanced TV Detection:', {
-            isTV: this.isTV,
-            userAgent: navigator.userAgent,
-            isSamsung: navigator.userAgent.toLowerCase().includes('tizen'),
-            isFireTV: navigator.userAgent.toLowerCase().includes('silk'),
-            isLG: navigator.userAgent.toLowerCase().includes('webos')
-        });
-
         return this.isTV;
     }
 
@@ -171,15 +163,6 @@ class TVKeyHandler {
      * @returns Normalized key name or null if not recognized
      */
     normalizeKey(event: KeyboardEvent): string | null {
-        console.log('Raw key event:', {
-            type: event.type,
-            key: event.key,
-            keyCode: event.keyCode,
-            which: event.which,
-            code: event.code,
-            userAgent: navigator.userAgent.substring(0, 100)
-        });
-
         // Check all key mapping categories
         const allMappings = [
             TVKeyMappings.STANDARD,
@@ -201,7 +184,6 @@ class TVKeyHandler {
             return event.key;
         }
 
-        console.log('Unrecognized key:', event.keyCode);
         return null;
     }
 }
@@ -764,15 +746,11 @@ class CarouselNavigator {
         const currentCarousel = currentElement?.closest('.carousel') as HTMLElement | null;
 
         if (!currentCarousel) {
-            console.log('navigateCarouselSlide: Not in carousel');
             return false;
         }
 
-        console.log('navigateCarouselSlide: Direction =', direction, 'from element:', currentElement);
-
         const bootstrapCarousel = (window as any).bootstrap?.Carousel;
         if (!bootstrapCarousel) {
-            console.log('Bootstrap carousel not available');
             return false;
         }
 
@@ -780,8 +758,6 @@ class CarouselNavigator {
         const currentSlide = currentCarousel.querySelector('.carousel-item.active') as HTMLElement;
         const visibleThumbnails = Array.from(currentSlide.querySelectorAll<HTMLElement>('.thumbnail, .thumbnail-home'));
         const currentIndex = visibleThumbnails.indexOf(currentElement!);
-
-        console.log('navigateCarouselSlide: Found', visibleThumbnails.length, 'thumbnails, current at index:', currentIndex);
 
         return this.handleSlideNavigation(direction, currentIndex, visibleThumbnails, carouselInstance, currentCarousel);
     }
@@ -812,7 +788,6 @@ class CarouselNavigator {
             return this.moveToPreviousSlide(activeIndex, carouselInstance, currentCarousel);
         }
 
-        console.log('navigateCarouselSlide: Not at edge, normal navigation should handle');
         return false;
     }
 
@@ -830,10 +805,7 @@ class CarouselNavigator {
         carouselInstance: BootstrapCarousel, 
         currentCarousel: HTMLElement
     ): boolean {
-        console.log('navigateCarouselSlide: At last item. Slide', activeIndex + 1, 'of', totalSlides);
-
         if (activeIndex < totalSlides - 1) {
-            console.log('navigateCarouselSlide: Moving to next slide');
             carouselInstance.next();
 
             setTimeout(() => {
@@ -841,7 +813,6 @@ class CarouselNavigator {
             }, TVNavigationConfig.SLIDE_NAVIGATION_DELAY);
             return true;
         } else {
-            console.log('navigateCarouselSlide: No more slides, staying put');
             return true;
         }
     }
@@ -858,10 +829,7 @@ class CarouselNavigator {
         carouselInstance: BootstrapCarousel, 
         currentCarousel: HTMLElement
     ): boolean {
-        console.log('navigateCarouselSlide: At first item. Slide', activeIndex + 1);
-
         if (activeIndex > 0) {
-            console.log('navigateCarouselSlide: Moving to previous slide');
             carouselInstance.prev();
 
             setTimeout(() => {
@@ -869,7 +837,6 @@ class CarouselNavigator {
             }, TVNavigationConfig.SLIDE_NAVIGATION_DELAY);
             return true;
         } else {
-            console.log('navigateCarouselSlide: No previous slides, staying put');
             return true;
         }
     }
@@ -1409,8 +1376,6 @@ class TVNavigationController {
      * @param element - Element to activate
      */
     private activateElement(element: HTMLElement): void {
-        console.log('Enter pressed on element:', element);
-
         // Enhanced click handling for carousel items
         if (element.classList.contains('thumbnail') || element.classList.contains('thumbnail-home')) {
             const linkElement = this.findClickableElement(element);
@@ -1418,19 +1383,15 @@ class TVNavigationController {
                 if (linkElement.hasAttribute('href')) {
                     const href = linkElement.getAttribute('href');
                     if (href) {
-                        console.log('Navigating to:', href);
                         window.location.href = href;
                     }
                 } else {
-                    console.log('Clicking element:', linkElement);
                     linkElement.click();
                 }
             } else {
-                console.log('No link found, clicking thumbnail directly');
                 element.click();
             }
         } else {
-            console.log('Normal click on:', element);
             element.click();
         }
     }

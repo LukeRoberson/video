@@ -567,12 +567,10 @@ class AdvancedSearchController {
 
         // Restore speakers
         const speakerIds = urlParams.getAll('speakers');
-        console.log('Restoring speakers from URL:', speakerIds);
         speakerIds.forEach(id => {
             // Convert both to strings for comparison since URL params are strings
             const speaker = data.speakers.find(s => String(s.id) === String(id));
             if (speaker) {
-                console.log('Restoring speaker:', speaker);
                 this.speakerManager.selectItem(speaker);
             } else {
                 console.warn('Speaker not found with id:', id);
@@ -581,11 +579,9 @@ class AdvancedSearchController {
 
         // Restore characters
         const characterIds = urlParams.getAll('characters');
-        console.log('Restoring characters from URL:', characterIds);
         characterIds.forEach(id => {
             const character = data.characters.find(c => String(c.id) === String(id));
             if (character) {
-                console.log('Restoring character:', character);
                 this.characterManager.selectItem(character);
             } else {
                 console.warn('Character not found with id:', id);
@@ -594,11 +590,9 @@ class AdvancedSearchController {
 
         // Restore locations
         const locationIds = urlParams.getAll('locations');
-        console.log('Restoring locations from URL:', locationIds);
         locationIds.forEach(id => {
             const location = data.locations.find(l => String(l.id) === String(id));
             if (location) {
-                console.log('Restoring location:', location);
                 this.locationManager.selectItem(location);
             } else {
                 console.warn('Location not found with id:', id);
@@ -607,11 +601,9 @@ class AdvancedSearchController {
 
         // Restore tags
         const tagIds = urlParams.getAll('tags');
-        console.log('Restoring tags from URL:', tagIds);
         tagIds.forEach(id => {
             const tag = data.tags.find(t => String(t.id) === String(id));
             if (tag) {
-                console.log('Restoring tag:', tag);
                 this.tagManager.selectItem(tag);
             } else {
                 console.warn('Tag not found with id:', id);

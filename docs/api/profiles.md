@@ -20,8 +20,8 @@ API endpoints that relate to profile management
 
 | Endpoint                            | Description                                  | Swagger UI |
 | ----------------------------------- | -------------------------------------------- | ---------- |
-| /                                   | Get all profiles                             |            |
-| /{{profile_id}}                     | Get a specific profile                       |            |
+| /                                   | Get all profiles                             | Done       |
+| /{{profile_id}}                     | Get a specific profile                       | Done       |
 | /create                             | Create a profile                             |            |
 | /delete{{profile_id}}               | Delete a profile                             |            |
 | /update/{{profile_id}}              | Update a profile                             |            |
@@ -29,8 +29,8 @@ API endpoints that relate to profile management
 | mark_watched_bulk                   | Check watch status on multiple videos        | Done       |
 | mark_watched                        | Mark a video as watched                      | Done       |
 | mark_unwatched                      | Mark a video as unwatched                    | Done       |
-| watch_history                       | Check watch history for a profile*           |            |
-| in_progress                         | Manage in-progress status for a video        |            |
+| watch_history                       | Check watch history for a profile*           | Done       |
+| in_progress                         | Manage in-progress status for a video        | GET, POST* |
 </br></br>
 
 
@@ -46,65 +46,10 @@ Get a list of all user profiles
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-Returns in 'data' and 'success' format.
-
-'data' include a list of profiles, each describing that profile.
-</br></br>
-
-
-| Field      | Type    | Description                                           |
-| ---------- | ------- | ----------------------------------------------------- |
-| id         | integer | The profile ID                                        |
-| name       | string  | The profile name                                      |
-| image      | string  | A filename for the profile's avatar                   |
-| admin      | integer | Whether the user is an admin (1 for yes, null for no) |
-| created_at | string  | When the profile was created                          |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "admin": 1,
-            "created_at": "2025-06-30 01:24:03",
-            "id": 2,
-            "image": "amos_1.png",
-            "name": "Luke"
-        }
-    ],
-    "success": true
-}
-```
-</br></br>
-
-
 
 
 
@@ -117,78 +62,10 @@ Get a specific user profile by its ID
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the profile does not exist.
-</br></br>
-
-
-**Response Body**
-
-Response in 'data' and 'success' format.
-
-The single entry in 'data' describes the profile.
-
-This is effectively returning one single entry from the entire list (as found in `/api/profile`)
-</br></br>
-
-
-| Field      | Type    | Description                                           |
-| ---------- | ------- | ----------------------------------------------------- |
-| id         | integer | The profile ID                                        |
-| name       | string  | The profile name                                      |
-| image      | string  | A filename for the profile's avatar                   |
-| admin      | integer | Whether the user is an admin (1 for yes, null for no) |
-| created_at | string  | When the profile was created                          |
-</br></br>
-
-
-```json
-{
-    "data": {
-        "admin": 1,
-        "created_at": "2025-06-30 01:24:03",
-        "id": 2,
-        "image": "amos_1.png",
-        "name": "Luke"
-    },
-    "success": true
-}
-```
-</br></br>
-
-
-If a profile is not found:
-
-```json
-{
-    "error": "Profile with ID 1 not found",
-    "success": false
-}
-```
-</br></br>
-
-
 
 
 
@@ -447,88 +324,13 @@ If the profile does not exist:
 **Description**
 
 Gets the watch history for the current active profile.
-
-Note: The active profile will be migrated to the frontend in future.
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-Pass the active profile to the endpoint.
-
-If the parameter is missing, the active profile is assumed to be "guest", which doesn't have a watch history.
-</br></br>
-
-
-| Field       | Type    | Description       |
-| ----------- | ------- | ----------------- |
-| profile     | integer | The profile's ID. |
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-</br></br>
-
-
-**Response Body**
-
-The response contains 'data', 'message', and the 'success' status.
-
-'data' is a list of entries, where each entry describes a video in the watch history.
-</br></br>
-
-
-| Field        | Type    | Description                                                   |
-| ------------ | ------- | ------------------------------------------------------------- |
-| profile_id   | integer | The ID of the profile used for the request                    |
-| video_id     | integer | The ID of the video                                           |
-| current_time | integer | The timestamp this profile is up to in the video (in seconds) |
-| watched_at   | string  | Date/time the video was watched                               |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "current_time": 0,
-            "id": 476,
-            "profile_id": 2,
-            "video_id": 1871,
-            "watched_at": "2026-01-18 12:51:26.409769"
-        }
-    ],
-    "message": "Retrieved watch history successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If the guest profile is active:
-
-```json
-{
-    "message": "No watch history for guest profile",
-    "success": true
-}
-```
-</br></br>
-
 
 
 
@@ -619,96 +421,10 @@ This endpoint also supports POST and DELETE methods.
 </br></br>
 
 
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-| Field       | Type    | Mandatory | Description                                                             |
-| ----------- | ------- | --------- | ----------------------------------------------------------------------- |
-| profile     | integer | Yes       | The profile to check for                                                |
-| video_id    | integer | No        | Optional video ID to check status for (rather than checking all videos) |
-</br></br>
-
 > [!NOTE]
-> If the profile ID is not included as a parameter, a 400 error will be returned
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` If the profile ID is not provided.
-
-`404 NOT FOUND` If an invalid profile is provided
-</br></br>
-
-
-**Response Body**
-
-Includes the usual 'data', 'message', and 'success' fields.
-
-The 'data' field is a list of videos in progress, where each entry describes the status of the video.
-</br></br>
-
-
-| Field        | Type    | Description                                           |
-| ------------ | ------- | ----------------------------------------------------- |
-| profile_id   | integer | The profile ID that was requested                     |
-| video_id     | integer | The ID of the video in progress                       |
-| current_time | integer | The playback position, in seconds                     |
-| updated_at   | string  | Date/time when the playback position was last updated |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "current_time": 8,
-            "profile_id": 2,
-            "updated_at": "2026-01-17 07:14:08",
-            "video_id": 2834
-        }
-    ],
-    "message": "Retrieved in-progress videos successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If the 'profile' parameter is not included:
-
-```json
-{
-    "error": "Missing 'profile' parameter in request",
-    "success": false
-}
-```
-</br></br>
-
-
-If an invalid profile is provided:
-
-```json
-{
-    "error": "Profile not found",
-    "success": false
-}
-```
-</br></br>
-
 
 
 

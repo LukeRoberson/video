@@ -74,6 +74,7 @@ class BaseFormHandler {
             headers: {
                 'Content-Type': MetadataConfig.JSON_CONTENT_TYPE
             },
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
         if (!response.ok) {

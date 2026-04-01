@@ -249,6 +249,47 @@
 - [ ] Advanced search page (these were difficult to implement previouisly)
   - [ ] Add support to search based on video duration
   - [ ] Add support for date
+- [ ] Searching
+  - [ ] Reindexing can take time; Maybe respond with a 'starting' message, and poll for updates?
+- [ ] Logging
+  - [ ] Improve logging in `api_profile.py`
+- [ ] API
+  - [ ] Create helper functions for reused components
+    * Checking if videos exist
+    * Logging debugs and warnings during field validation
+    * Probably many others
+  - [ ] Improve SQL queries
+    * Some of these are in for loops, which can be replaced with a better query
+    * This happens in the 'get bulk' type endpoints
+  - [ ] A query for an invalid tag does not return an empty list like other endpoints do
+  - [ ] A query for an invalid speaker does not return an empty list like other endpoints do
+  - [ ] Clean up some endpoint names
+    * eg, 'get_bulk' for videos; Sounds messy
+    * Profile: `mark_watched` checks if a video has been watched; This is a misleading name
+  - [ ] Profile: `mark_watched_bulk` takes `profile` as a parameter, others take `profile_id`
+    * Update for consistency
+  - [ ] `/api/categories/{{category_id}}/{{subcategory_id}}`
+    * Contains a 'videos' list in the response, which is unnecessary
+- [ ] Caching
+  - [ ] Cache theme banner file paths in App Cache (like category IDs) to improve load time of home page
+- [ ] Similarity
+  - [ ] Handle missing similarity scores
+    * Sometimes, new videos won't have similarity scores yet
+    * This throws errors in the terminal
+- [ ] Unit tests
+  - [ ] GET /api/profile/in_progress
+    * Need to test passing a video ID as a parameter
+    * However, need to be sure that video ID is listed as in progress in the DB first
+  - [ ] DELETE /api/profile/in_progress
+    * Need to test that we can remove an in progress video
+    * However, there needs to be one to remove
+  - [ ] POST /api/profile/mark_watched
+    * Test marking a video as watched
+  - [ ] Investigate tests that make changes to the DB
+    * Mock tests? Make a change and roll back?
+  - [ ] Investigate coverage
+    * Limit to API only
+    * Looks like I'm not testing as much code as I could be
 
 </br></br>
 

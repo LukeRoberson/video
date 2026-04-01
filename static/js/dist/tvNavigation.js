@@ -70,13 +70,6 @@ class TVDetectionManager {
         else {
             this.isTV = this.performEnhancedDetection();
         }
-        console.log('Enhanced TV Detection:', {
-            isTV: this.isTV,
-            userAgent: navigator.userAgent,
-            isSamsung: navigator.userAgent.toLowerCase().includes('tizen'),
-            isFireTV: navigator.userAgent.toLowerCase().includes('silk'),
-            isLG: navigator.userAgent.toLowerCase().includes('webos')
-        });
         return this.isTV;
     }
     /**
@@ -114,14 +107,6 @@ class TVKeyHandler {
      * @returns Normalized key name or null if not recognized
      */
     normalizeKey(event) {
-        console.log('Raw key event:', {
-            type: event.type,
-            key: event.key,
-            keyCode: event.keyCode,
-            which: event.which,
-            code: event.code,
-            userAgent: navigator.userAgent.substring(0, 100)
-        });
         // Check all key mapping categories
         const allMappings = [
             TVKeyMappings.STANDARD,
@@ -140,7 +125,6 @@ class TVKeyHandler {
         if (event.code && event.code.startsWith('Arrow')) {
             return event.key;
         }
-        console.log('Unrecognized key:', event.keyCode);
         return null;
     }
 }
@@ -595,20 +579,16 @@ class CarouselNavigator {
         const currentElement = this.focusManager.getCurrentElement();
         const currentCarousel = currentElement?.closest('.carousel');
         if (!currentCarousel) {
-            console.log('navigateCarouselSlide: Not in carousel');
             return false;
         }
-        console.log('navigateCarouselSlide: Direction =', direction, 'from element:', currentElement);
         const bootstrapCarousel = window.bootstrap?.Carousel;
         if (!bootstrapCarousel) {
-            console.log('Bootstrap carousel not available');
             return false;
         }
         const carouselInstance = bootstrapCarousel.getInstance(currentCarousel) || new bootstrapCarousel(currentCarousel);
         const currentSlide = currentCarousel.querySelector('.carousel-item.active');
         const visibleThumbnails = Array.from(currentSlide.querySelectorAll('.thumbnail, .thumbnail-home'));
         const currentIndex = visibleThumbnails.indexOf(currentElement);
-        console.log('navigateCarouselSlide: Found', visibleThumbnails.length, 'thumbnails, current at index:', currentIndex);
         return this.handleSlideNavigation(direction, currentIndex, visibleThumbnails, carouselInstance, currentCarousel);
     }
     /**
@@ -630,7 +610,6 @@ class CarouselNavigator {
         else if (direction === 'left' && currentIndex === 0) {
             return this.moveToPreviousSlide(activeIndex, carouselInstance, currentCarousel);
         }
-        console.log('navigateCarouselSlide: Not at edge, normal navigation should handle');
         return false;
     }
     /**
@@ -642,9 +621,7 @@ class CarouselNavigator {
      * @returns True if moved to next slide
      */
     moveToNextSlide(activeIndex, totalSlides, carouselInstance, currentCarousel) {
-        console.log('navigateCarouselSlide: At last item. Slide', activeIndex + 1, 'of', totalSlides);
         if (activeIndex < totalSlides - 1) {
-            console.log('navigateCarouselSlide: Moving to next slide');
             carouselInstance.next();
             setTimeout(() => {
                 this.focusFirstThumbnailInNewSlide(currentCarousel);
@@ -652,7 +629,6 @@ class CarouselNavigator {
             return true;
         }
         else {
-            console.log('navigateCarouselSlide: No more slides, staying put');
             return true;
         }
     }
@@ -664,9 +640,7 @@ class CarouselNavigator {
      * @returns True if moved to previous slide
      */
     moveToPreviousSlide(activeIndex, carouselInstance, currentCarousel) {
-        console.log('navigateCarouselSlide: At first item. Slide', activeIndex + 1);
         if (activeIndex > 0) {
-            console.log('navigateCarouselSlide: Moving to previous slide');
             carouselInstance.prev();
             setTimeout(() => {
                 this.focusLastThumbnailInNewSlide(currentCarousel);
@@ -674,7 +648,6 @@ class CarouselNavigator {
             return true;
         }
         else {
-            console.log('navigateCarouselSlide: No previous slides, staying put');
             return true;
         }
     }
@@ -1120,7 +1093,6 @@ class TVNavigationController {
      * @param element - Element to activate
      */
     activateElement(element) {
-        console.log('Enter pressed on element:', element);
         // Enhanced click handling for carousel items
         if (element.classList.contains('thumbnail') || element.classList.contains('thumbnail-home')) {
             const linkElement = this.findClickableElement(element);
@@ -1128,22 +1100,18 @@ class TVNavigationController {
                 if (linkElement.hasAttribute('href')) {
                     const href = linkElement.getAttribute('href');
                     if (href) {
-                        console.log('Navigating to:', href);
                         window.location.href = href;
                     }
                 }
                 else {
-                    console.log('Clicking element:', linkElement);
                     linkElement.click();
                 }
             }
             else {
-                console.log('No link found, clicking thumbnail directly');
                 element.click();
             }
         }
         else {
-            console.log('Normal click on:', element);
             element.click();
         }
     }

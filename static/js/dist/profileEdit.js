@@ -19,7 +19,7 @@ const ProfileEditConfig = {
     /** API endpoint pattern for clearing history */
     CLEAR_HISTORY_ENDPOINT: '/api/profile/clear_history/{id}',
     /** API endpoint for marking videos as watched */
-    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched/{id}',
+    MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** Content type for JSON requests */
     JSON_CONTENT_TYPE: 'application/json',
     /** Profile pictures directory path */
@@ -219,7 +219,8 @@ class ProfileEditApiService {
             method: 'DELETE',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
-            }
+            },
+            credentials: 'include'
         });
         if (!response.ok) {
             const data = await response.json();
@@ -238,6 +239,7 @@ class ProfileEditApiService {
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
+            credentials: 'include',
             body: JSON.stringify(profileData)
         });
         if (!response.ok) {
@@ -255,7 +257,8 @@ class ProfileEditApiService {
             method: 'POST',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
-            }
+            },
+            credentials: 'include'
         });
         if (!response.ok) {
             const data = await response.json();
@@ -275,6 +278,7 @@ class ProfileEditApiService {
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
+            credentials: 'include',
             body: JSON.stringify(requestBody)
         });
         if (!response.ok) {
@@ -289,11 +293,12 @@ class ProfileEditApiService {
      */
     static async markWatched(profileId, videoId) {
         const requestBody = { video_id: videoId };
-        const response = await fetch(`${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT.replace('{id}', profileId.toString())}`, {
+        const response = await fetch(`${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': ProfileEditConfig.JSON_CONTENT_TYPE
             },
+            credentials: 'include',
             body: JSON.stringify(requestBody)
         });
         if (!response.ok) {
@@ -422,8 +427,16 @@ class ProfileEditController {
      */
     async handleClearHistory() {
         try {
+            // Get profile data for API call
             const profileData = ProfileDataManager.getProfileData();
+            // API call to clear history
             await ProfileEditApiService.clearHistory(profileData.id);
+            // Update the UI to reflect cleared history
+            const watchHistoryList = document.getElementById('watchHistoryList');
+            if (watchHistoryList)
+                watchHistoryList.innerHTML = '';
+            this.updateHistoryCount();
+            // Update the 'Clear All' button to indicate history is cleared
             const clearAllBtn = document.querySelector('.btn-clear-all');
             if (clearAllBtn) {
                 clearAllBtn.disabled = true;
@@ -441,12 +454,15 @@ class ProfileEditController {
      */
     async handleClearHistoryItem(button) {
         try {
+            // Get profile data and video ID for API call
             const profileData = ProfileDataManager.getProfileData();
             const videoId = parseInt(button.getAttribute('data-video-id') || '0');
+            // API call to clear specific history item
             await ProfileEditApiService.clearHistoryItem(profileData.id, videoId);
-            const btn = button;
-            btn.disabled = true;
-            btn.textContent = 'Removed';
+            // Remove the history item from the DOM
+            const historyItem = document.querySelector(`.history-item[data-video-id="${videoId}"]`);
+            historyItem?.remove();
+            this.updateHistoryCount();
         }
         catch (error) {
             console.error('Error removing item:', error);
@@ -459,9 +475,18 @@ class ProfileEditController {
      */
     async handleMarkWatched(button) {
         try {
+            // Get data from the DOM
             const videoId = parseInt(button.getAttribute('data-video-id') || '0');
+            const historyItem = document.querySelector(`.history-item[data-video-id="${videoId}"]`);
+            // Get profile data for API call
             const profileData = ProfileDataManager.getProfileData();
+            // Call API to mark as watched
             await ProfileEditApiService.markWatched(profileData.id, videoId);
+            // Remove the progress bar from the history item
+            if (historyItem) {
+                historyItem.querySelector('.progress-bar')?.remove();
+            }
+            // Update the button to indicate it's now watched
             const btn = button;
             btn.disabled = true;
             btn.textContent = 'Watched';
@@ -470,6 +495,23 @@ class ProfileEditController {
             console.error('Error marking as watched:', error);
             alert('Failed to mark as watched: ' + error.message);
         }
+    }
+    /**
+     * Update the watch history count display
+     * Used when removing individual items from the history
+     * This prevents the need for a full page reload
+     */
+    updateHistoryCount() {
+        // Count remaining history items
+        const remaining = document.querySelectorAll('#watchHistoryList .history-item').length;
+        // Update UI if there are remaining items
+        const countEl = document.querySelector('.history-count');
+        if (countEl)
+            countEl.textContent = `${remaining} videos watched recently`;
+        // Update UI if there are no items left
+        const emptyEl = document.getElementById('historyEmpty');
+        if (emptyEl)
+            emptyEl.style.display = remaining === 0 ? 'block' : 'none';
     }
 }
 // Global controller instance

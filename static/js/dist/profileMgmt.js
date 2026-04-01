@@ -46,6 +46,7 @@ class ProfileApiService {
             headers: {
                 'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE
             },
+            credentials: 'include',
             body: JSON.stringify(profileData)
         });
         if (!response.ok) {
@@ -97,7 +98,8 @@ class ProfileApiService {
             method: 'DELETE',
             headers: {
                 'Content-Type': ProfileMgmtConfig.JSON_CONTENT_TYPE
-            }
+            },
+            credentials: 'include'
         });
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
