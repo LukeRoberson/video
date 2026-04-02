@@ -74,12 +74,50 @@
     * [x] Profile Edit: Can't mark videos as watched
     * [x] Profile Edit: Marking a video as watched can result in duplicates
     * [x] Profile edits: UI doesn't reflect changes straight away
-    * [x] After deleting a profile:
+    * [x] After deleting a profile, terminal errors for that profile show
     * [x] Confirm that guests can't have in progress videos, or watched videos
     * [x] Deleting a profile does not remove their in-progress history or watch history
-    * [ ] Categories: Invalid main/sub combinations (eg, Programs and Events/Monthly Programs) still return data
-    * [ ] `/api/search` doesn't seems to be enforcing the page size limit
-
+11. Deployment
+    * [x] Update npm packages
+    * [ ] Update python packages
+    * [ ] Final unit testing
+    * [ ] Update container strategy
+        * [ ] base image version
+        * [ ] Multiple containers
+    * [ ] Test local build
+    * [ ] Deploy to Docker server in devel environment
 
 </br></br>
+
+
+# Python package versions
+
+* Flask 3.1.2 > 3.1.3
+* Pandas 
+
+
+(.venv) PS C:\Users\luker\OneDrive\Documents\projects\video-devel> pip list --outdated
+Package            Version Latest       Type
+------------------ ------- ------------ -----
+attrs              25.4.0  26.1.0       wheel
+Cerberus           1.3.7   1.3.8        wheel
+charset-normalizer 3.4.3   3.4.6        wheel
+click              8.3.0   8.3.1        wheel
+coverage           7.13.4  7.13.5       wheel
+elastic-transport  8.17.1  9.2.1        wheel
+elasticsearch      8.19.2  9.3.0        wheel
+Flask              3.1.2   3.1.3        wheel
+idna               3.10    3.11         wheel
+MarkupSafe         3.0.2   3.0.3        wheel
+numpy              2.3.3   2.4.4        wheel
+pandas             2.3.2   3.0.2        wheel
+pytest             7.4.3   9.0.2        wheel
+pytest-cov         4.1.0   7.1.0        wheel
+pytest-timeout     2.2.0   2.4.0        wheel
+pytz               2025.2  2026.1.post1 wheel
+PyYAML             6.0.2   6.0.3        wheel
+requests           2.31.0  2.33.1       wheel
+tzdata             2025.2  2025.3       wheel
+Werkzeug           3.1.3   3.1.7        wheel
+
 

@@ -712,12 +712,362 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  # Bible Characters
-  # Scriptures
-  # Speakers
-  # Tags
-  # Search
-  # Similarity
+  # --------------------
+  #   Bible Characters
+  # --------------------
+
+  # --------------
+  #   Scriptures
+  # --------------
+
+  # ------------
+  #   Speakers
+  # ------------
+
+  # --------
+  #   Tags
+  # --------
+
+  # ----------
+  #   Search
+  # ----------
+  /api/search/status:
+    get:
+      tags: [Search]
+      summary: Check if the search service is ready
+      description: |
+        Check if the search service is ready for searching.
+        This is used to determine if ElasticSearch can be used or if it is offline.
+      responses:
+        '200':
+          summary: Successful response
+          description: Search service status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: The status of the search service, including whether it is ready and any relevant messages
+                    properties:
+                      elasticsearch_available:
+                        type: boolean
+                        description: Indicates whether ElasticSearch is available for searching
+                        example: true
+                      fallback_active:
+                        type: boolean
+                        description: Indicates whether the fallback search method is active (used when ElasticSearch is unavailable)
+                        example: false
+                      index_exists:
+                        type: boolean
+                        description: Indicates whether the ElasticSearch index exists and is ready for searching
+                        example: true
+                      timestamp:
+                        type: string
+                        format: date-time
+                        description: The date and time when the search status was checked
+                        example: "2026-03-13T23:19:48.940795+00:00"
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Search service status retrieved successfully
+
+  /api/search/advanced:
+    get:
+      tags: [Search]
+      summary: Perform an advanced search for videos
+      description: |
+        Perform an advanced search for videos based on multiple criteria, such as keywords, categories, speakers, tags, etc.
+        This allows for more complex search queries to find relevant videos.
+        Note, parameters can be included multiple times to search for multiple values.
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          description: The general search query string
+          example: "with eyes of faith"
+        - in: query
+          name: speakers
+          required: false
+          schema:
+            type: array
+          description: Filter search results by speaker name
+          example: ["Stephen Lett"]
+        - in: query
+          name: characters
+          required: false
+          schema:
+            type: array
+          description: Filter search results by character name
+          example: ["Jesus"]
+        - in: query
+          name: locations
+          required: false
+          schema:
+            type: array
+          description: Filter search results by location name
+          example: ["Africa"]
+        - in: query
+          name: tags
+          required: false
+          schema:
+            type: array
+          description: Filter search results by tag name
+          example: ["av"]
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: The page number of the search results to retrieve
+          example: 2
+        - in: query
+          name: page_size
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: The number of search results to return per page
+          example: 10
+      responses:
+        '200':
+          summary: Successful response
+          description: Search results retrieved successfully based on the advanced search query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of video details matching the advanced search criteria
+                    items:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          description: Total number of videos matching the advanced search criteria
+                          example: 123
+                        page:
+                          type: integer
+                          description: The current page number of the search results
+                          example: 2
+                        pages:
+                          type: integer
+                          description: Total number of pages available
+                          example: 13
+                        per_page:
+                          type: integer
+                          description: The number of search results returned per page
+                          example: 10
+                        using_elasticsearch:
+                          type: boolean
+                          description: Indicates whether ElasticSearch was used for the search query
+                          example: true
+                        filters:
+                          type: object
+                          description: The filters applied to the search query, including speakers, characters, locations, and tags
+                          properties:
+                            characters:
+                              type: array
+                              description: List of character names used as filters in the search query
+                              items:
+                                type: string
+                              example: ["Jesus"]
+                            locations:
+                              type: array
+                              description: List of location names used as filters in the search query
+                              items:
+                                type: string
+                              example: ["Africa"]
+                            speakers:
+                              type: array
+                              description: List of speaker names used as filters in the search query
+                              items:
+                                type: string
+                              example: ["Stephen Lett"]
+                            tags:
+                              type: array
+                              description: List of tag names used as filters in the search query
+                              items:
+                                type: string
+                              example: ["av"]
+                        query:
+                          type: string
+                          description: The original search query string provided in the request
+                          example: "with eyes of faith"
+                        results:
+                          type: array
+                          description: List of video details for the current page of search results
+                          items:
+                            type: object
+                            description: |
+                              Details of a video matching the advanced search criteria, including metadata and relevance score.
+                              The relevance score indicates how well the video matches the search query and filters.
+                            properties:
+                              id:
+                                type: number
+                                description: Unique identifier for the video
+                                example: 123
+                              video_id:
+                                type: integer
+                                description: Unique identifier for the video
+                                example: 123
+                              name:
+                                type: string
+                                description: Name of the video
+                                example: "Language of the Heart"
+                              title:
+                                type: string
+                                description: The title of the video, which may be the same as the name or may include additional information
+                                example: "JW Broadcasting—August 2025"
+                              description:
+                                type: string
+                                description: The description of this video
+                                example: "A description of the video."
+                              bible_character:
+                                type: string
+                                description: A string listing the Bible characters featured in the video, separated by commas
+                                example: "David, Jesus, Daniel"
+                              location:
+                                type: string
+                                description: A string listing the locations featured in the video, separated by commas
+                                example: "Africa, Europe"
+                              scriptures:
+                                type: string
+                                description: A string listing the scriptures featured in the video, separated by commas
+                                example: "John 3:16, Psalm 23:1"
+                              speaker:
+                                type: string
+                                description: A string listing the speakers featured in the video, separated by commas
+                                example: "Stephen Lett, David Schafer"
+                              tags:
+                                type: string
+                                description: A string listing the tags associated with the video, separated by commas
+                                example: "tag-1, tag-2"
+                              thumbnail:
+                                type: string
+                                description: URL to the video's thumbnail image
+                                example: "https://cms-imgp.jw-cdn.org/img/p/jwb-129/univ/art/jwb-129_univ_wss_01_lg.jpg"
+                              chapter_markers:
+                                type: string
+                                description: A string listing the chapter markers on this video
+                                example: "Chapter 1: Introduction, Chapter 2: The Journey"
+                              duration:
+                                type: integer
+                                description: The duration of the video in seconds
+                                example: 3600
+                              score:
+                                type: number
+                                description: The relevance score of the video for the search query and filters, where a higher score indicates a more relevant result
+                                example: 11.7441025
+                              watched:
+                                type: boolean
+                                description: Indicates whether the video has been marked as watched for the profile making the search request (if applicable)
+                                example: true
+                              highlights:
+                                type: array
+                                description: |
+                                  A list of highlighted snippets from the video that match the search query, providing context for why the video was returned in the search results
+                                  Highlighting uses HTML emphasis tags (<em></em>)
+                                items:
+                                  type: object
+                                  properties:
+                                    bible_character:
+                                      type: string
+                                      description: The Bible character mentioned in the highlighted snippet (if applicable)
+                                      example: "<em>David</em>, Jesus, Daniel"
+                                    chapter_markers:
+                                      type: string
+                                      description: The chapter markers mentioned in the highlighted snippet (if applicable)
+                                      example: "Chapter 1: Introduction, <em>Chapter 2: The Journey</em>"
+                                    description:
+                                      type: string
+                                      description: The description text of the highlighted snippet
+                                      example: "Theme: Imitate Jehovah's <em>Generosity</em>"
+                                    location:
+                                      type: string
+                                      description: The location mentioned in the highlighted snippet (if applicable)
+                                      example: "Africa, <em>Europe</em>"
+                                    speaker:
+                                      type: string
+                                      description: The speaker mentioned in the highlighted snippet (if applicable)
+                                      example: "<em>Stephen Lett</em>, David Schafer"
+                                    tags:
+                                      type: string
+                                      description: The tags mentioned in the highlighted snippet (if applicable)
+                                      example: "<em>tag-1</em>, tag-2"
+                                    transcript:
+                                      type: string
+                                      description: The transcript text of the highlighted snippet
+                                      example: "This is a transcript of the video, with <em>highlighted</em> sections that match the search query."
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Search results retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/search/reindex:
+    post:
+      tags: [Search]
+      summary: Reindex videos for search
+      description: |
+        Reindex all videos for the search service.
+        This is used to update the search index after changes to video metadata or when new videos are added.
+      responses:
+        '200':
+          summary: Successful response
+          description: Search index reindexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: The result of the reindexing operation, including any relevant messages
+                    properties:
+                      failed:
+                        type: integer
+                        description: The number of videos that failed to be indexed during the reindexing operation
+                        example: 0
+                      success:
+                        type: integer
+                        description: The number of videos that were successfully indexed during the reindexing operation
+                        example: 1000
+                      total:
+                        type: integer
+                        description: The total number of videos that were processed during the reindexing operation
+                        example: 1000
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Search index reindexed successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  # --------------
+  #   Similarity
+  # --------------
 
   # ----------------------
   #   Profile Management
@@ -1477,6 +1827,12 @@ components:
             $ref: '#/components/schemas/Error'
     InternalServerError:
       description: 500 Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: 503 Service unavailable
       content:
         application/json:
           schema:

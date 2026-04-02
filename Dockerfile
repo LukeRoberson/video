@@ -2,7 +2,7 @@
 # Using Python 3.13 to match the development
 
 FROM python:3.13.9-alpine
-LABEL org.opencontainers.image.base.name="python:3.13.7-alpine"
+LABEL org.opencontainers.image.base.name="python:3.13.9-alpine"
 
 # Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1 \

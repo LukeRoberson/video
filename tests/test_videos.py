@@ -71,42 +71,74 @@ class TestGetVideoBulk:
 
         # Validate structure
         if len(data) > 0:
-            assert all(
-                (
-                    "id" in video and
-                    isinstance(video["id"], int)
-                ) and
-                (
-                    "name" in video and
-                    isinstance(video["name"], str)
-                ) and
-                (
-                    "description" in video and
-                    isinstance(video["description"], str)
-                ) and
-                (
-                    "url" in video and
-                    isinstance(video["url"], str)
-                ) and
-                (
-                    "duration" in video and
-                    isinstance(video["duration"], int)
-                ) and
-                (
-                    "date_added" in video and
-                    isinstance(video["date_added"], str)
-                ) and
-                (
-                    "thumbnail" in video and
-                    isinstance(video["thumbnail"], str)
-                ) and
-                "url_1080" in video and
-                "url_720" in video and
-                "url_480" in video and
-                "url_360" in video and
-                "url_240" in video
-                for video in data
-            )
+            for index, item in enumerate(data):
+                assert "id" in item, (
+                    f"Video at index {index} is missing 'id'"
+                )
+                assert isinstance(item["id"], int), (
+                    f"Video at index {index} has 'id' of type "
+                    f"{item!r}, expected int"
+                )
+
+                assert "name" in item, (
+                    f"Video at index {index} is missing 'name'"
+                )
+                assert isinstance(item["name"], str), (
+                    f"Video at index {index} has 'name' of type "
+                    f"{item!r}, expected str"
+                )
+
+                assert "description" in item, (
+                    f"Video at index {index} is missing 'description'"
+                )
+                assert isinstance(item["description"], str), (
+                    f"Video at index {index} has 'description' of type "
+                    f"{item!r}, expected str"
+                )
+
+                assert "url" in item, (
+                    f"Video at index {index} is missing 'url'"
+                )
+
+                assert "duration" in item, (
+                    f"Video at index {index} is missing 'duration'"
+                )
+                assert isinstance(item["duration"], int), (
+                    f"Video at index {index} has 'duration' of type "
+                    f"{item!r}, expected int"
+                )
+
+                assert "date_added" in item, (
+                    f"Video at index {index} is missing 'date_added'"
+                )
+                assert isinstance(item["date_added"], str), (
+                    f"Video at index {index} has 'date_added' of type "
+                    f"{item!r}, expected str"
+                )
+
+                assert "thumbnail" in item, (
+                    f"Video at index {index} is missing 'thumbnail'"
+                )
+                assert isinstance(item["thumbnail"], str), (
+                    f"Video at index {index} has 'thumbnail' of type "
+                    f"{item!r}, expected str"
+                )
+
+                assert "url_1080" in item, (
+                    f"Video at index {index} is missing 'url_1080'"
+                )
+                assert "url_720" in item, (
+                    f"Video at index {index} is missing 'url_720'"
+                )
+                assert "url_480" in item, (
+                    f"Video at index {index} is missing 'url_480'"
+                )
+                assert "url_360" in item, (
+                    f"Video at index {index} is missing 'url_360'"
+                )
+                assert "url_240" in item, (
+                    f"Video at index {index} is missing 'url_240'"
+                )
 
     def test_missing_body(
         self

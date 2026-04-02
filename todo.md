@@ -270,6 +270,9 @@
     * Update for consistency
   - [ ] `/api/categories/{{category_id}}/{{subcategory_id}}`
     * Contains a 'videos' list in the response, which is unnecessary
+  - [ ] Elasticsearch returns redundant information
+    * `id` and `video_id`
+    * `name` and `title`
 - [ ] Caching
   - [ ] Cache theme banner file paths in App Cache (like category IDs) to improve load time of home page
 - [ ] Similarity

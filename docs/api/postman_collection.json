@@ -58,6 +58,120 @@
       "name": "categories",
       "item": [
         {
+          "name": "All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5010/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5010",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Categories",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\r\n    {{category 1}},\r\n    {{category 2}}\r\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5010/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5010",
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    \"Songs\",\r\n    \"Talks\"\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/categories",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "categories"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Invalid Category",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    \"bad category\",\r\n    \"Talks\"\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/categories",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "categories"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
+        },
+        {
           "name": "Resolve category name to ID",
           "request": {
             "method": "GET",
@@ -193,7 +307,7 @@
               "body": ""
             },
             {
-              "name": "Invalid Combination",
+              "name": "Invalid category",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
@@ -222,6 +336,31 @@
                 }
               ],
               "body": ""
+            },
+            {
+              "name": "Invalid Combination",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/categories/1344/1340",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "categories",
+                    "1344",
+                    "1340"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
             }
           ]
         },
@@ -3560,52 +3699,35 @@
       "name": "Profiles",
       "item": [
         {
-          "name": "Get a List of Profiles",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/profile",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get a Specific Profile",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/profile/{{id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "{{id}}"
-              ]
-            }
-          },
-          "response": [
+          "name": "Profile Management",
+          "item": [
             {
-              "name": "Success",
-              "originalRequest": {
+              "name": "Get a List of Profiles",
+              "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/profile/2",
+                  "raw": "http://localhost:5010/api/profile",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get a Specific Profile",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/{{id}}",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3614,22 +3736,550 @@
                   "path": [
                     "api",
                     "profile",
+                    "{{id}}"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/2",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "2"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid Profile",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/1",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "1"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            },
+            {
+              "name": "Create a Profile",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": {{name}},\r\n    \"image\": {{filename}}\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/create",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "create"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"name\": \"test2\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/create",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "create"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid Information",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"name\": \"test-3\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/create",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "create"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            },
+            {
+              "name": "Delete a profile",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/delete/{{id}}",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "delete",
+                    "{{id}}"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/delete/10",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "delete",
+                        "10"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Failure",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/delete/99999",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "delete",
+                        "99999"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            },
+            {
+              "name": "Update a profile",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": {{name}},\r\n    \"image\": {{filename}}\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/update/{{id}}",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "update",
+                    "{{id}}"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"name\": \"Test User\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/update/5",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "update",
+                        "5"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Bad Fields",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"image\": \"file-1.png\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/update/5",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "update",
+                        "5"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid User",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"name\": \"Test User\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/update/99999",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "update",
+                        "99999"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Watch History",
+          "item": [
+            {
+              "name": "Get Watch History",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/watch_history?profile={{profile_id}}",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "watch_history"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "{{profile_id}}",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Success",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/watch_history?profile=2",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "watch_history"
+                      ],
+                      "query": [
+                        {
+                          "key": "profile",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Guest",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/watch_history",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "watch_history"
+                      ],
+                      "query": [
+                        {
+                          "key": "profile",
+                          "value": "{{profile_id}}",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid Profile",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/watch_history?profile=9999",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "watch_history"
+                      ],
+                      "query": [
+                        {
+                          "key": "profile",
+                          "value": "9999"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            },
+            {
+              "name": "Remove an item from watch history",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": 1871\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/clear_history/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "clear_history",
                     "2"
                   ]
                 }
               },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
+              "response": []
             },
             {
-              "name": "Invalid Profile",
-              "originalRequest": {
+              "name": "Remove all watch history",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/clear_history/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "clear_history",
+                    "2"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Check watched status",
+              "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/profile/1",
+                  "raw": "http://localhost:5010/api/profile/mark_watched?video_id={{video_id}}&profile={{profile}}",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3638,54 +4288,202 @@
                   "path": [
                     "api",
                     "profile",
-                    "1"
+                    "mark_watched"
+                  ],
+                  "query": [
+                    {
+                      "key": "video_id",
+                      "value": "{{video_id}}"
+                    },
+                    {
+                      "key": "profile",
+                      "value": "{{profile}}"
+                    }
                   ]
                 }
               },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            }
-          ]
-        },
-        {
-          "name": "Create a Profile",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": {{name}},\r\n    \"image\": {{filename}}\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "response": [
+                {
+                  "name": "Success - Video Watched",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/mark_watched?video_id=1871&profile=2",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "mark_watched"
+                      ],
+                      "query": [
+                        {
+                          "key": "video_id",
+                          "value": "1871"
+                        },
+                        {
+                          "key": "profile",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Success - Video Unwatched",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/mark_watched?video_id=100&profile=2",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "mark_watched"
+                      ],
+                      "query": [
+                        {
+                          "key": "video_id",
+                          "value": "100"
+                        },
+                        {
+                          "key": "profile",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Success - Guest Profile",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/mark_watched?video_id=1871",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "mark_watched"
+                      ],
+                      "query": [
+                        {
+                          "key": "video_id",
+                          "value": "1871"
+                        },
+                        {
+                          "key": "profile",
+                          "value": "{{profile}}",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid Profile",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/mark_watched?video_id=1871&profile=9999",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "mark_watched"
+                      ],
+                      "query": [
+                        {
+                          "key": "video_id",
+                          "value": "1871"
+                        },
+                        {
+                          "key": "profile",
+                          "value": "9999"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
+                },
+                {
+                  "name": "Invalid Video",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "http://localhost:5010/api/profile/mark_watched?video_id=9999&profile=2",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "5010",
+                      "path": [
+                        "api",
+                        "profile",
+                        "mark_watched"
+                      ],
+                      "query": [
+                        {
+                          "key": "video_id",
+                          "value": "9999"
+                        },
+                        {
+                          "key": "profile",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": null,
+                  "header": null,
+                  "cookie": [],
+                  "body": null
                 }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:5010/api/profile/create",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "create"
               ]
-            }
-          },
-          "response": [
+            },
             {
-              "name": "Success",
-              "originalRequest": {
+              "name": "Check watched status (Bulk)",
+              "request": {
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\r\n    \"name\": \"test2\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
+                  "raw": "{\r\n    \"video_ids\": [1, 2, 3]\r\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3693,7 +4491,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://localhost:5010/api/profile/create",
+                  "raw": "http://localhost:5010/api/profile/mark_watched_bulk?profile=2",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -3702,254 +4500,17 @@
                   "path": [
                     "api",
                     "profile",
-                    "create"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Invalid Information",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"name\": \"test-3\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                    "mark_watched_bulk"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
                     }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/create",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "create"
                   ]
                 }
               },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            }
-          ]
-        },
-        {
-          "name": "Delete a profile",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/profile/delete/{{id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "delete",
-                "{{id}}"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Success",
-              "originalRequest": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/delete/10",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "delete",
-                    "10"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Failure",
-              "originalRequest": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/delete/99999",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "delete",
-                    "99999"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            }
-          ]
-        },
-        {
-          "name": "Update a profile",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": {{name}},\r\n    \"image\": {{filename}}\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:5010/api/profile/update/{{id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "update",
-                "{{id}}"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Success",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"name\": \"Test User\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/update/5",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "update",
-                    "5"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Bad Fields",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"image\": \"file-1.png\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/update/5",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "update",
-                    "5"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
-            },
-            {
-              "name": "Invalid User",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \"name\": \"Test User\",\r\n    \"image\": \"ruth_1.png\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "http://localhost:5010/api/profile/update/99999",
-                  "protocol": "http",
-                  "host": [
-                    "localhost"
-                  ],
-                  "port": "5010",
-                  "path": [
-                    "api",
-                    "profile",
-                    "update",
-                    "99999"
-                  ]
-                }
-              },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
+              "response": []
             }
           ]
         },
@@ -4105,12 +4666,12 @@
           "response": []
         },
         {
-          "name": "Get Watch History",
+          "name": "Videos In Progress",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5010/api/profile/watch_history?profile={{profile_id}}",
+              "raw": "http://localhost:5010/api/profile/in_progress?profile={{profile_id}}&video_id={{video_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -4119,12 +4680,16 @@
               "path": [
                 "api",
                 "profile",
-                "watch_history"
+                "in_progress"
               ],
               "query": [
                 {
                   "key": "profile",
-                  "value": "{{profile_id}}",
+                  "value": "{{profile_id}}"
+                },
+                {
+                  "key": "video_id",
+                  "value": "{{video_id}}",
                   "type": "text"
                 }
               ]
@@ -4132,12 +4697,12 @@
           },
           "response": [
             {
-              "name": "Success",
+              "name": "Get Videos in Progress",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/profile/watch_history?profile=2",
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4146,7 +4711,7 @@
                   "path": [
                     "api",
                     "profile",
-                    "watch_history"
+                    "in_progress"
                   ],
                   "query": [
                     {
@@ -4162,12 +4727,12 @@
               "body": null
             },
             {
-              "name": "Guest",
+              "name": "Check a Specific Video's Status",
               "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://localhost:5010/api/profile/watch_history",
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2&video_id=28",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -4176,7 +4741,71 @@
                   "path": [
                     "api",
                     "profile",
-                    "watch_history"
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    },
+                    {
+                      "key": "video_id",
+                      "value": "28"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Invalid Profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=99999",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "99999"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Missing Profile ID",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
                   ],
                   "query": [
                     {
@@ -4187,71 +4816,33 @@
                   ]
                 }
               },
-              "_postman_previewlanguage": null,
-              "header": null,
-              "cookie": [],
-              "body": null
+              "_postman_previewlanguage": "",
+              "header": [],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": ""
             }
           ]
         },
         {
-          "name": "Remove an item from watch history",
+          "name": "Videos in Progress",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"video_id\": 1871\r\n}",
+              "raw": "{\r\n    \"video_id\": {{video_id}},\r\n    \"current_time\": {{current_time}}\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "url": {
-              "raw": "http://localhost:5010/api/profile/clear_history/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "clear_history",
-                "2"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Remove all watch history",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/profile/clear_history/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "clear_history",
-                "2"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get videos in progress",
-          "request": {
-            "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
               "protocol": "http",
@@ -4267,61 +4858,212 @@
               "query": [
                 {
                   "key": "profile",
-                  "value": "2",
-                  "type": "text"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Check watched status",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5010/api/profile/mark_watched?video_id=1871&profile=2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "5010",
-              "path": [
-                "api",
-                "profile",
-                "mark_watched"
-              ],
-              "query": [
-                {
-                  "key": "video_id",
-                  "value": "1871"
-                },
-                {
-                  "key": "profile",
                   "value": "2"
                 }
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Mark a New Video as In Progress",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": 1,\r\n    \"current_time\": 60\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Failure: Missing profile",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": 1,\r\n    \"current_time\": 60\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Failure: Missing Body",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Failure: Missing Fields",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": 1,\r\n    \"time\": 60\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "name": "Failure: Invalid Field Types",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": \"one\",\r\n    \"current_time\": 60\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
         },
         {
-          "name": "Check watched status (Bulk)",
+          "name": "Videos In Progress",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"video_ids\": [1, 2, 3]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\r\n    \"video_id\": {{video_id}},\r\n}"
             },
             "url": {
-              "raw": "http://localhost:5010/api/profile/mark_watched_bulk?profile=2",
+              "raw": "http://localhost:5010/api/profile/in_progress?profile={{profile_id}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -4330,17 +5072,63 @@
               "path": [
                 "api",
                 "profile",
-                "mark_watched_bulk"
+                "in_progress"
               ],
               "query": [
                 {
                   "key": "profile",
-                  "value": "2"
+                  "value": "{{profile_id}}"
                 }
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Remove an in-progress video",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"video_id\": 1\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5010/api/profile/in_progress?profile=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5010",
+                  "path": [
+                    "api",
+                    "profile",
+                    "in_progress"
+                  ],
+                  "query": [
+                    {
+                      "key": "profile",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
         }
       ]
     },
