@@ -266,8 +266,6 @@ def video_details(
         else:
             speakers = None
 
-        logging.warning(f"Speakers for video {video_id}: {speakers}")
-
         return speakers
 
     def get_video_characters() -> dict | None:
@@ -435,7 +433,10 @@ def video_details(
     speakers = future_video_speakers.result()
     characters = future_video_characters.result()
     scriptures = future_video_scriptures.result()
-    video_ids = future_similar_videos.result()
+    similar_videos = future_similar_videos.result()
+
+    logger.warning(f"Similar videos for video {video_id}: {similar_videos}")
+    logger.warning(f"Type: {type(similar_videos)}")
 
     # Get these results if the user is not a guest
     if future_watch_status is not None and future_watch_time is not None:
@@ -473,7 +474,7 @@ def video_details(
             speakers=speakers,
             characters=characters,
             scriptures=scriptures,
-            similar_videos=video_ids,
+            similar_videos=similar_videos,
             watched=watched,
             current_time=current_time,
             has_chapters=has_chapters,
