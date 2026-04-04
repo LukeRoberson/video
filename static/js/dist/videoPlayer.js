@@ -18,8 +18,6 @@
  * Configuration constants API endpoints and settings.
  */
 const ApiConfig = {
-    /** API base URL for new endpoints (separate server) */
-    API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for marking videos as unwatched */
     MARK_UNWATCHED_ENDPOINT: '/api/profile/mark_unwatched',
     /** API endpoint for in-progress videos */
@@ -481,8 +479,12 @@ class ProgressTracker {
      * Initializes the progress tracker and validates required parameters.
      */
     init() {
-        if (!this.profileId || !this.videoId) {
-            console.error('Missing profileId or videoId. Progress tracking will not work.');
+        if (!this.profileId) {
+            console.log('Guest profile. Progress tracking will not work.');
+            return;
+        }
+        if (!this.videoId) {
+            console.error('Missing videoId. Progress tracking will not work.');
             return;
         }
         this.setupEventListeners();
@@ -545,7 +547,7 @@ class ProgressTracker {
      * @param currentTime - The current playback time in seconds
      */
     updateProgress(currentTime) {
-        fetch(`${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}?profile=${this.profileId}`, {
+        fetch(`${ApiConfig.IN_PROGRESS_ENDPOINT}?profile=${this.profileId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -562,14 +564,14 @@ class ProgressTracker {
     markAsWatched() {
         this.hasMarkedWatched = true;
         // Remove from in-progress
-        fetch(`${ProfileMgmtConfig.API_BASE_URL}${ApiConfig.IN_PROGRESS_ENDPOINT}`, {
+        fetch(`${ApiConfig.IN_PROGRESS_ENDPOINT}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ video_id: this.videoId })
         }).catch(err => console.error('Error removing from progress:', err));
         // Mark as watched
-        fetch(`${ApiConfig.API_BASE_URL}${ApiConfig.MARK_UNWATCHED_ENDPOINT}?profile=${this.profileId}`, {
+        fetch(`${ApiConfig.MARK_UNWATCHED_ENDPOINT}?profile=${this.profileId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',

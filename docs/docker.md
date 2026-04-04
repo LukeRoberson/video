@@ -1,78 +1,138 @@
 # Docker
 
-This app can be run as a stand alone container, or part of a larger system using Docker Compose.
+This app is designed to be deployed using Docker Compose. This is beacuse there are several containers in use:
+* Frontend (the UI)
+* Backend (the API and database)
+* ElasticSearch
+* Nginx reverse proxy
+</br></br>
+
+> [!NOTE]
+> This project is available as 'prod' and 'devel'.
+> 'prod' is the stable release, and 'devel' is used for testing new features.
+
+
+
+## Compose Environment
+
+The included `docker-compose.yaml` file shows how this deploys these four containers, or services, to make a complete app.
 </br></br>
 
 
-## Stand Alone Container
+### Containers
 
-This is most useful if you want to run this service locally in your own home environment. It's a simple case of deploying a single container in Docker Server or in Docker Desktop.
-
-See the **readme.md** file for details on how to get this up and running.
+| Name          | Notes                                                  | Relies on         |
+| ------------- | ------------------------------------------------------ | ----------------- |
+| backend       | The API and database services                          | ElasticSearch*    |
+| frontend      | The UI for the application                             | backend           |
+| elasticsearch | 3rd party container; Enables deep searching of content |                   |
+| proxy         | 3rd party container; The NGINX reverse proxy           | frontend, backend |
 </br></br>
 
 
-### Stable vs Development
-
-There are two container tags in use:
-* latest
-* devel
-
-As their names suggest, one is meant for 'production' and contains the latest stable updates.
-
-The other is meant for development only, and is not considered stable.
-
-Use the container with the _latest_ tag.
+> [!NOTE]
+> The backend can work without the ElasticSearch service.
+> However, for full functionality, this should be running before the backend starts
 </br></br>
 
 
-## Docker Compose
 
-This is a more complex solution that you can use if you want to make the service accessible from outside your home network. This is an advanced option which will require you to have signigicant IT knowledge.
+### Network
+
+There is a 'bridge' network named `private` for all containers to communicate with each other.
+
+Only the proxy service has any network exposure to the outside network. All requests to the app come through this service. This is to enforce HTTP routing as well as security.
 </br></br>
 
-The components used in this solution are:
-* Docker engine (docker server or docker desktop)
-* This app as a container
-* An NGINX container (to add certificates and other security)
-* A domain name and DNS
-* Port forwarding on your router
+
+The proxy service listens on ports 80 and 443 for the production deployment.
+
+It also listens on ports 8080 and 8443 for the devel deployment. This allows both to be be deployed on the same system without port conflicts.
+
+Typically however, just the production environment will be used.
 </br></br>
 
-This page will focus on the container setup, and leave the domain, DNS, and port forwarding to you.
+
+
+### Storage
+
+There is one named volume, called `esdata`. This is for the ElasticSearch service.
+
+There are also several bind mounts, which are used in the backend and proxy services.
+
+The backend service uses a bind mount for the `local.db` database file. This means this file is stored directly on the host system, and can easily be backed up by the system administrator.
+
+The proxy service has several bind mounts, which are used for configuration files, log files, and certificate files. More on how these are used in later sections.
 </br></br>
 
-Sample compose file:
 
-```yaml
-services:
-  frontend:
-    image: "lukerobertson19/1320:latest"
-    volumes:
-      - c:\apps\local.db:/app/local.db
-    restart: unless-stopped
 
-  devel:
-    image: "lukerobertson19/1320:devel"
-    volumes:
-      - c:\apps\local-devel.db:/app/local.db
-    restart: unless-stopped
+### Environment Variables
 
-  proxy:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - c:\apps\nginx.conf:/etc/nginx/nginx.conf
-      - c:\apps\nginx.key:/etc/ssl/certs/nginx.key
-      - c:\apps\nginx.crt:/etc/ssl/certs/nginx.crt
-      - c:\apps\dh-4096.pem:/etc/ssl/certs/dh-4096.pem
-      - c:\apps\logs:/var/log/nginx
-    restart: unless-stopped
-```
-
+Environment variables are used in several places for configuring the application.
 </br></br>
+
+
+#### Backend Service
+
+The backend service uses the `ELASTICSEARCH_HOST` and `ELASTICSEARCH_PORT` variables to find the elastic search service. By default, the ElasticSearch container will listen on TCP port 9200.
+
+These variables are configured directly in the compose file.
+</br></br>
+
+
+The backend service also uses the `LOCAL_DB_PATH` variable in a bind mount. This is the location of the `local.db` file on the local system.
+
+This variable needs to be set when the app is started.
+</br></br>
+
+
+#### Frontend Service
+
+The frontend service uses the `API_BASE_URL` variable, to define how to reach the backend service. This uses TCP port 5010 by default.
+
+This variable is defined in the compose file.
+</br></br>
+
+
+#### Proxy Service
+
+The proxy service uses five variables in its bind mount configuration. All of these are set at runtime, not in the compose file.
+
+`NGINX_CONF_PATH` defines the location of the `nginx.conf` file on the local system.
+
+`NGINX_CRT_PATH` defines the local location of the certificate PEM file.
+
+`NGINX_KEY_PATH` defines the local location of the certificate KEY file.
+
+`DH_PARAM_PATH` defines the local location of the DH key file.
+
+`NGINX_LOG_PATH` defines the local location of the log files that NGINX generates.
+</br></br>
+
+
+The NGINX configuration file is stored locally so an admin can change the configuration as needed for the local environment.
+
+The log files are stored locally so an admin can easily troubleshoot, if needed.
+
+The certificate files are stored locally so they can be replaced as needed.
+</br></br>
+
+
+### Build Files
+
+The frontend and backend containers are custom, so they need to be built into containers using docker files. ElasticSearch and NGINX are both 3rd party services, so these containers can just be downloaded.
+</br></br>
+
+
+This project includes `Dockerfile.backend` and `Dockerfile.frontend` for the backend and frontend services.
+
+While these can be built manually with docker commands, it's also easy to contain the build process in the compose file.
+
+The included compose file includes the required configuration to do this automatically when the app starts.
+</br></br>
+
+
 
 
 ----
@@ -84,6 +144,8 @@ Alternatively, you could run this locally in your home environment with your own
 
 The third option is not to use DNS at all, and just access the container by an IP address. However, this won't support TLS/certificates/HTTPS.
 </br></br>
+
+
 
 
 ----
@@ -160,89 +222,90 @@ openssl dhparam -out /openssl-data/dh-4096.pem 4096
 ----
 # NGINX Configuration
 
-First, create the **nginx.conf** in your local storage. It should look like this:
+As noted before, the `nginx.conf` file, that is the file for NGINX configuration, is not included natively in this project, and needs to be stored on the local system.
 
-```
+First, create the `nginx.conf` in your local storage. It should look like this:
+
+```nginx
 events {}
+
 http {
-    server {
-        listen 80;
-        server_name server.example.com;
+  # Common SSL settings
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers EECDH+AESGCM:EDH+AESGCM;
+  ssl_ecdh_curve secp384r1;
+  ssl_session_timeout 10m;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_tickets off;
 
-        location / {
-            return 301 https://$host$request_uri;
-        }
+  # Common security headers
+  add_header X-Frame-Options DENY always;
+  add_header X-Content-Type-Options nosniff always;
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'" always;
+
+  # Common proxy headers
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header X-Forwarded-Host $host;
+
+  # HTTP Routes: Redirect to HTTPS
+  server {
+    listen 80;
+    server_name server.example.com;
+    return 301 https://$host$request_uri;
+  }
+
+  # HTTPS routes
+  server {
+    # HTTPS specific settings
+    listen 443 ssl;
+    http2 on;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    server_name server.example.com;
+
+    ssl_certificate /etc/ssl/certs/nginx.crt;
+    ssl_certificate_key /etc/ssl/certs/nginx.key;
+    ssl_dhparam /etc/ssl/certs/dh-4096.pem;
+
+    # Frontend UI
+    location / {
+        proxy_pass http://frontend:5000;
     }
 
-    server {
-        listen 443 ssl;
-        server_name server.example.com;
-
-        ssl_certificate /etc/ssl/certs/cert.pem;
-        ssl_certificate_key /etc/ssl/certs/cert.pem;
-        ssl_dhparam /etc/ssl/certs/dh-4096.pem;
-
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_prefer_server_ciphers on;
-        ssl_ciphers EECDH+AESGCM:EDH+AESGCM;
-        ssl_ecdh_curve secp384r1;
-        ssl_session_cache shared:SSL:10m;
-        ssl_session_timeout 10m;
-        ssl_session_tickets off;
-
-        add_header X-Frame-Options DENY;
-        add_header X-Content-Type-Options nosniff;
-        add_header X-XSS-Protection "1; mode=block";
-
-        location / {
-            proxy_pass http://frontend:5000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;        }
+    # API route
+    location /api {
+        proxy_pass http://backend:5010;
     }
+  }
 }
 ```
 </br></br>
 
-This does several things:
-* Sets up a service for server.example.com (change to suit your domain)
-* Sets up a redirect from HTTP to HTTPS
-* Uses the certificates that were generated earlier
-* Sets up a proxy for the _frontend_ container (more on that next)
+
+This assumes deployment of the 'prod' service, which uses ports 80 (HTTP) and 443 (HTTPS).
+
+You can modify this sample configuration to your needs, or use it just as it is.
+
+> [!WARNING]
+> This uses specific filenames for certificate files, such as 'nginx.cert'.
+> If you use different file names, make sure you update this file accordingly.
+</br></br>
+
+> [!NOTE]
+> This example uses 'server.example.com'.
+> Update this as needed for your local environment.
 </br></br>
 
 
-----
-# Container Deployment
+This configuration does several things:
+* Sets up a service for server.example.com (change to suit your domain)
+* Sets up a redirect from HTTP to HTTPS
+* Uses the certificates that were generated earlier
+* Sets up a proxy for the _frontend_ container (the UI)
+* Sets up a proxy for the _backend_ container (the API)
+</br></br>
 
-Now, we deploy the service using **Docker Compose**. It might be simpler to deploy _Portainer_ to manage this, but that's up to you.
-
-The compose file looks like this:
-
-```yaml
-services:
-  frontend:
-    image: "lukerobertson19/1320:latest"
-    volumes:
-      - c:\apps\local.db:/app/local.db
-    restart: unless-stopped
-
-  proxy:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - c:\apps\nginx.conf:/etc/nginx/nginx.conf
-      - c:\apps\nginx.key:/etc/ssl/certs/nginx.key
-      - c:\apps\nginx.crt:/etc/ssl/certs/nginx.crt
-      - c:\apps\dh-4096.pem:/etc/ssl/certs/dh-4096.pem
-      - c:\apps\logs:/var/log/nginx
-```
-
-This deploys two containers. One is called _frontend_, which is the main web app container. There is no direct access to this container.
-
-The other is called _proxy_, which is the NGINX container. This listens on ports 80 and 443.
-
-When the NGINX container starts, it will receive web requests, and forward them to the frontend service.

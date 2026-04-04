@@ -8,8 +8,6 @@
  * Configuration constants for metadata management
  */
 const MetadataConfig = {
-    /** API base URL */
-    API_BASE_URL: 'http://localhost:5010',    
     /** API endpoint for video metadata */
     VIDEO_METADATA_ENDPOINT: '/api/videos/metadata',
     /** API endpoint for scripture data */
@@ -145,7 +143,7 @@ abstract class BaseFormHandler {
         endpoint: string,
         payload: unknown
     ): Promise<T> {
-        const url = `${MetadataConfig.API_BASE_URL}${endpoint}`;
+        const url = endpoint;
 
         const response = await fetch(url, {
             method: 'POST',

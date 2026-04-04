@@ -59,6 +59,7 @@ from flask import (
     url_for,
     session,
     request,
+    current_app
 )
 
 import random
@@ -266,9 +267,11 @@ def select_profile() -> Response:
         Response: A rendered HTML page for selecting a profile.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     # API: Get all profiles
     response = requests.get(
-        url='http://localhost:5010/api/profile',
+        url=f'{base_url}/api/profile',
     )
     profile_list = response.json().get('data', [])
     logger.info(f"Active profile: {session.get('active_profile', None)}")
@@ -339,7 +342,7 @@ def edit_profile(profile_id: int) -> Response:
 
         # API: Get profile details
         response = requests.get(
-            url=f'http://localhost:5010/api/profile/{profile_id}',
+            url=f'{base_url}/api/profile/{profile_id}',
         )
         profile = response.json().get('data', {})
 
@@ -356,12 +359,14 @@ def edit_profile(profile_id: int) -> Response:
 
         # API: Get watch history for the profile
         response = requests.get(
-            url='http://localhost:5010/api/profile/watch_history',
+            url=f'{base_url}/api/profile/watch_history',
             params={'profile': profile_id}
         )
         history = response.json().get('data', [])
 
         return history
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Run API calls concurrently to speed up page load time
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -390,7 +395,7 @@ def edit_profile(profile_id: int) -> Response:
     if history:
         video_ids = [item['video_id'] for item in history]
         response = requests.post(
-            url='http://localhost:5010/api/videos/get_bulk',
+            url=f'{base_url}/api/videos/get_bulk',
             json={'video_ids': video_ids}
         )
         data = response.json().get('data', [])
@@ -443,9 +448,11 @@ def characters() -> Response:
         Response: A rendered HTML page with character details.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     # API: Get all characters
     response = requests.get(
-        url='http://localhost:5010/api/characters',
+        url=f'{base_url}/api/characters',
     )
     characters = response.json().get('data', {})
 
@@ -478,9 +485,11 @@ def tags() -> Response:
         Response: A rendered HTML page with tag details.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     # API: Get all tags
     response = requests.get(
-        url='http://localhost:5010/api/tags',
+        url=f'{base_url}/api/tags',
     )
     tags = response.json().get('data', [])
 
@@ -515,9 +524,10 @@ def location() -> Response:
         Response: A rendered HTML page with location details.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
     # API: Get all locations
     response = requests.get(
-        url='http://localhost:5010/api/locations',
+        url=f'{base_url}/api/locations',
     )
     locations = response.json().get('data', [])
 
@@ -545,9 +555,10 @@ def speakers() -> Response:
         Response: A rendered HTML page with speaker details.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
     # API: Get a list of speakers
     response = requests.get(
-        url='http://localhost:5010/api/speakers',
+        url=f'{base_url}/api/speakers',
     )
     speakers = response.json().get('data', [])
 
@@ -587,9 +598,10 @@ def scriptures() -> Response:
         Response: A rendered HTML page with scripture details.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
     # API: Get all scriptures (unsorted)
     response = requests.get(
-        url='http://localhost:5010/api/scriptures',
+        url=f'{base_url}/api/scriptures',
     )
     scriptures = response.json().get('data', [])
 

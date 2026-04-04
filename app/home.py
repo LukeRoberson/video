@@ -44,7 +44,8 @@ from flask import (
     url_for,
     redirect,
     session,
-    request
+    request,
+    current_app
 )
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import (
@@ -150,6 +151,8 @@ def home() -> Response:
         Response: A rendered HTML 'welcome' page
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     def fetch_in_progress() -> list:
         """
         API Call: Get the in-progress videos for the active profile.
@@ -162,7 +165,7 @@ def home() -> Response:
             return []
 
         response = requests.get(
-            url='http://localhost:5010/api/profile/in_progress',
+            url=f'{base_url}/api/profile/in_progress',
             params={'profile': profile_id},
         )
 
@@ -177,7 +180,7 @@ def home() -> Response:
         """
 
         return requests.get(
-            url='http://localhost:5010/api/videos/filter',
+            url=f'{base_url}/api/videos/filter',
             params={
                 'cat': categories.get('Monthly Programs', None),
                 'latest': 1,
@@ -193,7 +196,7 @@ def home() -> Response:
         """
 
         return requests.get(
-            url='http://localhost:5010/api/videos/filter',
+            url=f'{base_url}/api/videos/filter',
             params={
                 'cat': categories.get('News and Announcements', None),
                 'latest': 1,
@@ -209,7 +212,7 @@ def home() -> Response:
         """
 
         return requests.get(
-            url='http://localhost:5010/api/videos/filter',
+            url=f'{base_url}/api/videos/filter',
             params={'latest': 9},
         ).json().get('data', [])
 
@@ -225,7 +228,7 @@ def home() -> Response:
 
         # API call to get details for all in-progress videos
         response = requests.post(
-            url='http://localhost:5010/api/videos/get_bulk',
+            url=f'{base_url}/api/videos/get_bulk',
             json={'video_ids': [v['video_id'] for v in in_progress_videos]}
         )
         data = response.json().get('data', [])

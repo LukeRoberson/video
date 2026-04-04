@@ -1,8 +1,8 @@
 services:
-  video-app:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
 
     # local.db is in persistent storage. It still needs to be backed up
     volumes:
@@ -18,7 +18,22 @@ services:
       - elasticsearch
     restart: unless-stopped
     networks:
-      - video-devel
+      - private
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+
+    # To find the backend API
+    environment:
+      - API_BASE_URL=http://backend:5010
+
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - private
 
   proxy:
     image: nginx:alpine
@@ -36,13 +51,14 @@ services:
       - ${NGINX_LOG_PATH}:/var/log/nginx
 
     depends_on:
-      - video-app
+      - frontend
+      - backend
     restart: unless-stopped
     networks:
-      - video-devel
+      - private
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.13
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
@@ -56,10 +72,10 @@ services:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
     networks:
-      - video-devel
+      - private
 
 networks:
-  video-devel:
+  private:
     driver: bridge
 
 volumes:

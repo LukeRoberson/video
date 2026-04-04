@@ -38,71 +38,7 @@ This gets the top-10 for a single video.
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the video does not exist.
-</br></br>
-
-
-**Response Body**
-
-Returns 'data', 'message', and 'success' fields.
-
-'data' is a list of entries, with each entry containing similarity scores for a video.
-
-Each entry contains the IDs for two videos, and a numerical score showing how similar they are
-</br></br>
-
-
-| Field       | Type    | Description                               |
-| ----------- | ------- | ----------------------------------------- |
-| video_1_id  | integer | The requested video ID                    |
-| video_2_id  | float   | The video ID that it is being compared to |
-| score       | float   | A score (between 0-1)                     |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "score": 0.23379166666666665,
-            "video_1_id": 1,
-            "video_2_id": 16
-        }
-    ],
-    "message": "Retrieved similar videos for video ID 1",
-    "success": true
-}
-```
-</br></br>
-
-
-On error:
-
-```json
-{
-    "error": "Video with ID 6 not found",
-    "success": false
-}
-```

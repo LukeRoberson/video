@@ -7,8 +7,6 @@
  * Configuration constants for category population
  */
 declare const CategoryConfig: {
-    /** API base URL for new endpoints (separate server) */
-    readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint pattern for category videos */
     readonly API_ENDPOINT_PATTERN: "/api/categories/{categoryId}/{subcategoryId}";
     /** Delay before enhancing TV navigation */

@@ -9,10 +9,8 @@
  * Configuration constants for profile editing
  */
 const ProfileEditConfig = {
-    /** API base URL for new endpoints (separate server) */
-    API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for profile pictures */
-    PROFILE_PICTURES_ENDPOINT: '/api/profile/pictures',
+    PROFILE_PICTURES_ENDPOINT: '/profile/pictures',
     /** API endpoint pattern for profile deletion */
     DELETE_PROFILE_ENDPOINT: '/api/profile/delete/{id}',
     /** API endpoint pattern for profile updates */
@@ -315,7 +313,7 @@ class ProfileEditApiService {
      * @param profileId - ID of profile to delete
      */
     static async deleteProfile(profileId: number): Promise<void> {
-        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
+        const endpoint = `${ProfileEditConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'DELETE',
@@ -337,7 +335,7 @@ class ProfileEditApiService {
      * @param profileData - Profile data to update
      */
     static async updateProfile(profileId: number, profileData: ProfileUpdateData): Promise<void> {
-        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
+        const endpoint = `${ProfileEditConfig.UPDATE_PROFILE_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -359,7 +357,7 @@ class ProfileEditApiService {
      * @param profileId - ID of profile
      */
     static async clearHistory(profileId: number): Promise<void> {
-        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
+        const endpoint = `${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -381,7 +379,7 @@ class ProfileEditApiService {
      * @param videoId - ID of video to remove from history
      */
     static async clearHistoryItem(profileId: number, videoId: number): Promise<void> {
-        const endpoint = `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
+        const endpoint = `${ProfileEditConfig.CLEAR_HISTORY_ENDPOINT.replace('{id}', profileId.toString())}`;
         
         const requestBody: ClearHistoryItemRequest = { video_id: videoId };
         
@@ -412,7 +410,7 @@ class ProfileEditApiService {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
         
         const response = await fetch(
-            `${ProfileEditConfig.API_BASE_URL}${ProfileEditConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`,
+            `${ProfileEditConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`,
             {
                 method: 'POST',
                 headers: {

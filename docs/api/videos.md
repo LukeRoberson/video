@@ -127,61 +127,10 @@ The CSV file is assumed to be named `missing_videos.csv`, and is stored in `../s
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the CSV file is not present
-
-`500 INTERNAL SERVER ERROR` if the CSV file could not be loaded
-</br></br>
-
-
-**Response Body**
-
-Returns videos as numberical indexes (starting at 0).
-
-Video information contains all the usual metadata.
-</br></br>
-
-
-```json
-{
-    "0": {
-        "video_name": "JW Broadcasting—January 2026: Annual Meeting 2025, Part 1",
-        "video_url": "https://www.jw.org/en/library/videos/#en/mediaitems/StudioMonthlyPrograms/pub-jwb-134_1_VIDEO",
-        "main_cat_name": "JW Broadcasting",
-        "sub_cat_name": "Monthly Programs",
-        "url_1080": null,
-        "url_720": "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r720P.mp4",
-        "url_480": "https://akdd1.jw-cdn.org/sg2/p/99bdbd/1/o/jwb-134_E_01_r480P.mp4",
-        "url_360": "https://akdd1.jw-cdn.org/sg2/p/fcc2dd/1/o/jwb-134_E_01_r360P.mp4",
-        "url_240": "https://akamd1.jw-cdn.org/sg2/p/485b9ed/1/o/jwb-134_E_01_r240P.mp4",
-        "thumbnail": "https://cms-imgp.jw-cdn.org/img/p/jwb-134/univ/art/jwb-134_univ_wss_01_lg.jpg",
-        "duration": "1:43:33"
-    }
-}
-```
-</br></br>
-
 
 
 
@@ -194,111 +143,7 @@ Add a new video to the database.
 </br></br>
 
 
-**Method**
-
-POST
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-Information about a single video to add to the database.
-</br></br>
-
-
-| Field         | Type    | Description                            |
-| ------------- | ------- | -------------------------------------- |
-| video_name    | string  | The name of the video                  |
-| video_url     | string  | The video's URL on jw.org              |
-| main_cat_name | string  | The main category the video belongs to |
-| sub_cat_name  | string  | The subcategory the video belongs to   |
-| url_1080      | string  | Video URL                              |
-| url_720       | string  | Video URL                              |
-| url_480       | string  | Video URL                              |
-| url_360       | string  | Video URL                              |
-| url_240       | string  | Video URL                              |
-| thumbnail     | string  | URL to the video's thumbnail           |
-| duration      | string  | Duration of the video, in HH:MM:SS     |
-</br></br>
-
-
-```json
-{
-    "video_name": "<video name>",
-    "video_url": "<video URL>",
-    "main_cat_name": "<main category name>",
-    "sub_cat_name": "<subcategory name>",
-    "url_1080": "<1080p video URL>",
-    "url_720": "<720p video URL>",
-    "url_480": "<480p video URL>",
-    "url_360": "<360p video URL>",
-    "url_240": "<240p video URL>",
-    "thumbnail": "<thumbnail image URL>",
-    "duration": "<video duration in HH:MM:SS>",
-}
-```
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`400 BAD REQUEST` If the video name is not present, or if the duration is not formatted correctly.
-
-`404 NOT FOUND` if the categories don't exist in the database
-
-`500 INTERNAL SERVER ERROR` if the video could not be added to the database
-</br></br>
-
-
-**Response Body**
-
-A simple success or failure message.
-</br></br>
-
-
-Success:
-
-```json
-{
-    "message": "video added",
-    "success": true
-}
-```
-</br></br>
-
-
-Failure:
-
-```json
-{
-    "error": "Missing 'video_name' in request data",
-    "success": false
-}
-```
-</br></br>
-
-
-```json
-{
-    "error": "Main category 'None' not found",
-    "success": false
-}
-```
-</br></br>
-
-
-```json
-{
-    "error": "Failed to add video 'Test Video'",
-    "success": false
-}
-```
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>

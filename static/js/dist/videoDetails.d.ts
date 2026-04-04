@@ -6,8 +6,6 @@
  * Configuration constants
  */
 declare const VideoDetailsConfig: {
-    /** API base URL */
-    readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint for marking videos as watched */
     readonly MARK_WATCHED_ENDPOINT: "/api/profile/mark_watched";
     /** API endpoint for marking videos as unwatched */

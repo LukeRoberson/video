@@ -19,11 +19,6 @@ Endpoints:
     POST /api/profile/update/<profile_id>
         Updates a user profile's name and/or image by ID.
 
-    POST /api/profile/set_active
-        Sets the active profile for the session.
-    GET /api/profile/get_active
-        Retrieves the active profile for the session.
-
     GET /api/profile/watch_history
         Retrieves the watch history for the active profile.
     POST /api/profile/clear_history/<profile_id>

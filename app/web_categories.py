@@ -54,6 +54,7 @@ from flask import (
     render_template,
     make_response,
     session,
+    current_app
 )
 from concurrent.futures import ThreadPoolExecutor
 import logging
@@ -114,7 +115,7 @@ def render_category_page(
 
         # API call
         response = requests.get(
-            f'http://localhost:5010/api/categories/{main_id}/{sub_cat_id}',
+            f'{base_url}/api/categories/{main_id}/{sub_cat_id}',
         )
 
         # Collect the video list from the API response
@@ -155,7 +156,7 @@ def render_category_page(
 
         # API call to get watch status for a list of video IDs
         response = requests.post(
-            'http://localhost:5010/api/profile/mark_watched_bulk',
+            f'{base_url}/api/profile/mark_watched_bulk',
             params={'profile': active_profile},
             json={
                 'video_ids': [video['id'] for video in video_list]
@@ -176,6 +177,8 @@ def render_category_page(
     logger.info(
         f"Category: {category_name}. Subcategories: {sub_category_list}"
     )
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Get category IDs from the cache (cached at startup)
     categories = app_cache.get_category_ids()

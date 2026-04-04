@@ -40,82 +40,10 @@ List is sorted alphabetically by speaker name.
 </br></br>
 
 
-**Method**
-
-GET
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
-
-
-**Parameters**
-
-Optionally, include a speaker ID to get just one speaker.
-</br></br>
-
-
-| Field  | Type    | Mandatory | Description                                |
-| ------ | ------- | --------- | ------------------------------------------ |
-| spk_id | integer | No        | The ID of a specific speaker to return     |
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`500 INTERNAL SERVER ERROR` If there was a problem getting speakers
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains a list of speakers, with each entry describing the speaker.
-</br></br>
-
-
-| Field       | Type    | Description                                |
-| ----------- | ------- | ------------------------------------------ |
-| id          | integer | The speaker's ID                           |
-| name        | string  | The speaker's name                         |
-| profile_pic | string  | The filename for the speaker's profile pic |
-| video_count | integer | The number of videos they appear in        |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "id": 321,
-            "name": "Adolf Denk",
-            "profile_pic": "321-Adolph_Denk.png",
-            "video_count": 2
-        }
-    ],
-    "message": "Speakers retrieved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If an invalid speaker was requested:
-
-```json
-{
-    "error": "Error occurred while getting speakers.",
-    "success": false
-}
-```
-</br></br>
-
 
 
 
@@ -128,70 +56,9 @@ Get a specific speaker.
 </br></br>
 
 
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` If the speaker does not exist
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains a single speaker entry.
-</br></br>
-
-
-| Field       | Type    | Description                            |
-| ----------- | ------- | -------------------------------------- |
-| id          | integer | The speaker's ID                       |
-| name        | string  | The speaker's name                     |
-| profile_pic | string  | Filename for the speaker's profile pic |
-</br></br>
-
-
-```json
-{
-    "data": {
-        "id": 321,
-        "name": "Adolf Denk",
-        "profile_pic": "321-Adolph_Denk.png"
-    },
-    "message": "Speaker retrieved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If there is an error:
-
-```json
-{
-    "error": "Speaker with ID 3 not found",
-    "success": false
-}
-```
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>
 
 
@@ -205,71 +72,7 @@ Get all speakers associated with a specific video.
 </br></br>
 
 
-**Method**
-
-GET
-</br></br>
-
-
-**Parameters**
-
-None
-</br></br>
-
-
-**Body**
-
-None
-</br></br>
-
-
-**Response Code**
-
-`200 OK` on success
-
-`404 NOT FOUND` if the video is not found
-</br></br>
-
-
-**Response Body**
-
-'data', 'message', and 'success' fields.
-
-The 'data' field contains a list of speakers, with each entry describing the speaker.
-</br></br>
-
-
-| Field       | Type    | Description                                |
-| ----------- | ------- | ------------------------------------------ |
-| id          | integer | The speaker's ID                           |
-| name        | string  | The speaker's name                         |
-| profile_pic | string  | The filename for the speaker's profile pic |
-</br></br>
-
-
-```json
-{
-    "data": [
-        {
-            "id": 321,
-            "name": "Adolf Denk",
-            "profile_pic": "321-Adolph_Denk.png",
-            "video_count": 2
-        }
-    ],
-    "message": "Speakers retrieved successfully",
-    "success": true
-}
-```
-</br></br>
-
-
-If the video is not found:
-
-```json
-{
-    "error": "Video with ID 6 not found",
-    "success": false
-}
-```
+> [!NOTE]
+> Documentation has been migrated to Swagger UI
+> http://localhost:5010
 </br></br>

@@ -7,16 +7,12 @@
  * Configuration constants for profile management
  */
 declare const ProfileMgmtConfig: {
-    /** API base URL for new endpoints (separate server) */
-    readonly API_BASE_URL: "http://localhost:5010";
-    /** Base URL for frontend settings */
-    readonly FRONTEND_BASE_URL: "http://localhost:5000";
     /** API endpoint for creating profiles */
     readonly CREATE_PROFILE_ENDPOINT: "/api/profile/create";
     /** API endpoint for getting active profile */
-    readonly GET_ACTIVE_ENDPOINT: "/api/profile/get_active";
+    readonly GET_ACTIVE_ENDPOINT: "/profile/get_active";
     /** API endpoint for setting active profile */
-    readonly SET_ACTIVE_ENDPOINT: "/api/profile/set_active";
+    readonly SET_ACTIVE_ENDPOINT: "/profile/set_active";
     /** API endpoint pattern for deleting profiles */
     readonly DELETE_PROFILE_ENDPOINT: "/api/profile/delete/{id}";
     /** API endpoint pattern for editing profiles */

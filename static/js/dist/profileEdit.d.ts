@@ -7,10 +7,8 @@
  * Configuration constants for profile editing
  */
 declare const ProfileEditConfig: {
-    /** API base URL for new endpoints (separate server) */
-    readonly API_BASE_URL: "http://localhost:5010";
     /** API endpoint for profile pictures */
-    readonly PROFILE_PICTURES_ENDPOINT: "/api/profile/pictures";
+    readonly PROFILE_PICTURES_ENDPOINT: "/profile/pictures";
     /** API endpoint pattern for profile deletion */
     readonly DELETE_PROFILE_ENDPOINT: "/api/profile/delete/{id}";
     /** API endpoint pattern for profile updates */

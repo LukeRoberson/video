@@ -8,16 +8,12 @@
  * Configuration constants for profile management
  */
 const ProfileMgmtConfig = {
-    /** API base URL for new endpoints (separate server) */
-    API_BASE_URL: 'http://localhost:5010',
-    /** Base URL for frontend settings */
-    FRONTEND_BASE_URL: 'http://localhost:5000',
     /** API endpoint for creating profiles */
     CREATE_PROFILE_ENDPOINT: '/api/profile/create',
     /** API endpoint for getting active profile */
-    GET_ACTIVE_ENDPOINT: '/api/profile/get_active',
+    GET_ACTIVE_ENDPOINT: '/profile/get_active',
     /** API endpoint for setting active profile */
-    SET_ACTIVE_ENDPOINT: '/api/profile/set_active',
+    SET_ACTIVE_ENDPOINT: '/profile/set_active',
     /** API endpoint pattern for deleting profiles */
     DELETE_PROFILE_ENDPOINT: '/api/profile/delete/{id}',
     /** API endpoint pattern for editing profiles */
@@ -88,7 +84,7 @@ class ProfileApiService {
      */
     static async createProfile(profileData: ProfileCreateData): Promise<ApiResponse> {
         const response = await fetch(
-            `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.CREATE_PROFILE_ENDPOINT}`,
+            `${ProfileMgmtConfig.CREATE_PROFILE_ENDPOINT}`,
             {
                 method: 'POST',
                 headers: { 
@@ -112,7 +108,7 @@ class ProfileApiService {
      */
     static async getActiveProfile(): Promise<ActiveProfileResponse> {
         const response = await fetch(
-            `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.GET_ACTIVE_ENDPOINT}`,
+            `${ProfileMgmtConfig.GET_ACTIVE_ENDPOINT}`,
             {
                 credentials: 'include'
             }
@@ -136,7 +132,7 @@ class ProfileApiService {
         console.log('Setting active profile with data:', profileData);
 
         // API call
-        const url = `${ProfileMgmtConfig.FRONTEND_BASE_URL}${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
+        const url = `${ProfileMgmtConfig.SET_ACTIVE_ENDPOINT}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 
@@ -169,7 +165,7 @@ class ProfileApiService {
         }
 
         // API call to delete the profile
-        const endpoint = `${ProfileMgmtConfig.API_BASE_URL}${ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId)}`;
+        const endpoint = `${ProfileMgmtConfig.DELETE_PROFILE_ENDPOINT.replace('{id}', profileId)}`;
         const response = await fetch(endpoint, {
             method: 'DELETE',
             headers: { 

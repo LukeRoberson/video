@@ -8,8 +8,6 @@
  * Configuration constants for category population
  */
 const CategoryConfig = {
-    /** API base URL for new endpoints (separate server) */
-    API_BASE_URL: 'http://localhost:5010',
     /** API endpoint pattern for category videos */
     API_ENDPOINT_PATTERN: '/api/categories/{categoryId}/{subcategoryId}',
     /** Delay before enhancing TV navigation */
@@ -147,7 +145,7 @@ class CategoryApiService {
         subcategoryId: string | number,
         profileId: string
     ): Promise<Video[]> {
-        const endpoint = `${CategoryConfig.API_BASE_URL}${CategoryConfig.API_ENDPOINT_PATTERN.replace('{categoryId}', String(categoryId)).replace('{subcategoryId}', String(subcategoryId))}`;
+        const endpoint = `${CategoryConfig.API_ENDPOINT_PATTERN.replace('{categoryId}', String(categoryId)).replace('{subcategoryId}', String(subcategoryId))}`;
         const params = new URLSearchParams({ profile_id: profileId });
 
         try {

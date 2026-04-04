@@ -24,6 +24,7 @@ import os
 from typing import Tuple
 import logging
 import requests
+from flask import current_app
 
 
 logger = logging.getLogger(__name__)
@@ -312,6 +313,11 @@ class ThemeManager:
             Update the document with these details.
         """
 
+        base_url = current_app.config.get(
+            'API_BASE_URL',
+            'http://localhost:5010'
+        )
+
         # Extract video IDs from each section (skipping the main document)
         video_list = []
         for section in self.theme_documents[1:]:
@@ -330,7 +336,7 @@ class ThemeManager:
 
         # Bulk API call to fetch video details for all video IDs
         response = requests.post(
-            "http://localhost:5010/api/videos/get_bulk",
+            f"{base_url}/api/videos/get_bulk",
             json={'video_ids': video_list}
         )
 

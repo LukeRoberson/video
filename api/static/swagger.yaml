@@ -30,6 +30,8 @@ tags:
     description: Endpoints for finding similar videos based on content and metadata.
   - name: Profiles
     description: Information about user profiles and their preferences.
+  - name: Admin
+    description: Endpoints for administrative tasks, such as adding videos and managing metadata.
 
 paths:
   # ----------
@@ -357,7 +359,7 @@ paths:
                     description: Indicates whether the operation was successful
                     example: true
     post:
-      tags: [Videos]
+      tags: [Videos, Admin]
       summary: Add metadata to a video.
       description: |
         Add metadata to an existing video. This allows for associating videos with categories, tags, locations, speakers, characters, and scriptures.
@@ -429,9 +431,172 @@ paths:
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
 
-  # Videos to do:
-    # /api/videos/csv
-    # /api/videos/add
+  /api/videos/csv:
+    get:
+      tags: [Videos, Admin]
+      summary: Load a CSV of videos to add.
+      description: |
+        Read a CSV file containing a list of videos that need to be added to the database.
+        This endpoint just reads this information, it does not modify the database.
+        The CSV file is assumed to be named `missing_videos.csv`, and is stored in `../scripts/csv`.
+      responses:
+        '200':
+          summary: Successful response
+          description: Video metadata CSV file generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  description: |
+                    A list of video metadata entries read from the CSV file, where each entry contains
+                    the details of a single video.
+                  items:
+                    type: object
+                    properties:
+                      video_name:
+                        type: string
+                        description: The name of the video
+                        example: "JW Broadcasting—January 2026: Annual Meeting 2025, Part 1"
+                      video_url:
+                        type: string
+                        description: The URL of the video's page on jw.org
+                        example: "https://www.jw.org/en/library/videos/#en/mediaitems/StudioMonthlyPrograms/pub-jwb-134_1_VIDEO"
+                      main_cat_name:
+                        type: string
+                        description: The name of the video's main category on jw.org
+                        example: "JW Broadcasting"
+                      sub_cat_name:
+                        type: string
+                        description: The name of the video's subcategory on jw.org
+                        example: "Monthly Programs"
+                      url_1080:
+                        type: string
+                        description: URL to stream the video in 1080p resolution
+                        nullable: true
+                        example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r1080P.mp4"
+                      url_720:
+                        type: string
+                        description: URL to stream the video in 720p resolution
+                        nullable: true
+                        example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r720P.mp4"
+                      url_480:
+                        type: string
+                        description: URL to stream the video in 480p resolution
+                        nullable: true
+                        example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r480P.mp4"
+                      url_360:
+                        type: string
+                        description: URL to stream the video in 360p resolution
+                        nullable: true
+                        example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r360P.mp4"
+                      url_240:
+                        type: string
+                        description: URL to stream the video in 240p resolution
+                        nullable: true
+                        example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r240P.mp4"
+                      thumbnail:
+                        type: string
+                        description: URL to the video's thumbnail image
+                        example: "https://cms-imgp.jw-cdn.org/img/p/jwb-134/univ/art/jwb-134_univ_wss_01_lg.jpg"
+                      duration:
+                        type: string
+                        description: Duration of the video in HH:MM:SS format
+                        example: "1:43:33"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/videos/add:
+    post:
+      tags: [Videos, Admin]
+      summary: Add a single video to the database.
+      description: |
+        Add a video to the database with the provided metadata.
+        This is used to add videos that are missing from the database, such as newly released videos.
+      requestBody:
+        description: Metadata for the video to add
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                video_name:
+                  type: string
+                  description: The name of the video
+                  example: "JW Broadcasting—January 2026: Annual Meeting 2025, Part 1"
+                video_url:
+                  type: string
+                  description: The URL of the video's page on jw.org
+                  example: "https://www.jw.org/en/library/videos/#en/mediaitems/StudioMonthlyPrograms/pub-jwb-134_1_VIDEO"
+                main_cat_name:
+                  type: string
+                  description: The name of the video's main category on jw.org
+                  example: "JW Broadcasting"
+                sub_cat_name:
+                  type: string
+                  description: The name of the video's subcategory on jw.org
+                  example: "Monthly Programs"
+                url_1080:
+                  type: string
+                  description: URL to stream the video in 1080p resolution
+                  nullable: true
+                  example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r1080P.mp4"
+                url_720:
+                  type: string
+                  description: URL to stream the video in 720p resolution
+                  nullable: true
+                  example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r720P.mp4"
+                url_480:
+                  type: string
+                  description: URL to stream the video in 480p resolution
+                  nullable: true
+                  example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r480P.mp4"
+                url_360:
+                  type: string
+                  description: URL to stream the video in 360p resolution
+                  nullable: true
+                  example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r360P.mp4"
+                url_240:
+                  type: string
+                  description: URL to stream the video in 240p resolution
+                  nullable: true
+                  example: "https://akdd1.jw-cdn.org/sg2/p/360c2c/1/o/jwb-134_E_01_r240P.mp4"
+                thumbnail:
+                  type: string
+                  description: URL to the video's thumbnail image
+                  example: "https://cms-imgp.jw-cdn.org/img/p/jwb-134/univ/art/jwb-134_univ_wss_01_lg.jpg"
+                duration:
+                  type: string
+                  description: Duration of the video in HH:MM:SS format
+                  example: "1:43:33"
+      responses:
+        '200':
+          summary: Successful response
+          description: Video added successfully based on provided metadata names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful for adding the video
+                    example: true
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Video added successfully
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
 
   # --------------
   #   Categories
@@ -715,18 +880,558 @@ paths:
   # --------------------
   #   Bible Characters
   # --------------------
+  /api/characters:
+    get:
+      tags: [Characters]
+      summary: Retrieve a list of Bible characters
+      description: |
+        Get a list of all Bible characters, or just one specific character.
+        When getting the entire list, it will be sorted alphabetically by name.
+      parameters:
+        - in: query
+          name: name
+          required: false
+          schema:
+            type: integer
+          description: Optionally include a character's ID to get just that character.
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: A list of Bible characters retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: One or more Bible characters with names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the character
+                          example: 230
+                        name:
+                          type: string
+                          description: Name of the character
+                          example: "Aaron"
+                        description:
+                          type: string
+                          description: A brief description of the character
+                          example: "Brother of Moses and the first high priest of Israel"
+                        profile_pic:
+                          type: string
+                          description: A filename for the character's profile picture
+                          example: "230-Aaron.png"
+                        date_range:
+                          type: string
+                          description: The date range when the character lived, if known
+                          example: "1597-1474 B.C.E."
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Bible characters retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+
+  /api/characters/video/{video_id}:
+    get:
+      tags: [Characters]
+      summary: Retrieve Bible characters for a video
+      description: |
+        Get the Bible characters associated with a specific video.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to retrieve Bible characters for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Bible characters for the specified video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of Bible characters associated with the specified video, including character names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the character
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the character
+                          example: "David"
+                        description:
+                          type: string
+                          description: A brief description of the character
+                          example: "Son of Jesse, and the second King of Israel."
+                        profile_pic:
+                          type: string
+                          description: A filename for the character's profile picture
+                          example: "1-David.png"
+                        date_range:
+                          type: string
+                          description: The date range when the character lived, if known
+                          example: "About 1000 B.C.E."
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Bible characters retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # --------------
   #   Scriptures
   # --------------
 
+  /api/scriptures:
+    get:
+      tags: [Scriptures]
+      summary: Retrieve a list of scriptures
+      description: |
+        Get a list of all scriptures, or just one specific scripture.
+        When getting the entire list, it will be sorted alphabetically by name.
+      parameters:
+        - in: query
+          name: scr_id
+          required: false
+          schema:
+            type: integer
+          description: Optionally include a scripture's ID to get just that scripture.
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: A list of scriptures retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: One or more scriptures with names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the scripture
+                          example: 1
+                        book:
+                          type: string
+                          description: The book name
+                          example: "Matthew"
+                        chapter:
+                          type: integer
+                          description: The chapter number
+                          example: 19
+                        verse:
+                          type: integer
+                          description: The verse number
+                          example: 13
+                        verse_text:
+                          type: string
+                          description: The text of the verse
+                          example: "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Scriptures retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+    post:
+      tags: [Scriptures, Admin]
+      summary: Add text to a scripture entry
+      description: |
+        Add text to a scripture entry by providing the scripture ID and the text to add.
+        The scripture must already exist in the database.
+      requestBody:
+        description: The scripture ID and the text to add
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                scr_name:
+                  type: string
+                  description: The name of the scripture
+                  example: "Matthew 19:13"
+                scr_text:
+                  type: string
+                  description: The text to add to the scripture
+                  example: "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+      responses:
+        '200':
+          summary: Successful response
+          description: A filtered list of scriptures retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Scriptures retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/scriptures/video/{{video_id}}:
+    get:
+      tags: [Scriptures]
+      summary: Retrieve scriptures for a video
+      description: |
+        Get the scriptures associated with a specific video.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to retrieve scriptures for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Scriptures for the specified video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of scriptures associated with the specified video, including scripture names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the scripture
+                          example: 1
+                        book:
+                          type: string
+                          description: The book name
+                          example: "Matthew"
+                        chapter:
+                          type: integer
+                          description: The chapter number
+                          example: 19
+                        verse:
+                          type: integer
+                          description: The verse number
+                          example: 13
+                        verse_text:
+                          type: string
+                          description: The text of the verse
+                          example: "Then young children were brought to him for him to place his hands on them and offer prayer, but the disciples reprimanded them."
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Scriptures retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # ------------
   #   Speakers
   # ------------
 
+  /api/speakers:
+    get:
+      tags: [Speakers]
+      summary: Retrieve a list of speakers
+      description: |
+        Get a list of all speakers, or just one specific speaker.
+        When getting the entire list, it will be sorted alphabetically by name.
+      parameters:
+        - in: query
+          name: spk_id
+          required: false
+          schema:
+            type: integer
+          description: Optionally include a speaker's ID to get just that speaker.
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: A list of speakers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: One or more speakers with names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the speaker
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the speaker
+                          example: "Stephen Lett"
+                        profile_pic:
+                          type: string
+                          description: The filename of the speaker's profile picture
+                          example: "1-Stephen_Lett.png"
+                        video_count:
+                          type: integer
+                          description: The number of videos associated with the speaker
+                          example: 5
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Speakers retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/speakers/{{speaker_id}}:
+    get:
+      tags: [Speakers]
+      summary: Retrieve details for a specific speaker
+      description: |
+        Get detailed information about a specific speaker by their ID.
+      parameters:
+        - in: path
+          name: speaker_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the speaker to retrieve details for
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: Details for the specified speaker retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Detailed information about the specified speaker, including name and profile picture
+                    properties:
+                      id:
+                        type: integer
+                        description: Unique identifier for the speaker
+                        example: 1
+                      name:
+                        type: string
+                        description: Name of the speaker
+                        example: "Stephen Lett"
+                      profile_pic:
+                        type: string
+                        description: The filename of the speaker's profile picture
+                        example: "1-Stephen_Lett.png"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Speaker details retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/speakers/video/{{video_id}}:
+    get:
+      tags: [Speakers]
+      summary: Retrieve speakers for a video
+      description: |
+        Get the speakers associated with a specific video.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to retrieve speakers for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Speakers for the specified video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of speakers associated with the specified video, including speaker names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the speaker
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the speaker
+                          example: "Stephen Lett"
+                        profile_pic:
+                          type: string
+                          description: The filename of the speaker's profile picture
+                          example: "1-Stephen_Lett.png"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Speakers retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   # --------
   #   Tags
   # --------
+
+  /api/tags:
+    get:
+      tags: [Tags]
+      summary: Retrieve a list of tags
+      description: |
+        Get a list of all tags, or just one specific tag.
+        When getting the entire list, it will be sorted alphabetically by name.
+      parameters:
+        - in: query
+          name: tag_id
+          required: false
+          schema:
+            type: integer
+          description: Optionally include a tag's ID to get just that tag.
+          example: 1
+      responses:
+        '200':
+          summary: Successful response
+          description: A list of tags retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: One or more tags with names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the tag
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the tag
+                          example: "av"
+                        video_count:
+                          type: integer
+                          description: The number of videos associated with the tag
+                          example: 5
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Tags retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+
+  /api/tags/video/{{video_id}}:
+    get:
+      tags: [Tags]
+      summary: Retrieve tags for a video
+      description: |
+        Get the tags associated with a specific video.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to retrieve tags for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Tags for the specified video retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of tags associated with the specified video, including tag names and IDs
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Unique identifier for the tag
+                          example: 1
+                        name:
+                          type: string
+                          description: Name of the tag
+                          example: "av"
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Tags retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ----------
   #   Search
@@ -1024,7 +1729,7 @@ paths:
 
   /api/search/reindex:
     post:
-      tags: [Search]
+      tags: [Search, Admin]
       summary: Reindex videos for search
       description: |
         Reindex all videos for the search service.
@@ -1068,6 +1773,62 @@ paths:
   # --------------
   #   Similarity
   # --------------
+
+  /api/imilarity/{{video_id}}:
+    get:
+      tags: [Similarity]
+      summary: Retrieve similar videos
+      description: |
+        Get a list of videos similar to a specified video based on content and metadata.
+        This allows for finding related videos that may be of interest to the user.
+        Gets the top 10 most similar videos based on the specified video ID.
+      parameters:
+        - in: path
+          name: video_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the video to find similar videos for
+          example: 123
+      responses:
+        '200':
+          summary: Successful response
+          description: Similar videos retrieved successfully based on the specified video ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: List of videos similar to the specified video, including their IDs, names, and similarity scores
+                    items:
+                      type: object
+                      properties:
+                        video_1_id:
+                          type: integer
+                          description: Unique identifier for the first video in the similarity comparison
+                          example: 123
+                        video_2_id:
+                          type: integer
+                          description: Unique identifier for the second video in the similarity comparison
+                          example: 456
+                        score:
+                          type: number
+                          description: The similarity score between the two videos, where a higher score indicates greater similarity
+                          example: 0.85
+                          minimum: 0.00
+                          maximum: 1.00
+                  message:
+                    type: string
+                    description: A message indicating the result of the operation
+                    example: Similar videos retrieved successfully
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation was successful
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ----------------------
   #   Profile Management
@@ -1796,6 +2557,17 @@ components:
           type: string
           description: Error message
           example: No data provided
+    ErrorNotFound:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message for 404 Not Found
+          example: Resource not found
+        success:
+          type: boolean
+          description: Set to false, as the resource was not found
+          example: false
 
   responses:
     NotFound:
@@ -1803,7 +2575,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorNotFound'
     BadRequest:
       description: 400 Invalid request parameters
       content:

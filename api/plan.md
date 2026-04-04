@@ -79,21 +79,33 @@
     * [x] Deleting a profile does not remove their in-progress history or watch history
 11. Deployment
     * [x] Update npm packages
-    * [ ] Update python packages
-    * [ ] Final unit testing
+    * [x] Update python packages
+    * [x] Final unit testing
+    * [ ] Swagger clean up
+        * [ ] Finish documenting endpoints
+        * [ ] Schemas for errors
+        * [ ] Other common schemas
+        * [ ] Clean up old API docs
     * [ ] Update container strategy
-        * [ ] base image version
-        * [ ] Multiple containers
+        * [x] base image version
+        * [x] Update elasticsearch
+        * [ ] Multiple containers (API + frontend)
     * [ ] Test local build
     * [ ] Deploy to Docker server in devel environment
+    * [ ] Update `changelog.yaml`
 
 </br></br>
 
 
 # Python package versions
 
+Major packages, from `pyproject.toml`:
 * Flask 3.1.2 > 3.1.3
-* Pandas 
+* Pandas 2.3.2 > 3.0.2
+* Requests 2.32.5 > 2.33.1
+* PyYAML 6.0.2 > 6.0.3
+* elasticsearch 8.19.2 > 8.19.3
+* Cerberus 1.3.7 > 1.3.8
 
 
 (.venv) PS C:\Users\luker\OneDrive\Documents\projects\video-devel> pip list --outdated

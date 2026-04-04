@@ -41,6 +41,7 @@ Custom Imports:
 # Standard library imports
 import logging
 from flask import Flask
+import os
 
 # Custom imports
 from app.web_categories import category_bp
@@ -53,8 +54,10 @@ from app.web_errors import (
     not_found,
 )
 from app.api_profile import profile_api_bp
+from app.dev_proxy import dev_proxy_bp
 
 
+# Dummy secret key for Flask's session management
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
 LOCAL_DB_PATH = "/local.db"
 
@@ -195,6 +198,12 @@ def create_app():
     # Set the secret key for the Flask application
     app.secret_key = SECRET_KEY
 
+    # Set the API base URL from environment variable or default
+    app.config['API_BASE_URL'] = os.getenv(
+        'API_BASE_URL',
+        'http://localhost:5010'
+    )
+
     # Import and register blueprints
     app.register_blueprint(profile_api_bp)
     app.register_blueprint(web_bp)
@@ -202,6 +211,9 @@ def create_app():
     app.register_blueprint(category_bp)
     app.register_blueprint(dynamic_bp)
     app.register_blueprint(error_bp)
+
+    # Register the dev proxy blueprint
+    app.register_blueprint(dev_proxy_bp)
 
     # Add jinja filters
     app.jinja_env.filters['seconds_to_hhmmss'] = seconds_to_hhmmss

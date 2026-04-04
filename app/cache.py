@@ -17,11 +17,10 @@ Dependencies:
 
 import requests
 import logging
+from flask import current_app
 
 
 logger = logging.getLogger(__name__)
-
-BASE_URL = 'http://localhost:5010'
 
 
 class AppCache:
@@ -60,8 +59,10 @@ class AppCache:
             None
         """
 
+        base_url = current_app.config['API_BASE_URL']
+
         # Get all categories from the API
-        response = requests.get(f'{BASE_URL}/api/categories')
+        response = requests.get(f'{base_url}/api/categories')
 
         # Cache the category IDs if the request was successful
         if response.status_code == 200:
@@ -107,4 +108,3 @@ class AppCache:
 
 # Cache category IDs at startup
 app_cache = AppCache()
-app_cache.cache_category_id()

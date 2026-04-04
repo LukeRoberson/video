@@ -7,8 +7,6 @@
  * Configuration constants
  */
 const VideoDetailsConfig = {
-    /** API base URL */
-    API_BASE_URL: 'http://localhost:5010',
     /** API endpoint for marking videos as watched */
     MARK_WATCHED_ENDPOINT: '/api/profile/mark_watched',
     /** API endpoint for marking videos as unwatched */
@@ -116,7 +114,7 @@ class VideoDetailsController {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
 
         const response = await fetch(
-            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`,
+            `${VideoDetailsConfig.MARK_WATCHED_ENDPOINT}?profile=${profileId}`,
             {
                 method: 'POST',
                 headers: {
@@ -144,7 +142,7 @@ class VideoDetailsController {
         const requestBody: MarkWatchedRequest = { video_id: videoId };
 
         const response = await fetch(
-            `${VideoDetailsConfig.API_BASE_URL}${VideoDetailsConfig.MARK_UNWATCHED_ENDPOINT}?profile=${profileId}`,
+            `${VideoDetailsConfig.MARK_UNWATCHED_ENDPOINT}?profile=${profileId}`,
             {
                 method: 'POST',
                 headers: {

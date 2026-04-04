@@ -5,8 +5,12 @@ API endpoints that the browser will use to fetch additional information
     Specifically, for user profiles and their management.
 
 Routes:
-    - /api/profile/pictures
+    - /profile/pictures
         - get_profile_pictures: Retrieves available profile pictures.
+    - /profile/set_active
+        - set_active_profile: Sets the active profile for the session.
+    - /profile/get_active
+        - get_active_profile: Retrieves the active profile for the session.
 
 Dependencies:
     - Flask: For creating the API endpoints.
@@ -54,7 +58,7 @@ def api_error(
 
 
 @profile_api_bp.route(
-    '/api/profile/pictures'
+    '/profile/pictures'
 )
 def get_profile_pictures():
     """Get list of available profile pictures"""
@@ -80,7 +84,7 @@ def get_profile_pictures():
 
 
 @profile_api_bp.route(
-    "/api/profile/set_active",
+    "/profile/set_active",
     methods=["POST"]
 )
 def set_active_profile() -> Response:
@@ -123,7 +127,7 @@ def set_active_profile() -> Response:
 
 
 @profile_api_bp.route(
-    "/api/profile/get_active",
+    "/profile/get_active",
     methods=["GET"]
 )
 def get_active_profile() -> Response:
@@ -133,6 +137,8 @@ def get_active_profile() -> Response:
     Returns:
         Response: A JSON response with the active profile ID.
     """
+
+    base_url = current_app.config['API_BASE_URL']
 
     # Retrieve the active profile from the session
     active_profile = session.get("active_profile", None)
@@ -149,7 +155,7 @@ def get_active_profile() -> Response:
     else:
         try:
             response = requests.get(
-                f"http://localhost:5010/api/profile/{active_profile}"
+                f"{base_url}/api/profile/{active_profile}"
             )
             if response.status_code == 200:
                 profile = response.json().get("data", {})

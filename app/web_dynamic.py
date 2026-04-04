@@ -62,7 +62,6 @@ import requests
 logger = logging.getLogger(__name__)
 
 # Configuration
-SEARCH_API_BASE_URL = 'http://localhost:5010'
 PIC_PATH = "/static/img/characters/"
 
 
@@ -86,12 +85,14 @@ def check_watch_status(
         None: The function modifies the video_list in place.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     # Extract video IDs from the video list
     video_ids = [video['id'] for video in video_list]
 
     # API call to check status of multiple videos at once
     response = requests.post(
-        url='http://localhost:5010/api/profile/mark_watched_bulk',
+        url=f'{base_url}/api/profile/mark_watched_bulk',
         params={
             'profile': profile_id
         },
@@ -175,7 +176,7 @@ def video_details(
             'video_ids': [video_id]
         }
         response = requests.post(
-            "http://localhost:5010/api/videos/get_bulk",
+            f'{base_url}/api/videos/get_bulk',
             json=body
         )
         video = response.json().get('data', [])
@@ -198,7 +199,7 @@ def video_details(
 
         # API: Get categories for the video
         response = requests.get(
-            f'http://localhost:5010/api/categories/video/{video_id}',
+            f'{base_url}/api/categories/video/{video_id}',
         )
         if response.status_code == 200:
             cat_list = response.json().get('data', {})
@@ -218,7 +219,7 @@ def video_details(
 
         # API: Get tags for the video
         response = requests.get(
-            f'http://localhost:5010/api/tags/video/{video_id}',
+            f'{base_url}/api/tags/video/{video_id}',
         )
         if response.status_code == 200:
             tags = response.json().get('data', {})
@@ -238,7 +239,7 @@ def video_details(
 
         # API: Get locations for the video
         response = requests.get(
-            f'http://localhost:5010/api/locations/video/{video_id}',
+            f'{base_url}/api/locations/video/{video_id}',
         )
         if response.status_code == 200:
             locations = response.json().get('data', {})
@@ -258,7 +259,7 @@ def video_details(
 
         # API: Get speakers for the video
         response = requests.get(
-            f'http://localhost:5010/api/speakers/video/{video_id}',
+            f'{base_url}/api/speakers/video/{video_id}',
         )
         if response.status_code == 200:
             speakers = response.json().get('data', {})
@@ -280,7 +281,7 @@ def video_details(
 
         # API: Get characters for the video
         response = requests.get(
-            f'http://localhost:5010/api/characters/video/{video_id}',
+            f'{base_url}/api/characters/video/{video_id}',
         )
         if response.status_code == 200:
             characters = response.json().get('data', {})
@@ -300,7 +301,7 @@ def video_details(
 
         # API: Get scriptures for the video
         response = requests.get(
-            f'http://localhost:5010/api/scriptures/video/{video_id}',
+            f'{base_url}/api/scriptures/video/{video_id}',
         )
         if response.status_code == 200:
             scriptures = response.json().get('data', {})
@@ -318,7 +319,7 @@ def video_details(
         """
 
         response = requests.post(
-            'http://localhost:5010/api/profile/mark_watched_bulk',
+            f'{base_url}/api/profile/mark_watched_bulk',
             params={
                 'profile': profile_id
             },
@@ -345,7 +346,7 @@ def video_details(
         """
 
         response = requests.get(
-            'http://localhost:5010/api/profile/in_progress',
+            f'{base_url}/api/profile/in_progress',
             params={
                 'video_id': video_id,
                 'profile': profile_id
@@ -369,7 +370,7 @@ def video_details(
 
         # API: Get a list of similar videos
         response = requests.get(
-            f'http://localhost:5010/api/similarity/{video_id}',
+            f'{base_url}/api/similarity/{video_id}',
         )
         if response.status_code == 200:
             similar_videos = response.json().get('data', [])
@@ -388,7 +389,7 @@ def video_details(
 
         # Get the details for the similar videos
         response = requests.post(
-            'http://localhost:5010/api/videos/get_bulk',
+            f'{base_url}/api/videos/get_bulk',
             json={'video_ids': ids}
         )
 
@@ -402,6 +403,8 @@ def video_details(
             video_ids = []
 
         return video_ids
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Manage profile ID or guest
     profile_id = session.get("active_profile", None)
@@ -569,7 +572,7 @@ def tag_details(
             'tag_id': tag_id
         }
         response = requests.get(
-            'http://localhost:5010/api/tags',
+            f'{base_url}/api/tags',
             params=param
         )
 
@@ -596,7 +599,7 @@ def tag_details(
 
         # API: Fetch videos for the tag
         response = requests.get(
-            'http://localhost:5010/api/videos/filter',
+            f'{base_url}/api/videos/filter',
             params={
                 'tag': tag_id
             },
@@ -607,6 +610,8 @@ def tag_details(
             videos = None
 
         return videos
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -680,7 +685,7 @@ def location_details(
             'loc_id': location_id
         }
         response = requests.get(
-            'http://localhost:5010/api/locations',
+            f'{base_url}/api/locations',
             params=param
         )
 
@@ -707,7 +712,7 @@ def location_details(
 
         # API: Fetch videos for the location
         response = requests.get(
-            'http://localhost:5010/api/videos/filter',
+            f'{base_url}/api/videos/filter',
             params={
                 'loc': location_id
             },
@@ -718,6 +723,8 @@ def location_details(
             videos = None
 
         return videos
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -796,7 +803,7 @@ def speaker_details(
             'spk_id': speaker_id
         }
         response = requests.get(
-            'http://localhost:5010/api/speakers',
+            f'{base_url}/api/speakers',
             params=param
         )
 
@@ -822,7 +829,7 @@ def speaker_details(
 
         # API: Fetch videos for the speaker
         response = requests.get(
-            'http://localhost:5010/api/videos/filter',
+            f'{base_url}/api/videos/filter',
             params={
                 'speak': speaker_id
             },
@@ -833,6 +840,8 @@ def speaker_details(
             videos = None
 
         return videos
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -906,7 +915,7 @@ def character_details(
             'char_id': character_id
         }
         response = requests.get(
-            'http://localhost:5010/api/characters',
+            f'{base_url}/api/characters',
             params=param
         )
         if response.status_code == 200:
@@ -926,7 +935,7 @@ def character_details(
 
         # API: Fetch videos for the character
         response = requests.get(
-            'http://localhost:5010/api/videos/filter',
+            f'{base_url}/api/videos/filter',
             params={
                 'char': character_id
             },
@@ -937,6 +946,8 @@ def character_details(
             videos = None
 
         return videos
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -1024,7 +1035,7 @@ def scripture_details(
             'scr_id': scripture_id
         }
         response = requests.get(
-            'http://localhost:5010/api/scriptures',
+            f'{base_url}/api/scriptures',
             params=param
         )
 
@@ -1049,7 +1060,7 @@ def scripture_details(
 
         # API: Fetch videos for the scripture
         response = requests.get(
-            'http://localhost:5010/api/videos/filter',
+            f'{base_url}/api/videos/filter',
             params={
                 'scrip': scripture_id
             },
@@ -1060,6 +1071,8 @@ def scripture_details(
             videos = None
 
         return videos
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrent API calls
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -1123,6 +1136,8 @@ def search_results() -> Response:
         If no query is provided, redirects to home page.
     """
 
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
+
     # Get the search query from the request
     query = request.args.get("q", "").strip()
 
@@ -1172,7 +1187,7 @@ def search_results() -> Response:
     if query:
         try:
             # Make API call to search endpoint
-            api_url = f'{SEARCH_API_BASE_URL}/api/search/advanced'
+            api_url = f'{base_url}/api/search/advanced'
             params = {
                 'query': query,
                 'page': page,
@@ -1317,7 +1332,7 @@ def advanced_search() -> Response:
 
         # API: Get speakers
         response = requests.get(
-            'http://localhost:5010/api/speakers',
+            f'{base_url}/api/speakers',
         )
 
         if response.status_code == 200:
@@ -1338,7 +1353,7 @@ def advanced_search() -> Response:
 
         # API: Get characters
         response = requests.get(
-            'http://localhost:5010/api/characters',
+            f'{base_url}/api/characters',
         )
 
         if response.status_code == 200:
@@ -1359,7 +1374,7 @@ def advanced_search() -> Response:
 
         # API: Get locations
         response = requests.get(
-            'http://localhost:5010/api/locations',
+            f'{base_url}/api/locations',
         )
 
         if response.status_code == 200:
@@ -1380,7 +1395,7 @@ def advanced_search() -> Response:
 
         # API: Get tags
         response = requests.get(
-            'http://localhost:5010/api/tags',
+            f'{base_url}/api/tags',
         )
 
         if response.status_code == 200:
@@ -1390,6 +1405,8 @@ def advanced_search() -> Response:
             tags = []
 
         return tags
+
+    base_url = current_app.config.get('API_BASE_URL', 'http://localhost:5010')
 
     # Concurrently fetch metadata for filters to speed up page load
     with ThreadPoolExecutor(max_workers=4) as executor:
@@ -1514,7 +1531,7 @@ def advanced_search() -> Response:
 
         try:
             # Make API call to advanced search endpoint
-            api_url = f'{SEARCH_API_BASE_URL}/api/search/advanced'
+            api_url = f'{base_url}/api/search/advanced'
             params = {
                 'query': search_query,
                 'page': page,
