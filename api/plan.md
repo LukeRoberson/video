@@ -107,16 +107,6 @@
 
 # Pre-Prod Bugs
 
-* Some videos report HTTP 500 when going to the video detail page
-    * eg, https://192.168.200.235:8443/video/3082
-    * Seems to be some categories only?
-        * Monthly Programs
-        * News and Announcements
-        * Morning Worship
-* Cannot mark video as watched
-    * Tested on https://192.168.200.235:8443/video/1006
-    * This video is already in progress
-    * Not sure if other videos are affected
 * Sometimes the category pages will not load
     * Not always the case
     * When this happens, it seems to affect all categories
@@ -144,6 +134,15 @@
 
 
 
+# Deployment Checklist
+
+* Update the nginx config file
+    * Confirm it is correct for prod or dev
+* Make sure ENV variables are correct for prod or dev
+* Make sure local.db is in the correct place
+    * Confirm write permissions are present
+
+
 # UI Test Plan
 
 - [x] Load home page
@@ -159,8 +158,8 @@
     - [x] Video plays correctly
     - [ ] In progress status tracks correctly (appears as in progress on the home page)
     - [ ] Resumes at the correct playback location
-    - [ ] Mark video as watched
-    - [ ] Mark video as unwatched
+    - [x] Mark video as watched
+    - [x] Mark video as unwatched
     - [x] Theatre mode and full screen work
     - [x] Skip ahead and back work
     - [x] Different resolutions work

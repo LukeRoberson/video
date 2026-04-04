@@ -489,6 +489,10 @@ class ProfileManager:
                 f"Error marking video {video_id} as watched for "
                 f"profile {profile_id}: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             self.db.conn.rollback()
             return False
 
@@ -526,6 +530,10 @@ class ProfileManager:
                 f"Error marking video {video_id} as unwatched for "
                 f"profile {profile_id}: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             self.db.conn.rollback()
             return False
 
@@ -626,6 +634,10 @@ class ProfileManager:
             logging.error(
                 f"Error removing watch history for profile {profile_id}: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             self.db.conn.rollback()
             return False
 
@@ -690,6 +702,10 @@ class ProgressManager:
             logging.error(
                 f"[ProgressManager.create] Error adding profile: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             self.db.conn.rollback()
             return False
 
@@ -816,6 +832,10 @@ class ProgressManager:
                 f"[ProfileManager.update] Error updating progress on video "
                 f"{video_id} for profile {profile_id}: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             return False
 
         return True
@@ -863,5 +883,9 @@ class ProgressManager:
                 f"[ProfileManager.update] Error deleting in progress entry "
                 f" for video {video_id} on profile {profile_id}: {e}"
             )
+            if "readonly" in str(e).lower():
+                logging.error(
+                    "Check that local.db has write permissions."
+                )
             self.db.conn.rollback()
             return None

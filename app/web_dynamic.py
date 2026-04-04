@@ -432,9 +432,6 @@ def video_details(
     scriptures = future_video_scriptures.result()
     similar_videos = future_similar_videos.result()
 
-    logger.warning(f"Similar videos for video {video_id}: {similar_videos}")
-    logger.warning(f"Type: {type(similar_videos)}")
-
     # Get these results if the user is not a guest
     if future_watch_status is not None and future_watch_time is not None:
         watched = future_watch_status.result()

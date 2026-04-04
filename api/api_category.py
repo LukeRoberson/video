@@ -225,7 +225,7 @@ def category_filter(
 
     # Check the profile ID is valid
     active_profile = request.args.get("profile_id", None)
-    if active_profile is not None:
+    if active_profile is not None and active_profile != "guest":
         with LocalDbContext() as db:
             profile_mgr = ProfileManager(db)
             profile = profile_mgr.read(profile_id=int(active_profile))
