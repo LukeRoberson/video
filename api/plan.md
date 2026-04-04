@@ -86,13 +86,15 @@
         * [x] Schemas for errors
         * [x] Other common schemas
         * [x] Clean up old API docs
-    * [ ] Sync databases with the master branch
+    * [x] Sync databases with the master branch
     * [ ] Update container strategy
         * [x] base image version
         * [x] Update elasticsearch
-        * [ ] Multiple containers (API + frontend)
+        * [x] Multiple containers (API + frontend)
+        * [ ] Separate deps in `pyproject.toml` for each container
     * [ ] Deploy to Docker server in devel environment
     * [ ] Update `changelog.yaml`
+    * [ ] Update `readme.md`
 
 </br></br>
 

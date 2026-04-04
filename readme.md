@@ -4,23 +4,23 @@ A modern web-based video streaming interface for accessing educational content f
 </br></br>
 
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 All videos in this application are publicly available on jw.org. This app does not distribute these videos - it serves as an interface to access them in a streaming service format with enhanced search and categorization features.
 </br></br>
 
 
 ----
-# ✨ Features
+# Features
 
-### 🎯 Core Functionality
+### Core Functionality
 - **Video Streaming**: Stream videos directly from jw.org
 - **Advanced Search**: Search by categories, speakers, Bible characters, scriptures, and tags
 - **User Profiles**: Create and manage multiple user profiles with custom avatars
 - **Responsive Design**: Modern, mobile-friendly interface
 </br></br>
 
-### 📚 Content Organization
+### Content Organization
 - **Categories**: Organized by major categories (JW Broadcasting, Bible Studies, etc.)
 - **Speakers**: Browse content by specific speakers
 - **Bible Characters**: Find videos featuring specific Bible characters
@@ -28,7 +28,7 @@ All videos in this application are publicly available on jw.org. This app does n
 - **Tags**: Additional metadata for enhanced discoverability
 </br></br>
 
-### 👤 Profile Management
+### Profile Management
 - **Multiple Profiles**: Support for multiple user profiles
 - **Custom Avatars**: Choose from a variety of profile pictures
 - **Personalized Experience**: Each profile maintains its own viewing preferences
@@ -36,7 +36,7 @@ All videos in this application are publicly available on jw.org. This app does n
 
 
 ----
-# 🚀 Quick Start
+# Quick Start
 
 There are two ways to run this application: using Docker or running it directly with Python.
 
