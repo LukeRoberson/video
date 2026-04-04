@@ -99,19 +99,14 @@ def get_similar_videos(
             video1_id=video_id,
         )
 
-        if not similar_videos:
+        if not similar_videos or similar_videos is None:
             logger.debug(
                 "Module: api_similarity, Function: get_similar_videos"
             )
             logger.warning(
                 f"No similar videos found for video ID {video_id}"
             )
-
-            return api_success(
-                data=[],
-                message=f"No similar videos found for video ID {video_id}",
-                status=200
-            )
+            similar_videos = []
 
         return api_success(
             data=similar_videos,
