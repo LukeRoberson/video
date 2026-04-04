@@ -373,10 +373,7 @@ def video_details(
         if response.status_code == 200:
             similar_videos = response.json().get('data', [])
         else:
-            similar_videos = None
-
-        if similar_videos is None or len(similar_videos) == 0:
-            return None
+            similar_videos = []
 
         # Pick three videos at random, and get their IDs
         sample = random.sample(similar_videos, min(3, len(similar_videos)))
