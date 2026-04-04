@@ -91,7 +91,8 @@
         * [x] base image version
         * [x] Update elasticsearch
         * [x] Multiple containers (API + frontend)
-        * [ ] Separate deps in `pyproject.toml` for each container
+        * [x] Separate deps in `pyproject.toml` for each container
+        * [ ] Consider multistage build
     * [ ] Deploy to Docker server in devel environment
     * [ ] Update `changelog.yaml`
     * [ ] Update `readme.md`

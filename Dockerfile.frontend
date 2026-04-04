@@ -31,8 +31,8 @@ RUN pip install --upgrade pip && pip install .
 
 # Cleanup
 RUN rm -rf /var/cache/apk/* && \
-    rm -rf /root/.cache/pip && \
-    apk del gcc musl-dev linux-headers
+    rm -rf /root/.cache/pip
+    #apk del gcc musl-dev linux-headers
 
 # Switch to the non-root user
 USER appuser
