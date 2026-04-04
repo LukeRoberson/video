@@ -81,16 +81,16 @@
     * [x] Update npm packages
     * [x] Update python packages
     * [x] Final unit testing
-    * [ ] Swagger clean up
-        * [ ] Finish documenting endpoints
-        * [ ] Schemas for errors
-        * [ ] Other common schemas
-        * [ ] Clean up old API docs
+    * [x] Swagger clean up
+        * [x] Finish documenting endpoints
+        * [x] Schemas for errors
+        * [x] Other common schemas
+        * [x] Clean up old API docs
+    * [ ] Sync databases with the master branch
     * [ ] Update container strategy
         * [x] base image version
         * [x] Update elasticsearch
         * [ ] Multiple containers (API + frontend)
-    * [ ] Test local build
     * [ ] Deploy to Docker server in devel environment
     * [ ] Update `changelog.yaml`
 
