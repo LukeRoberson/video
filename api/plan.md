@@ -93,11 +93,131 @@
         * [x] Multiple containers (API + frontend)
         * [x] Separate deps in `pyproject.toml` for each container
         * [ ] Consider multistage build
+            * Backend: 120MB/435MB
+            * Frontend: 214MB/651MB
     * [ ] Deploy to Docker server in devel environment
     * [ ] Update `changelog.yaml`
     * [ ] Update `readme.md`
 
 </br></br>
+
+
+
+
+
+# Pre-Prod Bugs
+
+* Some videos report HTTP 500 when going to the video detail page
+    * eg, https://192.168.200.235:8443/video/3082
+    * Seems to be some categories only?
+        * Monthly Programs
+        * News and Announcements
+        * Morning Worship
+* Cannot mark video as watched
+    * Tested on https://192.168.200.235:8443/video/1006
+    * This video is already in progress
+    * Not sure if other videos are affected
+* Sometimes the category pages will not load
+    * Not always the case
+    * When this happens, it seems to affect all categories
+    * Appears to happen as guest only
+
+* Deleting a profile fails
+* Editing a profile fails
+    * Both name and image
+* Creating a profile fails
+    * Silent fail, no active errors
+    * Profile not visible in the select profile window
+    * Haven't checked database
+* Snippets:
+    * The progress bar on a video does not load correctly
+    * It has the text 'snippet' and the time stamps
+
+* Cannot load swagger info
+    * Swagger UI loads
+    * Can't find yaml file
+    * Docker file seems to be copying the file
+* Can't access devel site through cloudflare
+    * Local works
+    * Probably need to port forward 8443 on the router
+
+
+
+
+# UI Test Plan
+
+- [x] Load home page
+    - [x] Themes show at the top
+    - [x] Latest News and Monthly Program have two videos
+    - [x] Nine videos in 'Latest Videos'
+- [x] Video Details (test a few different ones)
+    - [x] Load the details page for a video
+    - [x] Metadata displays (description, date, tags, url)
+    - [x] Categories, speakers, scriptures, and bible characters populate
+    - [x] Three similar videos are shown
+- [ ] Play a video
+    - [x] Video plays correctly
+    - [ ] In progress status tracks correctly (appears as in progress on the home page)
+    - [ ] Resumes at the correct playback location
+    - [ ] Mark video as watched
+    - [ ] Mark video as unwatched
+    - [x] Theatre mode and full screen work
+    - [x] Skip ahead and back work
+    - [x] Different resolutions work
+    - [x] Transcript works
+- [x] About page loads
+- [ ] Various category pages load
+    - [ ] Thumbnails load
+    - [ ] Can access video details from here
+    - [x] Some videos are marked as watched
+    - [x] 'Hide watched' slider works
+- [x] Dig deeper pages load
+    - [x] Characters
+        - [x] Character details page loads
+        - [x] Metadata present (Name, profile pic, video count, dates, profile description)
+        - [x] Associated videos are present
+    - [x] Speakers
+        - [x] Speaker details page loads
+        - [x] Video count shows
+        - [x] Associated videos are present
+    - [x] Scriptures
+        - [x] Scripture details page loads
+        - [x] Metadata present (Scripture, text)
+        - [x] Associated videos are present
+    - [x] Locations
+        - [x] Location details page loads
+        - [x] Metadata present (name, video count)
+        - [x] Associated videos are present
+    - [x] Tags
+        - [x] Tag details page loads
+        - [x] Metadata present (name, video count)
+        - [x] Associated videos are present
+- [x] Simple Search
+    - [x] Simple search gets results
+    - [x] ElasticSearch is used
+    - [x] Matching fields (title, desc, tags, etc) are shown
+    - [x] Load video page from here
+- [x] Advanced search
+    - [x] Search by speaker filter
+    - [x] Search by character filter
+    - [x] Search by location filter
+    - [x] Search by tag filter
+- [ ] Profiles
+    - [x] Select Guest profile
+    - [x] Select non-guest profile
+    - [ ] Delete a profile
+    - [ ] Rename a profile
+    - [ ] Change profile avatar image
+    - [ ] Create a profile
+    - [ ] Mark an in progress video as watched
+    - [ ] Clear a video from the watch history
+    - [ ] Clear the entire watch history
+- [x] Themes
+    - [x] Various themes load
+        - [x] Videos are shown
+        - [x] Titles and descriptions are shown
+    - [x] Video snippets work
+
 
 
 # Python package versions

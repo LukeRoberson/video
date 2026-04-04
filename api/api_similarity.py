@@ -104,15 +104,13 @@ def get_similar_videos(
                 "Module: api_similarity, Function: get_similar_videos"
             )
             logger.warning(
-                f"An error occurred while retrieving "
-                f"similar videos for video ID {video_id}"
+                f"No similar videos found for video ID {video_id}"
             )
 
-            return api_error(
-                error=(
-                    f"Error retrieving similar videos for video ID {video_id}"
-                ),
-                status=500
+            return api_success(
+                data=[],
+                message=f"No similar videos found for video ID {video_id}",
+                status=200
             )
 
         return api_success(
