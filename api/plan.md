@@ -111,11 +111,6 @@
     * The progress bar on a video does not load correctly
     * It has the text 'snippet' and the time stamps
 
-* Cannot load swagger info
-    * Swagger UI loads
-    * Can't find yaml file
-    * Docker file seems to be copying the file
-
 
 
 

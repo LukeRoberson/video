@@ -715,6 +715,15 @@ class UrlTimeHandler {
         }
         // Add snippet range highlight
         this.highlightSnippetRange(startTime, endTime);
+        // Hide indicator while playing, show when paused
+        this.player.on('play', () => {
+            if (this.snippetIndicator)
+                this.snippetIndicator.style.display = 'none';
+        });
+        this.player.on('pause', () => {
+            if (this.snippetIndicator)
+                this.snippetIndicator.style.display = '';
+        });
     }
     /**
      * Highlights the snippet range on the progress bar.
