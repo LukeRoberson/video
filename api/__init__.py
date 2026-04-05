@@ -143,7 +143,6 @@ logger = logging.getLogger(__name__)
 def create_app(
     key: str,
     template_folder: str = 'templates',
-    static_folder: str = 'static',
     log_level: str = 'WARNING',
 ) -> Flask:
     """
@@ -188,7 +187,8 @@ def create_app(
     app = Flask(
         __name__,
         template_folder=template_folder,
-        static_folder=static_folder,
+        static_folder='static',
+        static_url_path='/api/static'
     )
 
     # Allow requests from the frontend on localhost:5000
@@ -217,7 +217,7 @@ def create_app(
     # Register Swagger UI for API documentation
     swagger_ui_blueprint = get_swaggerui_blueprint(
         '/api/docs',
-        '/static/swagger.yaml',
+        '/api/static/swagger.yaml',
         config={'app_name': APP_NAME}
     )
     app.register_blueprint(swagger_ui_blueprint)

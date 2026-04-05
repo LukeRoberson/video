@@ -41,7 +41,7 @@ PORT = 5010
 HOST = "0.0.0.0"
 SECRET_KEY = "gU0BTfsKgCJNpNipm5PeyhapfYCGCVB2"
 TEMPLATE_FOLDER = "templates"
-STATICFOLDER = "static"
+STATICFOLDER = "/static"
 
 
 # Setup argument parsing
@@ -73,7 +73,6 @@ else:
 app = create_app(
     key=SECRET_KEY,
     template_folder=TEMPLATE_FOLDER,
-    static_folder=STATICFOLDER,
     log_level=log_level
 )
 

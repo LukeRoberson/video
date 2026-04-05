@@ -107,18 +107,6 @@
 
 # Pre-Prod Bugs
 
-* Sometimes the category pages will not load
-    * Not always the case
-    * When this happens, it seems to affect all categories
-    * Appears to happen as guest only
-
-* Deleting a profile fails
-* Editing a profile fails
-    * Both name and image
-* Creating a profile fails
-    * Silent fail, no active errors
-    * Profile not visible in the select profile window
-    * Haven't checked database
 * Snippets:
     * The progress bar on a video does not load correctly
     * It has the text 'snippet' and the time stamps
@@ -127,9 +115,6 @@
     * Swagger UI loads
     * Can't find yaml file
     * Docker file seems to be copying the file
-* Can't access devel site through cloudflare
-    * Local works
-    * Probably need to port forward 8443 on the router
 
 
 
@@ -154,10 +139,10 @@
     - [x] Metadata displays (description, date, tags, url)
     - [x] Categories, speakers, scriptures, and bible characters populate
     - [x] Three similar videos are shown
-- [ ] Play a video
+- [x] Play a video
     - [x] Video plays correctly
-    - [ ] In progress status tracks correctly (appears as in progress on the home page)
-    - [ ] Resumes at the correct playback location
+    - [x] In progress status tracks correctly (appears as in progress on the home page)
+    - [x] Resumes at the correct playback location
     - [x] Mark video as watched
     - [x] Mark video as unwatched
     - [x] Theatre mode and full screen work
@@ -165,9 +150,9 @@
     - [x] Different resolutions work
     - [x] Transcript works
 - [x] About page loads
-- [ ] Various category pages load
-    - [ ] Thumbnails load
-    - [ ] Can access video details from here
+- [x] Various category pages load
+    - [x] Thumbnails load
+    - [x] Can access video details from here
     - [x] Some videos are marked as watched
     - [x] 'Hide watched' slider works
 - [x] Dig deeper pages load
@@ -201,21 +186,22 @@
     - [x] Search by character filter
     - [x] Search by location filter
     - [x] Search by tag filter
-- [ ] Profiles
+- [x] Profiles
     - [x] Select Guest profile
     - [x] Select non-guest profile
-    - [ ] Delete a profile
-    - [ ] Rename a profile
-    - [ ] Change profile avatar image
-    - [ ] Create a profile
-    - [ ] Mark an in progress video as watched
-    - [ ] Clear a video from the watch history
-    - [ ] Clear the entire watch history
+    - [x] Delete a profile
+    - [x] Rename a profile
+    - [x] Change profile avatar image
+    - [x] Create a profile
+    - [x] Mark an in progress video as watched
+    - [x] Clear a video from the watch history
+    - [x] Clear the entire watch history
 - [x] Themes
     - [x] Various themes load
         - [x] Videos are shown
         - [x] Titles and descriptions are shown
     - [x] Video snippets work
+- [ ] Swagger page loads
 
 
 
