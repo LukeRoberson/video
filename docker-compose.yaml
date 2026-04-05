@@ -1,8 +1,8 @@
 services:
-  video-app:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
 
     # local.db is in persistent storage. It still needs to be backed up
     volumes:
@@ -14,17 +14,48 @@ services:
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
     
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5010/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 7s
+    
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     restart: unless-stopped
     networks:
-      - video-prod
+      - private
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+
+    # To find the backend API
+    environment:
+      - API_BASE_URL=http://backend:5010
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - private
 
   proxy:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-80}:${HTTP_PORT:-80}"
+      - "${HTTPS_PORT:-443}:${HTTPS_PORT:-443}"
     
     # These are files that need to be mounted as volumes at runtime
     volumes:
@@ -35,19 +66,36 @@ services:
       - ${DH_PARAM_PATH}:/etc/ssl/certs/dh-4096.pem
       - ${NGINX_LOG_PATH}:/var/log/nginx
 
+    healthcheck:
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 12s
+
     depends_on:
-      - video-app
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     networks:
-      - video-prod
+      - private
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.13
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.enabled=false
       - bootstrap.memory_lock=true
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    
     ulimits:
       memlock:
         soft: -1
@@ -56,10 +104,10 @@ services:
       - esdata:/usr/share/elasticsearch/data
     restart: unless-stopped
     networks:
-      - video-prod
+      - private
 
 networks:
-  video-prod:
+  private:
     driver: bridge
 
 volumes:
