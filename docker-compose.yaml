@@ -65,7 +65,7 @@ services:
       - ${NGINX_LOG_PATH}:/var/log/nginx
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      test: ["CMD", "service", "nginx", "status"]
       interval: 30s
       timeout: 5s
       retries: 3

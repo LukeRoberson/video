@@ -92,9 +92,7 @@
         * [x] Update elasticsearch
         * [x] Multiple containers (API + frontend)
         * [x] Separate deps in `pyproject.toml` for each container
-        * [ ] Consider multistage build
-            * Backend: 120MB/435MB
-            * Frontend: 214MB/651MB
+        * [ ] Add health checks
     * [ ] Deploy to Docker server in devel environment
     * [ ] Update `changelog.yaml`
     * [ ] Update `readme.md`
