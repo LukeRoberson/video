@@ -22,7 +22,8 @@ services:
       start_period: 7s
     
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - private
@@ -44,7 +45,8 @@ services:
       start_period: 10s
 
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - private
@@ -65,15 +67,16 @@ services:
       - ${NGINX_LOG_PATH}:/var/log/nginx
 
     healthcheck:
-      test: ["CMD", "service", "nginx", "status"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 12s
 
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - private
