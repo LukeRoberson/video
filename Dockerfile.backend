@@ -25,7 +25,7 @@ RUN apk add --no-cache gcc musl-dev linux-headers && \
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache sqlite && \
-    apk --no-cache curl
+    apk add --no-cache curl
 
 # Copy the requirements file and install dependencies
 COPY pyproject.toml .

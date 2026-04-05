@@ -111,6 +111,18 @@ The proxy service uses five variables in its bind mount configuration. All of th
 </br></br>
 
 
+Optional environment variables can be used to change which ports are used on the outside. For example, if the standard ports are already in use.
+
+`HTTP_PORT` is the standard HTTP port. Defaults to 80.
+
+`HTTPS_PORT` is the secure HTTP port. Defaults to 443.
+
+> [!NOTE]
+> Changing the porst here affects the container deployment.
+> The NGINX config file will still need to be updated accordingly.
+</br></br>
+
+
 The NGINX configuration file is stored locally so an admin can change the configuration as needed for the local environment.
 
 The log files are stored locally so an admin can easily troubleshoot, if needed.
