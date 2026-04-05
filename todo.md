@@ -11,13 +11,12 @@
 
 ## Architecture
 
-- [ ] Separate API and frontend into separate services
+- [x] Separate API and frontend into separate services
   - [x] Create a new directory with basic API framework
-  - [ ] Migrate API endpoints (api.py)
-  - [ ] Migrate profile management (api_profile.py)
-  - [ ] Migrate search (api_search.py)
+  - [x] Migrate API endpoints (api.py)
+  - [x] Migrate profile management (api_profile.py)
+  - [x] Migrate search (api_search.py)
 - [x] Migrate database classes (videos and local)
-- [ ] Migrate theme management
 - [x] Dockerignore file: Ignore documentation
 - [x] Don't wait for Elasticsearch on startup (local mode with no ES)
 
@@ -44,7 +43,6 @@
   - [ ] Get the recent catalog
   - [ ] Check for new videos
 - [ ] Create Transcript (for videos that don't have them)
-- [ ] Update ElasticSearch indexes
 
 
 ## Indexes

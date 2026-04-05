@@ -60,8 +60,9 @@ This assumes that you have deployed portainer in your environment.
 2. Go to *stacks*
 3. Add a stack
 4. Select *Repository*
-5. Enter *https://github.com/LukeRoberson/video* as the repository URL, leave authentication off
-6. Leave *Repository reference* blank
+5. Enter a name for the stack
+6. Enter *https://github.com/LukeRoberson/video* as the repository URL
+7. Enter *refs/heads/master* as the *Repository reference*
 7. Enter *docker-compose.yaml* as the compose path
 8. Add the six env variables shown below
 9. Deploy the stack
@@ -159,26 +160,53 @@ docker run -d -p 5000:5000 -v ${PWD}/local.db:/app/local.db lukerobertson19/1320
 
 
 2. **Install dependencies**
+   Optionally, create a venv first, and activate it.
    ```bash
-   pip install -r requirements.txt
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+
+   Install the dependencies (in `pyproject.toml`)
+   ```bash
+   pip install .
    ```
 </br></br>
 
 
-3. **Run the application**
+3. **Start the ElasticSearch Service**
+   This is optional if you want to use ES for advanced searching.
+
+   Create a volume
+   ```bash
+   docker volume create elasticsearch_data
+   ```
+
+   Run the container
+   ```bash
+   docker run --env=discovery.type=single-node --env=xpack.security.enabled=false --env=ES_JAVA_OPTS=-Xms512m -Xmx512m --env=bootstrap.memory_lock=true --volume=elasticsearch_data:/usr/share/elasticsearch/data -p 9200:9200 elasticsearch/elasticsearch:8.19.2
+   ```
+
+4. **Start the API**
+   ```bash
+   python -m api.main
+   ```
+
+   If using ES, reindex by going to http://localhost:5010/api/search/reindex
+
+5. **Start the UI**
    ```bash
    python -m app.main
    ```
 </br></br>
 
 
-4. **Access the application**
+6. **Access the application**
    Open your web browser and navigate to `http://localhost:5000`
 </br></br>
 
 
 ----
-# �️ Development
+# Development
 
 ## TypeScript Development
 
@@ -195,10 +223,6 @@ npm run watch
 npm run clean
 ```
 
-### Files migrated to TypeScript:
-- `static/js/tvDetection.ts` - TV device detection with type safety
-- `static/js/tvNavigation.ts` - TV remote navigation with strict typing
-
 Compiled JavaScript files are automatically generated in `static/js/dist/` and included in the application.
 </br></br>
 
@@ -206,12 +230,5 @@ Compiled JavaScript files are automatically generated in `static/js/dist/` and i
 ----
 # �📚 Documentation
 
-Additional documentation can be found in the `docs/` directory:
-- `project.md` - General project structure information
-- `global_database.md` - Schema of the global database
-- `local_database.md` - Schema of the local database
-- `db_management.md` - The database management classes
-- `routes.md` - Web routes documentation
-- `similar_videos.md` - The methods of finding similar videos
-- `todo.md` - Development roadmap
+Additional documentation can be found in the `docs/` directory
 </br></br>
