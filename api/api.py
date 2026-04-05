@@ -8,6 +8,9 @@ Functions:
     - api_error: Returns a standardized error response.
     - seconds_to_hhmmss: Converts seconds to HH:MM:SS format.
 
+Routes:
+    - /health: A simple health check endpoint.
+
 Dependencies:
     - Flask: For creating the API endpoints.
 """
@@ -16,6 +19,7 @@ Dependencies:
 # Standard library imports
 from flask import (
     Response,
+    Blueprint,
     jsonify,
     make_response,
 )
@@ -98,3 +102,27 @@ def seconds_to_hhmmss(
     if hours > 0:
         return f"{hours}:{minutes:02}:{seconds:02}"
     return f"{minutes}:{seconds:02}"
+
+
+health_endpoint = Blueprint(
+    "health",
+    __name__
+)
+
+
+@health_endpoint.route(
+    "/api/health",
+    methods=["GET"]
+)
+def health_check() -> Response:
+    """
+    Health check endpoint to verify the API is running.
+
+    Returns:
+        Response: A JSON response indicating the API is healthy.
+    """
+
+    return api_success(
+        message="API is healthy",
+        status=200
+    )

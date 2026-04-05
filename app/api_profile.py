@@ -5,6 +5,8 @@ API endpoints that the browser will use to fetch additional information
     Specifically, for user profiles and their management.
 
 Routes:
+    - /health
+        - health_check: A simple health check endpoint.
     - /profile/pictures
         - get_profile_pictures: Retrieves available profile pictures.
     - /profile/set_active
@@ -183,5 +185,25 @@ def get_active_profile() -> Response:
             "data": {
                 "active_profile": profile
             }
+        }
+    )
+
+
+@profile_api_bp.route(
+    "/health",
+    methods=["GET"]
+)
+def health_check() -> Response:
+    """
+    Health check endpoint to verify the API is running.
+
+    Returns:
+        Response: A JSON response indicating the API is healthy.
+    """
+
+    return jsonify(
+        {
+            "success": True,
+            "message": "API is healthy"
         }
     )

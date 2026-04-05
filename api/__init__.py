@@ -46,6 +46,7 @@ from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 
 # Custom imports
+from api.api import health_endpoint
 from api.api_profile import profile_bp
 from api.api_search import search_bp
 from api.api_video import video_endpoint
@@ -203,6 +204,7 @@ def create_app(
     app.secret_key = key
 
     # Register blueprints
+    app.register_blueprint(health_endpoint)
     app.register_blueprint(profile_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(video_endpoint)

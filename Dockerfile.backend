@@ -24,7 +24,8 @@ RUN apk add --no-cache gcc musl-dev linux-headers && \
 # Update distro packages
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache sqlite
+    apk add --no-cache sqlite && \
+    apk --no-cache curl
 
 # Copy the requirements file and install dependencies
 COPY pyproject.toml .
@@ -53,5 +54,5 @@ CMD ["uwsgi", \
     "--threads", "2"]
 
 # Build and upload with:
-# docker build -f Dockerfile.backend -t yourusername/1320:latest .
-# docker push yourusername/1320:latest
+# docker build -f Dockerfile.backend -t yourusername/1320-backend:devel .
+# docker push yourusername/1320-backend:devel

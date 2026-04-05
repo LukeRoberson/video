@@ -35,6 +35,25 @@ tags:
 
 paths:
   # ----------
+  #   Health
+  # ----------
+  /api/health:
+    get:
+      tags: [Admin]
+      summary: Check API health
+      description: |
+        A simple endpoint to check if the API is running and healthy.
+        This can be used for monitoring and health checks.
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+
+
+  # ----------
   #   Videos
   # ----------
   /api/videos/get_bulk:
