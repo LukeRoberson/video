@@ -54,6 +54,7 @@ Custom dependencies:
 Note:
     Selenium requires a web driver to be installed
         (e.g., ChromeDriver for Chrome).
+        https://googlechromelabs.github.io/chrome-for-testing/#stable
 """
 
 from selenium import webdriver
@@ -1243,7 +1244,7 @@ if __name__ == "__main__":
     """
 
     # Set to true to fetch only the latest videos
-    latest_only = True
+    latest_only = False
 
     # Check if the CSV files already exist
     major_cat_filename = "major_categories.csv" if os.path.exists(
