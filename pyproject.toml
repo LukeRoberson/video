@@ -35,6 +35,9 @@ dev = [
 max-line-length = 88
 exclude = ["__pycache__", "static", "templates"]
 
+[tool.setuptools.packages.find]
+include = ["api*", "app*"]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"

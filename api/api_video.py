@@ -72,6 +72,7 @@ from datetime import datetime
 import re
 import os
 import pandas as pd
+import json
 
 # Custom imports
 from api.api import (
@@ -959,10 +960,11 @@ def get_videos_csv() -> Response:
         )
 
     # Convert the DataFrame to JSON format
-    logging.debug(f"Missing videos:\n{df.to_dict(orient='records')}")
+    data = json.loads(df.to_json(orient='records'))
+    logging.debug(f"Missing videos:\n{data}")
 
     return api_success(
-        data=df.to_dict(orient='index'),
+        data=data,
         message="Missing videos retrieved successfully",
         status=200
     )

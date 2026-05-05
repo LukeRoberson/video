@@ -31,3 +31,10 @@ THIRD_PARTY_LICENSES.chromedriver
 
 # Logs
 *.log
+
+# Other
+*.egg.ignore
+*.egg-info/
+dist/
+build/
+eggs/

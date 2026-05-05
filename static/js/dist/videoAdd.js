@@ -36,8 +36,11 @@ class VideoApiService {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
+        return data.data;
         // Convert object to array if necessary
-        return Array.isArray(data) ? data : Object.values(data);
+        // const dataArray = Array.isArray(data) ? data : Object.values(data);
+        // console.log('Returning:', dataArray);
+        // return dataArray as VideoData[];
     }
     /**
      * Add a video to the database
@@ -389,6 +392,7 @@ class VideoAddController {
         try {
             this.setLoadingState(true);
             const videos = await VideoApiService.fetchVideosFromCSV();
+            console.log('Videos fetched:', videos);
             this.tableManager.displayVideos(videos);
         }
         catch (error) {

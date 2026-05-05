@@ -68,9 +68,7 @@ class VideoApiService {
         }
         
         const data = await response.json();
-        
-        // Convert object to array if necessary
-        return Array.isArray(data) ? data : Object.values(data);
+        return data.data as VideoData[];
     }
 
     /**
@@ -479,6 +477,7 @@ class VideoAddController {
             this.setLoadingState(true);
             
             const videos = await VideoApiService.fetchVideosFromCSV();
+            console.log('Videos fetched:', videos);
             
             this.tableManager.displayVideos(videos);
             
