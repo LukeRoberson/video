@@ -68,9 +68,7 @@ class VideoApiService {
         }
         
         const data = await response.json();
-        
-        // Convert object to array if necessary
-        return Array.isArray(data) ? data : Object.values(data);
+        return data.data as VideoData[];
     }
 
     /**
